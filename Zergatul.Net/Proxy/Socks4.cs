@@ -26,33 +26,46 @@ namespace Zergatul.Net.Proxy
             public const byte ClientIdentUserIDFailed = 0x5d;
         }
 
-        private string _address;
-        private int _port;
+        public override bool AllowConnectionsByDomainName { get { return false; } }
 
-        public bool AllowConnectionsByDomainName { get { return false; } }
-
-        public Socks4(string address, int port)
+        public Socks4(IPAddress address, int port)
+            : base(address, port)
         {
-            this._address = address;
-            this._port = port;
         }
 
-        public TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp = null)
+        public Socks4(string hostname, int port)
+            : base(hostname, port)
         {
-            var tcp = new TcpClient();
-            tcp.Connect(_address, _port);
+        }
+
+        public override TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp)
+        {
+            if (tcp == null)
+            {
+                tcp = new TcpClient();
+                if (_serverAddress != null)
+                    tcp.Connect(_serverAddress, _serverPort);
+                else
+                    tcp.Connect(_serverHostname, _serverPort);
+            }
 
             SendCommand(tcp.GetStream(), Command.Connect, address.GetAddressBytes(), port);
 
             return tcp;
         }
 
-        public TcpClient CreateConnection(string hostname, int port, TcpClient tcp = null)
+        public override TcpClient CreateConnection(string hostname, int port, TcpClient tcp = null)
         {
+            if (ResolveDnsLocally)
+            {
+                var addresses = Dns.GetHostAddresses(hostname);
+                return CreateConnection(addresses[0], port, tcp);
+            }
+
             throw new NotSupportedByProtocolException("Proxy connection by host name is not supported by SOCKS4");
         }
 
-        public TcpListener CreateListener(int port)
+        public override TcpListener CreateListener(int port)
         {
             throw new NotImplementedException();
         }

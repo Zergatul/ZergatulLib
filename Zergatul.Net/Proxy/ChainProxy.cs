@@ -12,7 +12,7 @@ namespace Zergatul.Net.Proxy
     {
         private ProxyBase[] _proxies;
 
-        public bool AllowConnectionsByDomainName
+        public override bool AllowConnectionsByDomainName
         {
             get
             {
@@ -21,30 +21,35 @@ namespace Zergatul.Net.Proxy
         }
 
         public ChainProxy(params ProxyBase[] proxies)
+            : base()
         {
             if (proxies.Length == 0)
                 throw new ArgumentException();
             this._proxies = proxies;
         }
 
-        public TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp = null)
+        public override TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp)
         {
-            if (tcp != null)
-                throw new NotImplementedException();
-
             if (_proxies.Length == 1)
-                return _proxies.First().CreateConnection(address, port);
+                return _proxies.First().CreateConnection(address, port, tcp);
 
             for (int i = 0; i < _proxies.Length - 1; i++)
-                ;//tcp = _proxies[i].CreateConnection(_proxies[i + 1].
+            {
+                if (_proxies[i + 1].ServerAddress != null)
+                    tcp = _proxies[i].CreateConnection(_proxies[i + 1].ServerAddress, _proxies[i + 1].ServerPort, tcp);
+                else
+                    tcp = _proxies[i].CreateConnection(_proxies[i + 1].ServerHostName, _proxies[i + 1].ServerPort, tcp);
+            }
+
+            return _proxies.Last().CreateConnection(address, port, tcp);
         }
 
-        public TcpClient CreateConnection(string hostname, int port, TcpClient tcp = null)
+        public override TcpClient CreateConnection(string hostname, int port, TcpClient tcp)
         {
             throw new NotImplementedException();
         }
 
-        public TcpListener CreateListener(int port)
+        public override TcpListener CreateListener(int port)
         {
             throw new NotImplementedException();
         }

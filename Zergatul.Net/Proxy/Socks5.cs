@@ -47,36 +47,45 @@ namespace Zergatul.Net.Proxy
             public const byte AddressTypeNotSupported = 8;
         }
 
-        private string _address;
-        private int _port;
+        public override bool AllowConnectionsByDomainName { get { return true; } }
 
-        public bool AllowConnectionsByDomainName { get { return true; } }
-
-        public Socks5(string address, int port)
+        public Socks5(IPAddress address, int port)
+            : base(address, port)
         {
-            this._address = address;
-            this._port = port;
         }
 
-        public TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp = null)
+        public Socks5(string hostname, int port)
+            : base(hostname, port)
+        {
+        }
+
+        public override TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp)
         {
             if (tcp == null)
             {
                 tcp = new TcpClient();
-                tcp.Connect(_address, _port);
+                if (_serverAddress != null)
+                    tcp.Connect(_serverAddress, _serverPort);
+                else
+                    tcp.Connect(_serverHostname, _serverPort);
             }
+
             Greeting(tcp.GetStream());
             Connect(tcp.GetStream(), address, port);
             return tcp;
         }
 
-        public TcpClient CreateConnection(string hostname, int port, TcpClient tcp = null)
+        public override TcpClient CreateConnection(string hostname, int port, TcpClient tcp = null)
         {
             if (tcp == null)
             {
                 tcp = new TcpClient();
-                tcp.Connect(_address, _port);
+                if (_serverAddress != null)
+                    tcp.Connect(_serverAddress, _serverPort);
+                else
+                    tcp.Connect(_serverHostname, _serverPort);
             }
+
             Greeting(tcp.GetStream());
             Connect(tcp.GetStream(), hostname, port);
             return tcp;
@@ -179,7 +188,7 @@ namespace Zergatul.Net.Proxy
             }
         }
 
-        public TcpListener CreateListener(int port)
+        public override TcpListener CreateListener(int port)
         {
             throw new NotImplementedException();
         }
