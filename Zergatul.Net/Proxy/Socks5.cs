@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Net.Proxy
 {
+    // RFCs
+    // SOCKS Protocol Version 5 https://tools.ietf.org/html/rfc1928
+    // Username/Password Authentication for SOCKS V5 https://tools.ietf.org/html/rfc1929
+
     public class Socks5 : ProxyBase
     {
         private const byte Version = 5;

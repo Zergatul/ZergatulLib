@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Net.Proxy
 {
+    // http://ftp.icm.edu.pl/packages/socks/socks4/SOCKS4.protocol
+
     public class Socks4 : ProxyBase
     {
         private const byte Version = 4;

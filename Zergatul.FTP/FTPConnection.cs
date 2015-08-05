@@ -14,6 +14,11 @@ using Zergatul.Net.Proxy;
 
 namespace Zergatul.Ftp
 {
+    // RFCs
+    // FILE TRANSFER PROTOCOL (FTP) https://tools.ietf.org/html/rfc959
+    // FTP Security Extensions https://tools.ietf.org/html/rfc2228
+    // Securing FTP with TLS https://tools.ietf.org/html/rfc4217
+
     public class FtpConnection
     {
         private static readonly Regex DataPortRegex = new Regex(@"\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)");
