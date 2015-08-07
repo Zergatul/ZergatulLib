@@ -39,7 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FTPConnection.cs" />
+    <Compile Include="FtpClient.cs" />
+    <Compile Include="FtpCommands.cs" />
+    <Compile Include="FtpConnection.cs" />
+    <Compile Include="FtpException.cs" />
+    <Compile Include="FtpReplyCode.cs" />
+    <Compile Include="FtpTransferMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
