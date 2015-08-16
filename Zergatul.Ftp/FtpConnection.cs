@@ -19,6 +19,7 @@ namespace Zergatul.Ftp
     // Requirements for Internet Hosts -- Application and Support https://tools.ietf.org/html/rfc1123
     // Firewall-Friendly FTP https://tools.ietf.org/html/rfc1579
     // FTP Security Extensions https://tools.ietf.org/html/rfc2228
+    // Feature negotiation mechanism for the File Transfer Protocol https://tools.ietf.org/html/rfc2389
     // FTP Extensions for IPv6 and NATs https://tools.ietf.org/html/rfc2428
     // Securing FTP with TLS https://tools.ietf.org/html/rfc4217
 
@@ -41,6 +42,7 @@ namespace Zergatul.Ftp
         public TextWriter Log { get; set; }
         public X509CertificateCollection X509CertificateCollection { get; set; }
         public ProxyBase Proxy { get; set; }
+        public bool ThrowExceptionOnServerErrors { get; set; }
 
         public string Greeting { get; private set; }
         public string OperatingSystem { get; private set; }
@@ -52,6 +54,7 @@ namespace Zergatul.Ftp
             this._passiveBuffer = new byte[1024];
             this._messageBytes = new List<byte>(256);
             this.X509CertificateCollection = new X509CertificateCollection();
+            this.ThrowExceptionOnServerErrors = false;
         }
 
         public void Connect(string host, int port)
@@ -68,6 +71,8 @@ namespace Zergatul.Ftp
             TransferMode = FtpTransferMode.Stream;
         }
 
+        #region Access control
+
         public void Login(string user, string password)
         {
             string response = SendCommand(FtpCommands.USER, user);
@@ -75,6 +80,41 @@ namespace Zergatul.Ftp
             if (reply.Code == FtpReplyCode.NotLoggedIn)
                 throw new FtpException(reply.Message, reply.Code);
         }
+
+        public void Logout()
+        {
+            SendCommand(FtpCommands.QUIT);
+            _tcpClient.Close();
+        }
+
+        public void AuthTls()
+        {
+            SendCommand(FtpCommands.AUTH, "TLS");
+            _commandStream = AuthenticateStreamWithTls(_commandStream);
+            _tls = true;
+        }
+
+        // ACCT, SMNT, REIN
+
+        #endregion
+
+        #region Current directory
+
+        public void ChangeWorkingDirectory(string dir)
+        {
+            SendCommand(FtpCommands.CWD, dir);
+        }
+
+        public void ChangeToParentDirectory()
+        {
+            SendCommand(FtpCommands.CDUP);
+        }
+
+        // PWD
+
+        #endregion
+
+        #region Transfer parameter
 
         public void EnterPassiveMode()
         {
@@ -140,16 +180,19 @@ namespace Zergatul.Ftp
             TransferMode = mode;
         }
 
-        public void List()
+        public void SetRepresentationType(string type, string parameter)
         {
-            SendCommand(FtpCommands.LIST, null, true);
-
-            var stream = CreateDataConnection();
-            
-            var bytes = new FtpStreamReader(stream, TransferMode).ReadToEnd();
-            ReadFromServer();
-            Console.WriteLine(Encoding.ASCII.GetString(bytes.ToArray()));
+            string p = type;
+            if (!string.IsNullOrEmpty(parameter))
+                p += " " + parameter;
+            SendCommand(FtpCommands.TYPE, p);
         }
+
+        // TYPE, STRU
+
+        #endregion
+
+        #region Directory/Files commands
 
         public List<byte> RetrieveFile(string file)
         {
@@ -162,28 +205,122 @@ namespace Zergatul.Ftp
             return bytes;
         }
 
+        public void StoreFile(string file, Stream content)
+        {
+            SendCommand(FtpCommands.STOR, file, true);
+
+            var stream = CreateDataConnection();
+            new FtpStreamWriter(stream, TransferMode).Write(content);
+
+            ReadFromServer();
+        }
+
+        public void StoreFile(string file, byte[] content)
+        {
+            SendCommand(FtpCommands.STOR, file, true);
+
+            var stream = CreateDataConnection();
+            new FtpStreamWriter(stream, TransferMode).Write(content);
+
+            ReadFromServer();
+        }
+
+        public void AppendFile(string file, Stream content)
+        {
+            SendCommand(FtpCommands.APPE, file, true);
+
+            var stream = CreateDataConnection();
+            new FtpStreamWriter(stream, TransferMode).Write(content);
+
+            ReadFromServer();
+        }
+
+        public void AppendFile(string file, byte[] content)
+        {
+            SendCommand(FtpCommands.APPE, file, true);
+
+            var stream = CreateDataConnection();
+            new FtpStreamWriter(stream, TransferMode).Write(content);
+
+            ReadFromServer();
+        }
+
+        public void DeleteFile(string file)
+        {
+            SendCommand(FtpCommands.DELE, file);
+        }
+
+        public void RenameFile(string oldName, string newName)
+        {
+            SendCommand(FtpCommands.RNFR, oldName);
+            SendCommand(FtpCommands.RNTO, newName);
+        }
+
+        public void MakeDirectory(string dir)
+        {
+            SendCommand(FtpCommands.MKD, dir);
+        }
+
+        public void RemoveDirectory(string dir)
+        {
+            SendCommand(FtpCommands.RMD, dir);
+        }
+
+        public void List()
+        {
+            SendCommand(FtpCommands.LIST, null, true);
+
+            var stream = CreateDataConnection();
+
+            var bytes = new FtpStreamReader(stream, TransferMode).ReadToEnd();
+            ReadFromServer();
+            if (Log != null)
+                Log.WriteLine(Encoding.ASCII.GetString(bytes.ToArray()));
+        }
+
+        public void NameList()
+        {
+            SendCommand(FtpCommands.NLST, null, true);
+
+            var stream = CreateDataConnection();
+
+            var bytes = new FtpStreamReader(stream, TransferMode).ReadToEnd();
+            ReadFromServer();
+            if (Log != null)
+                Log.WriteLine(Encoding.ASCII.GetString(bytes.ToArray()));
+        }
+
+        // STOU, ALLO, REST, ABOR
+
+        #endregion
+
+        #region Other commands
+
         public void System()
         {
             string response = SendCommand(FtpCommands.SYST);
             OperatingSystem = response;
         }
 
-        public void AuthTls()
+        public void Help(string cmd)
         {
-            SendCommand(FtpCommands.AUTH, "TLS");
-            _commandStream = AuthenticateStreamWithTls(_commandStream);
-            _tls = true;
+            if (string.IsNullOrEmpty(cmd))
+                SendCommand(FtpCommands.HELP);
+            else
+                SendCommand(FtpCommands.HELP, cmd);
         }
 
-        public void ChangeWorkingDirectory(string dir)
+        public string Features()
         {
-            SendCommand(FtpCommands.CWD, dir);
+            var reply = ParseServerReply(SendCommand(FtpCommands.FEAT));
+            return reply.Message;
         }
 
-        public void ChangeToParentDirectory()
-        {
-            SendCommand(FtpCommands.CDUP);
-        }
+        // SITE, STAT, HELP, NOOP
+
+        #endregion
+
+        #region Private helper methods
 
         private TcpClient CreateProxyConnection(string host, int port)
         {
@@ -278,14 +415,7 @@ namespace Zergatul.Ftp
             return new ServerReply((FtpReplyCode)int.Parse(match.Groups[1].Value), match.Groups[2].Value);
         }
 
-        public void Disconnect()
-        {
-            if (_tcpClient != null && _tcpClient.Connected)
-            {
-                SendCommand(FtpCommands.QUIT);
-                _tcpClient.Close();
-            }
-        }
+        #endregion
 
         #region Nested Classes
 

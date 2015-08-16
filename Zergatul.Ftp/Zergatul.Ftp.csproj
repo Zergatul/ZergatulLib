@@ -46,7 +46,9 @@
     <Compile Include="FtpException.cs" />
     <Compile Include="FtpNetworkProtocol.cs" />
     <Compile Include="FtpReplyCode.cs" />
+    <Compile Include="FtpRepresentation.cs" />
     <Compile Include="FtpStreamReader.cs" />
+    <Compile Include="FtpStreamWriter.cs" />
     <Compile Include="FtpTransferMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

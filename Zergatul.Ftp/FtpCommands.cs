@@ -44,5 +44,6 @@ namespace Zergatul.Ftp
         public static string AUTH = "AUTH";
         public static string EPRT = "EPRT";
         public static string EPSV = "EPSV";
+        public static string FEAT = "FEAT";
     }
 }
