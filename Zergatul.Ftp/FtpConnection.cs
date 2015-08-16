@@ -19,12 +19,14 @@ namespace Zergatul.Ftp
     // Requirements for Internet Hosts -- Application and Support https://tools.ietf.org/html/rfc1123
     // Firewall-Friendly FTP https://tools.ietf.org/html/rfc1579
     // FTP Security Extensions https://tools.ietf.org/html/rfc2228
+    // FTP Extensions for IPv6 and NATs https://tools.ietf.org/html/rfc2428
     // Securing FTP with TLS https://tools.ietf.org/html/rfc4217
 
     public class FtpConnection
     {
         private static readonly Regex ServerReplyRegex = new Regex(@"^(\d{3}) (.+)$");
         private static readonly Regex DataPortRegex = new Regex(@"\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)");
+        private static readonly Regex ExPassiveModeRegex = new Regex(@"\(\|\|\|(\d+)\|\)");
         private static readonly string TelnetEndOfLine = new string(new[] { (char)0x0D, (char)0x0A });
 
         private TcpClient _tcpClient;
@@ -93,6 +95,38 @@ namespace Zergatul.Ftp
             _passive = true;
         }
 
+        public void EnterPassiveModeEx()
+        {
+            var reply = ParseServerReply(SendCommand(FtpCommands.EPSV));
+            var m = ExPassiveModeRegex.Match(reply.Message);
+            if (!m.Success)
+                throw new Exception("parse fail");
+
+            int port = int.Parse(m.Groups[1].Value);
+            _passiveIPEndPoint = new IPEndPoint(Dns.GetHostEntry(_host).AddressList[0], port);
+            _passive = true;
+        }
+
+        public void EnterActiveMode(IPAddress address, int port)
+        {
+            string parameter = string.Join(",", address.GetAddressBytes().Concat(new byte[] { (byte)(port / 256), (byte)(port % 256) }).Select(b => b.ToString()));
+            string response = SendCommand(FtpCommands.PORT, parameter);
+        }
+
+        public void EnterActiveModeEx(IPAddress address, int port)
+        {
+            char delimiter = '|';
+            string parameter;
+            if (address.AddressFamily == AddressFamily.InterNetwork)
+                parameter = delimiter + FtpNetworkProtocol.IPv4 + delimiter + address.ToString() + delimiter + port + delimiter;
+            else
+                if (address.AddressFamily == AddressFamily.InterNetworkV6)
+                    parameter = delimiter + FtpNetworkProtocol.IPv6 + delimiter + address.ToString() + delimiter + port + delimiter;
+                else
+                    throw new NotImplementedException(address.AddressFamily + " not implemented");
+            string response = SendCommand(FtpCommands.EPRT, parameter);
+        }
+
         public void SetTransferMode(FtpTransferMode mode)
         {
             string param = null;
@@ -103,40 +137,29 @@ namespace Zergatul.Ftp
             if (mode == FtpTransferMode.Compressed)
                 param = "C";
             SendCommand(FtpCommands.MODE, param);
+            TransferMode = mode;
         }
 
         public void List()
         {
             SendCommand(FtpCommands.LIST, null, true);
-            if (!_passive)
-                throw new NotImplementedException("Active mode not implemented");
 
-            TcpClient passiveConnection;
-            if (Proxy != null)
-                passiveConnection = Proxy.CreateConnection(_passiveIPEndPoint.Address, _passiveIPEndPoint.Port);
-            else
-            {
-                passiveConnection = new TcpClient();
-                passiveConnection.Connect(_passiveIPEndPoint.Address, _passiveIPEndPoint.Port);
-            }
-            var bytes = new List<byte>();
-            Stream passiveStream = passiveConnection.GetStream();
-            if (_tls)
-                passiveStream = AuthenticateStreamWithTls(passiveStream);
-            while (true)
-            {
-                int bytesRead = passiveStream.Read(_passiveBuffer, 0, _passiveBuffer.Length);
-                if (bytesRead == 0)
-                    break;
-                if (bytesRead == _passiveBuffer.Length)
-                    bytes.AddRange(_passiveBuffer);
-                else
-                    for (int i = 0; i < bytesRead; i++)
-                        bytes.Add(_passiveBuffer[i]);
-            }
-            passiveConnection.Close();
+            var stream = CreateDataConnection();
+            
+            var bytes = new FtpStreamReader(stream, TransferMode).ReadToEnd();
             ReadFromServer();
             Console.WriteLine(Encoding.ASCII.GetString(bytes.ToArray()));
+        }
+
+        public List<byte> RetrieveFile(string file)
+        {
+            SendCommand(FtpCommands.RETR, file, true);
+
+            var stream = CreateDataConnection();
+
+            var bytes = new FtpStreamReader(stream, TransferMode).ReadToEnd();
+            ReadFromServer();
+            return bytes;
         }
 
         public void System()
@@ -155,6 +178,11 @@ namespace Zergatul.Ftp
         public void ChangeWorkingDirectory(string dir)
         {
             SendCommand(FtpCommands.CWD, dir);
+        }
+
+        public void ChangeToParentDirectory()
+        {
+            SendCommand(FtpCommands.CDUP);
         }
 
         private TcpClient CreateProxyConnection(string host, int port)
@@ -178,6 +206,28 @@ namespace Zergatul.Ftp
                 SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12,
                 true);
             return stream;
+        }
+
+        private Stream CreateDataConnection()
+        {
+            if (!_passive)
+                throw new NotImplementedException("Active mode not implemented");
+
+            TcpClient passiveConnection;
+            if (Proxy != null)
+                passiveConnection = Proxy.CreateConnection(_passiveIPEndPoint.Address, _passiveIPEndPoint.Port);
+            else
+            {
+                passiveConnection = new TcpClient();
+                passiveConnection.Connect(_passiveIPEndPoint.Address, _passiveIPEndPoint.Port);
+            }
+
+            Stream result = passiveConnection.GetStream();
+
+            if (_tls)
+                result = AuthenticateStreamWithTls(result);
+
+            return result;
         }
 
         private string SendCommand(string command, string param = null, bool doNotReadReply = false)

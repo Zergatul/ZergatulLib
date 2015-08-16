@@ -42,5 +42,7 @@ namespace Zergatul.Ftp
         public static string HELP = "HELP";
         public static string NOOP = "NOOP";
         public static string AUTH = "AUTH";
+        public static string EPRT = "EPRT";
+        public static string EPSV = "EPSV";
     }
 }

@@ -39,11 +39,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FtpBlockHeaderDescriptor.cs" />
     <Compile Include="FtpClient.cs" />
     <Compile Include="FtpCommands.cs" />
     <Compile Include="FtpConnection.cs" />
     <Compile Include="FtpException.cs" />
+    <Compile Include="FtpNetworkProtocol.cs" />
     <Compile Include="FtpReplyCode.cs" />
+    <Compile Include="FtpStreamReader.cs" />
     <Compile Include="FtpTransferMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
