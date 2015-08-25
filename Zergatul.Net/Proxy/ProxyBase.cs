@@ -40,6 +40,19 @@ namespace Zergatul.Net.Proxy
             this._serverPort = port;
         }
 
+        protected TcpClient ConnectToServer(TcpClient tcp)
+        {
+            if (tcp == null)
+            {
+                tcp = new TcpClient();
+                if (_serverAddress != null)
+                    tcp.Connect(_serverAddress, _serverPort);
+                else
+                    tcp.Connect(_serverHostname, _serverPort);
+            }
+            return tcp;
+        }
+
         public abstract TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp);
 
         public abstract TcpClient CreateConnection(string hostname, int port, TcpClient tcp);

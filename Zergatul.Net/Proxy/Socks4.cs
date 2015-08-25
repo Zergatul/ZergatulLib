@@ -42,14 +42,7 @@ namespace Zergatul.Net.Proxy
 
         public override TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp)
         {
-            if (tcp == null)
-            {
-                tcp = new TcpClient();
-                if (_serverAddress != null)
-                    tcp.Connect(_serverAddress, _serverPort);
-                else
-                    tcp.Connect(_serverHostname, _serverPort);
-            }
+            tcp = ConnectToServer(tcp);
 
             SendCommand(tcp.GetStream(), Command.Connect, address.GetAddressBytes(), port);
 

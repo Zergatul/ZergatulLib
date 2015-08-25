@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Zergatul.Net;
 using Zergatul.Net.Proxy;
 
 namespace Zergatul.Ftp
@@ -21,6 +22,7 @@ namespace Zergatul.Ftp
     // FTP Security Extensions https://tools.ietf.org/html/rfc2228
     // Feature negotiation mechanism for the File Transfer Protocol https://tools.ietf.org/html/rfc2389
     // FTP Extensions for IPv6 and NATs https://tools.ietf.org/html/rfc2428
+    // Extensions to FTP https://tools.ietf.org/html/rfc3659
     // Securing FTP with TLS https://tools.ietf.org/html/rfc4217
 
     public class FtpConnection
@@ -28,7 +30,6 @@ namespace Zergatul.Ftp
         private static readonly Regex ServerReplyRegex = new Regex(@"^(\d{3}) (.+)$");
         private static readonly Regex DataPortRegex = new Regex(@"\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)");
         private static readonly Regex ExPassiveModeRegex = new Regex(@"\(\|\|\|(\d+)\|\)");
-        private static readonly string TelnetEndOfLine = new string(new[] { (char)0x0D, (char)0x0A });
 
         private TcpClient _tcpClient;
         private string _host;
@@ -205,6 +206,18 @@ namespace Zergatul.Ftp
             return bytes;
         }
 
+        public List<byte> RetrieveFile(string file, int from)
+        {
+            SendCommand(FtpCommands.REST, from.ToString());
+            SendCommand(FtpCommands.RETR, file, true);
+
+            var stream = CreateDataConnection();
+
+            var bytes = new FtpStreamReader(stream, TransferMode).ReadToEnd();
+            ReadFromServer();
+            return bytes;
+        }
+
         public void StoreFile(string file, Stream content)
         {
             SendCommand(FtpCommands.STOR, file, true);
@@ -370,7 +383,7 @@ namespace Zergatul.Ftp
         private string SendCommand(string command, string param = null, bool doNotReadReply = false)
         {
             string commandWithParam = command + (string.IsNullOrEmpty(param) ? "" : " " + param);
-            var bytes = Encoding.ASCII.GetBytes(commandWithParam  + TelnetEndOfLine);
+            var bytes = Encoding.ASCII.GetBytes(commandWithParam  + Constants.TelnetEndOfLine);
             if (Log != null)
                 Log.WriteLine(commandWithParam);
             _commandStream.Write(bytes, 0, bytes.Length);
@@ -389,12 +402,12 @@ namespace Zergatul.Ftp
                 for (int i = 0; i < bytesRead; i++)
                     _messageBytes.Add(_readBuffer[i]);
                 string result = Encoding.ASCII.GetString(_messageBytes.ToArray());
-                if (result.EndsWith(TelnetEndOfLine))
+                if (result.EndsWith(Constants.TelnetEndOfLine))
                 {
                     // check if result multiline
                     if (result.Length > 6 && result[3] == '-')
                     {
-                        var lines = result.Split(new[] { TelnetEndOfLine }, StringSplitOptions.None);
+                        var lines = result.Split(new[] { Constants.TelnetEndOfLine }, StringSplitOptions.None);
                         var lastLine = lines[lines.Length - 2];
                         if (lastLine.Length < 4 || lastLine[3] != ' ')
                             continue;
@@ -408,7 +421,7 @@ namespace Zergatul.Ftp
 
         private ServerReply ParseServerReply(string s)
         {
-            var lines = s.Split(new[] { TelnetEndOfLine }, StringSplitOptions.None);
+            var lines = s.Split(new[] { Constants.TelnetEndOfLine }, StringSplitOptions.None);
             var match = ServerReplyRegex.Match(lines[lines.Length - 2]);
             if (!match.Success)
                 throw new FtpException("Cannot parse server reply.");

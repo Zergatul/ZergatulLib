@@ -65,14 +65,7 @@ namespace Zergatul.Net.Proxy
 
         public override TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp)
         {
-            if (tcp == null)
-            {
-                tcp = new TcpClient();
-                if (_serverAddress != null)
-                    tcp.Connect(_serverAddress, _serverPort);
-                else
-                    tcp.Connect(_serverHostname, _serverPort);
-            }
+            tcp = ConnectToServer(tcp);
 
             Greeting(tcp.GetStream());
             Connect(tcp.GetStream(), address, port);
@@ -81,14 +74,7 @@ namespace Zergatul.Net.Proxy
 
         public override TcpClient CreateConnection(string hostname, int port, TcpClient tcp = null)
         {
-            if (tcp == null)
-            {
-                tcp = new TcpClient();
-                if (_serverAddress != null)
-                    tcp.Connect(_serverAddress, _serverPort);
-                else
-                    tcp.Connect(_serverHostname, _serverPort);
-            }
+            tcp = ConnectToServer(tcp);
 
             Greeting(tcp.GetStream());
             Connect(tcp.GetStream(), hostname, port);
