@@ -9,6 +9,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Zergatul.Net;
 using Zergatul.Net.Proxy;
@@ -39,6 +40,8 @@ namespace Zergatul.Ftp
         private bool _passive, _tls;
         private IPEndPoint _passiveIPEndPoint;
         private IPAddress _resolvedHost;
+
+        private bool _asyncOperationInProcess;
 
         public TextWriter Log { get; set; }
         public X509CertificateCollection X509CertificateCollection { get; set; }
@@ -84,6 +87,9 @@ namespace Zergatul.Ftp
 
         public void Logout()
         {
+            if (this._asyncOperationInProcess)
+                throw new Exception();
+
             SendCommand(FtpCommands.QUIT);
             _tcpClient.Close();
         }
@@ -216,6 +222,27 @@ namespace Zergatul.Ftp
             var bytes = new FtpStreamReader(stream, TransferMode).ReadToEnd();
             ReadFromServer();
             return bytes;
+        }
+
+        public Task RetrieveFileAsync(string file, Stream destination, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
+        {
+            Thread.Sleep(1500);
+            return Task.Run(() =>
+                {
+                    this._asyncOperationInProcess = true;
+                    try
+                    {
+                        SendCommand(FtpCommands.RETR, file, true);
+
+                        var stream = CreateDataConnection();
+                        new FtpStreamReader(stream, TransferMode).ReadToStreamAsync(destination, cancellationToken, progress);
+                        ReadFromServer();
+                    }
+                    finally
+                    {
+                        this._asyncOperationInProcess = false;
+                    }
+                }, cancellationToken);
         }
 
         public void StoreFile(string file, Stream content)
