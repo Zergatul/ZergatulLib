@@ -11,6 +11,7 @@ namespace Zergatul.Net.Proxy
     public class HttpProxy : ProxyBase
     {
         public override bool AllowConnectionsByDomainName { get { return true; } }
+        public override bool AllowListener { get { return false; } }
 
         public HttpProxy(IPAddress address, int port)
             : base(address, port)

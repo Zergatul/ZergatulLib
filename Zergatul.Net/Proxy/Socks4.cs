@@ -29,6 +29,7 @@ namespace Zergatul.Net.Proxy
         }
 
         public override bool AllowConnectionsByDomainName { get { return false; } }
+        public override bool AllowListener { get { return true; } }
 
         public Socks4(IPAddress address, int port)
             : base(address, port)

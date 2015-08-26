@@ -11,6 +11,7 @@ namespace Zergatul.Net.Proxy
     public abstract class ProxyBase
     {
         public abstract bool AllowConnectionsByDomainName { get; }
+        public abstract bool AllowListener { get; }
         public virtual bool ResolveDnsLocally { get; set; }
 
         protected IPAddress _serverAddress;

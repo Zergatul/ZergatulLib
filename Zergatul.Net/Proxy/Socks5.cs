@@ -52,6 +52,7 @@ namespace Zergatul.Net.Proxy
         }
 
         public override bool AllowConnectionsByDomainName { get { return true; } }
+        public override bool AllowListener { get { return true; } }
 
         public Socks5(IPAddress address, int port)
             : base(address, port)

@@ -20,6 +20,11 @@ namespace Zergatul.Net.Proxy
             }
         }
 
+        public override bool AllowListener
+        {
+            get { return false; }
+        }
+
         public ChainProxy(params ProxyBase[] proxies)
             : base()
         {
