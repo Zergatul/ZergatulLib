@@ -40,43 +40,31 @@ namespace Zergatul.Ftp
             }
         }
 
-        public List<byte> ReadToEnd()
+        public void ReadToStream(Stream destination)
         {
             switch (_mode)
             {
                 case FtpTransferMode.Stream:
-                    return ReadStreamToEnd();
+                    ReadStreamToStream(destination);
+                    break;
                 case FtpTransferMode.Block:
-                    return ReadBlockToEnd();
+                    ReadBlockToStream(destination);
+                    break;
                 case FtpTransferMode.Compressed:
-                    return ReadCompressedToEnd();
+                    ReadCompressedToStream(destination);
+                    break;
                 default:
                     throw new FtpException("Unknown mode");
             }
         }
 
-        private List<byte> ReadStreamToEnd()
+        private void ReadStreamToStream(Stream destination)
         {
-            var bytes = new List<byte>();
-            var buffer = new byte[1024];
-            while (true)
-            {
-                int bytesRead = _stream.Read(buffer, 0, buffer.Length);
-                if (bytesRead == 0)
-                    break;
-                if (bytesRead == buffer.Length)
-                    bytes.AddRange(buffer);
-                else
-                    for (int i = 0; i < bytesRead; i++)
-                        bytes.Add(buffer[i]);
-            }
-            _stream.Close();
-            return bytes;
+            _stream.CopyTo(destination);
         }
 
-        private List<byte> ReadBlockToEnd()
+        private void ReadBlockToStream(Stream destination)
         {
-            var bytes = new List<byte>();
             var buffer = new byte[1024];
             while (true)
             {
@@ -91,15 +79,12 @@ namespace Zergatul.Ftp
                 {
                     int bytesRead = _stream.Read(buffer, 0, Math.Min(buffer.Length, blockLength - totalRead));
                     totalRead += bytesRead;
-                    for (int i = 0; i < bytesRead; i++)
-                        bytes.Add(buffer[i]);
+                    destination.Write(buffer, 0, bytesRead);
                 }
             }
-            _stream.Close();
-            return bytes;
         }
 
-        private List<byte> ReadCompressedToEnd()
+        private List<byte> ReadCompressedToStream(Stream destination)
         {
             throw new NotImplementedException();
         }

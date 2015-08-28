@@ -44,13 +44,11 @@ namespace Zergatul.Ftp
         private void WriteStream(Stream data)
         {
             data.CopyTo(_stream);
-            _stream.Close();
         }
 
         private void WriteStream(byte[] data)
         {
             _stream.Write(data, 0, data.Length);
-            _stream.Close();
         }
     }
 }

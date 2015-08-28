@@ -43,6 +43,7 @@
     <Compile Include="FtpClient.cs" />
     <Compile Include="FtpCommands.cs" />
     <Compile Include="FtpConnection.cs" />
+    <Compile Include="FtpDataChannelProtectionLevel.cs" />
     <Compile Include="FtpException.cs" />
     <Compile Include="FtpNetworkProtocol.cs" />
     <Compile Include="FtpReplyCode.cs" />
