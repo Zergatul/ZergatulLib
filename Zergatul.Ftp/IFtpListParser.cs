@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Ftp
 {
-    public class FtpException : Exception
+    public interface IFtpListParser
     {
-        public FtpException(string message)
-            : base(message)
-        {
-        }
+        FtpFileInfo[] Parse(string response);
     }
 }

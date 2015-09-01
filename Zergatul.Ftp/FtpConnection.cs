@@ -38,8 +38,9 @@ namespace Zergatul.Ftp
         private Stream _commandStream, _baseCommandStream;
         private byte[] _readBuffer, _passiveBuffer;
         private List<byte> _messageBytes;
-        private bool _passive, _tls, _dataChannelTls;
-        private IPEndPoint _passiveIPEndPoint;
+        private bool _tls, _dataChannelTls;
+        private bool? _passive;
+        private IPEndPoint _dataConnectionIPEndPoint;
         private IPAddress _resolvedHost;
 
         private bool _asyncOperationInProcess;
@@ -133,7 +134,18 @@ namespace Zergatul.Ftp
             ServerReply reply;
             reply = ParseServerReply(SendCommand(FtpCommands.USER, user));
             CheckReply(reply);
+            if (reply.Code == FtpReplyCode.UserLoggedIn)
+                return;
+
             reply = ParseServerReply(SendCommand(FtpCommands.PASS, password));
+            CheckReply(reply);
+        }
+
+        public void Account(string acct)
+        {
+            CheckStateBeforeCommand();
+
+            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.ACCT));
             CheckReply(reply);
         }
 
@@ -143,6 +155,12 @@ namespace Zergatul.Ftp
 
             ServerReply reply = ParseServerReply(SendCommand(FtpCommands.REIN));
             CheckReply(reply);
+
+            if (_tls)
+            {
+                _commandStream.Dispose();
+                _commandStream = _baseCommandStream;
+            }
         }
 
         public void Quit()
@@ -202,7 +220,7 @@ namespace Zergatul.Ftp
 
         #endregion
 
-        // ACCT, SMNT
+        // SMNT
 
         #endregion
 
@@ -246,7 +264,7 @@ namespace Zergatul.Ftp
                     byte.Parse(m.Groups[4].Value)
                 });
             int port = (byte.Parse(m.Groups[5].Value) << 8) | byte.Parse(m.Groups[6].Value);
-            _passiveIPEndPoint = new IPEndPoint(ip, port);
+            _dataConnectionIPEndPoint = new IPEndPoint(ip, port);
             _passive = true;
         }
 
@@ -255,30 +273,38 @@ namespace Zergatul.Ftp
             CheckStateBeforeCommand();
 
             var reply = ParseServerReply(SendCommand(FtpCommands.EPSV));
+            CheckReply(reply);
             var m = ExPassiveModeRegex.Match(reply.Message);
             if (!m.Success)
                 throw new Exception("parse fail");
 
             int port = int.Parse(m.Groups[1].Value);
             if (string.IsNullOrEmpty(_host))
-                _passiveIPEndPoint = new IPEndPoint(_address, port);
+                _dataConnectionIPEndPoint = new IPEndPoint(_address, port);
             else
             {
                 var ipv4 = Dns.GetHostEntry(_host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
                 if (ipv4 != null)
-                    _passiveIPEndPoint = new IPEndPoint(ipv4, port);
+                    _dataConnectionIPEndPoint = new IPEndPoint(ipv4, port);
                 else
-                    _passiveIPEndPoint = new IPEndPoint(Dns.GetHostEntry(_host).AddressList[0], port);
+                    _dataConnectionIPEndPoint = new IPEndPoint(Dns.GetHostEntry(_host).AddressList[0], port);
             }
             _passive = true;
         }
 
         public void EnterActiveMode(IPAddress address, int port)
         {
+            if (address.AddressFamily != AddressFamily.InterNetwork)
+                throw new FtpException("Only IPv4 addresses are supported. Use EnterActiveModeEx for IPv6.");
+
             CheckStateBeforeCommand();
 
             string parameter = string.Join(",", address.GetAddressBytes().Concat(new byte[] { (byte)(port / 256), (byte)(port % 256) }).Select(b => b.ToString()));
-            string response = SendCommand(FtpCommands.PORT, parameter);
+            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.PORT, parameter));
+            CheckReply(reply);
+
+            _dataConnectionIPEndPoint = new IPEndPoint(address, port);
+            _passive = false;
         }
 
         public void EnterActiveModeEx(IPAddress address, int port)
@@ -294,7 +320,11 @@ namespace Zergatul.Ftp
                     parameter = delimiter + FtpNetworkProtocol.IPv6 + delimiter + address.ToString() + delimiter + port + delimiter;
                 else
                     throw new NotImplementedException(address.AddressFamily + " not implemented");
-            string response = SendCommand(FtpCommands.EPRT, parameter);
+            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.EPRT, parameter));
+            CheckReply(reply);
+
+            _dataConnectionIPEndPoint = new IPEndPoint(address, port);
+            _passive = false;
         }
 
         public void SetTransferMode(FtpTransferMode mode)
@@ -395,31 +425,7 @@ namespace Zergatul.Ftp
             stream.Close();
         }
 
-        public void StoreFile(string file, byte[] content)
-        {
-            CheckStateBeforeCommand();
-
-            SendCommand(FtpCommands.STOR, file, true);
-
-            var stream = CreateDataConnection();
-            ReadFromServer();
-            new FtpStreamWriter(stream, TransferMode).Write(content);
-            stream.Close();
-        }
-
         public void AppendFile(string file, Stream content)
-        {
-            CheckStateBeforeCommand();
-
-            SendCommand(FtpCommands.APPE, file, true);
-
-            var stream = CreateDataConnection();
-            ReadFromServer();
-            new FtpStreamWriter(stream, TransferMode).Write(content);
-            stream.Close();
-        }
-
-        public void AppendFile(string file, byte[] content)
         {
             CheckStateBeforeCommand();
 
@@ -460,11 +466,11 @@ namespace Zergatul.Ftp
             SendCommand(FtpCommands.RMD, dir);
         }
 
-        public void List()
+        public string List(string path = null)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.LIST, null, true);
+            SendCommand(FtpCommands.LIST, path, true);
 
             var stream = CreateDataConnection();
             ReadFromServer();
@@ -472,9 +478,8 @@ namespace Zergatul.Ftp
             var ms = new MemoryStream();
             new FtpStreamReader(stream, TransferMode).ReadToStream(ms);
             stream.Close();
-            
-            if (Log != null)
-                Log.WriteLine(Encoding.ASCII.GetString(ms.ToArray()));
+
+            return Encoding.ASCII.GetString(ms.ToArray());
         }
 
         public void NameList()
@@ -494,6 +499,26 @@ namespace Zergatul.Ftp
                 Log.WriteLine(Encoding.ASCII.GetString(ms.ToArray()));
         }
 
+        #region RFC 3659
+
+        public void MachineListingSingle(string path = null)
+        {
+            CheckStateBeforeCommand();
+
+            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.MLST, path));
+            CheckReply(reply);
+        }
+
+        public void MachineListingMany(string path = null)
+        {
+            CheckStateBeforeCommand();
+
+            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.MLSD, path));
+            CheckReply(reply);
+        }
+
+        #endregion
+
         // STOU, ALLO, REST
 
         #endregion
@@ -512,10 +537,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            if (string.IsNullOrEmpty(cmd))
-                SendCommand(FtpCommands.HELP);
-            else
-                SendCommand(FtpCommands.HELP, cmd);
+            SendCommand(FtpCommands.HELP, cmd);
         }
 
         public string Features()
@@ -526,7 +548,24 @@ namespace Zergatul.Ftp
             return reply.Message;
         }
 
-        // SITE, STAT, HELP, NOOP
+        public string Site(string command)
+        {
+            CheckStateBeforeCommand();
+
+            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.SITE, command));
+            CheckReply(reply);
+            return reply.Message;
+        }
+
+        public void Noop()
+        {
+            CheckStateBeforeCommand();
+
+            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.NOOP));
+            CheckReply(reply);
+        }
+
+        // STAT
 
         #endregion
 
@@ -543,7 +582,7 @@ namespace Zergatul.Ftp
             if ((int)reply.Code >= 500)
             {
                 if (ThrowExceptionOnServerErrors)
-                    throw new FtpException(reply.Message, reply.Code);
+                    throw new FtpServerException(reply.Message, reply.Code);
             }
         }
 
@@ -572,24 +611,44 @@ namespace Zergatul.Ftp
 
         private Stream CreateDataConnection()
         {
-            if (!_passive)
-                throw new NotImplementedException("Active mode not implemented");
+            if (!_passive == null)
+                throw new FtpException("You must enter active or passive mode to open data connections.");
+            if (_passive.Value)
+            {
+                TcpClient passiveConnection;
+                if (Proxy != null)
+                    passiveConnection = Proxy.CreateConnection(_dataConnectionIPEndPoint.Address, _dataConnectionIPEndPoint.Port);
+                else
+                {
+                    passiveConnection = new TcpClient(_dataConnectionIPEndPoint.Address.AddressFamily);
+                    passiveConnection.Connect(_dataConnectionIPEndPoint.Address, _dataConnectionIPEndPoint.Port);
+                }
 
-            TcpClient passiveConnection;
-            if (Proxy != null)
-                passiveConnection = Proxy.CreateConnection(_passiveIPEndPoint.Address, _passiveIPEndPoint.Port);
+                Stream result = passiveConnection.GetStream();
+
+                if (_tls && _dataChannelTls)
+                    result = AuthenticateStreamWithTls(result);
+
+                return result;
+            }
             else
             {
-                passiveConnection = new TcpClient(_passiveIPEndPoint.Address.AddressFamily);
-                passiveConnection.Connect(_passiveIPEndPoint.Address, _passiveIPEndPoint.Port);
+                TcpListener activeConnectionListener;
+                if (Proxy != null)
+                    throw new NotImplementedException("proxy with active mode not implemented");
+
+                activeConnectionListener = new TcpListener(_dataConnectionIPEndPoint);
+                activeConnectionListener.Start();
+                TcpClient activeConnection = activeConnectionListener.AcceptTcpClient();
+                activeConnectionListener.Stop();
+
+                Stream result = activeConnection.GetStream();
+
+                if (_tls && _dataChannelTls)
+                    result = AuthenticateStreamWithTls(result);
+
+                return result;
             }
-
-            Stream result = passiveConnection.GetStream();
-
-            if (_tls && _dataChannelTls)
-                result = AuthenticateStreamWithTls(result);
-
-            return result;
         }
 
         private string SendCommand(string command, string param = null, bool doNotReadReply = false)
@@ -621,7 +680,9 @@ namespace Zergatul.Ftp
                     {
                         var lines = result.Split(new[] { Constants.TelnetEndOfLine }, StringSplitOptions.None);
                         var lastLine = lines[lines.Length - 2];
-                        if (lastLine.Length < 4 || lastLine[3] != ' ')
+                        if (lastLine.Length < 4)
+                            continue;
+                        if (!char.IsDigit(lastLine[0]) || !char.IsDigit(lastLine[1]) || !char.IsDigit(lastLine[2]) || lastLine[3] != ' ')
                             continue;
                     }
                     if (Log != null)

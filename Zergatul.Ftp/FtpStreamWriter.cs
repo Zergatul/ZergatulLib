@@ -31,24 +31,9 @@ namespace Zergatul.Ftp
             }
         }
 
-        public void Write(byte[] data)
-        {
-            switch (_mode)
-            {
-                case FtpTransferMode.Stream:
-                    WriteStream(data);
-                    break;
-            }
-        }
-
         private void WriteStream(Stream data)
         {
             data.CopyTo(_stream);
-        }
-
-        private void WriteStream(byte[] data)
-        {
-            _stream.Write(data, 0, data.Length);
         }
     }
 }
