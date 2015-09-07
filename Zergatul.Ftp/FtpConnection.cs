@@ -69,6 +69,8 @@ namespace Zergatul.Ftp
         public FtpTransferMode TransferMode { get; private set; }
         public string LastServerReply { get; private set; }
 
+        #region ctor + connection establishment
+
         public FtpConnection()
         {
             this._readBuffer = new byte[256];
@@ -136,6 +138,8 @@ namespace Zergatul.Ftp
             Greeting = _controlStreamReader.ReadServerReply().Message;
             TransferMode = FtpTransferMode.Stream;
         }
+
+        #endregion
 
         #region Access control
 
@@ -440,91 +444,107 @@ namespace Zergatul.Ftp
                 }, cancellationToken);
         }*/
 
-        /*public void StoreFile(string file, Stream content)
+        public void StoreFile(string file, Stream content)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.STOR, file, true);
-
             var stream = CreateDataConnection();
-            ReadFromServer();
+
+            FtpServerReply reply = SendCommand(FtpCommands.STOR, file);
+            CheckReply(reply);
+
             new FtpDataStreamWriter(stream, TransferMode).Write(content);
             stream.Close();
-        }*/
 
-        /*public void AppendFile(string file, Stream content)
+            ReadReplyAfterDataTransfer();
+        }
+
+        public void AppendFile(string file, Stream content)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.APPE, file, true);
-
             var stream = CreateDataConnection();
-            ReadFromServer();
+
+            FtpServerReply reply = SendCommand(FtpCommands.APPE, file);
+            CheckReply(reply);
+
             new FtpDataStreamWriter(stream, TransferMode).Write(content);
             stream.Close();
-        }*/
+
+            ReadReplyAfterDataTransfer();
+        }
 
         public void DeleteFile(string file)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.DELE, file);
+            FtpServerReply reply = SendCommand(FtpCommands.DELE, file);
+            CheckReply(reply);
         }
 
         public void RenameFile(string oldName, string newName)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.RNFR, oldName);
-            SendCommand(FtpCommands.RNTO, newName);
+            FtpServerReply reply;
+            reply = SendCommand(FtpCommands.RNFR, oldName);
+            CheckReply(reply);
+            reply = SendCommand(FtpCommands.RNTO, newName);
+            CheckReply(reply);
         }
 
         public void MakeDirectory(string dir)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.MKD, dir);
+            FtpServerReply reply = SendCommand(FtpCommands.MKD, dir);
+            CheckReply(reply);
         }
 
         public void RemoveDirectory(string dir)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.RMD, dir);
+            FtpServerReply reply = SendCommand(FtpCommands.RMD, dir);
+            CheckReply(reply);
         }
 
-        /*public string List(string path = null)
+        public string List(string path = null)
         {
             CheckStateBeforeCommand();
 
             var stream = CreateDataConnection();
-            SendCommand(FtpCommands.LIST, path);
-            ServerReply reply = ParseServerReply(ReadFromServer());
+
+            FtpServerReply reply = SendCommand(FtpCommands.LIST, path);
             CheckReply(reply);
 
             var ms = new MemoryStream();
             new FtpDataStreamReader(stream, TransferMode).ReadToStream(ms);
             stream.Close();
 
+            ReadReplyAfterDataTransfer();
+
             return Encoding.ASCII.GetString(ms.ToArray());
         }
 
-        public void NameList()
+        public void NameList(string path = null)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.NLST, null, true);
-
             var stream = CreateDataConnection();
-            ReadFromServer();
+
+            FtpServerReply reply = SendCommand(FtpCommands.NLST, path);
+            CheckReply(reply);
 
             var ms = new MemoryStream();
             new FtpDataStreamReader(stream, TransferMode).ReadToStream(ms);
             stream.Close();
-            
+
+            ReadReplyAfterDataTransfer();
+
             if (Log != null)
                 Log.WriteLine(Encoding.ASCII.GetString(ms.ToArray()));
-        }*/
+        }
 
         #region RFC 3659
 
