@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Ftp
 {
-    public class FtpStreamWriter
+    public class FtpDataStreamWriter
     {
         private Stream _stream;
         private FtpTransferMode _mode;
 
-        public FtpStreamWriter(Stream stream, FtpTransferMode mode)
+        public FtpDataStreamWriter(Stream stream, FtpTransferMode mode)
         {
             if (mode != FtpTransferMode.Stream)
                 throw new NotImplementedException(mode + " mode not implemented");

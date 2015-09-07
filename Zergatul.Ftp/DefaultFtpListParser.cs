@@ -84,6 +84,9 @@ namespace Zergatul.Ftp
             for (int i = startFrom; i < lines.Length; i++)
             {
                 var match = _unixFileLine.Match(lines[i]);
+                // skip links for now
+                if (lines[i].Length > 0 && lines[i][0] == 'l')
+                    continue;
                 if (!match.Success)
                     throw new Exception("Cannot parse file info. First line was ok.");
 

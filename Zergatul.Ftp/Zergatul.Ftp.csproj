@@ -44,6 +44,7 @@
     <Compile Include="FtpClient.cs" />
     <Compile Include="FtpCommands.cs" />
     <Compile Include="FtpConnection.cs" />
+    <Compile Include="FtpControlStreamReader.cs" />
     <Compile Include="FtpDataChannelProtectionLevel.cs" />
     <Compile Include="FtpException.cs" />
     <Compile Include="FtpFileInfo.cs" />
@@ -51,8 +52,9 @@
     <Compile Include="FtpReplyCode.cs" />
     <Compile Include="FtpRepresentation.cs" />
     <Compile Include="FtpServerException.cs" />
-    <Compile Include="FtpStreamReader.cs" />
-    <Compile Include="FtpStreamWriter.cs" />
+    <Compile Include="FtpDataStreamReader.cs" />
+    <Compile Include="FtpDataStreamWriter.cs" />
+    <Compile Include="FtpServerReply.cs" />
     <Compile Include="FtpTransferMode.cs" />
     <Compile Include="IFtpListParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

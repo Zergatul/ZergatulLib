@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Ftp
 {
-    public class FtpStreamReader
+    public class FtpDataStreamReader
     {
         private Stream _stream;
         private FtpTransferMode _mode;
 
-        public FtpStreamReader(Stream stream, FtpTransferMode mode)
+        public FtpDataStreamReader(Stream stream, FtpTransferMode mode)
         {
             if (mode == FtpTransferMode.Compressed)
                 throw new NotImplementedException("Compressed mode not implemented");

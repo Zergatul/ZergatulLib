@@ -28,7 +28,6 @@ namespace Zergatul.Ftp
 
     public class FtpConnection
     {
-        private static readonly Regex ServerReplyRegex = new Regex(@"^(\d{3}) (.+)$");
         private static readonly Regex DataPortRegex = new Regex(@"\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)");
         private static readonly Regex ExPassiveModeRegex = new Regex(@"\(\|\|\|(\d+)\|\)");
 
@@ -36,6 +35,19 @@ namespace Zergatul.Ftp
         private string _host;
         private IPAddress _address;
         private Stream _commandStream, _baseCommandStream;
+        private FtpControlStreamReader _controlStreamReader;
+        private Stream CommandStream
+        {
+            set
+            {
+                _commandStream = value;
+                _controlStreamReader = new FtpControlStreamReader(value);
+            }
+            get
+            {
+                return _commandStream;
+            }
+        }
         private byte[] _readBuffer, _passiveBuffer;
         private List<byte> _messageBytes;
         private bool _tls, _dataChannelTls;
@@ -103,8 +115,8 @@ namespace Zergatul.Ftp
             }
             if (!_tcpClient.Connected)
                 throw new Exception("");
-            _commandStream = _tcpClient.GetStream();
-            Greeting = ReadFromServer();
+            CommandStream = _tcpClient.GetStream();
+            Greeting = _controlStreamReader.ReadServerReply().Message;
             TransferMode = FtpTransferMode.Stream;
         }
 
@@ -120,8 +132,8 @@ namespace Zergatul.Ftp
             }
             if (!_tcpClient.Connected)
                 throw new Exception("");
-            _commandStream = _tcpClient.GetStream();
-            Greeting = ReadFromServer();
+            CommandStream = _tcpClient.GetStream();
+            Greeting = _controlStreamReader.ReadServerReply().Message;
             TransferMode = FtpTransferMode.Stream;
         }
 
@@ -131,13 +143,13 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply;
-            reply = ParseServerReply(SendCommand(FtpCommands.USER, user));
+            FtpServerReply reply;
+            reply = SendCommand(FtpCommands.USER, user);
             CheckReply(reply);
             if (reply.Code == FtpReplyCode.UserLoggedIn)
                 return;
 
-            reply = ParseServerReply(SendCommand(FtpCommands.PASS, password));
+            reply = SendCommand(FtpCommands.PASS, password);
             CheckReply(reply);
         }
 
@@ -145,7 +157,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.ACCT));
+            FtpServerReply reply = SendCommand(FtpCommands.ACCT);
             CheckReply(reply);
         }
 
@@ -153,13 +165,13 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.REIN));
+            FtpServerReply reply = SendCommand(FtpCommands.REIN);
             CheckReply(reply);
 
             if (_tls)
             {
-                _commandStream.Dispose();
-                _commandStream = _baseCommandStream;
+                CommandStream.Dispose();
+                CommandStream = _baseCommandStream;
             }
         }
 
@@ -167,7 +179,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.QUIT));
+            FtpServerReply reply = SendCommand(FtpCommands.QUIT);
             CheckReply(reply);
 
             _tcpClient.Close();
@@ -179,11 +191,11 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.AUTH, "TLS"));
+            FtpServerReply reply = SendCommand(FtpCommands.AUTH, "TLS");
             CheckReply(reply);
 
-            _baseCommandStream = _commandStream;
-            _commandStream = AuthenticateStreamWithTls(_commandStream);
+            _baseCommandStream = CommandStream;
+            CommandStream = AuthenticateStreamWithTls(CommandStream);
             _tls = true;
             _dataChannelTls = false;
         }
@@ -192,7 +204,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.PBSZ, size.ToString()));
+            FtpServerReply reply = SendCommand(FtpCommands.PBSZ, size.ToString());
             CheckReply(reply);
         }
 
@@ -200,7 +212,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.PROT, level.ToCommand()));
+            FtpServerReply reply = SendCommand(FtpCommands.PROT, level.ToCommand());
             CheckReply(reply);
 
             _dataChannelTls = level != FtpDataChannelProtectionLevel.Clear;
@@ -210,12 +222,12 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.CCC));
+            FtpServerReply reply = SendCommand(FtpCommands.CCC);
             CheckReply(reply);
 
             // dispose SslStream; this will remain underlying NetworkStream opened
-            _commandStream.Dispose();
-            _commandStream = _baseCommandStream;
+            CommandStream.Dispose();
+            CommandStream = _baseCommandStream;
         }
 
         #endregion
@@ -230,7 +242,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.CWD, dir));
+            FtpServerReply reply = SendCommand(FtpCommands.CWD, dir);
             CheckReply(reply);
         }
 
@@ -238,7 +250,8 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.CDUP);
+            FtpServerReply reply = SendCommand(FtpCommands.CDUP);
+            CheckReply(reply);
         }
 
         // PWD
@@ -251,8 +264,10 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            string response = SendCommand(FtpCommands.PASV);
-            Match m = DataPortRegex.Match(response);
+            FtpServerReply reply = SendCommand(FtpCommands.PASV);
+            CheckReply(reply);
+
+            Match m = DataPortRegex.Match(reply.Message);
             if (!m.Success)
                 throw new Exception("");
 
@@ -272,7 +287,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            var reply = ParseServerReply(SendCommand(FtpCommands.EPSV));
+            FtpServerReply reply = SendCommand(FtpCommands.EPSV);
             CheckReply(reply);
             var m = ExPassiveModeRegex.Match(reply.Message);
             if (!m.Success)
@@ -300,7 +315,7 @@ namespace Zergatul.Ftp
             CheckStateBeforeCommand();
 
             string parameter = string.Join(",", address.GetAddressBytes().Concat(new byte[] { (byte)(port / 256), (byte)(port % 256) }).Select(b => b.ToString()));
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.PORT, parameter));
+            FtpServerReply reply = SendCommand(FtpCommands.PORT, parameter);
             CheckReply(reply);
 
             _dataConnectionIPEndPoint = new IPEndPoint(address, port);
@@ -320,7 +335,7 @@ namespace Zergatul.Ftp
                     parameter = delimiter + FtpNetworkProtocol.IPv6 + delimiter + address.ToString() + delimiter + port + delimiter;
                 else
                     throw new NotImplementedException(address.AddressFamily + " not implemented");
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.EPRT, parameter));
+            FtpServerReply reply = SendCommand(FtpCommands.EPRT, parameter);
             CheckReply(reply);
 
             _dataConnectionIPEndPoint = new IPEndPoint(address, port);
@@ -331,7 +346,9 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.MODE, mode.ToCommand());
+            FtpServerReply reply = SendCommand(FtpCommands.MODE, mode.ToCommand());
+            CheckReply(reply);
+
             TransferMode = mode;
         }
 
@@ -342,7 +359,9 @@ namespace Zergatul.Ftp
             string p = type;
             if (!string.IsNullOrEmpty(parameter))
                 p += " " + parameter;
-            SendCommand(FtpCommands.TYPE, p);
+
+            FtpServerReply reply = SendCommand(FtpCommands.TYPE, p);
+            CheckReply(reply);
         }
 
         // STRU
@@ -355,28 +374,36 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.RETR, file, true);
-
             var stream = CreateDataConnection();
-            ReadFromServer();
-            new FtpStreamReader(stream, TransferMode).ReadToStream(destination);
+
+            FtpServerReply reply = SendCommand(FtpCommands.RETR, file);
+            CheckReply(reply);
+
+            new FtpDataStreamReader(stream, TransferMode).ReadToStream(destination);
             stream.Close();
+
+            ReadReplyAfterDataTransfer();
         }
 
         public void RetrieveFile(string file, int from, Stream destination)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.REST, from.ToString());
-            SendCommand(FtpCommands.RETR, file, true);
-
             var stream = CreateDataConnection();
-            ReadFromServer();
-            new FtpStreamReader(stream, TransferMode).ReadToStream(destination);
+
+            FtpServerReply reply;
+            reply = SendCommand(FtpCommands.REST, from.ToString());
+            CheckReply(reply);
+            reply = SendCommand(FtpCommands.RETR, file);
+            CheckReply(reply);
+
+            new FtpDataStreamReader(stream, TransferMode).ReadToStream(destination);
             stream.Close();
+
+            ReadReplyAfterDataTransfer();
         }
 
-        public Task RetrieveFileAsync(string file, Stream destination, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
+        /*public Task RetrieveFileAsync(string file, Stream destination, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
         {
             return Task.Run(() =>
                 {
@@ -392,7 +419,7 @@ namespace Zergatul.Ftp
                         stream = CreateDataConnection();
                         ReadFromServer();
                         dataConnectionOpened = true;
-                        new FtpStreamReader(stream, TransferMode).ReadToStreamAsync(destination, cancellationToken, progress);
+                        new FtpDataStreamReader(stream, TransferMode).ReadToStreamAsync(destination, cancellationToken, progress);
                         stream.Close();
                         ReadFromServer();
                     }
@@ -411,9 +438,9 @@ namespace Zergatul.Ftp
                         this._asyncOperationInProcess = false;
                     }
                 }, cancellationToken);
-        }
+        }*/
 
-        public void StoreFile(string file, Stream content)
+        /*public void StoreFile(string file, Stream content)
         {
             CheckStateBeforeCommand();
 
@@ -421,11 +448,11 @@ namespace Zergatul.Ftp
 
             var stream = CreateDataConnection();
             ReadFromServer();
-            new FtpStreamWriter(stream, TransferMode).Write(content);
+            new FtpDataStreamWriter(stream, TransferMode).Write(content);
             stream.Close();
-        }
+        }*/
 
-        public void AppendFile(string file, Stream content)
+        /*public void AppendFile(string file, Stream content)
         {
             CheckStateBeforeCommand();
 
@@ -433,9 +460,9 @@ namespace Zergatul.Ftp
 
             var stream = CreateDataConnection();
             ReadFromServer();
-            new FtpStreamWriter(stream, TransferMode).Write(content);
+            new FtpDataStreamWriter(stream, TransferMode).Write(content);
             stream.Close();
-        }
+        }*/
 
         public void DeleteFile(string file)
         {
@@ -466,17 +493,17 @@ namespace Zergatul.Ftp
             SendCommand(FtpCommands.RMD, dir);
         }
 
-        public string List(string path = null)
+        /*public string List(string path = null)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.LIST, path, true);
-
             var stream = CreateDataConnection();
-            ReadFromServer();
+            SendCommand(FtpCommands.LIST, path);
+            ServerReply reply = ParseServerReply(ReadFromServer());
+            CheckReply(reply);
 
             var ms = new MemoryStream();
-            new FtpStreamReader(stream, TransferMode).ReadToStream(ms);
+            new FtpDataStreamReader(stream, TransferMode).ReadToStream(ms);
             stream.Close();
 
             return Encoding.ASCII.GetString(ms.ToArray());
@@ -492,12 +519,12 @@ namespace Zergatul.Ftp
             ReadFromServer();
 
             var ms = new MemoryStream();
-            new FtpStreamReader(stream, TransferMode).ReadToStream(ms);
+            new FtpDataStreamReader(stream, TransferMode).ReadToStream(ms);
             stream.Close();
             
             if (Log != null)
                 Log.WriteLine(Encoding.ASCII.GetString(ms.ToArray()));
-        }
+        }*/
 
         #region RFC 3659
 
@@ -505,7 +532,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.MLST, path));
+            FtpServerReply reply = SendCommand(FtpCommands.MLST, path);
             CheckReply(reply);
         }
 
@@ -513,7 +540,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.MLSD, path));
+            FtpServerReply reply = SendCommand(FtpCommands.MLSD, path);
             CheckReply(reply);
         }
 
@@ -529,22 +556,27 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            string response = SendCommand(FtpCommands.SYST);
-            OperatingSystem = response;
+            FtpServerReply reply = SendCommand(FtpCommands.SYST);
+            CheckReply(reply);
+
+            OperatingSystem = reply.Message;
         }
 
         public void Help(string cmd)
         {
             CheckStateBeforeCommand();
 
-            SendCommand(FtpCommands.HELP, cmd);
+            FtpServerReply reply = SendCommand(FtpCommands.HELP, cmd);
+            CheckReply(reply);
         }
 
         public string Features()
         {
             CheckStateBeforeCommand();
 
-            var reply = ParseServerReply(SendCommand(FtpCommands.FEAT));
+            FtpServerReply reply = SendCommand(FtpCommands.FEAT);
+            CheckReply(reply);
+
             return reply.Message;
         }
 
@@ -552,8 +584,9 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.SITE, command));
+            FtpServerReply reply = SendCommand(FtpCommands.SITE, command);
             CheckReply(reply);
+
             return reply.Message;
         }
 
@@ -561,7 +594,7 @@ namespace Zergatul.Ftp
         {
             CheckStateBeforeCommand();
 
-            ServerReply reply = ParseServerReply(SendCommand(FtpCommands.NOOP));
+            FtpServerReply reply = SendCommand(FtpCommands.NOOP);
             CheckReply(reply);
         }
 
@@ -577,13 +610,21 @@ namespace Zergatul.Ftp
                 throw new Exception("Async operation currently in process.");
         }
 
-        private void CheckReply(ServerReply reply)
+        private void CheckReply(FtpServerReply reply)
         {
             if ((int)reply.Code >= 500)
             {
                 if (ThrowExceptionOnServerErrors)
                     throw new FtpServerException(reply.Message, reply.Code);
             }
+        }
+
+        private void ReadReplyAfterDataTransfer()
+        {
+            FtpServerReply reply = _controlStreamReader.ReadServerReply();
+            if (Log != null)
+                Log.WriteLine(reply.Message);
+            CheckReply(reply);
         }
 
         private TcpClient CreateProxyConnection(string host, int port)
@@ -651,71 +692,17 @@ namespace Zergatul.Ftp
             }
         }
 
-        private string SendCommand(string command, string param = null, bool doNotReadReply = false)
+        private FtpServerReply SendCommand(string command, string param = null)
         {
             string commandWithParam = command + (string.IsNullOrEmpty(param) ? "" : " " + param);
             var bytes = Encoding.ASCII.GetBytes(commandWithParam  + Constants.TelnetEndOfLine);
             if (Log != null)
                 Log.WriteLine(commandWithParam);
-            _commandStream.Write(bytes, 0, bytes.Length);
-            if (doNotReadReply)
-                return null;
-            else
-                return ReadFromServer();
-        }
-
-        private string ReadFromServer()
-        {
-            _messageBytes.Clear();
-            while (true)
-            {
-                int bytesRead = _commandStream.Read(_readBuffer, 0, _readBuffer.Length);
-                for (int i = 0; i < bytesRead; i++)
-                    _messageBytes.Add(_readBuffer[i]);
-                string result = Encoding.ASCII.GetString(_messageBytes.ToArray());
-                if (result.EndsWith(Constants.TelnetEndOfLine))
-                {
-                    // check if result multiline
-                    if (result.Length > 6 && result[3] == '-')
-                    {
-                        var lines = result.Split(new[] { Constants.TelnetEndOfLine }, StringSplitOptions.None);
-                        var lastLine = lines[lines.Length - 2];
-                        if (lastLine.Length < 4)
-                            continue;
-                        if (!char.IsDigit(lastLine[0]) || !char.IsDigit(lastLine[1]) || !char.IsDigit(lastLine[2]) || lastLine[3] != ' ')
-                            continue;
-                    }
-                    if (Log != null)
-                        Log.Write(result);
-                    LastServerReply = result;
-                    return result;
-                }
-            }
-        }
-
-        private ServerReply ParseServerReply(string s)
-        {
-            var lines = s.Split(new[] { Constants.TelnetEndOfLine }, StringSplitOptions.None);
-            var match = ServerReplyRegex.Match(lines[lines.Length - 2]);
-            if (!match.Success)
-                throw new FtpException("Cannot parse server reply.");
-            return new ServerReply((FtpReplyCode)int.Parse(match.Groups[1].Value), match.Groups[2].Value);
-        }
-
-        #endregion
-
-        #region Nested Classes
-
-        private class ServerReply
-        {
-            public FtpReplyCode Code;
-            public string Message;
-
-            public ServerReply(FtpReplyCode code, string message)
-            {
-                this.Code = code;
-                this.Message = message;
-            }
+            CommandStream.Write(bytes, 0, bytes.Length);
+            FtpServerReply reply = _controlStreamReader.ReadServerReply();
+            if (Log != null)
+                Log.WriteLine(reply.Message);
+            return reply;
         }
 
         #endregion
