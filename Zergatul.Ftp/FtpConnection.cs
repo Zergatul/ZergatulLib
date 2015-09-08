@@ -26,7 +26,7 @@ namespace Zergatul.Ftp
     // Extensions to FTP https://tools.ietf.org/html/rfc3659
     // Securing FTP with TLS https://tools.ietf.org/html/rfc4217
 
-    public class FtpConnection
+    public class FtpConnection : IDisposable
     {
         private static readonly Regex DataPortRegex = new Regex(@"\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)");
         private static readonly Regex ExPassiveModeRegex = new Regex(@"\(\|\|\|(\d+)\|\)");
@@ -374,19 +374,11 @@ namespace Zergatul.Ftp
 
         #region Directory/Files commands
 
+        #region Retrieve File
+
         public void RetrieveFile(string file, Stream destination)
         {
-            CheckStateBeforeCommand();
-
-            var stream = CreateDataConnection();
-
-            FtpServerReply reply = SendCommand(FtpCommands.RETR, file);
-            CheckReply(reply);
-
-            new FtpDataStreamReader(stream, TransferMode).ReadToStream(destination);
-            stream.Close();
-
-            ReadReplyAfterDataTransfer();
+            RetrieveFile(file, 0, destination);
         }
 
         public void RetrieveFile(string file, int from, Stream destination)
@@ -396,18 +388,26 @@ namespace Zergatul.Ftp
             var stream = CreateDataConnection();
 
             FtpServerReply reply;
-            reply = SendCommand(FtpCommands.REST, from.ToString());
-            CheckReply(reply);
+            if (from != 0)
+            {
+                reply = SendCommand(FtpCommands.REST, from.ToString());
+                CheckReply(reply);
+            }
             reply = SendCommand(FtpCommands.RETR, file);
             CheckReply(reply);
 
-            new FtpDataStreamReader(stream, TransferMode).ReadToStream(destination);
+            new FtpDataStreamReader(stream, TransferMode).Read(destination);
             stream.Close();
 
             ReadReplyAfterDataTransfer();
         }
 
-        /*public Task RetrieveFileAsync(string file, Stream destination, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
+        public Task RetrieveFileAsync(string file, Stream destination, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
+        {
+            return RetrieveFileAsync(file, 0, destination, cancellationToken, progress);
+        }
+
+        public Task RetrieveFileAsync(string file, int from, Stream destination, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
         {
             return Task.Run(() =>
                 {
@@ -418,39 +418,62 @@ namespace Zergatul.Ftp
                     Stream stream = null;
                     try
                     {
-                        SendCommand(FtpCommands.RETR, file, true);
-
                         stream = CreateDataConnection();
-                        ReadFromServer();
                         dataConnectionOpened = true;
-                        new FtpDataStreamReader(stream, TransferMode).ReadToStreamAsync(destination, cancellationToken, progress);
+
+                        FtpServerReply reply;
+                        if (from != 0)
+                        {
+                            reply = SendCommand(FtpCommands.REST, from.ToString());
+                            CheckReply(reply);
+                        }
+                        reply = SendCommand(FtpCommands.RETR, file);
+                        CheckReply(reply);
+
+                        new FtpDataStreamReader(stream, TransferMode).ReadAsync(destination, cancellationToken, progress);
                         stream.Close();
-                        ReadFromServer();
+
+                        ReadReplyAfterDataTransfer();
                     }
                     catch (OperationCanceledException)
                     {
                         if (dataConnectionOpened)
                         {
-                            SendCommand(FtpCommands.ABOR, null, true);
+                            FtpServerReply reply = SendCommand(FtpCommands.ABOR);
                             stream.Close();
-                            ReadFromServer();
-                            ReadFromServer();
+                            ReadReplyAfterDataTransfer();
                         }
+                        throw;
                     }
                     finally
                     {
                         this._asyncOperationInProcess = false;
                     }
                 }, cancellationToken);
-        }*/
+        }
+
+        #endregion
+
+        #region Store File
 
         public void StoreFile(string file, Stream content)
+        {
+            StoreFile(file, 0, content);
+        }
+
+        public void StoreFile(string file, int from, Stream content)
         {
             CheckStateBeforeCommand();
 
             var stream = CreateDataConnection();
 
-            FtpServerReply reply = SendCommand(FtpCommands.STOR, file);
+            FtpServerReply reply;
+            if (from != 0)
+            {
+                reply = SendCommand(FtpCommands.REST, from.ToString());
+                CheckReply(reply);
+            }
+            reply = SendCommand(FtpCommands.STOR, file);
             CheckReply(reply);
 
             new FtpDataStreamWriter(stream, TransferMode).Write(content);
@@ -458,6 +481,60 @@ namespace Zergatul.Ftp
 
             ReadReplyAfterDataTransfer();
         }
+
+        public Task StoreFileAsync(string file, Stream content, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
+        {
+            return StoreFileAsync(file, 0, content, cancellationToken, progress);
+        }
+
+        public Task StoreFileAsync(string file, int from, Stream content, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
+        {
+            return Task.Run(() =>
+            {
+                CheckStateBeforeCommand();
+
+                this._asyncOperationInProcess = true;
+                bool dataConnectionOpened = false;
+                Stream stream = null;
+                try
+                {
+                    stream = CreateDataConnection();
+                    dataConnectionOpened = true;
+
+                    FtpServerReply reply;
+                    if (from != 0)
+                    {
+                        reply = SendCommand(FtpCommands.REST, from.ToString());
+                        CheckReply(reply);
+                    }
+                    reply = SendCommand(FtpCommands.STOR, file);
+                    CheckReply(reply);
+
+                    new FtpDataStreamWriter(stream, TransferMode).WriteAsync(content, cancellationToken, progress);
+                    stream.Close();
+
+                    ReadReplyAfterDataTransfer();
+                }
+                catch (OperationCanceledException)
+                {
+                    if (dataConnectionOpened)
+                    {
+                        FtpServerReply reply = SendCommand(FtpCommands.ABOR);
+                        stream.Close();
+                        ReadReplyAfterDataTransfer();
+                    }
+                    throw;
+                }
+                finally
+                {
+                    this._asyncOperationInProcess = false;
+                }
+            }, cancellationToken);
+        }
+
+        #endregion
+
+        #region Append File
 
         public void AppendFile(string file, Stream content)
         {
@@ -472,6 +549,85 @@ namespace Zergatul.Ftp
             stream.Close();
 
             ReadReplyAfterDataTransfer();
+        }
+
+        public Task AppendFileAsync(string file, Stream content, CancellationToken cancellationToken = default(CancellationToken), IProgress<long> progress = null)
+        {
+            return Task.Run(() =>
+            {
+                CheckStateBeforeCommand();
+
+                this._asyncOperationInProcess = true;
+                bool dataConnectionOpened = false;
+                Stream stream = null;
+                try
+                {
+                    stream = CreateDataConnection();
+                    dataConnectionOpened = true;
+
+                    FtpServerReply reply;
+                    reply = SendCommand(FtpCommands.APPE, file);
+                    CheckReply(reply);
+
+                    new FtpDataStreamWriter(stream, TransferMode).WriteAsync(content, cancellationToken, progress);
+                    stream.Close();
+
+                    ReadReplyAfterDataTransfer();
+                }
+                catch (OperationCanceledException)
+                {
+                    if (dataConnectionOpened)
+                    {
+                        FtpServerReply reply = SendCommand(FtpCommands.ABOR);
+                        stream.Close();
+                        ReadReplyAfterDataTransfer();
+                    }
+                    throw;
+                }
+                finally
+                {
+                    this._asyncOperationInProcess = false;
+                }
+            }, cancellationToken);
+        }
+
+        #endregion
+
+        public string List(string path = null)
+        {
+            CheckStateBeforeCommand();
+
+            var stream = CreateDataConnection();
+
+            FtpServerReply reply = SendCommand(FtpCommands.LIST, path);
+            CheckReply(reply);
+
+            var ms = new MemoryStream();
+            new FtpDataStreamReader(stream, TransferMode).Read(ms);
+            stream.Close();
+
+            ReadReplyAfterDataTransfer();
+
+            return Encoding.ASCII.GetString(ms.ToArray());
+        }
+
+        public void NameList(string path = null)
+        {
+            CheckStateBeforeCommand();
+
+            var stream = CreateDataConnection();
+
+            FtpServerReply reply = SendCommand(FtpCommands.NLST, path);
+            CheckReply(reply);
+
+            var ms = new MemoryStream();
+            new FtpDataStreamReader(stream, TransferMode).Read(ms);
+            stream.Close();
+
+            ReadReplyAfterDataTransfer();
+
+            if (Log != null)
+                Log.WriteLine(Encoding.ASCII.GetString(ms.ToArray()));
         }
 
         public void DeleteFile(string file)
@@ -509,43 +665,6 @@ namespace Zergatul.Ftp
             CheckReply(reply);
         }
 
-        public string List(string path = null)
-        {
-            CheckStateBeforeCommand();
-
-            var stream = CreateDataConnection();
-
-            FtpServerReply reply = SendCommand(FtpCommands.LIST, path);
-            CheckReply(reply);
-
-            var ms = new MemoryStream();
-            new FtpDataStreamReader(stream, TransferMode).ReadToStream(ms);
-            stream.Close();
-
-            ReadReplyAfterDataTransfer();
-
-            return Encoding.ASCII.GetString(ms.ToArray());
-        }
-
-        public void NameList(string path = null)
-        {
-            CheckStateBeforeCommand();
-
-            var stream = CreateDataConnection();
-
-            FtpServerReply reply = SendCommand(FtpCommands.NLST, path);
-            CheckReply(reply);
-
-            var ms = new MemoryStream();
-            new FtpDataStreamReader(stream, TransferMode).ReadToStream(ms);
-            stream.Close();
-
-            ReadReplyAfterDataTransfer();
-
-            if (Log != null)
-                Log.WriteLine(Encoding.ASCII.GetString(ms.ToArray()));
-        }
-
         #region RFC 3659
 
         public void MachineListingSingle(string path = null)
@@ -566,7 +685,7 @@ namespace Zergatul.Ftp
 
         #endregion
 
-        // STOU, ALLO, REST
+        // STOU, ALLO
 
         #endregion
 
@@ -723,6 +842,28 @@ namespace Zergatul.Ftp
             if (Log != null)
                 Log.WriteLine(reply.Message);
             return reply;
+        }
+
+        #endregion
+
+        #region Dispose pattern
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_tcpClient != null && _tcpClient.Connected)
+                {
+                    Quit();
+                    _tcpClient.Close();
+                }
+            }
         }
 
         #endregion

@@ -80,7 +80,7 @@ namespace Zergatul.Ftp
                     lines.Add(line);
                     m = _singleLineReply.Match(line);
                 }
-                while (m.Success);
+                while (!m.Success);
                 if (int.Parse(m.Groups["code"].Value) != code)
                     throw new InvalidDataException("Invalid reply");
                 return new FtpServerReply((FtpReplyCode)code, string.Join(Environment.NewLine, lines));
