@@ -11,25 +11,25 @@ Provides low-level access to FTP server functions. In most cases using of FtpCli
 
 ### Connect to FTP server
 To connect to an FTP server, use Connect method:
-'''
+```
 var ftp = new FtpConnection();
 // connect using host name and port
 ftp.Connect("your.hostname.com", 21);
-'''
+```
 
 If you need to connect by IP address, use overload of Connect method:
-'''
+```
 ftp.Connect(IPAddress.Parse("127.0.0.1"), 21);
-'''
+```
 
 You can also connect to IPv6 address:
-'''
+```
 ftp.Connect(IPAddress.Parse("::1"), 21);
-'''
+```
 
 If you need to use IPv6 and host name, you can specify to prefer IPv6 address. By default IPv4 address is preferred:
-'''
+```
 ftp.PreferIPv4 = false;
 // if there is associated to this domain IPv6 address, it will be used. If there is no IPv6 addresses, IPv4 address will be used.
 ftp.Connect("your.hostname.com", 21);
-'''
+```
