@@ -10,7 +10,7 @@ Provides low-level access to FTP server functions. In most cases using of FtpCli
 * IPv6 support
 
 ### Connect to FTP server
-To connect to an FTP server, use Connect method:
+Simple example:
 ```C#
 var ftp = new FtpConnection();
 // connect using host name and port
@@ -44,7 +44,7 @@ ftp.Quit();
 
 
 ### Login to FTP server
-To login to an FTP server, use Login method:
+Simple example:
 ```C#
 var ftp = new FtpConnection();
 ftp.Connect("your.hostname.com", 21);
@@ -67,4 +67,46 @@ ftp.Reinitialize();
 ftp.Login("admin2", "qwerty2");
 // do action as admin2
 ftp.Quit();
+```
+
+### Passive mode
+Use EnterPassiveMode or EnterPassiveModeEx method. EnterPassiveMode supports only IPv4, EnterPassiveModeEx supports both IPv4 and IPv6. You should explicitly enter passive or active mode before make any data transfer:
+```C#
+ftp.EnterPassiveMode();
+ftp.RetrieveFile("1.txt", stream1);
+ftp.EnterPassiveMode();
+ftp.RetrieveFile("2.txt", stream2);
+```
+
+
+### Active mode
+Use EnterActiveMode or EnterActiveModeEx method. EnterActiveMode supports only IPv4, EnterActiveModeEx supports both IPv4 and IPv6. You should explicitly enter passive or active mode before make any data transfer:
+```C#
+ftp.EnterActiveMode(IPAddress.Parse("127.0.0.1"), 60000);
+ftp.RetrieveFile("1.txt", stream);
+```
+```C#
+ftp.EnterActiveModeEx(IPAddress.Parse("::1"), 60000);
+ftp.RetrieveFile("1.txt", stream);
+```
+
+### Transfer mode
+Default mode is Stream. Other modes are not implemented.
+```C#
+ftp.SetTransferMode(FtpTransferMode.Stream);
+```
+
+
+### Representation type
+Example:
+```C#
+ftp.SetRepresentationType(FtpRepresentation.Type.ASCII, FtpRepresentation.Param.NonPrint);
+```
+
+
+### Download/upload files
+Before each operation you should explicitly enter active or passive mode by using corresponding methods.
+Simple example:
+```C#
+```
 ```
