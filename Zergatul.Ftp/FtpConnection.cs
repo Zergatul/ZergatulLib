@@ -817,8 +817,10 @@ namespace Zergatul.Ftp
 
         private void CheckStateBeforeCommand()
         {
+            if (this._tcpClient == null)
+                throw new InvalidOperationException("No connection. Use Connect method.");
             if (this._asyncOperationInProcess)
-                throw new Exception("Async operation currently in process.");
+                throw new InvalidOperationException("Async operation currently in process.");
         }
 
         private void CheckReply(FtpServerReply reply)
