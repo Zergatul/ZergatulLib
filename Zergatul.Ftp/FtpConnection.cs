@@ -190,6 +190,8 @@ namespace Zergatul.Ftp
                 throw new Exception("Unknown error");
             CommandStream = _tcpClient.GetStream();
             Greeting = _controlStreamReader.ReadServerReply().Message;
+            if (Log != null)
+                Log.WriteLine(Greeting);
             TransferMode = FtpTransferMode.Stream;
         }
 
