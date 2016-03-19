@@ -12,7 +12,7 @@ namespace Zergatul.Ftp
     public class FtpControlStreamReader
     {
         static Regex _multiLineReply = new Regex(@"^(?<code>\d{3})-.+$");
-        static Regex _singleLineReply = new Regex(@"^(?<code>\d{3}) .+$");
+        static Regex _singleLineReply = new Regex(@"^(?<code>\d{3})( .+)?$");
 
         Stream _stream;
         byte[] _buffer;
