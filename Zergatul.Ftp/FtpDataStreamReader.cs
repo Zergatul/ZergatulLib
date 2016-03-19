@@ -22,48 +22,48 @@ namespace Zergatul.Ftp
             this._mode = mode;
         }
 
-        public void ReadToStreamAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
+        public void ReadAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
         {
             switch (_mode)
             {
                 case FtpTransferMode.Stream:
-                    ReadStreamToStreamAsync(destination, cancellationToken, progress);
+                    ReadStreamAsync(destination, cancellationToken, progress);
                     return;
                 case FtpTransferMode.Block:
-                    ReadBlockToStreamAsync(destination, cancellationToken, progress);
+                    ReadBlockAsync(destination, cancellationToken, progress);
                     return;
                 case FtpTransferMode.Compressed:
-                    ReadCompressedToStreamAsync(destination, cancellationToken, progress);
+                    ReadCompressedAsync(destination, cancellationToken, progress);
                     return;
                 default:
                     throw new FtpException("Unknown mode");
             }
         }
 
-        public void ReadToStream(Stream destination)
+        public void Read(Stream destination)
         {
             switch (_mode)
             {
                 case FtpTransferMode.Stream:
-                    ReadStreamToStream(destination);
+                    ReadStream(destination);
                     break;
                 case FtpTransferMode.Block:
-                    ReadBlockToStream(destination);
+                    ReadBlock(destination);
                     break;
                 case FtpTransferMode.Compressed:
-                    ReadCompressedToStream(destination);
+                    ReadCompressed(destination);
                     break;
                 default:
                     throw new FtpException("Unknown mode");
             }
         }
 
-        private void ReadStreamToStream(Stream destination)
+        private void ReadStream(Stream destination)
         {
             _stream.CopyTo(destination);
         }
 
-        private void ReadBlockToStream(Stream destination)
+        private void ReadBlock(Stream destination)
         {
             var buffer = new byte[1024];
             while (true)
@@ -84,16 +84,17 @@ namespace Zergatul.Ftp
             }
         }
 
-        private List<byte> ReadCompressedToStream(Stream destination)
+        private List<byte> ReadCompressed(Stream destination)
         {
             throw new NotImplementedException();
         }
 
-        private void ReadStreamToStreamAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
+        private void ReadStreamAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
         {
             int totalRead = 0;
             var buffer = new byte[1024];
-            progress.Report(0);
+            if (progress != null)
+                progress.Report(0);
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -102,11 +103,12 @@ namespace Zergatul.Ftp
                     break;
                 destination.Write(buffer, 0, bytesRead);
                 totalRead += bytesRead;
-                progress.Report(totalRead);
+                if (progress != null)
+                    progress.Report(totalRead);
             }
         }
 
-        private void ReadBlockToStreamAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
+        private void ReadBlockAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
         {
             throw new NotImplementedException();
             /*var bytes = new List<byte>();
@@ -132,7 +134,7 @@ namespace Zergatul.Ftp
             return bytes;*/
         }
 
-        private void ReadCompressedToStreamAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
+        private void ReadCompressedAsync(Stream destination, CancellationToken cancellationToken, IProgress<long> progress)
         {
         }
     }

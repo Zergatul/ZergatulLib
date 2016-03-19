@@ -74,15 +74,14 @@ namespace Zergatul.Ftp
                 int code = int.Parse(m.Groups["code"].Value);
                 List<string> lines = new List<string>();
                 lines.Add(firstLine);
-                do
+                while (true)
                 {
                     string line = ReadLine();
                     lines.Add(line);
                     m = _singleLineReply.Match(line);
+                    if (m.Success && int.Parse(m.Groups["code"].Value) == code)
+                        break;
                 }
-                while (m.Success);
-                if (int.Parse(m.Groups["code"].Value) != code)
-                    throw new InvalidDataException("Invalid reply");
                 return new FtpServerReply((FtpReplyCode)code, string.Join(Environment.NewLine, lines));
             }
             else
