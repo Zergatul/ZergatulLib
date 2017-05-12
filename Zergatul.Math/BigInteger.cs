@@ -12,15 +12,15 @@ namespace Zergatul.Math
         /// <summary>
         /// Little-endian order.
         /// </summary>
-        internal uint[] _bits;
+        internal uint[] _words;
 
         /// <summary>
         /// Valuable uint's in array. Some last elements can be zero.
         /// </summary>
-        internal int _bitsLength;
+        internal int _wordsLength;
 
         #region Public properties
-        public bool IsZero => _bitsLength == 0;
+        public bool IsZero => _wordsLength == 0;
         #endregion
 
         #region Public constants
@@ -30,10 +30,17 @@ namespace Zergatul.Math
 
         #region Contructors
 
-        private BigInteger(uint[] bits)
+        private BigInteger(uint[] words)
         {
-            this._bits = bits;
-            this._bitsLength = bits.Length;
+            this._words = words;
+            this._wordsLength = words.Length;
+            TruncateLeadingZeros();
+        }
+
+        private BigInteger(uint[] words, int length)
+        {
+            this._words = words;
+            this._wordsLength = length;
             TruncateLeadingZeros();
         }
 
@@ -46,13 +53,13 @@ namespace Zergatul.Math
             {
                 if (value > uint.MaxValue)
                 {
-                    _bits = new uint[2] { (uint)(value & 0xFFFFFFFF), (uint)(value >> 32) };
-                    _bitsLength = 2;
+                    _words = new uint[2] { (uint)(value & 0xFFFFFFFF), (uint)(value >> 32) };
+                    _wordsLength = 2;
                 }
                 else
                 {
-                    _bits = new uint[1] { (uint)value };
-                    _bitsLength = 1;
+                    _words = new uint[1] { (uint)value };
+                    _wordsLength = 1;
                 }
             }
             else
@@ -67,15 +74,15 @@ namespace Zergatul.Math
                 int first = 0;
                 while (first < dataLen && data[first] == 0)
                     first++;
-                _bits = new uint[(dataLen - first + 3) >> 2];
-                _bitsLength = _bits.Length;
-                for (int i = _bits.Length - 1; i >= 0; i--)
+                _words = new uint[(dataLen - first + 3) >> 2];
+                _wordsLength = _words.Length;
+                for (int i = _words.Length - 1; i >= 0; i--)
                 {
                     byte b0 = SafeGetByte(data, dataLen, dataLen - 1 - ((i << 2) | 3));
                     byte b1 = SafeGetByte(data, dataLen, dataLen - 1 - ((i << 2) | 2));
                     byte b2 = SafeGetByte(data, dataLen, dataLen - 1 - ((i << 2) | 1));
                     byte b3 = SafeGetByte(data, dataLen, dataLen - 1 - ((i << 2) | 0));
-                    _bits[i] = (uint)((b0 << 24) | (b1 << 16) | (b2 << 8) | b3);
+                    _words[i] = (uint)((b0 << 24) | (b1 << 16) | (b2 << 8) | b3);
                 }
             }
             if (order == ByteOrder.LittleEndian)
@@ -84,15 +91,15 @@ namespace Zergatul.Math
                 int last = dataLen - 1;
                 while (last >= 0 && data[last] == 0)
                     last--;
-                _bits = new uint[(last + 4) >> 2];
-                _bitsLength = _bits.Length;
-                for (int i = 0; i < _bits.Length; i++)
+                _words = new uint[(last + 4) >> 2];
+                _wordsLength = _words.Length;
+                for (int i = 0; i < _words.Length; i++)
                 {
                     byte b0 = SafeGetByte(data, dataLen, ((i << 2) | 3));
                     byte b1 = SafeGetByte(data, dataLen, ((i << 2) | 2));
                     byte b2 = SafeGetByte(data, dataLen, ((i << 2) | 1));
                     byte b3 = SafeGetByte(data, dataLen, ((i << 2) | 0));
-                    _bits[i] = (uint)((b0 << 24) | (b1 << 16) | (b2 << 8) | b3);
+                    _words[i] = (uint)((b0 << 24) | (b1 << 16) | (b2 << 8) | b3);
                 }
             }
         }
@@ -116,7 +123,7 @@ namespace Zergatul.Math
             }
 
             int bitsCount = (int)System.Math.Ceiling(value.Length * System.Math.Log(radix, 2));
-            _bits = new uint[(bitsCount + 31) / 32];
+            _words = new uint[(bitsCount + 31) / 32];
 
             int cursor = 0;
             int firstGroupLen = value.Length % _digitsPerUInt32[radix];
@@ -124,10 +131,10 @@ namespace Zergatul.Math
                 firstGroupLen = _digitsPerUInt32[radix];
             string group = value.Substring(cursor, firstGroupLen);
             cursor += firstGroupLen;
-            _bits[0] = Convert.ToUInt32(group, radix);
+            _words[0] = Convert.ToUInt32(group, radix);
 
             uint superRadix = _radixUInt32[radix];
-            _bitsLength = 1;
+            _wordsLength = 1;
             while (cursor < value.Length)
             {
                 group = value.Substring(cursor, _digitsPerUInt32[radix]);
@@ -135,8 +142,8 @@ namespace Zergatul.Math
                 uint groupValue = Convert.ToUInt32(group, radix);
                 DestructiveMulAdd(superRadix, groupValue);
 
-                if (_bitsLength < _bits.Length && _bits[_bitsLength] != 0)
-                    _bitsLength++;
+                if (_wordsLength < _words.Length && _words[_wordsLength] != 0)
+                    _wordsLength++;
             }
         }
 
@@ -151,28 +158,28 @@ namespace Zergatul.Math
             if (value.IsZero)
                 return this;
 
-            var newbits = new uint[System.Math.Max(this._bitsLength, value._bitsLength) + 1];
+            var newwords = new uint[System.Math.Max(this._wordsLength, value._wordsLength) + 1];
             uint carry = 0;
-            for (int i = 0; i < newbits.Length; i++)
+            for (int i = 0; i < newwords.Length; i++)
             {
                 long sum = carry;
-                if (i < this._bitsLength)
-                    sum += this._bits[i];
-                if (i < value._bitsLength)
-                    sum += value._bits[i];
+                if (i < this._wordsLength)
+                    sum += this._words[i];
+                if (i < value._wordsLength)
+                    sum += value._words[i];
                 if (sum >= UInt32Overflow)
                 {
-                    newbits[i] = (uint)(sum - UInt32Overflow);
+                    newwords[i] = (uint)(sum - UInt32Overflow);
                     carry = 1;
                 }
                 else
                 {
-                    newbits[i] = (uint)sum;
+                    newwords[i] = (uint)sum;
                     carry = 0;
                 }
             }
 
-            return new BigInteger(newbits);
+            return new BigInteger(newwords);
         }
 
         public BigInteger Multiply(BigInteger value)
@@ -180,7 +187,7 @@ namespace Zergatul.Math
             if (this.IsZero || value.IsZero)
                 return Zero;
 
-            if (this._bitsLength < value._bitsLength)
+            if (this._wordsLength < value._wordsLength)
                 return value.MultiplyGeneral(this);
             else
                 return this.MultiplyGeneral(value);
@@ -201,27 +208,50 @@ namespace Zergatul.Math
             if (this.CompareTo(value) < 0)
                 return new Tuple<BigInteger, BigInteger>(Zero, this);
 
-            var x = new uint[this._bitsLength + 1];
-            var y = new uint[value._bitsLength];
+            var x = new uint[this._wordsLength + 1];
+            var y = new uint[value._wordsLength];
 
-            Array.Copy(this._bits, x, this._bitsLength);
-            Array.Copy(value._bits, y, value._bitsLength);
+            Array.Copy(this._words, x, this._wordsLength);
+            Array.Copy(value._words, y, value._wordsLength);
 
             // calculate normalizing shift
             int shift = 0;
-            uint yLead = y[value._bitsLength];
-            while ((yLead & 1) == 0)
+            uint yHighWord = y[value._wordsLength - 1];
+            while ((yHighWord & 0x80000000) == 0)
             {
-                yLead <<= 1;
+                yHighWord <<= 1;
                 shift++;
             }
 
-            ShiftLeftNoResize(x, this._bitsLength + 1, shift);
-            ShiftLeftNoResize(y, value._bitsLength, shift);
+            int xLen = BitShiftLeftNoResize(x, this._wordsLength + 1, shift);
+            int yLen = BitShiftLeftNoResize(y, value._wordsLength, shift);
 
-            var q = new uint[this._bitsLength - value._bitsLength + 1];
+            var q = new uint[xLen - yLen + 1];
+            yHighWord = y[yLen - 1];
+            for (int i = xLen; i >= yLen; i--)
+            {
+                ulong xHighWords = i == xLen ? x[i - 1] : (((ulong)x[i] << 32) | x[i - 1]);
+                ulong nextQuotWords = xHighWords / yHighWord;
+                if (nextQuotWords >= 0x100000000)
+                    throw new OverflowException("Internal overflow");
+                uint nextQuotWord = (uint)nextQuotWords;
 
-            return null;
+                if (nextQuotWords != 0)
+                    if (!WordShiftSubstractLinearCombination(x, xLen, y, yLen, nextQuotWord, i - yLen))
+                    {
+                        nextQuotWord--;
+                        WordShiftNegativeAdd(x, xLen, y, yLen, i - yLen);
+                    }
+                q[i - yLen] = nextQuotWord;
+
+                while (x[xLen - 1] == 0)
+                    xLen--;
+            }
+
+            // shift back normalization of x
+            BitShiftRightNoResize(x, xLen, shift);
+
+            return new Tuple<BigInteger, BigInteger>(new BigInteger(q), new BigInteger(x, xLen));
         }
 
         public string ToString(int radix)
@@ -232,11 +262,18 @@ namespace Zergatul.Math
             if (radix == 2 || radix == 4 || radix == 16)
             {
                 var result = "";
-                for (int i = _bitsLength - 1; i >= 0; i--)
+                for (int i = _wordsLength - 1; i >= 0; i--)
                 {
-                    string part = Convert.ToString(_bits[i], radix);
+                    string part = Convert.ToString(_words[i], radix);
                     if (result != "")
-                        part = part.PadLeft(32 * 2 / radix, '0');
+                    {
+                        if (radix == 2)
+                            part = part.PadLeft(32, '0');
+                        if (radix == 4)
+                            part = part.PadLeft(16, '0');
+                        if (radix == 16)
+                            part = part.PadLeft(8, '0');
+                    }
                     result = result + part;
                 }
                 return result;
@@ -277,10 +314,10 @@ namespace Zergatul.Math
         public override int GetHashCode()
         {
             int result = 2057369101;
-            for (int i = 0; i < this._bitsLength; i++)
+            for (int i = 0; i < this._wordsLength; i++)
             {
                 int shift = i * 59 % 32;
-                result = result ^ (int)((_bits[i] << shift) | (_bits[i] >> (32 - shift)));
+                result = result ^ (int)((_words[i] << shift) | (_words[i] >> (32 - shift)));
             }
             return result;
         }
@@ -296,14 +333,14 @@ namespace Zergatul.Math
 
         public bool Equals(BigInteger other)
         {
-            if (this._bits == other._bits)
+            if (this._words == other._words)
                 return true;
 
-            if (this._bitsLength != other._bitsLength)
+            if (this._wordsLength != other._wordsLength)
                 return false;
 
-            for (int i = 0; i < this._bitsLength; i++)
-                if (this._bits[i] != other._bits[i])
+            for (int i = 0; i < this._wordsLength; i++)
+                if (this._words[i] != other._words[i])
                     return false;
 
             return true;
@@ -315,16 +352,16 @@ namespace Zergatul.Math
 
         public int CompareTo(BigInteger other)
         {
-            if (this._bits == other._bits)
+            if (this._words == other._words)
                 return 0;
 
-            int compare = this._bitsLength.CompareTo(other._bitsLength);
+            int compare = this._wordsLength.CompareTo(other._wordsLength);
             if (compare != 0)
                 return compare;
 
-            for (int i = this._bitsLength - 1; i >= 0; i--)
+            for (int i = this._wordsLength - 1; i >= 0; i--)
             {
-                compare = this._bits[i].CompareTo(other._bits[i]);
+                compare = this._words[i].CompareTo(other._words[i]);
                 if (compare != 0)
                     return compare;
             }
@@ -372,14 +409,14 @@ namespace Zergatul.Math
 
         private void CopyFrom(BigInteger value)
         {
-            this._bits = value._bits;
-            this._bitsLength = value._bitsLength;
+            this._words = value._words;
+            this._wordsLength = value._wordsLength;
         }
 
         private void TruncateLeadingZeros()
         {
-            while (_bitsLength > 0 && _bits[_bitsLength - 1] == 0)
-                _bitsLength--;
+            while (_wordsLength > 0 && _words[_wordsLength - 1] == 0)
+                _wordsLength--;
         }
 
         #endregion
@@ -407,8 +444,8 @@ namespace Zergatul.Math
                     throw new InvalidOperationException();
             }
 
-            _bits = new uint[(value.Length * bitsPerDigit + 31) / 32];
-            _bitsLength = _bits.Length;
+            _words = new uint[(value.Length * bitsPerDigit + 31) / 32];
+            _wordsLength = _words.Length;
             int cursor = 0;
             int groupLen = 32 / bitsPerDigit;
             int firstGroupLen = value.Length % groupLen;
@@ -417,23 +454,23 @@ namespace Zergatul.Math
 
             string group = value.Substring(cursor, firstGroupLen);
             cursor += firstGroupLen;
-            _bits[_bits.Length - 1] = Convert.ToUInt32(group, radix);
+            _words[_words.Length - 1] = Convert.ToUInt32(group, radix);
 
-            for (int i = _bits.Length - 2; i >= 0; i--)
+            for (int i = _words.Length - 2; i >= 0; i--)
             {
                 group = value.Substring(cursor, groupLen);
                 cursor += groupLen;
-                _bits[i] = Convert.ToUInt32(group, radix);
+                _words[i] = Convert.ToUInt32(group, radix);
             }
         }
 
         private Tuple<BigInteger, uint> DivideByUInt32(uint divisor)
         {
-            var quotient = new uint[_bitsLength];
+            var quotient = new uint[_wordsLength];
             long remainder = 0;
             for (int i = quotient.Length - 1; i >= 0; i--)
             {
-                remainder = (remainder << 32) | _bits[i];
+                remainder = (remainder << 32) | _words[i];
                 quotient[i] = (uint)(remainder / divisor);
                 remainder = remainder % divisor;
             }
@@ -446,20 +483,20 @@ namespace Zergatul.Math
         private void DestructiveMulAdd(uint mult, uint add)
         {
             ulong carry = 0;
-            for (int i = 0; i < _bitsLength; i++)
+            for (int i = 0; i < _wordsLength; i++)
             {
-                ulong product = (ulong)_bits[i] * mult + carry;
-                _bits[i] = (uint)(product & 0xFFFFFFFF);
+                ulong product = (ulong)_words[i] * mult + carry;
+                _words[i] = (uint)(product & 0xFFFFFFFF);
                 carry = product >> 32;
             }
             if (carry > 0)
-                _bits[_bitsLength] = (uint)carry;
+                _words[_wordsLength] = (uint)carry;
 
             carry = add;
-            for (int i = 0; i <= _bitsLength; i++)
+            for (int i = 0; i <= _wordsLength; i++)
             {
-                ulong sum = _bits[i] + carry;
-                _bits[i] = (uint)(sum & 0xFFFFFFFF);
+                ulong sum = _words[i] + carry;
+                _words[i] = (uint)(sum & 0xFFFFFFFF);
                 carry = sum >> 32;
 
                 if (carry == 0)
@@ -468,19 +505,19 @@ namespace Zergatul.Math
         }
 
         /// <summary>
-        /// Assumes this._bitsLength >= value._bitsLength, both values != 0
+        /// Assumes this._wordsLength >= value._wordsLength, both values != 0
         /// </summary>
         private BigInteger MultiplyGeneral(BigInteger value)
         {
-            uint[] result = new uint[this._bitsLength + value._bitsLength];
-            if (value._bitsLength < KaratsubaBitsLength)
+            uint[] result = new uint[this._wordsLength + value._wordsLength];
+            if (value._wordsLength < KaratsubaBitsLength)
             {
                 // O(n^2) algo
-                for (int i1 = 0; i1 < this._bitsLength; i1++)
-                    for (int i2 = 0; i2 < value._bitsLength; i2++)
+                for (int i1 = 0; i1 < this._wordsLength; i1++)
+                    for (int i2 = 0; i2 < value._wordsLength; i2++)
                     {
                         int index = i1 + i2;
-                        ulong carry = (ulong)this._bits[i1] * value._bits[i2];
+                        ulong carry = (ulong)this._words[i1] * value._words[i2];
                         do
                         {
                             carry += result[index];
@@ -494,7 +531,7 @@ namespace Zergatul.Math
             else
             {
                 // O(n^1.585) algo, http://en.wikipedia.org/wiki/Karatsuba_algorithm
-                int half = value._bitsLength / 2;
+                int half = value._wordsLength / 2;
                 var t1 = this.Split(half);
                 var t2 = value.Split(half);
                 var low1 = t1.Item1;
@@ -508,9 +545,9 @@ namespace Zergatul.Math
                 z1.DestructiveSubstract(z0);
                 z1.DestructiveSubstract(z2);
 
-                Array.Copy(z0._bits, result, z0._bitsLength);
-                DestructiveShiftSum(result, z1, half);
-                DestructiveShiftSum(result, z2, 2 * half);
+                Array.Copy(z0._words, result, z0._wordsLength);
+                WordShiftSum(result, z1, half);
+                WordShiftSum(result, z2, 2 * half);
             }
 
             return new BigInteger(result);
@@ -522,9 +559,9 @@ namespace Zergatul.Math
         private Tuple<BigInteger, BigInteger> Split(int length)
         {
             uint[] low = new uint[length];
-            uint[] high = new uint[_bitsLength - length];
-            Array.Copy(_bits, 0, low, 0, length);
-            Array.Copy(_bits, length, high, 0, _bitsLength - length);
+            uint[] high = new uint[_wordsLength - length];
+            Array.Copy(_words, 0, low, 0, length);
+            Array.Copy(_words, length, high, 0, _wordsLength - length);
 
             return new Tuple<BigInteger, BigInteger>(new BigInteger(low), new BigInteger(high));
         }
@@ -536,12 +573,12 @@ namespace Zergatul.Math
         private void DestructiveSubstract(BigInteger value)
         {
             long carry = 0;
-            for (int i = 0; i < this._bitsLength; i++)
+            for (int i = 0; i < this._wordsLength; i++)
             {
-                long sub = this._bits[i];
+                long sub = this._words[i];
                 sub += carry;
-                if (i < value._bitsLength)
-                    sub -= value._bits[i];
+                if (i < value._wordsLength)
+                    sub -= value._words[i];
                 else
                     if (carry == 0)
                         break;
@@ -552,7 +589,7 @@ namespace Zergatul.Math
                 }
                 else
                     carry = 0;
-                this._bits[i] = (uint)sub;
+                this._words[i] = (uint)sub;
             }
 
             TruncateLeadingZeros();
@@ -562,36 +599,36 @@ namespace Zergatul.Math
         /// self += value &lt;&lt; shift
         /// Assumes no overflow
         /// </summary>
-        private static void DestructiveShiftSum(uint[] bits, BigInteger value, int shift)
+        private static void WordShiftSum(uint[] words, BigInteger value, int shift)
         {
             long carry = 0;
-            for (int i = 0; i < value._bitsLength; i++)
+            for (int i = 0; i < value._wordsLength; i++)
             {
-                long sum = (long)bits[shift + i] + value._bits[i] + carry;
+                long sum = (long)words[shift + i] + value._words[i] + carry;
                 if (sum >= UInt32Overflow)
                 {
-                    bits[shift + i] = (uint)(sum & 0xFFFFFFFF);
+                    words[shift + i] = (uint)(sum & 0xFFFFFFFF);
                     carry = 1;
                 }
                 else
                 {
-                    bits[shift + i] = (uint)(sum);
+                    words[shift + i] = (uint)(sum);
                     carry = 0;
                 }
             }
-            for (int i = value._bitsLength + shift; ; i++)
+            for (int i = value._wordsLength + shift; ; i++)
             {
                 if (carry == 0)
                     break;
-                long sum = (long)bits[i] + carry;
+                long sum = (long)words[i] + carry;
                 if (sum >= UInt32Overflow)
                 {
-                    bits[i] = (uint)(sum & 0xFFFFFFFF);
+                    words[i] = (uint)(sum & 0xFFFFFFFF);
                     carry = 1;
                 }
                 else
                 {
-                    bits[i] = (uint)(sum);
+                    words[i] = (uint)(sum);
                     carry = 0;
                 }
             }
@@ -599,17 +636,88 @@ namespace Zergatul.Math
 
         /// <summary>
         /// Assumes operation will not change array size
+        /// Return resulted length
         /// </summary>
-        private static void ShiftLeftNoResize(uint[] bits, int length, int shift)
+        private static int BitShiftLeftNoResize(uint[] words, int length, int shift)
         {
-            if (shift == 0)
-                return;
-            for (int i = length - 1; i >= 0; i--)
+            if (shift != 0)
+                for (int i = length - 1; i >= 0; i--)
+                {
+                    if (i > 0)
+                        words[i] = (words[i] << shift) | (words[i - 1] >> (32 - shift));
+                    else
+                        words[i] = (words[i] << shift);
+                }
+
+            while (length > 0 && words[length - 1] == 0)
+                length--;
+            return length;
+        }
+
+        private static void BitShiftRightNoResize(uint[] words, int length, int shift)
+        {
+            if (shift != 0)
+                for (int i = 0; i < length; i++)
+                {
+                    if (i + 1 < length)
+                        words[i] = (words[i] >> shift) | (words[i + 1] << (32 - shift));
+                    else
+                        words[i] = (words[i] >> shift);
+                }
+        }
+
+        /// <summary>
+        /// x = x - (y * q) &lt;&lt; shift
+        /// Return true if result >= 0
+        /// </summary>
+        private static bool WordShiftSubstractLinearCombination(uint[] x, int xLen, uint[] y, int yLen, uint q, int shift)
+        {
+            ulong multCarry = 0;
+            long diffCarry = 0;
+            for (int i = 0; i < yLen; i++)
             {
-                if (i > 0)
-                    bits[i] = (bits[i] << shift) | (bits[i - 1] >> (32 - shift));
-                else
-                    bits[i] = (bits[i] << shift);
+                ulong mult = (ulong)y[i] * q + multCarry;
+                multCarry = mult >> 32;
+                long diff = (long)x[i + shift] - (uint)(mult & 0xFFFFFFFF) + diffCarry;
+                x[i + shift] = (uint)(diff & 0xFFFFFFFF);
+                diffCarry = diff >> 32;
+            }
+
+            int index = yLen;
+            while ((multCarry > 0 || diffCarry != 0) && index + shift < xLen)
+            {
+                long diff = (long)x[index + shift] - (uint)multCarry + diffCarry;
+                multCarry = 0;
+                x[index + shift] = (uint)(diff & 0xFFFFFFFF);
+                diffCarry = diff >> 32;
+
+                index++;
+            }
+            return diffCarry >= 0;
+        }
+
+        /// <summary>
+        /// x &lt; 0, as result of WordShiftSubstractLinearCombination method
+        /// x = x + (y &lt;&lt; shift)
+        /// </summary>
+        private static void WordShiftNegativeAdd(uint[] x, int xLen, uint[] y, int yLen, int shift)
+        {
+            long carry = 0;
+            for (int i = 0; i < yLen; i++)
+            {
+                carry = carry + x[i + shift] + y[i];
+                x[i + shift] = (uint)(carry & 0xFFFFFFFF);
+                carry = carry >> 32;
+            }
+
+            int index = yLen;
+            while (carry != 0 && shift + index < xLen)
+            {
+                carry = carry + x[index + shift];
+                x[index + shift] = (uint)(carry & 0xFFFFFFFF);
+                carry = carry >> 32;
+
+                index++;
             }
         }
 

@@ -47,6 +47,9 @@ namespace Test
             Console.WriteLine(res2.ToString());
             return;*/
 
+            tt();
+            return;
+
             var rnd = new Random();
             Func<int, string> rndNumber = (int len) =>
             {
@@ -56,28 +59,52 @@ namespace Test
                 return result;
             };
 
-            var bi1 = new BigInteger[10000];
-            var bi2 = new BigInteger[10000];
-            for (int i = 0; i < bi1.Length; i++)
+            int count = 0;
+            while (true)
             {
-                string num1 = rndNumber(1000 + rnd.Next(1000));
-                string num2 = rndNumber(1000 + rnd.Next(1000));
-                bi1[i] = new BigInteger(num1);
-                bi2[i] = new BigInteger(num2);
-            }
+                string num1 = rndNumber(20);
+                string num2 = rndNumber(10);
+                var bi1 = new BigInteger(num1);
+                var bi2 = new BigInteger(num2);
+                var si1 = System.Numerics.BigInteger.Parse(num1);
+                var si2 = System.Numerics.BigInteger.Parse(num2);
+                System.Numerics.BigInteger rem;
+                var sres = System.Numerics.BigInteger.DivRem(si1, si2, out rem);
+                var res = bi1.Division(bi2);
+                if (res.Item1.ToString() != sres.ToString())
+                {
+                    Console.WriteLine("Div failed:");
+                    Console.WriteLine(num1);
+                    Console.WriteLine(num2);
+                    break;
+                }
+                if (res.Item2.ToString() != rem.ToString())
+                {
+                    Console.WriteLine("Mod failed:");
+                    Console.WriteLine(num1);
+                    Console.WriteLine(num2);
+                    break;
+                }
 
-            for (BigInteger.KaratsubaBitLen = 5; BigInteger.KaratsubaBitLen < 50; BigInteger.KaratsubaBitLen++)
-            {
-                var sw = new Stopwatch();
-                sw.Start();
-                for (int i = 0; i < 10000; i++)
-                    bi1[i].Multiply(bi2[i]);
-                sw.Stop();
-
-                Console.WriteLine($"{BigInteger.KaratsubaBitLen}: {sw.ElapsedMilliseconds}ms");
+                count++;
+                Console.WriteLine("OK");
             }
 
             Console.ReadLine();
+        }
+
+        private static void tt()
+        {
+            string num1 = "32999900863646250090";
+            string num2 = "9341814507";
+
+            var bi1 = new BigInteger(num1);
+            var bi2 = new BigInteger(num2);
+
+            var div = System.Numerics.BigInteger.Parse(num1) / System.Numerics.BigInteger.Parse(num2);
+            var mod = System.Numerics.BigInteger.Parse(num1) % System.Numerics.BigInteger.Parse(num2);
+
+            var res = bi1.Division(bi2);
         }
     }
 }

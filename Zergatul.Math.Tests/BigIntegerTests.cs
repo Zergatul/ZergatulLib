@@ -11,102 +11,102 @@ namespace Zergatul.Math.Tests
         public void ConstructorFromBytesBE_1()
         {
             var bi = new BigInteger(new byte[] { 0, 0, 0, 0 }, ByteOrder.BigEndian);
-            Assert.IsTrue(bi._bits.Length == 0);
+            Assert.IsTrue(bi._words.Length == 0);
         }
 
         [TestMethod]
         public void ConstructorFromBytesBE_2()
         {
             var bi = new BigInteger(Enumerable.Repeat((byte)0, 1000).Concat(new byte[] { 2 }).ToArray(), ByteOrder.BigEndian);
-            Assert.IsTrue(bi._bits.Length == 1);
-            Assert.IsTrue(bi._bits[0] == 2);
+            Assert.IsTrue(bi._words.Length == 1);
+            Assert.IsTrue(bi._words[0] == 2);
         }
 
         [TestMethod]
         public void ConstructorFromBytesBE_3()
         {
             var bi = new BigInteger(Enumerable.Repeat((byte)0, 1000).Concat(new byte[] { 1, 0, 0, 0, 2 }).ToArray(), ByteOrder.BigEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 1);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 1);
         }
 
         [TestMethod]
         public void ConstructorFromBytesBE_4()
         {
             var bi = new BigInteger(Enumerable.Repeat((byte)0, 1000).Concat(new byte[] { 1, 0, 0, 0, 0, 2 }).ToArray(), ByteOrder.BigEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 256);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 256);
         }
 
         [TestMethod]
         public void ConstructorFromBytesBE_5()
         {
             var bi = new BigInteger(Enumerable.Repeat((byte)0, 1000).Concat(new byte[] { 1, 0, 0, 0, 0, 0, 2 }).ToArray(), ByteOrder.BigEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 256 * 256);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 256 * 256);
         }
 
         [TestMethod]
         public void ConstructorFromBytesBE_6()
         {
             var bi = new BigInteger(Enumerable.Repeat((byte)0, 1000).Concat(new byte[] { 1, 0, 0, 0, 0, 0, 0, 2 }).ToArray(), ByteOrder.BigEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 256 * 256 * 256);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 256 * 256 * 256);
         }
 
         [TestMethod]
         public void ConstructorFromBytesLE_1()
         {
             var bi = new BigInteger(new byte[] { 0, 0, 0, 0 }, ByteOrder.LittleEndian);
-            Assert.IsTrue(bi._bits.Length == 0);
+            Assert.IsTrue(bi._words.Length == 0);
         }
 
         [TestMethod]
         public void ConstructorFromBytesLE_2()
         {
             var bi = new BigInteger(new byte[] { 2 }.Concat(Enumerable.Repeat((byte)0, 1000)).ToArray(), ByteOrder.LittleEndian);
-            Assert.IsTrue(bi._bits.Length == 1);
-            Assert.IsTrue(bi._bits[0] == 2);
+            Assert.IsTrue(bi._words.Length == 1);
+            Assert.IsTrue(bi._words[0] == 2);
         }
 
         [TestMethod]
         public void ConstructorFromBytesLE_3()
         {
             var bi = new BigInteger(new byte[] { 2, 0, 0, 0, 1 }.Concat(Enumerable.Repeat((byte)0, 1000)).ToArray(), ByteOrder.LittleEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 1);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 1);
         }
 
         [TestMethod]
         public void ConstructorFromBytesLE_4()
         {
             var bi = new BigInteger(new byte[] { 2, 0, 0, 0, 0, 1 }.Concat(Enumerable.Repeat((byte)0, 1000)).ToArray(), ByteOrder.LittleEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 256);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 256);
         }
 
         [TestMethod]
         public void ConstructorFromBytesLE_5()
         {
             var bi = new BigInteger(new byte[] { 2, 0, 0, 0, 0, 0, 1 }.Concat(Enumerable.Repeat((byte)0, 1000)).ToArray(), ByteOrder.LittleEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 256 * 256);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 256 * 256);
         }
 
         [TestMethod]
         public void ConstructorFromBytesLE_6()
         {
             var bi = new BigInteger(new byte[] { 2, 0, 0, 0, 0, 0, 0, 1 }.Concat(Enumerable.Repeat((byte)0, 1000)).ToArray(), ByteOrder.LittleEndian);
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 2);
-            Assert.IsTrue(bi._bits[1] == 256 * 256 * 256);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 2);
+            Assert.IsTrue(bi._words[1] == 256 * 256 * 256);
         }
 
         [TestMethod]
@@ -127,7 +127,21 @@ namespace Zergatul.Math.Tests
         public void ToString2_1()
         {
             var bi = new BigInteger(new byte[] { 255, 0, 0, 0, 0, 255 }, ByteOrder.BigEndian);
-            Assert.IsTrue(bi.ToString(2) == "111111110000000000000000000000000000000011111111");
+            Assert.IsTrue(bi.ToString(2) == Convert.ToString(0xFF00000000FF, 2));
+        }
+
+        [TestMethod]
+        public void ToString2_2()
+        {
+            var bi = new BigInteger(new byte[] { 255, 0, 0, 255 }, ByteOrder.BigEndian);
+            Assert.IsTrue(bi.ToString(2) == Convert.ToString(0xFF0000FF, 2));
+        }
+
+        [TestMethod]
+        public void ToString16_1()
+        {
+            var bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0 }, ByteOrder.BigEndian);
+            Assert.IsTrue(bi.ToString(16) == "100000000");
         }
 
         [TestMethod]
@@ -168,9 +182,9 @@ namespace Zergatul.Math.Tests
             string number = "FFFFFFFFFFFF";
             var bi = new BigInteger(number, 16);
 
-            Assert.IsTrue(bi._bits.Length == 2);
-            Assert.IsTrue(bi._bits[0] == 0xFFFFFFFF);
-            Assert.IsTrue(bi._bits[1] == 0xFFFF);
+            Assert.IsTrue(bi._words.Length == 2);
+            Assert.IsTrue(bi._words[0] == 0xFFFFFFFF);
+            Assert.IsTrue(bi._words[1] == 0xFFFF);
         }
 
         [TestMethod]
@@ -309,6 +323,56 @@ namespace Zergatul.Math.Tests
             var result = bi1.Division(bi2);
             Assert.IsTrue(result.Item1.IsZero);
             Assert.IsTrue(result.Item2 == bi1);
+        }
+
+        [TestMethod]
+        public void Division_3()
+        {
+            var bi1 = new BigInteger("100000001", 16);
+            var bi2 = new BigInteger(2);
+            var result = bi1.Division(bi2);
+            Assert.IsTrue(result.Item1.ToString(16) == "80000000");
+            Assert.IsTrue(result.Item2.ToString() == "1");
+        }
+
+        [TestMethod]
+        public void Division_4()
+        {
+            var bi1 = new BigInteger("18190758438987288201");
+            var bi2 = new BigInteger("7771411298");
+            var result = bi1.Division(bi2);
+            Assert.IsTrue(result.Item1.ToString() == "2340727795");
+            Assert.IsTrue(result.Item2.ToString() == "7381660291");
+        }
+
+        [TestMethod]
+        public void Division_5()
+        {
+            var bi1 = new BigInteger("33983299299734985002");
+            var bi2 = new BigInteger("3671279634");
+            var result = bi1.Division(bi2);
+            Assert.IsTrue(result.Item1.ToString() == "9256527066");
+            Assert.IsTrue(result.Item2.ToString() == "759411158");
+        }
+
+        [TestMethod]
+        public void Division_6()
+        {
+            var bi1 = new BigInteger("24912195018622299722");
+            var bi2 = new BigInteger("3783002497");
+            var result = bi1.Division(bi2);
+            Assert.IsTrue(result.Item1.ToString() == "6585297006");
+            Assert.IsTrue(result.Item2.ToString() == "1437675740");
+        }
+
+        [TestMethod]
+        public void Division_7()
+        {
+            var bi1 = new BigInteger("89693542179547309145");
+            var bi2 = new BigInteger("9907093449");
+            var result = bi1.Division(bi2);
+            Assert.IsTrue(result.Item1.ToString() == "9053466855");
+            Assert.IsTrue(result.Item2.ToString() == "9638176250");
         }
     }
 }
