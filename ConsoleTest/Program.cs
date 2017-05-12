@@ -47,8 +47,8 @@ namespace Test
             Console.WriteLine(res2.ToString());
             return;*/
 
-            tt();
-            return;
+            /*tt();
+            return;*/
 
             var rnd = new Random();
             Func<int, string> rndNumber = (int len) =>
@@ -62,32 +62,31 @@ namespace Test
             int count = 0;
             while (true)
             {
-                string num1 = rndNumber(20);
-                string num2 = rndNumber(10);
+                string num1 = rndNumber(20 + rnd.Next(2));
+                string num2 = rndNumber(20 + rnd.Next(2));
+                string num3 = rndNumber(20 + rnd.Next(2));
                 var bi1 = new BigInteger(num1);
                 var bi2 = new BigInteger(num2);
+                var bi3 = new BigInteger(num3);
                 var si1 = System.Numerics.BigInteger.Parse(num1);
                 var si2 = System.Numerics.BigInteger.Parse(num2);
-                System.Numerics.BigInteger rem;
-                var sres = System.Numerics.BigInteger.DivRem(si1, si2, out rem);
-                var res = bi1.Division(bi2);
-                if (res.Item1.ToString() != sres.ToString())
+                var si3 = System.Numerics.BigInteger.Parse(num3);
+
+                var res1 = BigInteger.ModularExponentiation(bi1, bi2, bi3);
+                var res2 = System.Numerics.BigInteger.ModPow(si1, si2, si3);
+
+                if (res1.ToString() != res2.ToString())
                 {
-                    Console.WriteLine("Div failed:");
+                    Console.WriteLine("ERROR");
                     Console.WriteLine(num1);
                     Console.WriteLine(num2);
-                    break;
-                }
-                if (res.Item2.ToString() != rem.ToString())
-                {
-                    Console.WriteLine("Mod failed:");
-                    Console.WriteLine(num1);
-                    Console.WriteLine(num2);
+                    Console.WriteLine(num3);
                     break;
                 }
 
                 count++;
-                Console.WriteLine("OK");
+                if (count % 1 == 0)
+                    Console.WriteLine($"{count} OK");
             }
 
             Console.ReadLine();
@@ -95,16 +94,18 @@ namespace Test
 
         private static void tt()
         {
-            string num1 = "32999900863646250090";
-            string num2 = "9341814507";
+            string num1 = "78362760750068396170";
+            string num2 = "274919547864220404034";
+            string num3 = "74296421505141971816";
 
             var bi1 = new BigInteger(num1);
             var bi2 = new BigInteger(num2);
+            var bi3 = new BigInteger(num3);
+            Func<string, System.Numerics.BigInteger> parse = s => System.Numerics.BigInteger.Parse(s);
 
-            var div = System.Numerics.BigInteger.Parse(num1) / System.Numerics.BigInteger.Parse(num2);
-            var mod = System.Numerics.BigInteger.Parse(num1) % System.Numerics.BigInteger.Parse(num2);
-
-            var res = bi1.Division(bi2);
+            var res1 = System.Numerics.BigInteger.ModPow(parse(num1), parse(num2), parse(num3));
+            var res2 = BigInteger.ModularExponentiation(bi1, bi2, bi3);
+            
         }
     }
 }

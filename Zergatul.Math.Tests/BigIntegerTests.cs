@@ -310,9 +310,10 @@ namespace Zergatul.Math.Tests
         [TestMethod]
         public void Division_1()
         {
-            var result = BigInteger.One.Division(new BigInteger(2));
-            Assert.IsTrue(result.Item1.IsZero);
-            Assert.IsTrue(result.Item2.ToString() == "1");
+            BigInteger quotient, remainder;
+            BigInteger.Division(BigInteger.One, new BigInteger(2), out quotient, out remainder);
+            Assert.IsTrue(quotient.IsZero);
+            Assert.IsTrue(remainder.ToString() == "1");
         }
 
         [TestMethod]
@@ -320,9 +321,10 @@ namespace Zergatul.Math.Tests
         {
             var bi1 = new BigInteger(Enumerable.Repeat((byte)244, 500).ToArray(), ByteOrder.BigEndian);
             var bi2 = new BigInteger(Enumerable.Repeat((byte)245, 500).ToArray(), ByteOrder.BigEndian);
-            var result = bi1.Division(bi2);
-            Assert.IsTrue(result.Item1.IsZero);
-            Assert.IsTrue(result.Item2 == bi1);
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.IsZero);
+            Assert.IsTrue(remainder == bi1);
         }
 
         [TestMethod]
@@ -330,9 +332,10 @@ namespace Zergatul.Math.Tests
         {
             var bi1 = new BigInteger("100000001", 16);
             var bi2 = new BigInteger(2);
-            var result = bi1.Division(bi2);
-            Assert.IsTrue(result.Item1.ToString(16) == "80000000");
-            Assert.IsTrue(result.Item2.ToString() == "1");
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.ToString(16) == "80000000");
+            Assert.IsTrue(remainder.ToString() == "1");
         }
 
         [TestMethod]
@@ -340,9 +343,10 @@ namespace Zergatul.Math.Tests
         {
             var bi1 = new BigInteger("18190758438987288201");
             var bi2 = new BigInteger("7771411298");
-            var result = bi1.Division(bi2);
-            Assert.IsTrue(result.Item1.ToString() == "2340727795");
-            Assert.IsTrue(result.Item2.ToString() == "7381660291");
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.ToString() == "2340727795");
+            Assert.IsTrue(remainder.ToString() == "7381660291");
         }
 
         [TestMethod]
@@ -350,9 +354,10 @@ namespace Zergatul.Math.Tests
         {
             var bi1 = new BigInteger("33983299299734985002");
             var bi2 = new BigInteger("3671279634");
-            var result = bi1.Division(bi2);
-            Assert.IsTrue(result.Item1.ToString() == "9256527066");
-            Assert.IsTrue(result.Item2.ToString() == "759411158");
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.ToString() == "9256527066");
+            Assert.IsTrue(remainder.ToString() == "759411158");
         }
 
         [TestMethod]
@@ -360,9 +365,10 @@ namespace Zergatul.Math.Tests
         {
             var bi1 = new BigInteger("24912195018622299722");
             var bi2 = new BigInteger("3783002497");
-            var result = bi1.Division(bi2);
-            Assert.IsTrue(result.Item1.ToString() == "6585297006");
-            Assert.IsTrue(result.Item2.ToString() == "1437675740");
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.ToString() == "6585297006");
+            Assert.IsTrue(remainder.ToString() == "1437675740");
         }
 
         [TestMethod]
@@ -370,9 +376,48 @@ namespace Zergatul.Math.Tests
         {
             var bi1 = new BigInteger("89693542179547309145");
             var bi2 = new BigInteger("9907093449");
-            var result = bi1.Division(bi2);
-            Assert.IsTrue(result.Item1.ToString() == "9053466855");
-            Assert.IsTrue(result.Item2.ToString() == "9638176250");
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.ToString() == "9053466855");
+            Assert.IsTrue(remainder.ToString() == "9638176250");
         }
+
+        [TestMethod]
+        public void Division_8()
+        {
+            var bi1 = new BigInteger("32999900863646250090");
+            var bi2 = new BigInteger("9341814507");
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.ToString() == "3532493696");
+            Assert.IsTrue(remainder.ToString() == "8467402218");
+        }
+
+        [TestMethod]
+        public void Division_9()
+        {
+            var bi1 = new BigInteger("281982656586273440378");
+            var bi2 = new BigInteger("57508465279");
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient.ToString() == "4903324323");
+            Assert.IsTrue(remainder.ToString() == "5351759261");
+        }
+
+        [TestMethod]
+        public void ModPow_1()
+        {
+            var bi1 = new BigInteger("078362760750068396170");
+            var bi2 = new BigInteger("274919547864220404034");
+            var bi3 = new BigInteger("74296421505141971816");
+            Assert.IsTrue(BigInteger.ModularExponentiation(bi1, bi2, bi3).ToString() == "62733211883538321040");
+        }
+
+        /*
+         * "163338342975806799406"
+"02827803280063344426"
+"76224379996895040153"
+         * */
+
     }
 }

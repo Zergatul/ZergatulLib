@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Zergatul.Math
 {
     // https://github.com/Zergatul/zChat/blob/master/client/bigint.js
-    public class BigInteger : IComparable<BigInteger>, IEquatable<BigInteger>
+    public class BigInteger : IComparable<BigInteger>, IEquatable<BigInteger>, IEquatable<int>
     {
         /// <summary>
         /// Little-endian order.
@@ -151,107 +151,125 @@ namespace Zergatul.Math
 
         #region Public methods
 
-        public BigInteger Add(BigInteger value)
+        public static BigInteger Sum(BigInteger summand1, BigInteger summand2)
         {
-            if (this.IsZero)
-                return value;
-            if (value.IsZero)
-                return this;
+            if (summand1.IsZero)
+                return summand2;
+            if (summand2.IsZero)
+                return summand1;
 
-            var newwords = new uint[System.Math.Max(this._wordsLength, value._wordsLength) + 1];
-            uint carry = 0;
-            for (int i = 0; i < newwords.Length; i++)
+            var words = new uint[System.Math.Max(summand1._wordsLength, summand2._wordsLength) + 1];
+            long carry = 0;
+            for (int i = 0; i < words.Length; i++)
             {
                 long sum = carry;
-                if (i < this._wordsLength)
-                    sum += this._words[i];
-                if (i < value._wordsLength)
-                    sum += value._words[i];
-                if (sum >= UInt32Overflow)
-                {
-                    newwords[i] = (uint)(sum - UInt32Overflow);
-                    carry = 1;
-                }
-                else
-                {
-                    newwords[i] = (uint)sum;
-                    carry = 0;
-                }
+                if (i < summand1._wordsLength)
+                    sum += summand1._words[i];
+                if (i < summand2._wordsLength)
+                    sum += summand2._words[i];
+
+                words[i] = (uint)(sum & 0xFFFFFFFF);
+                carry = sum >> 32;
             }
 
-            return new BigInteger(newwords);
+            return new BigInteger(words);
         }
 
-        public BigInteger Multiply(BigInteger value)
+        public static BigInteger Difference(BigInteger minuend, BigInteger subtrahend)
         {
-            if (this.IsZero || value.IsZero)
+            throw new NotImplementedException();
+        }
+
+        public static BigInteger Product(BigInteger factor1, BigInteger factor2)
+        {
+            if (factor1.IsZero || factor2.IsZero)
                 return Zero;
 
-            if (this._wordsLength < value._wordsLength)
-                return value.MultiplyGeneral(this);
+            if (factor1._wordsLength < factor2._wordsLength)
+                return factor2.MultiplyGeneral(factor1);
             else
-                return this.MultiplyGeneral(value);
+                return factor1.MultiplyGeneral(factor2);
         }
 
-        public BigInteger Div(BigInteger value)
+        public static void Division(BigInteger divident, BigInteger divisor, out BigInteger quotient, out BigInteger remainder)
         {
-            return Division(value).Item1;
-        }
-
-        public BigInteger Mod(BigInteger value)
-        {
-            return Division(value).Item2;
-        }
-
-        public Tuple<BigInteger, BigInteger> Division(BigInteger value)
-        {
-            if (this.CompareTo(value) < 0)
-                return new Tuple<BigInteger, BigInteger>(Zero, this);
-
-            var x = new uint[this._wordsLength + 1];
-            var y = new uint[value._wordsLength];
-
-            Array.Copy(this._words, x, this._wordsLength);
-            Array.Copy(value._words, y, value._wordsLength);
-
-            // calculate normalizing shift
-            int shift = 0;
-            uint yHighWord = y[value._wordsLength - 1];
-            while ((yHighWord & 0x80000000) == 0)
+            if (divident.CompareTo(divisor) < 0)
             {
-                yHighWord <<= 1;
-                shift++;
+                quotient = Zero;
+                remainder = divident;
+                return;
             }
 
-            int xLen = BitShiftLeftNoResize(x, this._wordsLength + 1, shift);
-            int yLen = BitShiftLeftNoResize(y, value._wordsLength, shift);
+            BigInteger _quotient = null;
+            BigInteger _remainder = null;
+            DivisionGeneral(divident, divisor, ref _quotient, ref _remainder, true, true);
+            quotient = _quotient;
+            remainder = _remainder;
+        }
 
-            var q = new uint[xLen - yLen + 1];
-            yHighWord = y[yLen - 1];
-            for (int i = xLen; i >= yLen; i--)
+        public static BigInteger Modulo(BigInteger divident, BigInteger divisor)
+        {
+            if (divident.CompareTo(divisor) < 0)
+                return divident;
+
+            BigInteger quotient = null;
+            BigInteger remainder = null;
+            DivisionGeneral(divident, divisor, ref quotient, ref remainder, false, true);
+
+            return remainder;
+        }
+
+        public static BigInteger ModularExponentiation(BigInteger @base, BigInteger exponent, BigInteger modulus)
+        {
+            if (modulus.IsZero)
+                throw new ArgumentException("Modulus cannot be zero.", nameof(modulus));
+            if (modulus == 1)
+                return Zero;
+            if (@base >= modulus)
+                @base = Modulo(@base, modulus);
+            if (@base.IsZero)
+                return Zero;
+            if (exponent.IsZero)
+                return One;
+
+            if (modulus.IsBitSet(0))
             {
-                ulong xHighWords = i == xLen ? x[i - 1] : (((ulong)x[i] << 32) | x[i - 1]);
-                ulong nextQuotWords = xHighWords / yHighWord;
-                if (nextQuotWords >= 0x100000000)
-                    throw new OverflowException("Internal overflow");
-                uint nextQuotWord = (uint)nextQuotWords;
+                // use Montgomery exponentiation
+                var rWords = new uint[modulus._wordsLength + 1];
+                rWords[modulus._wordsLength] = 1;
+                var r = new BigInteger(rWords);
 
-                if (nextQuotWords != 0)
-                    if (!WordShiftSubstractLinearCombination(x, xLen, y, yLen, nextQuotWord, i - yLen))
-                    {
-                        nextQuotWord--;
-                        WordShiftNegativeAdd(x, xLen, y, yLen, i - yLen);
-                    }
-                q[i - yLen] = nextQuotWord;
+                var x = modulus; // ???
 
-                while (x[xLen - 1] == 0)
-                    xLen--;
+                long mPrime = -ExtendedEuclideanInt64(0x100000000, modulus._words[0]).y;
+                if (mPrime < 0)
+                    mPrime += 0x100000000;
+
+                var xPrime = @base * r % modulus;
+                var a = r % modulus;
+
+                for (int i = exponent.GetBitsLength() - 1; i >= 0; i--)
+                {
+                    a = MontgomeryMultiplication(a, a, modulus, (uint)mPrime);
+                    if (exponent.IsBitSet(i))
+                        a = MontgomeryMultiplication(a, xPrime, modulus, (uint)mPrime);
+                }
+                // final step montgomery * 1 ????
+
+                return a;
             }
-
-            // shift back normalization of x
-            BitShiftRightNoResize(x, xLen, shift);
-
-            return new Tuple<BigInteger, BigInteger>(new BigInteger(q), new BigInteger(x, xLen));
+            else
+            {
+                // general method
+                var result = One;
+                for (int i = exponent.GetBitsLength() - 1; i >= 0; i--)
+                {
+                    result = result * result % modulus;
+                    if (exponent.IsBitSet(i))
+                        result = result * @base % modulus;
+                }
+                return result;
+            }
         }
 
         public string ToString(int radix)
@@ -348,6 +366,19 @@ namespace Zergatul.Math
 
         #endregion
 
+        #region IEquatable<int>
+
+        public bool Equals(int other)
+        {
+            if (other == 0)
+                return IsZero;
+            if (other < 0)
+                return false;
+            return _wordsLength == 1 && _words[0] == other;
+        }
+
+        #endregion
+
         #region IComparable<BigInteger>
 
         public int CompareTo(BigInteger other)
@@ -383,24 +414,49 @@ namespace Zergatul.Math
             return !left.Equals(right);
         }
 
+        public static bool operator ==(BigInteger left, int right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(BigInteger left, int right)
+        {
+            return !left.Equals(right);
+        }
+
+        public static bool operator >=(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
+
+        public static bool operator <=(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
         public static BigInteger operator+(BigInteger left, BigInteger right)
         {
-            return left.Add(right);
+            return Sum(left, right);
+        }
+
+        public static BigInteger operator -(BigInteger left, BigInteger right)
+        {
+            return Difference(left, right);
         }
 
         public static BigInteger operator *(BigInteger left, BigInteger right)
         {
-            return left.Multiply(right);
+            return Product(left, right);
         }
 
         public static BigInteger operator /(BigInteger left, BigInteger right)
         {
-            return left.Div(right);
+            return null;
         }
 
         public static BigInteger operator %(BigInteger left, BigInteger right)
         {
-            return left.Mod(right);
+            return Modulo(left, right);
         }
 
         #endregion
@@ -417,6 +473,30 @@ namespace Zergatul.Math
         {
             while (_wordsLength > 0 && _words[_wordsLength - 1] == 0)
                 _wordsLength--;
+        }
+
+        private int GetBitsLength()
+        {
+            if (IsZero)
+                return 0;
+
+            int result = _wordsLength * 32;
+            int shift = 31;
+            while ((_words[_wordsLength - 1] & (1 << shift)) == 0)
+            {
+                shift--;
+                result--;
+            }
+
+            return result;
+        }
+
+        private bool IsBitSet(int position)
+        {
+            int wordIndex = position / 32;
+            if (wordIndex >= _wordsLength)
+                return false;
+            return (_words[wordIndex] & (1 << (position & 0x1f))) != 0;
         }
 
         #endregion
@@ -634,6 +714,80 @@ namespace Zergatul.Math
             }
         }
 
+        private static void DivisionGeneral(BigInteger divident, BigInteger divisor, ref BigInteger quotient, ref BigInteger remainder, bool calcQuotient, bool calcRemainder)
+        {
+            var x = new uint[divident._wordsLength + 1];
+            var y = new uint[divisor._wordsLength];
+
+            Array.Copy(divident._words, x, divident._wordsLength);
+            Array.Copy(divisor._words, y, divisor._wordsLength);
+
+            // calculate normalizing shift
+            int shift = 0;
+            uint yHighWord1 = y[divisor._wordsLength - 1];
+            while ((yHighWord1 & 0x80000000) == 0)
+            {
+                yHighWord1 <<= 1;
+                shift++;
+            }
+
+            int xLen = BitShiftLeftNoResize(x, divident._wordsLength + 1, shift);
+            int yLen = BitShiftLeftNoResize(y, divisor._wordsLength, shift);
+
+            uint[] q = null;
+            if (calcQuotient)
+                q = new uint[xLen - yLen + 1];
+
+            yHighWord1 = y[yLen - 1];
+            uint yHighWord2 = SafeGetUInt32(y, yLen, yLen - 2);
+            for (int i = xLen; i >= yLen; i--)
+            {
+                uint xHighWord1 = SafeGetUInt32(x, xLen, i);
+                uint xHighWord2 = x[i - 1];
+                uint xHighWord3 = SafeGetUInt32(x, xLen, i - 2);
+
+                uint nextQuotWord = (uint)((((ulong)xHighWord1 << 32) | xHighWord2) / yHighWord1);
+
+                ulong carry = (ulong)yHighWord2 * nextQuotWord;
+                uint qyHighWord3 = (uint)(carry & 0xFFFFFFFF);
+                carry = carry >> 32;
+
+                carry = carry + (ulong)yHighWord1 * nextQuotWord;
+                uint qyHighWord2 = (uint)(carry & 0xFFFFFFFF);
+                uint qyHighWord1 = (uint)(carry >> 32);
+
+                if (qyHighWord1 > xHighWord1)
+                    nextQuotWord--;
+                else
+                    if (qyHighWord1 == xHighWord1 && qyHighWord2 > xHighWord2)
+                    nextQuotWord--;
+                else
+                        if (qyHighWord2 == xHighWord2 && qyHighWord3 > xHighWord3)
+                    nextQuotWord--;
+
+                if (nextQuotWord != 0)
+                    if (!WordShiftSubstractLinearCombination(x, xLen, y, yLen, nextQuotWord, i - yLen))
+                    {
+                        nextQuotWord--;
+                        WordShiftNegativeAdd(x, xLen, y, yLen, i - yLen);
+                    }
+
+                if (calcQuotient)
+                    q[i - yLen] = nextQuotWord;
+
+                while (x[xLen - 1] == 0)
+                    xLen--;
+            }
+
+            // shift back normalization of x
+            BitShiftRightNoResize(x, xLen, shift);
+
+            if (calcQuotient)
+                quotient = new BigInteger(q);
+            if (calcRemainder)
+                remainder = new BigInteger(x, xLen);
+        }
+
         /// <summary>
         /// Assumes operation will not change array size
         /// Return resulted length
@@ -721,6 +875,119 @@ namespace Zergatul.Math
             }
         }
 
+        /// <summary>
+        /// value1 >= value2
+        /// Returns: d = gcd(a, b); ax+by=d
+        /// </summary>
+        private static ExtEuclideanResult ExtendedEuclideanInt64(long a, long b)
+        {
+            if (a < b)
+                throw new ArgumentException("a should be greater than b.");
+            if (b == 0)
+                return new ExtEuclideanResult
+                {
+                    d = a,
+                    x = 1,
+                    y = 0
+                };
+
+            long x1 = 0, x2 = 1, y1 = 1, y2 = 0, x, y;
+            while (b > 0)
+            {
+                long q = a / b;
+                long r = a % b;
+                x = x2 - q * x1;
+                y = y2 - q * y1;
+                a = b;
+                b = r;
+                x2 = x1;
+                x1 = x;
+                y2 = y1;
+                y1 = y;
+            }
+            return new ExtEuclideanResult
+            {
+                d = a,
+                x = x2,
+                y = y2
+            };
+        }
+
+        private struct ExtEuclideanResult
+        {
+            public long x, y, d;
+        }
+
+        /// <summary>
+        /// m - odd
+        /// mInv = -(1 / m) mod 0x100000000
+        /// </summary>
+        private static BigInteger MontgomeryMultiplication(BigInteger x, BigInteger y, BigInteger m, uint mInv)
+        {
+            var result = new uint[m._wordsLength + 2];
+            for (int i = 0; i < m._wordsLength; i++)
+            {
+                uint u = (uint)((((result[0] + (ulong)x._words[i] * y._words[0]) & 0xFFFFFFFF) * mInv) & 0xFFFFFFFF);
+
+                ulong carry = 0;
+                ulong sum;
+                for (int j = 0; j < m._wordsLength; j++)
+                {
+                    sum = checked(carry + result[j] + (ulong)x._words[i] * m._words[j]);
+                    carry = sum >> 32;
+                    result[j] = (uint)(sum & 0xFFFFFFFF);
+                }
+                sum = result[m._wordsLength] + carry;
+                result[m._wordsLength] = (uint)(sum & 0xFFFFFFFF);
+                result[m._wordsLength + 1] += (uint)(sum >> 32);
+
+                carry = 0;
+                for (int j = 0; j < m._wordsLength; j++)
+                {
+                    sum = checked(carry + result[j] + (ulong)u * m._words[j]);
+                    carry = sum >> 32;
+                    result[j] = (uint)(sum & 0xFFFFFFFF);
+                }
+                sum = result[m._wordsLength] + carry;
+                result[m._wordsLength] = (uint)(sum & 0xFFFFFFFF);
+                result[m._wordsLength + 1] += (uint)(sum >> 32);
+
+                if (result[0] != 0)
+                    throw new Exception("Error occured");
+                for (int j = 0; j <= m._wordsLength; j++)
+                    result[j] = result[j + 1];
+                result[m._wordsLength + 1] = 0;
+            }
+
+            // check if result > m
+            bool greater = false;
+            if (result[m._wordsLength] > 0)
+                greater = true;
+            else
+                for (int i = m._wordsLength - 1; i >= 0; i++)
+                    if (result[i] > m._words[i])
+                    {
+                        greater = true;
+                        break;
+                    }
+                    else
+                        if (result[i] < m._words[i])
+                            break;
+
+            if (greater)
+            {
+                long carry = 0;
+                for (int i = 0; i < m._wordsLength; i++)
+                {
+                    long diff = carry + result[i] - m._words[i];
+                    result[i] = (uint)(diff & 0xFFFFFFFF);
+                    carry = diff >> 32;
+                }
+            }
+
+            return new BigInteger(result, m._wordsLength);
+        }
+
         #endregion
 
         #region Private static members
@@ -748,6 +1015,11 @@ namespace Zergatul.Math
         private static byte SafeGetByte(byte[] data, int dataLen, int index)
         {
             return (0 <= index) && (index < dataLen) ? data[index] : (byte)0;
+        }
+
+        private static uint SafeGetUInt32(uint[] data, int dataLen, int index)
+        {
+            return (0 <= index) && (index < dataLen) ? data[index] : 0;
         }
 
         #endregion
