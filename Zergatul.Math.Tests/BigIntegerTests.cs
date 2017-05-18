@@ -110,6 +110,34 @@ namespace Zergatul.Math.Tests
         }
 
         [TestMethod]
+        public void ToBytes_1()
+        {
+            var data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.BigEndian).ToBytes(ByteOrder.BigEndian)));
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.LittleEndian).ToBytes(ByteOrder.LittleEndian)));
+
+            data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.BigEndian).ToBytes(ByteOrder.BigEndian)));
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.LittleEndian).ToBytes(ByteOrder.LittleEndian)));
+
+            data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.BigEndian).ToBytes(ByteOrder.BigEndian)));
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.LittleEndian).ToBytes(ByteOrder.LittleEndian)));
+
+            data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.BigEndian).ToBytes(ByteOrder.BigEndian)));
+            Assert.IsTrue(data.SequenceEqual(new BigInteger(data, ByteOrder.LittleEndian).ToBytes(ByteOrder.LittleEndian)));
+        }
+
+        [TestMethod]
+        public void ToBytes_2()
+        {
+            var data = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            Assert.IsTrue(Enumerable.Repeat((byte)0, 10).Concat(data).SequenceEqual(new BigInteger(data, ByteOrder.BigEndian).ToBytes(ByteOrder.BigEndian, data.Length + 10)));
+            Assert.IsTrue(data.Concat(Enumerable.Repeat((byte)0, 10)).SequenceEqual(new BigInteger(data, ByteOrder.LittleEndian).ToBytes(ByteOrder.LittleEndian, data.Length + 10)));
+        }
+
+        [TestMethod]
         public void ToString10_1()
         {
             var bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, ByteOrder.BigEndian);
@@ -405,6 +433,26 @@ namespace Zergatul.Math.Tests
         }
 
         [TestMethod]
+        public void ExtendedEuclideanInt64_1()
+        {
+            long a = 4294967296;
+            long b = 3411137177;
+            var result = BigInteger.ExtendedEuclideanInt64(a, b);
+            Assert.IsTrue(checked(a * result.x + b * result.y) == result.d);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void MontgomeryMultiplication_1()
+        {
+            var x = new BigInteger("72919217394");
+            var m = new BigInteger("385942420801");
+            uint mInv = 3206704447;
+
+            var result = BigInteger.MontgomeryMultiplication(x, x, m, mInv);
+        }
+
+        [TestMethod]
         public void ModPow_1()
         {
             var bi1 = new BigInteger("078362760750068396170");
@@ -413,6 +461,16 @@ namespace Zergatul.Math.Tests
             Assert.IsTrue(BigInteger.ModularExponentiation(bi1, bi2, bi3).ToString() == "62733211883538321040");
         }
 
+        [TestMethod]
+        public void ModPow_2()
+        {
+            var bi1 = new BigInteger("078362760750068396170");
+            var bi2 = new BigInteger("274919547864220404034");
+            var bi3 = new BigInteger("74296421505141971816");
+            Assert.IsTrue(BigInteger.ModularExponentiation(bi1, bi2, bi3).ToString() == "62733211883538321040");
+        }
+
+        // ModPow
         /*
          * "163338342975806799406"
 "02827803280063344426"

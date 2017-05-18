@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
+using Zergatul.Math;
 using Zergatul.Net.Tls.Extensions;
 
 namespace Zergatul.Net.Tls
@@ -149,13 +150,13 @@ namespace Zergatul.Net.Tls
                 case KeyExchangeAlgorithm.DH_DSS:
                 case KeyExchangeAlgorithm.DH_RSA:
                 case KeyExchangeAlgorithm.DH_anon:
-                    var dh = new DiffieHellman(DHParams.DH_g, DHParams.DH_p, DHParams.DH_Ys);
+                    var dh = new DiffieHellman(DHParams.DH_g, DHParams.DH_p, DHParams.DH_Ys, new DefaultSecureRandom());
                     dh.CalculateForBSide();
                     keys = new ClientKeyExchange(this)
                     {
                         DHPublic = new ClientDiffieHellmanPublic
                         {
-                            DH_Yc = null
+                            DH_Yc = dh.Yb.ToBytes(ByteOrder.BigEndian, 42)
                         }
                     };
                     break;
@@ -176,6 +177,10 @@ namespace Zergatul.Net.Tls
                     }
                 }
             };
+            message.Write(_innerStream);
+
+            message = new RecordMessage(this);
+            message.Read(_reader);
         }
 
         internal void OnContentMessage(ContentMessage message)

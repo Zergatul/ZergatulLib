@@ -232,7 +232,8 @@ namespace Zergatul.Math
             if (exponent.IsZero)
                 return One;
 
-            if (modulus.IsBitSet(0))
+            // TODO: fix montgomery
+            if (false)//(modulus.IsBitSet(0))
             {
                 // use Montgomery exponentiation
                 var rWords = new uint[modulus._wordsLength + 1];
@@ -315,6 +316,59 @@ namespace Zergatul.Math
 
                 return result;
             }
+        }
+
+        public byte[] ToBytes(ByteOrder order)
+        {
+            if (IsZero)
+                return new byte[0];
+
+            uint high = _words[_wordsLength - 1];
+            int highWordBytes = 1;
+            if (high >= (1U << 8))
+                highWordBytes = 2;
+            if (high >= (1U << 16))
+                highWordBytes = 3;
+            if (high >= (1U << 24))
+                highWordBytes = 4;
+
+            byte[] result = new byte[(_wordsLength - 1) * 4 + highWordBytes];
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (order == ByteOrder.BigEndian)
+                {
+                    int i2 = result.Length - 1 - i;
+                    result[i] = ByteFromUInt32(_words[i2 / 4], i2 % 4);
+                }
+                if (order == ByteOrder.LittleEndian)
+                {
+                    result[i] = ByteFromUInt32(_words[i / 4], i % 4);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// length - pads zeros if resulting array is shorter
+        /// </summary>
+        public byte[] ToBytes(ByteOrder order, int length)
+        {
+            byte[] result = new byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                if (order == ByteOrder.BigEndian)
+                {
+                    int i2 = length - 1 - i;
+                    result[i] = ByteFromUInt32(SafeGetUInt32(_words, _wordsLength, i2 / 4), i2 % 4);
+                }
+                if (order == ByteOrder.LittleEndian)
+                {
+                    result[i] = ByteFromUInt32(SafeGetUInt32(_words, _wordsLength, i / 4), i % 4);
+                }
+            }
+
+            return result;
         }
 
         #endregion
@@ -432,6 +486,16 @@ namespace Zergatul.Math
         public static bool operator <=(BigInteger left, BigInteger right)
         {
             return left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator <(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) < 0;
         }
 
         public static BigInteger operator+(BigInteger left, BigInteger right)
@@ -879,7 +943,7 @@ namespace Zergatul.Math
         /// value1 >= value2
         /// Returns: d = gcd(a, b); ax+by=d
         /// </summary>
-        private static ExtEuclideanResult ExtendedEuclideanInt64(long a, long b)
+        internal static ExtEuclideanResult ExtendedEuclideanInt64(long a, long b)
         {
             if (a < b)
                 throw new ArgumentException("a should be greater than b.");
@@ -913,79 +977,84 @@ namespace Zergatul.Math
             };
         }
 
-        private struct ExtEuclideanResult
+        internal struct ExtEuclideanResult
         {
             public long x, y, d;
         }
 
         /// <summary>
         /// m - odd
-        /// mInv = -(1 / m) mod 0x100000000
+        /// mInv = - m^(-1) mod 0x100000000
         /// </summary>
-        private static BigInteger MontgomeryMultiplication(BigInteger x, BigInteger y, BigInteger m, uint mInv)
+        internal static BigInteger MontgomeryMultiplication(BigInteger x, BigInteger y, BigInteger m, uint mInv)
         {
-            var result = new uint[m._wordsLength + 2];
-            for (int i = 0; i < m._wordsLength; i++)
+            if (x >= m || y >= m)
+                throw new InvalidOperationException();
+            checked
             {
-                uint u = (uint)((((result[0] + (ulong)x._words[i] * y._words[0]) & 0xFFFFFFFF) * mInv) & 0xFFFFFFFF);
-
-                ulong carry = 0;
-                ulong sum;
-                for (int j = 0; j < m._wordsLength; j++)
-                {
-                    sum = checked(carry + result[j] + (ulong)x._words[i] * m._words[j]);
-                    carry = sum >> 32;
-                    result[j] = (uint)(sum & 0xFFFFFFFF);
-                }
-                sum = result[m._wordsLength] + carry;
-                result[m._wordsLength] = (uint)(sum & 0xFFFFFFFF);
-                result[m._wordsLength + 1] += (uint)(sum >> 32);
-
-                carry = 0;
-                for (int j = 0; j < m._wordsLength; j++)
-                {
-                    sum = checked(carry + result[j] + (ulong)u * m._words[j]);
-                    carry = sum >> 32;
-                    result[j] = (uint)(sum & 0xFFFFFFFF);
-                }
-                sum = result[m._wordsLength] + carry;
-                result[m._wordsLength] = (uint)(sum & 0xFFFFFFFF);
-                result[m._wordsLength + 1] += (uint)(sum >> 32);
-
-                if (result[0] != 0)
-                    throw new Exception("Error occured");
-                for (int j = 0; j <= m._wordsLength; j++)
-                    result[j] = result[j + 1];
-                result[m._wordsLength + 1] = 0;
-            }
-
-            // check if result > m
-            bool greater = false;
-            if (result[m._wordsLength] > 0)
-                greater = true;
-            else
-                for (int i = m._wordsLength - 1; i >= 0; i++)
-                    if (result[i] > m._words[i])
-                    {
-                        greater = true;
-                        break;
-                    }
-                    else
-                        if (result[i] < m._words[i])
-                            break;
-
-            if (greater)
-            {
-                long carry = 0;
+                var result = new uint[m._wordsLength + 2];
                 for (int i = 0; i < m._wordsLength; i++)
                 {
-                    long diff = carry + result[i] - m._words[i];
-                    result[i] = (uint)(diff & 0xFFFFFFFF);
-                    carry = diff >> 32;
-                }
-            }
+                    uint u = (uint)((((result[0] + (ulong)x._words[i] * y._words[0]) & 0xFFFFFFFF) * mInv) & 0xFFFFFFFF);
 
-            return new BigInteger(result, m._wordsLength);
+                    ulong carry = 0;
+                    ulong sum;
+                    for (int j = 0; j < m._wordsLength; j++)
+                    {
+                        sum = carry + result[j] + (ulong)x._words[i] * y._words[j];
+                        carry = sum >> 32;
+                        result[j] = (uint)(sum & 0xFFFFFFFF);
+                    }
+                    sum = result[m._wordsLength] + carry;
+                    result[m._wordsLength] = (uint)(sum & 0xFFFFFFFF);
+                    result[m._wordsLength + 1] += (uint)(sum >> 32);
+
+                    carry = 0;
+                    for (int j = 0; j < m._wordsLength; j++)
+                    {
+                        sum = carry + result[j] + (ulong)u * m._words[j];
+                        carry = sum >> 32;
+                        result[j] = (uint)(sum & 0xFFFFFFFF);
+                    }
+                    sum = result[m._wordsLength] + carry;
+                    result[m._wordsLength] = (uint)(sum & 0xFFFFFFFF);
+                    result[m._wordsLength + 1] += (uint)(sum >> 32);
+
+                    if (result[0] != 0)
+                        throw new Exception("Error occured");
+                    for (int j = 0; j <= m._wordsLength; j++)
+                        result[j] = result[j + 1];
+                    result[m._wordsLength + 1] = 0;
+                }
+
+                // check if result > m
+                bool greater = false;
+                if (result[m._wordsLength] > 0)
+                    greater = true;
+                else
+                    for (int i = m._wordsLength - 1; i >= 0; i++)
+                        if (result[i] > m._words[i])
+                        {
+                            greater = true;
+                            break;
+                        }
+                        else
+                            if (result[i] < m._words[i])
+                            break;
+
+                if (greater)
+                {
+                    long carry = 0;
+                    for (int i = 0; i < m._wordsLength; i++)
+                    {
+                        long diff = carry + result[i] - m._words[i];
+                        result[i] = (uint)(diff & 0xFFFFFFFF);
+                        carry = diff >> 32;
+                    }
+                }
+
+                return new BigInteger(result, m._wordsLength);
+            }
         }
 
         #endregion
@@ -1020,6 +1089,19 @@ namespace Zergatul.Math
         private static uint SafeGetUInt32(uint[] data, int dataLen, int index)
         {
             return (0 <= index) && (index < dataLen) ? data[index] : 0;
+        }
+
+        private static byte ByteFromUInt32(uint value, int index)
+        {
+            if (index == 0)
+                return (byte)(value & 0xFF);
+            if (index == 1)
+                return (byte)((value >> 8) & 0xFF);
+            if (index == 2)
+                return (byte)((value >> 16) & 0xFF);
+            if (index == 3)
+                return (byte)((value >> 24) & 0xFF);
+            throw new InvalidOperationException();
         }
 
         #endregion

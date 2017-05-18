@@ -12,28 +12,51 @@ namespace Zergatul.Cryptography
     {
         public BigInteger p { get; private set; }
         public BigInteger g { get; private set; }
+
+        /// <summary>
+        /// {A} private key
+        /// </summary>
         public BigInteger Xa { get; private set; }
+
+        /// <summary>
+        /// {B} private key
+        /// </summary>
         public BigInteger Xb { get; private set; }
+
+        /// <summary>
+        /// {A} public key
+        /// </summary>
         public BigInteger Ya { get; private set; }
+
+        /// <summary>
+        /// {B} public key
+        /// </summary>
         public BigInteger Yb { get; private set; }
+
+        /// <summary>
+        /// Shared secret
+        /// </summary>
         public BigInteger ZZ { get; private set; }
 
-        public DiffieHellman(byte[] g, byte[] p, byte[] Ya)
+        private ISecureRandom _rnd;
+
+        public DiffieHellman(byte[] g, byte[] p, byte[] Ya, ISecureRandom rnd)
         {
             this.p = new BigInteger(p, ByteOrder.BigEndian);
             this.g = new BigInteger(g, ByteOrder.BigEndian);
             this.Ya = new BigInteger(Ya, ByteOrder.BigEndian);
+            this._rnd = rnd;
         }
 
         public void CalculateForBSide()
         {
             var bytes = new byte[42];
-            var rng = new System.Security.Cryptography.RNGCryptoServiceProvider();
-            rng.GetBytes(bytes);
-            /*Xb = new BigInteger(bytes);
+            _rnd.GetBytes(bytes);
 
-            Yb = BigInteger.ModPow(g, Xb, p);
-            ZZ = BigInteger.ModPow(Ya, Xb, p);*/
+            Xb = new BigInteger(bytes, ByteOrder.BigEndian);
+
+            Yb = BigInteger.ModularExponentiation(g, Xb, p);
+            ZZ = BigInteger.ModularExponentiation(Ya, Xb, p);
         }
     }
 }

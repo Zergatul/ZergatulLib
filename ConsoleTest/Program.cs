@@ -47,8 +47,8 @@ namespace Test
             Console.WriteLine(res2.ToString());
             return;*/
 
-            /*tt();
-            return;*/
+            tt();
+            return;
 
             var rnd = new Random();
             Func<int, string> rndNumber = (int len) =>
@@ -62,9 +62,9 @@ namespace Test
             int count = 0;
             while (true)
             {
-                string num1 = rndNumber(20 + rnd.Next(2));
-                string num2 = rndNumber(20 + rnd.Next(2));
-                string num3 = rndNumber(20 + rnd.Next(2));
+                string num1 = rndNumber(10 + rnd.Next(2));
+                string num2 = rndNumber(10 + rnd.Next(2));
+                string num3 = rndNumber(12 + rnd.Next(2));
                 var bi1 = new BigInteger(num1);
                 var bi2 = new BigInteger(num2);
                 var bi3 = new BigInteger(num3);
@@ -94,9 +94,13 @@ namespace Test
 
         private static void tt()
         {
-            string num1 = "78362760750068396170";
-            string num2 = "274919547864220404034";
-            string num3 = "74296421505141971816";
+            /*string num1 = "163338342975806799406";
+            string num2 = "02827803280063344426";
+            string num3 = "76224379996895040153";*/
+
+            string num1 = "3812984915";
+            string num2 = "9545293744";
+            string num3 = "385942420801";
 
             var bi1 = new BigInteger(num1);
             var bi2 = new BigInteger(num2);
