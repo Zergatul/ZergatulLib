@@ -442,17 +442,6 @@ namespace Zergatul.Math.Tests
         }
 
         [TestMethod]
-        [Ignore]
-        public void MontgomeryMultiplication_1()
-        {
-            var x = new BigInteger("72919217394");
-            var m = new BigInteger("385942420801");
-            uint mInv = 3206704447;
-
-            var result = BigInteger.MontgomeryMultiplication(x, x, m, mInv);
-        }
-
-        [TestMethod]
         public void ModPow_1()
         {
             var bi1 = new BigInteger("078362760750068396170");
@@ -470,12 +459,22 @@ namespace Zergatul.Math.Tests
             Assert.IsTrue(BigInteger.ModularExponentiation(bi1, bi2, bi3).ToString() == "62733211883538321040");
         }
 
-        // ModPow
-        /*
-         * "163338342975806799406"
-"02827803280063344426"
-"76224379996895040153"
-         * */
+        [TestMethod]
+        public void ModPow_3()
+        {
+            var bi1 = new BigInteger("3812984915");
+            var bi2 = new BigInteger("9545293744");
+            var bi3 = new BigInteger("385942420801");
+            Assert.IsTrue(BigInteger.ModularExponentiation(bi1, bi2, bi3).ToString() == "317273175837");
+        }
 
+        [TestMethod]
+        public void ModPow_4()
+        {
+            var bi1 = new BigInteger("163338342975806799406");
+            var bi2 = new BigInteger("02827803280063344426");
+            var bi3 = new BigInteger("76224379996895040153");
+            Assert.IsTrue(BigInteger.ModularExponentiation(bi1, bi2, bi3).ToString() == "50608764524184452200");
+        }
     }
 }

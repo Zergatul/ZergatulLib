@@ -34,7 +34,7 @@ namespace Test
 
         static void Main(string[] args)
         {
-            var tcp = new TcpClient("localhost", 2828);
+            var tcp = new TcpClient("localhost", 32028);
             TlsStream stream = new TlsStream(tcp.GetStream());
             stream.AuthenticateAsClient("localhost");
             /*BigInteger bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, ByteOrder.BigEndian);
@@ -48,9 +48,9 @@ namespace Test
             return;*/
 
             /*tt();
-            return;
+            return;*/
 
-            var rnd = new Random();
+            /*var rnd = new Random();
             Func<int, string> rndNumber = (int len) =>
             {
                 string result = "";
@@ -94,13 +94,9 @@ namespace Test
 
         private static void tt()
         {
-            /*string num1 = "163338342975806799406";
+            string num1 = "163338342975806799406";
             string num2 = "02827803280063344426";
-            string num3 = "76224379996895040153";*/
-
-            string num1 = "3812984915";
-            string num2 = "9545293744";
-            string num3 = "385942420801";
+            string num3 = "76224379996895040153";
 
             var bi1 = new BigInteger(num1);
             var bi2 = new BigInteger(num2);

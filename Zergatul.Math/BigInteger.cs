@@ -232,30 +232,32 @@ namespace Zergatul.Math
             if (exponent.IsZero)
                 return One;
 
-            // TODO: fix montgomery
-            if (false)//(modulus.IsBitSet(0))
+            if (modulus.IsBitSet(0))
             {
                 // use Montgomery exponentiation
                 var rWords = new uint[modulus._wordsLength + 1];
                 rWords[modulus._wordsLength] = 1;
                 var r = new BigInteger(rWords);
 
-                var x = modulus; // ???
-
                 long mPrime = -ExtendedEuclideanInt64(0x100000000, modulus._words[0]).y;
                 if (mPrime < 0)
                     mPrime += 0x100000000;
+                uint mPrimeUInt32 = (uint)mPrime;
 
-                var xPrime = @base * r % modulus;
+                // base * r = WordShift(base, modulus._wordsLength)
+                var xPrime = WordShift(@base, modulus._wordsLength) % modulus;
                 var a = r % modulus;
 
                 for (int i = exponent.GetBitsLength() - 1; i >= 0; i--)
                 {
-                    a = MontgomeryMultiplication(a, a, modulus, (uint)mPrime);
+                    a = MontgomeryMultiplication(a, a, modulus, mPrimeUInt32);
                     if (exponent.IsBitSet(i))
-                        a = MontgomeryMultiplication(a, xPrime, modulus, (uint)mPrime);
+                        a = MontgomeryMultiplication(a, xPrime, modulus, mPrimeUInt32);
                 }
-                // final step montgomery * 1 ????
+
+                var one = new uint[modulus._wordsLength];
+                one[0] = 1;
+                a = MontgomeryMultiplication(a, new BigInteger(one, 1), modulus, mPrimeUInt32);
 
                 return a;
             }
@@ -1032,7 +1034,7 @@ namespace Zergatul.Math
                 if (result[m._wordsLength] > 0)
                     greater = true;
                 else
-                    for (int i = m._wordsLength - 1; i >= 0; i++)
+                    for (int i = m._wordsLength - 1; i >= 0; i--)
                         if (result[i] > m._words[i])
                         {
                             greater = true;
@@ -1055,6 +1057,17 @@ namespace Zergatul.Math
 
                 return new BigInteger(result, m._wordsLength);
             }
+        }
+
+        internal static BigInteger WordShift(BigInteger value, int shift)
+        {
+            if (value.IsZero)
+                return Zero;
+
+            var words = new uint[value._wordsLength + shift];
+            Array.Copy(value._words, 0, words, shift, value._wordsLength);
+
+            return new BigInteger(words, words.Length);
         }
 
         #endregion

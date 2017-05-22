@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Math", "Zergatul.M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Math.Tests", "Zergatul.Math.Tests\Zergatul.Math.Tests.csproj", "{43998905-9407-4A96-8A42-CCB80543ED61}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTest2", "ConsoleTest2\ConsoleTest2.csproj", "{2A68B138-A1C7-478C-AA2C-18D117569DDA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{43998905-9407-4A96-8A42-CCB80543ED61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43998905-9407-4A96-8A42-CCB80543ED61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43998905-9407-4A96-8A42-CCB80543ED61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A68B138-A1C7-478C-AA2C-18D117569DDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A68B138-A1C7-478C-AA2C-18D117569DDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A68B138-A1C7-478C-AA2C-18D117569DDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A68B138-A1C7-478C-AA2C-18D117569DDA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
