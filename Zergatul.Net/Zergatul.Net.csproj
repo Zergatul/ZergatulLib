@@ -53,12 +53,15 @@
     <Compile Include="Tls\BinaryReader.cs" />
     <Compile Include="Tls\BinaryWriter.cs" />
     <Compile Include="Tls\Certificate.cs" />
-    <Compile Include="Tls\CipherSuite.cs" />
-    <Compile Include="Tls\CipherSuiteDetail.cs" />
+    <Compile Include="Tls\ChangeCipherSpec.cs" />
+    <Compile Include="Tls\CipherSuites\CipherSuiteType.cs" />
+    <Compile Include="Tls\CipherSuites\CipherSuite.cs" />
+    <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_GCM_SHA384.cs" />
     <Compile Include="Tls\ClientDiffieHellmanPublic.cs" />
     <Compile Include="Tls\ClientHello.cs" />
     <Compile Include="Tls\ClientKeyExchange.cs" />
     <Compile Include="Tls\ContentMessage.cs" />
+    <Compile Include="Tls\ContentMessageReadEventArgs.cs" />
     <Compile Include="Tls\ContentType.cs" />
     <Compile Include="Tls\ECBasisType.cs" />
     <Compile Include="Tls\ECCurve.cs" />
@@ -71,6 +74,8 @@
     <Compile Include="Tls\Extensions\SignatureAlgorithmsExtension.cs" />
     <Compile Include="Tls\Extensions\SignatureAndHashAlgorithm.cs" />
     <Compile Include="Tls\Extensions\TlsExtensionFactory.cs" />
+    <Compile Include="Tls\Finished.cs" />
+    <Compile Include="Tls\InterceptionStream.cs" />
     <Compile Include="Tls\KeyExchangeAlgorithm.cs" />
     <Compile Include="Tls\NamedCurve.cs" />
     <Compile Include="Tls\ProtocolVersion.cs" />
@@ -79,6 +84,7 @@
     <Compile Include="Tls\HandshakeMessage.cs" />
     <Compile Include="Tls\HandshakeType.cs" />
     <Compile Include="Tls\ReadCounter.cs" />
+    <Compile Include="Tls\ReadDataEventArgs.cs" />
     <Compile Include="Tls\RecordMessage.cs" />
     <Compile Include="Tls\ServerDHParams.cs" />
     <Compile Include="Tls\ServerECDHParams.cs" />
@@ -89,6 +95,7 @@
     <Compile Include="Tls\TlsStream.cs" />
     <Compile Include="Tls\TlsStreamException.cs" />
     <Compile Include="Tls\TlsUtils.cs" />
+    <Compile Include="Tls\WriteDataEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tls\Cryptography\" />

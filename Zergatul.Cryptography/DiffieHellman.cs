@@ -40,11 +40,11 @@ namespace Zergatul.Cryptography
 
         private ISecureRandom _rnd;
 
-        public DiffieHellman(byte[] g, byte[] p, byte[] Ya, ISecureRandom rnd)
+        public DiffieHellman(BigInteger g, BigInteger p, BigInteger Ya, ISecureRandom rnd)
         {
-            this.p = new BigInteger(p, ByteOrder.BigEndian);
-            this.g = new BigInteger(g, ByteOrder.BigEndian);
-            this.Ya = new BigInteger(Ya, ByteOrder.BigEndian);
+            this.p = p;
+            this.g = g;
+            this.Ya = Ya;
             this._rnd = rnd;
         }
 

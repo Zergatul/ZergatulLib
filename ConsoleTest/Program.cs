@@ -34,12 +34,12 @@ namespace Test
 
         static void Main(string[] args)
         {
-            /*var tcp = new TcpClient("localhost", 2828);
+            var tcp = new TcpClient("localhost", 2828);
             TlsStream stream = new TlsStream(tcp.GetStream());
-            stream.AuthenticateAsClient("localhost");*/
+            stream.AuthenticateAsClient("localhost");
             /*BigInteger bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, ByteOrder.BigEndian);
             Console.WriteLine(bi.ToString());
-            Console.ReadLine();*/
+            Console.ReadLine();
 
             /*string num1 = "08396905339595156620";
             string num2 = "13568775824401428918";
@@ -47,7 +47,7 @@ namespace Test
             Console.WriteLine(res2.ToString());
             return;*/
 
-            tt();
+            /*tt();
             return;
 
             var rnd = new Random();
@@ -89,7 +89,7 @@ namespace Test
                     Console.WriteLine($"{count} OK");
             }
 
-            Console.ReadLine();
+            Console.ReadLine();*/
         }
 
         private static void tt()
@@ -109,7 +109,6 @@ namespace Test
 
             var res1 = System.Numerics.BigInteger.ModPow(parse(num1), parse(num2), parse(num3));
             var res2 = BigInteger.ModularExponentiation(bi1, bi2, bi3);
-            
         }
     }
 }

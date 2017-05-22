@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zergatul.Net.Tls
+﻿namespace Zergatul.Net.Tls.CipherSuites
 {
-    public enum CipherSuite : ushort
+    public enum CipherSuiteType : ushort
     {
         TLS_NULL_WITH_NULL_NULL = 0x0000,
         TLS_RSA_WITH_NULL_MD5 = 0x0001,

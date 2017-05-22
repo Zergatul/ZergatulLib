@@ -9,14 +9,17 @@ namespace Zergatul.Net.Tls
 {
     internal class RecordMessage
     {
-        private TlsStream _stream;
-
         public ContentType RecordType;
         public ProtocolVersion Version;
         public ushort Length => (ushort)ContentMessages.Sum(m => m.Length);
         public List<ContentMessage> ContentMessages = new List<ContentMessage>();
 
-        public RecordMessage(TlsStream stream)
+        private TlsStream _stream;
+
+        public delegate void ContentMessageReadEventHandler(object sender, ContentMessageReadEventArgs e);
+        public event ContentMessageReadEventHandler OnContentMessageRead;
+
+        public RecordMessage(TlsStream stream = null)
         {
             this._stream = stream;
         }
@@ -32,9 +35,10 @@ namespace Zergatul.Net.Tls
                 switch (RecordType)
                 {
                     case ContentType.Handshake:
-                        ContentMessages.Add(new HandshakeMessage(_stream));
-                        ContentMessages.Last().Read(reader);
-                        _stream.OnContentMessage(ContentMessages.Last());
+                        var message = new HandshakeMessage(_stream.SelectedCipher);
+                        message.Read(reader);
+                        ContentMessages.Add(message);
+                        OnContentMessageRead?.Invoke(this, new ContentMessageReadEventArgs(message));
                         break;
                 }
             }

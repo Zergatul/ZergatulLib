@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
 using Zergatul.Math;
+using Zergatul.Net.Tls.CipherSuites;
 using Zergatul.Net.Tls.Extensions;
 
 namespace Zergatul.Net.Tls
@@ -17,6 +18,7 @@ namespace Zergatul.Net.Tls
     public class TlsStream
     {
         private Stream _innerStream;
+        private InterceptionStream _interceptionStream;
         private BinaryReader _reader;
         private TlsUtils _utils;
 
@@ -26,13 +28,17 @@ namespace Zergatul.Net.Tls
         private byte[] _serverRandom;
         private ServerDHParams DHParams;
 
+        private List<byte> _handshakeData;
+
         public TlsStream(Stream innerStream)
         {
             this._innerStream = innerStream;
-            this._reader = new BinaryReader(_innerStream);
+            this._interceptionStream = new InterceptionStream(innerStream);
+            this._interceptionStream.OnReadData += _interceptionStream_OnReadData;
+            this._interceptionStream.OnWriteData += _interceptionStream_OnWriteData;
+            this._handshakeData = new List<byte>();
+            this._reader = new BinaryReader(_interceptionStream);
             this._utils = new TlsUtils();
-
-            this.SelectedCipher = CipherSuite.INVALID;
         }
 
         public void AuthenticateAsClient(string host)
@@ -44,49 +50,49 @@ namespace Zergatul.Net.Tls
             };
             _clientRandom = random.ToArray();
 
-            var message = new RecordMessage(this)
+            var message = new RecordMessage
             {
                 RecordType = ContentType.Handshake,
                 Version = ProtocolVersion.Tls12,
                 ContentMessages = new List<ContentMessage>
                 {
-                    new HandshakeMessage(this)
+                    new HandshakeMessage
                     {
                         MessageType = HandshakeType.ClientHello,
                         Body = new ClientHello
                         {
                             ClientVersion = ProtocolVersion.Tls12,
                             Random = random,
-                            CipherSuites = new CipherSuite[]
+                            CipherSuites = new CipherSuiteType[]
                             {
                                 /*CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
                                 CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
                                 CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
                                 CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,*/
-                                CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-                                CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                                CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
-                                CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
-                                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                                CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                                CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-                                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-                                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
-                                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
-                                CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-                                CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-                                CipherSuite.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                                CipherSuite.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-                                CipherSuite.TLS_RSA_WITH_RC4_128_SHA,
-                                CipherSuite.TLS_RSA_WITH_RC4_128_MD5
+                                CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+                                CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                                CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+                                CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+                                CipherSuiteType.TLS_RSA_WITH_AES_256_GCM_SHA384,
+                                CipherSuiteType.TLS_RSA_WITH_AES_128_GCM_SHA256,
+                                CipherSuiteType.TLS_RSA_WITH_AES_256_CBC_SHA256,
+                                CipherSuiteType.TLS_RSA_WITH_AES_128_CBC_SHA256,
+                                CipherSuiteType.TLS_RSA_WITH_AES_256_CBC_SHA,
+                                CipherSuiteType.TLS_RSA_WITH_AES_128_CBC_SHA,
+                                CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                                CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                                CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+                                CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+                                CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+                                CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+                                CipherSuiteType.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
+                                CipherSuiteType.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
+                                CipherSuiteType.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
+                                CipherSuiteType.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
+                                CipherSuiteType.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+                                CipherSuiteType.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
+                                CipherSuiteType.TLS_RSA_WITH_RC4_128_SHA,
+                                CipherSuiteType.TLS_RSA_WITH_RC4_128_MD5
                             },
                             Extensions = new TlsExtension[]
                             {
@@ -134,78 +140,88 @@ namespace Zergatul.Net.Tls
                     }
                 }
             };
-            message.Write(_innerStream);
+            message.Write(_interceptionStream);
 
             message = new RecordMessage(this);
+            message.OnContentMessageRead += OnContentMessage;
             message.Read(_reader);
 
-            ClientKeyExchange keys;
-            switch (CipherSuiteDetail.Ciphers[SelectedCipher].KeyExchange)
-            {
-                case KeyExchangeAlgorithm.RSA:
-                    //EncryptedPreMasterSecret
-                    throw new NotImplementedException();
-                case KeyExchangeAlgorithm.DHE_DSS:
-                case KeyExchangeAlgorithm.DHE_RSA:
-                case KeyExchangeAlgorithm.DH_DSS:
-                case KeyExchangeAlgorithm.DH_RSA:
-                case KeyExchangeAlgorithm.DH_anon:
-                    var dh = new DiffieHellman(DHParams.DH_g, DHParams.DH_p, DHParams.DH_Ys, new DefaultSecureRandom());
-                    dh.CalculateForBSide();
-                    keys = new ClientKeyExchange(this)
-                    {
-                        DHPublic = new ClientDiffieHellmanPublic
-                        {
-                            DH_Yc = dh.Yb.ToBytes(ByteOrder.BigEndian, 42)
-                        }
-                    };
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
-            message = new RecordMessage(this)
+            message = new RecordMessage
             {
                 RecordType = ContentType.Handshake,
                 Version = ProtocolVersion.Tls12,
                 ContentMessages = new List<ContentMessage>
                 {
-                    new HandshakeMessage(this)
+                    new HandshakeMessage
                     {
                         MessageType = HandshakeType.ClientKeyExchange,
-                        Body = keys
+                        Body = SelectedCipher.GetClientKeyExchange()
                     }
+                }
+            };
+            message.Write(_interceptionStream);
+
+            SelectedCipher.CalculateMasterSecret(_clientRandom, _serverRandom);
+
+            message = new RecordMessage
+            {
+                RecordType = ContentType.ChangeCipherSpec,
+                Version = ProtocolVersion.Tls12,
+                ContentMessages = new List<ContentMessage>
+                {
+                    new ChangeCipherSpec()
                 }
             };
             message.Write(_innerStream);
 
-            message = new RecordMessage(this);
+            message = new RecordMessage
+            {
+                RecordType = ContentType.Handshake,
+                Version = ProtocolVersion.Tls12,
+                ContentMessages = new List<ContentMessage>
+                {
+                    new HandshakeMessage
+                    {
+                        MessageType = HandshakeType.Finished,
+                        Body = SelectedCipher.GetFinished(_handshakeData)
+                    }
+                }
+            };
+            message.Write(_interceptionStream);
+
+            message = new RecordMessage();
+            message.OnContentMessageRead += OnContentMessage;
             message.Read(_reader);
         }
 
-        internal void OnContentMessage(ContentMessage message)
+        #region Message read events
+
+        internal void OnContentMessage(object sender, ContentMessageReadEventArgs e)
         {
-            if (message is HandshakeMessage)
+            if (e.Message is HandshakeMessage)
             {
-                var handshakeMsg = message as HandshakeMessage;
-                if (handshakeMsg.Body is ServerHello)
-                    OnServerHello(handshakeMsg.Body as ServerHello);
-                if (handshakeMsg.Body is Certificate)
-                    OnCertificate(handshakeMsg.Body as Certificate);
-                if (handshakeMsg.Body is ServerKeyExchange)
-                    OnServerKeyExchange(handshakeMsg.Body as ServerKeyExchange);
+                var message = e.Message as HandshakeMessage;
+                if (message.Body is ServerHello)
+                    OnServerHello(message.Body as ServerHello);
+                if (message.Body is Certificate)
+                    OnCertificate(message.Body as Certificate);
+                if (message.Body is ServerKeyExchange)
+                    OnServerKeyExchange(message.Body as ServerKeyExchange);
             }
         }
 
         private void OnServerHello(ServerHello message)
         {
-            SelectedCipher = message.CipherSuite;
+            SelectedCipher = CipherSuite.Resolve(message.CipherSuite);
             _serverRandom = message.Random.ToArray();
         }
 
         private void OnCertificate(Certificate message)
         {
-            _serverCertificate = message.Certificates.First();
+            if (message.Certificates.Count == 1)
+                _serverCertificate = message.Certificates[0];
+            else
+                throw new NotImplementedException();
         }
 
         private void OnServerKeyExchange(ServerKeyExchange message)
@@ -238,6 +254,18 @@ namespace Zergatul.Net.Tls
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        #endregion
+
+        private void _interceptionStream_OnWriteData(object sender, WriteDataEventArgs e)
+        {
+            _handshakeData.AddRange(e.Data);
+        }
+
+        private void _interceptionStream_OnReadData(object sender, ReadDataEventArgs e)
+        {
+            _handshakeData.AddRange(e.Data);
         }
     }
 }

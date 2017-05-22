@@ -8,21 +8,16 @@ namespace Zergatul.Net.Tls
 {
     internal class ClientKeyExchange : HandshakeBody
     {
-        private TlsStream _stream;
-
         public ClientDiffieHellmanPublic DHPublic;
 
         public override ushort Length
         {
             get
             {
+                if (DHPublic != null)
+                    return (ushort)(2 + DHPublic.DH_Yc.Length);
                 throw new NotImplementedException();
             }
-        }
-
-        public ClientKeyExchange(TlsStream stream)
-        {
-
         }
 
         public override void Read(BinaryReader reader)
@@ -32,6 +27,12 @@ namespace Zergatul.Net.Tls
 
         public override void WriteTo(BinaryWriter writer)
         {
+            if (DHPublic != null)
+            {
+                writer.WriteShort((ushort)DHPublic.DH_Yc.Length);
+                writer.WriteBytes(DHPublic.DH_Yc);
+                return;
+            }
             throw new NotImplementedException();
         }
     }

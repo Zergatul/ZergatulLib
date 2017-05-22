@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Net.Tls.CipherSuites;
 using Zergatul.Net.Tls.Extensions;
 
 namespace Zergatul.Net.Tls
@@ -12,7 +13,7 @@ namespace Zergatul.Net.Tls
         public ProtocolVersion ServerVersion;
         public Random Random;
         public byte[] SessionID = new byte[0];
-        public CipherSuite CipherSuite;
+        public CipherSuiteType CipherSuite;
         public List<TlsExtension> Extensions = new List<TlsExtension>();
         public override ushort Length => 0;
 
@@ -25,7 +26,7 @@ namespace Zergatul.Net.Tls
                 RandomBytes = reader.ReadBytes(28)
             };
             SessionID = reader.ReadBytes(reader.ReadByte());
-            CipherSuite = (CipherSuite)reader.ReadShort();
+            CipherSuite = (CipherSuiteType)reader.ReadShort();
             var compressionMethod = reader.ReadByte();
 
             var counter = reader.StartCounter(reader.ReadShort());

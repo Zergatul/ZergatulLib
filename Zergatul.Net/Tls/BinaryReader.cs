@@ -14,6 +14,7 @@ namespace Zergatul.Net.Tls
         private byte[] _buffer = new byte[4];
 
         internal int Position { get; private set; }
+        private int? _limit;
 
         public BinaryReader(Stream stream)
         {
@@ -104,9 +105,39 @@ namespace Zergatul.Net.Tls
             return (uint)((_buffer[0] << 24) | (_buffer[1] << 16) | (_buffer[2] << 8) | _buffer[3]);
         }
 
+        public byte[] ReadToEnd()
+        {
+            if (_limit == null || Position > _limit.Value)
+                throw new InvalidOperationException();
+            return ReadBytes(_limit.Value - Position);
+        }
+
         public ReadCounter StartCounter(int totalBytes)
         {
             return new ReadCounter(this, totalBytes);
+        }
+
+        public IDisposable SetReadLimit(int totalBytes)
+        {
+            _limit = Position + totalBytes;
+            return new ReadLimit(this);
+        }
+
+        private class ReadLimit : IDisposable
+        {
+            private BinaryReader _br;
+
+            public ReadLimit(BinaryReader br)
+            {
+                this._br = br;
+            }
+
+            public void Dispose()
+            {
+                if (_br.Position != _br._limit)
+                    throw new InvalidOperationException();
+                _br._limit = null;
+            }
         }
     }
 }
