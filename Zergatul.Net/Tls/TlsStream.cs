@@ -69,8 +69,8 @@ namespace Zergatul.Net.Tls
                                 CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
                                 CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
                                 CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,*/
-                                CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-                                CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                                /*CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+                                CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,*/
                                 CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
                                 CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
                                 /*CipherSuiteType.TLS_RSA_WITH_AES_256_GCM_SHA384,

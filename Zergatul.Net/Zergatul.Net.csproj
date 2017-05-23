@@ -56,6 +56,8 @@
     <Compile Include="Tls\ChangeCipherSpec.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuiteType.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuite.cs" />
+    <Compile Include="Tls\CipherSuites\DHECipherSuite.cs" />
+    <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_CBC_SHA.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_GCM_SHA384.cs" />
     <Compile Include="Tls\ClientDiffieHellmanPublic.cs" />
     <Compile Include="Tls\ClientHello.cs" />
