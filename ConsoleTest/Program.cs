@@ -36,10 +36,10 @@ namespace Test
         {
             var tcp = new TcpClient("localhost", 32028);
 
-            /*TlsStream stream = new TlsStream(tcp.GetStream());
-            stream.AuthenticateAsClient("localhost");*/
+            TlsStream stream = new TlsStream(tcp.GetStream());
+            stream.AuthenticateAsClient("localhost");
 
-            SslStream stream = new SslStream(tcp.GetStream(), false, (a1, a2, a3, a4) => true);
+            /*SslStream stream = new SslStream(tcp.GetStream(), false, (a1, a2, a3, a4) => true);
             stream.AuthenticateAsClient("localhost", null, System.Security.Authentication.SslProtocols.Tls12, false);
             Console.WriteLine("**************************************************");
             Console.WriteLine(stream.CipherAlgorithm);
@@ -51,7 +51,7 @@ namespace Test
             Console.WriteLine("**************************************************");
             Console.WriteLine(new StreamReader(stream).ReadToEnd());
             stream.Close();
-            Console.ReadLine();
+            Console.ReadLine();*/
 
             /*BigInteger bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, ByteOrder.BigEndian);
             Console.WriteLine(bi.ToString());

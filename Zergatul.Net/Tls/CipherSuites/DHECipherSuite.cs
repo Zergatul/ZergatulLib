@@ -47,7 +47,7 @@ namespace Zergatul.Net.Tls.CipherSuites
         {
             var dh = new DiffieHellman(_g, _p, _Ys, new DefaultSecureRandom());
             dh.CalculateForBSide();
-            _preMasterSecret = dh.ZZ.ToBytes(ByteOrder.BigEndian, _dhKeyLength);
+            _preMasterSecret = new ByteArray(dh.ZZ.ToBytes(ByteOrder.BigEndian, _dhKeyLength));
             return new ClientKeyExchange
             {
                 DHPublic = new ClientDiffieHellmanPublic

@@ -9,8 +9,8 @@ namespace Zergatul.Net.Tls.CipherSuites
     {
         public CipherSuiteType Type { get; private set; }
 
-        protected byte[] _preMasterSecret;
-        protected byte[] _masterSecret;
+        protected ByteArray _preMasterSecret;
+        protected ByteArray _masterSecret;
 
         public CipherSuite(CipherSuiteType type)
         {
@@ -21,46 +21,74 @@ namespace Zergatul.Net.Tls.CipherSuites
 
         public abstract ClientKeyExchange GetClientKeyExchange();
 
-        public virtual void CalculateMasterSecret(byte[] clientRandom, byte[] serverRandom)
+        public virtual void CalculateMasterSecret(ByteArray clientRandom, ByteArray serverRandom)
         {
             // RFC 5246 // Page 63
             // The master secret is always exactly 48 bytes in length.
-            _masterSecret = PseudoRandomFunction(_preMasterSecret, "master secret", clientRandom.Concat(serverRandom))
-                .Take(48).ToArray();
+            _masterSecret = PseudoRandomFunction(_preMasterSecret, "master secret", clientRandom + serverRandom, 48);
 
             // RFC 5246 // Page 63
             // The pre_master_secret should be deleted from memory once the master_secret has been computed.
-            for (int i = 0; i < _preMasterSecret.Length; i++)
-                _preMasterSecret[i] = 0;
+            _preMasterSecret.ClearMemory();
         }
 
-        public virtual Finished GetFinished(IEnumerable<byte> data)
+        public virtual Finished GetFinished(ByteArray data)
         {
+            // RFC 5246 // Page 62
+            /*
+                In previous versions of TLS, the verify_data was always 12 octets
+                long.  In the current version of TLS, it depends on the cipher
+                suite.  Any cipher suite which does not explicitly specify
+                verify_data_length has a verify_data_length equal to 12.  This
+                includes all existing cipher suites.  Note that this
+                representation has the same encoding as with previous versions.
+                Future cipher suites MAY specify other lengths but such length
+                MUST be at least 12 bytes.
+            */
             return new Finished
             {
-                Data = PseudoRandomFunction(_masterSecret, "client finished", Hash(data)).Take(12).ToArray()
+                Data = PseudoRandomFunction(_masterSecret, "client finished", Hash(data), 12).ToArray()
             };
         }
 
-        protected byte[] Hash(IEnumerable<byte> data)
+        protected ByteArray Hash(ByteArray data)
         {
             var algo = new System.Security.Cryptography.SHA256Managed();
-            return algo.ComputeHash(data.ToArray());
+            return new ByteArray(algo.ComputeHash(data.ToArray()));
         }
 
-        protected byte[] HMACHash(byte[] secret, IEnumerable<byte> seed)
+        protected ByteArray HMACHash(ByteArray secret, ByteArray seed)
         {
-            return Hash(secret.Select(b => (byte)(b ^ 0x5C)).Concat(Hash(secret.Select(b => (byte)(b ^ 0x36)).Concat(seed))));
+            // RFC 2104 // Page 2
+            return Hash((secret ^ 0x5C) + Hash((secret ^ 0x36) + seed));
         }
 
-        protected byte[] PHash(byte[] secret, IEnumerable<byte> seed)
+        protected ByteArray PHash(ByteArray secret, ByteArray seed, int length)
         {
-            return HMACHash(secret, seed.Concat(seed));
+            // RFC 5246 // Page 14
+            /*
+                P_hash(secret, seed) = HMAC_hash(secret, A(1) + seed) +
+                                       HMAC_hash(secret, A(2) + seed) +
+                                       HMAC_hash(secret, A(3) + seed) + ...
+                A() is defined as:
+                     A(0) = seed
+                     A(i) = HMAC_hash(secret, A(i - 1))
+            */
+            var a = seed;
+            ByteArray result = new ByteArray();
+            while (result.Length < length)
+            {
+                a = HMACHash(secret, a);
+                result = result + HMACHash(secret, a + seed);
+            }
+            return result.Truncate(length);
         }
 
-        public virtual byte[] PseudoRandomFunction(byte[] secret, string label, IEnumerable<byte> seed)
+        public virtual ByteArray PseudoRandomFunction(ByteArray secret, string label, ByteArray seed, int length)
         {
-            return PHash(secret, Encoding.ASCII.GetBytes(label).Concat(seed));
+            // RFC 5246 // Page 14
+            // PRF(secret, label, seed) = P_<hash>(secret, label + seed)
+            return PHash(secret, Encoding.ASCII.GetBytes(label) + seed, length);
         }
 
         public static CipherSuite Resolve(CipherSuiteType type)

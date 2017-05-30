@@ -12,7 +12,12 @@ using Zergatul.Net.Tls.Extensions;
 
 namespace Zergatul.Net.Tls
 {
+    // HMAC: Keyed-Hashing for Message Authentication
+    // https://www.ietf.org/rfc/rfc2104.txt
+
+    // The Transport Layer Security (TLS) Protocol Version 1.2
     // https://www.ietf.org/rfc/rfc5246.txt
+
     // https://tools.ietf.org/search/rfc4492#section-5.1
     // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
     public class TlsStream
@@ -24,11 +29,11 @@ namespace Zergatul.Net.Tls
 
         internal CipherSuite SelectedCipher;
         private X509Certificate2 _serverCertificate;
-        private byte[] _clientRandom;
-        private byte[] _serverRandom;
+        private ByteArray _clientRandom;
+        private ByteArray _serverRandom;
         private ServerDHParams DHParams;
 
-        private List<byte> _handshakeData;
+        private ByteArray _handshakeData;
 
         public TlsStream(Stream innerStream)
         {
@@ -36,7 +41,7 @@ namespace Zergatul.Net.Tls
             this._interceptionStream = new InterceptionStream(innerStream);
             this._interceptionStream.OnReadData += _interceptionStream_OnReadData;
             this._interceptionStream.OnWriteData += _interceptionStream_OnWriteData;
-            this._handshakeData = new List<byte>();
+            this._handshakeData = new ByteArray();
             this._reader = new BinaryReader(_interceptionStream);
             this._utils = new TlsUtils();
         }
@@ -48,7 +53,7 @@ namespace Zergatul.Net.Tls
                 GMTUnixTime = _utils.GetGMTUnixTime(),
                 RandomBytes = _utils.GetRandomBytes(28)
             };
-            _clientRandom = random.ToArray();
+            _clientRandom = new ByteArray(random.ToArray());
 
             var message = new RecordMessage
             {
@@ -213,7 +218,7 @@ namespace Zergatul.Net.Tls
         private void OnServerHello(ServerHello message)
         {
             SelectedCipher = CipherSuite.Resolve(message.CipherSuite);
-            _serverRandom = message.Random.ToArray();
+            _serverRandom = new ByteArray(message.Random.ToArray());
         }
 
         private void OnCertificate(Certificate message)
@@ -234,10 +239,7 @@ namespace Zergatul.Net.Tls
                     var dhParamsBytes = message.Params.ToArray();
                     DHParams = message.Params;
 
-                    var signedBytes = new byte[64 + dhParamsBytes.Length];
-                    Array.Copy(_clientRandom, 0, signedBytes, 0, 32);
-                    Array.Copy(_serverRandom, 0, signedBytes, 32, 32);
-                    Array.Copy(dhParamsBytes, 0, signedBytes, 64, dhParamsBytes.Length);
+                    var signedBytes = _clientRandom + _serverRandom + dhParamsBytes;
 
                     string oid;
                     switch (message.SignAndHashAlgo.Hash)
@@ -248,7 +250,7 @@ namespace Zergatul.Net.Tls
                         default:
                             throw new NotImplementedException();
                     }
-                    if (!rsa.VerifyData(signedBytes, oid, message.Signature))
+                    if (!rsa.VerifyData(signedBytes.ToArray(), oid, message.Signature))
                         throw new TlsStreamException("Invalid signature");
                     break;
                 default:
@@ -260,12 +262,12 @@ namespace Zergatul.Net.Tls
 
         private void _interceptionStream_OnWriteData(object sender, WriteDataEventArgs e)
         {
-            _handshakeData.AddRange(e.Data);
+            _handshakeData = _handshakeData + e.Data;
         }
 
         private void _interceptionStream_OnReadData(object sender, ReadDataEventArgs e)
         {
-            _handshakeData.AddRange(e.Data);
+            _handshakeData = _handshakeData + e.Data;
         }
     }
 }
