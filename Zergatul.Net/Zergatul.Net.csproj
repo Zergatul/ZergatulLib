@@ -55,11 +55,16 @@
     <Compile Include="Tls\BinaryWriter.cs" />
     <Compile Include="Tls\Certificate.cs" />
     <Compile Include="Tls\ChangeCipherSpec.cs" />
+    <Compile Include="Tls\CipherSuites\AbstractKeyExchange.cs" />
+    <Compile Include="Tls\CipherSuites\AbstractHMAC.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuiteType.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuite.cs" />
-    <Compile Include="Tls\CipherSuites\DHECipherSuite.cs" />
+    <Compile Include="Tls\CipherSuites\ClientKeyExchangeResult.cs" />
+    <Compile Include="Tls\CipherSuites\DHEKeyExchange.cs" />
+    <Compile Include="Tls\CipherSuites\HMACSHA256.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_CBC_SHA.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_GCM_SHA384.cs" />
+    <Compile Include="Tls\CipherType.cs" />
     <Compile Include="Tls\ClientDiffieHellmanPublic.cs" />
     <Compile Include="Tls\ClientHello.cs" />
     <Compile Include="Tls\ClientKeyExchange.cs" />
@@ -78,6 +83,10 @@
     <Compile Include="Tls\Extensions\SignatureAndHashAlgorithm.cs" />
     <Compile Include="Tls\Extensions\TlsExtensionFactory.cs" />
     <Compile Include="Tls\Finished.cs" />
+    <Compile Include="Tls\GenericAEADCiphertext.cs" />
+    <Compile Include="Tls\GenericBlockCiphertext.cs" />
+    <Compile Include="Tls\GenericCiphertext.cs" />
+    <Compile Include="Tls\GenericStreamCiphertext.cs" />
     <Compile Include="Tls\InterceptionStream.cs" />
     <Compile Include="Tls\KeyExchangeAlgorithm.cs" />
     <Compile Include="Tls\NamedCurve.cs" />
@@ -89,20 +98,24 @@
     <Compile Include="Tls\ReadCounter.cs" />
     <Compile Include="Tls\ReadDataEventArgs.cs" />
     <Compile Include="Tls\RecordMessage.cs" />
+    <Compile Include="Tls\Role.cs" />
+    <Compile Include="Tls\SecurityParameters.cs" />
     <Compile Include="Tls\ServerDHParams.cs" />
     <Compile Include="Tls\ServerECDHParams.cs" />
     <Compile Include="Tls\ServerHello.cs" />
     <Compile Include="Tls\ServerHelloDone.cs" />
     <Compile Include="Tls\ServerKeyExchange.cs" />
     <Compile Include="Tls\Extensions\TlsExtension.cs" />
+    <Compile Include="Tls\TLSCiphertext.cs" />
+    <Compile Include="Tls\TLSCompressed.cs" />
+    <Compile Include="Tls\TlsConnectionKeys.cs" />
+    <Compile Include="Tls\TLSPlaintext.cs" />
     <Compile Include="Tls\TlsStream.cs" />
     <Compile Include="Tls\TlsStreamException.cs" />
     <Compile Include="Tls\TlsUtils.cs" />
     <Compile Include="Tls\WriteDataEventArgs.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Tls\Cryptography\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Zergatul.Cryptography\Zergatul.Cryptography.csproj">
       <Project>{fd292544-74cd-4fcf-b564-efa21ef197ce}</Project>

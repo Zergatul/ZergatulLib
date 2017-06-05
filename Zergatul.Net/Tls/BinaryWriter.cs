@@ -28,6 +28,14 @@ namespace Zergatul.Net.Tls
             _list.AddRange(value);
         }
 
+        public void WriteBytes(ByteArray value)
+        {
+            if (value == null)
+                return;
+
+            value.AddTo(_list);
+        }
+
         public void WriteShort(ushort value)
         {
             _list.Add((byte)((value >> 8) & 0xFF));

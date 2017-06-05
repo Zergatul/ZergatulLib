@@ -26,16 +26,20 @@ namespace Zergatul.Net.Tls
         private InterceptionStream _interceptionStream;
         private BinaryReader _reader;
         private TlsUtils _utils;
+        private ISecureRandom _random;
 
         internal CipherSuite SelectedCipher;
         private X509Certificate2 _serverCertificate;
-        private ByteArray _clientRandom;
-        private ByteArray _serverRandom;
+
         private ServerDHParams DHParams;
 
         private ByteArray _handshakeData;
 
-        public TlsStream(Stream innerStream)
+        private SecurityParameters _secParams;
+        private ulong _clientSequenceNum;
+        private ulong _serverSequenceNum;
+
+        public TlsStream(Stream innerStream, ISecureRandom random = null)
         {
             this._innerStream = innerStream;
             this._interceptionStream = new InterceptionStream(innerStream);
@@ -43,7 +47,12 @@ namespace Zergatul.Net.Tls
             this._interceptionStream.OnWriteData += _interceptionStream_OnWriteData;
             this._handshakeData = new ByteArray();
             this._reader = new BinaryReader(_interceptionStream);
-            this._utils = new TlsUtils();
+
+            this._random = random ?? new DefaultSecureRandom();
+
+            this._utils = new TlsUtils(this._random);
+
+            this._secParams = new SecurityParameters();
         }
 
         public void AuthenticateAsClient(string host)
@@ -53,7 +62,7 @@ namespace Zergatul.Net.Tls
                 GMTUnixTime = _utils.GetGMTUnixTime(),
                 RandomBytes = _utils.GetRandomBytes(28)
             };
-            _clientRandom = new ByteArray(random.ToArray());
+            _secParams.ClientRandom = new ByteArray(random.ToArray());
 
             var message = new RecordMessage
             {
@@ -166,7 +175,7 @@ namespace Zergatul.Net.Tls
             };
             message.Write(_interceptionStream);
 
-            SelectedCipher.CalculateMasterSecret(_clientRandom, _serverRandom);
+            SelectedCipher.CalculateMasterSecret();
 
             message = new RecordMessage
             {
@@ -179,6 +188,11 @@ namespace Zergatul.Net.Tls
             };
             message.Write(_innerStream);
 
+            SelectedCipher.GenerateKeyMaterial(_secParams);
+
+            _clientSequenceNum = 0;
+            _serverSequenceNum = 0;
+
             message = new RecordMessage
             {
                 RecordType = ContentType.Handshake,
@@ -188,7 +202,7 @@ namespace Zergatul.Net.Tls
                     new HandshakeMessage
                     {
                         MessageType = HandshakeType.Finished,
-                        Body = SelectedCipher.GetFinished(_handshakeData)
+                        Body = SelectedCipher.GetFinished(_handshakeData, _clientSequenceNum)
                     }
                 }
             };
@@ -217,8 +231,8 @@ namespace Zergatul.Net.Tls
 
         private void OnServerHello(ServerHello message)
         {
-            SelectedCipher = CipherSuite.Resolve(message.CipherSuite);
-            _serverRandom = new ByteArray(message.Random.ToArray());
+            SelectedCipher = CipherSuite.Resolve(message.CipherSuite, _secParams, _random);
+            _secParams.ServerRandom = new ByteArray(message.Random.ToArray());
         }
 
         private void OnCertificate(Certificate message)
@@ -239,7 +253,7 @@ namespace Zergatul.Net.Tls
                     var dhParamsBytes = message.Params.ToArray();
                     DHParams = message.Params;
 
-                    var signedBytes = _clientRandom + _serverRandom + dhParamsBytes;
+                    var signedBytes = _secParams.ClientRandom + _secParams.ServerRandom + dhParamsBytes;
 
                     string oid;
                     switch (message.SignAndHashAlgo.Hash)

@@ -9,17 +9,18 @@ using Zergatul.Net.Tls.Extensions;
 
 namespace Zergatul.Net.Tls.CipherSuites
 {
-    internal abstract class DHECipherSuite : CipherSuite
+    internal class DHEKeyExchange : AbstractKeyExchange
     {
-        protected BigInteger _g;
-        protected BigInteger _p;
-        protected BigInteger _Ys;
-        protected int _dhKeyLength;
+        private BigInteger _g;
+        private BigInteger _p;
+        private BigInteger _Ys;
+        private int _dhKeyLength;
 
-        public DHECipherSuite(CipherSuiteType type)
-            : base(type)
+        private ISecureRandom _random;
+
+        public DHEKeyExchange(ISecureRandom random)
         {
-
+            this._random = random;
         }
 
         public override void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
@@ -43,16 +44,19 @@ namespace Zergatul.Net.Tls.CipherSuites
             _Ys = new BigInteger(message.Params.DH_Ys, ByteOrder.BigEndian);
         }
 
-        public override ClientKeyExchange GetClientKeyExchange()
+        public override ClientKeyExchangeResult GenerateClientKeyExchange()
         {
-            var dh = new DiffieHellman(_g, _p, _Ys, new DefaultSecureRandom());
+            var dh = new DiffieHellman(_g, _p, _Ys, _random);
             dh.CalculateForBSide();
-            _preMasterSecret = new ByteArray(dh.ZZ.ToBytes(ByteOrder.BigEndian, _dhKeyLength));
-            return new ClientKeyExchange
+            return new ClientKeyExchangeResult
             {
-                DHPublic = new ClientDiffieHellmanPublic
+                PreMasterSecret = new ByteArray(dh.ZZ.ToBytes(ByteOrder.BigEndian, _dhKeyLength)),
+                Message = new ClientKeyExchange
                 {
-                    DH_Yc = dh.Yb.ToBytes(ByteOrder.BigEndian, _dhKeyLength)
+                    DHPublic = new ClientDiffieHellmanPublic
+                    {
+                        DH_Yc = dh.Yb.ToBytes(ByteOrder.BigEndian, _dhKeyLength)
+                    }
                 }
             };
         }

@@ -10,11 +10,11 @@ namespace Zergatul.Net.Tls
     {
         public override ushort Length => (ushort)Data.Length;
 
-        public byte[] Data;
+        public ByteArray Data;
 
         public override void Read(BinaryReader reader)
         {
-            Data = reader.ReadToEnd();
+            //Data = reader.ReadToEnd();
         }
 
         public override void WriteTo(BinaryWriter writer)

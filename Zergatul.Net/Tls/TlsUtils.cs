@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography;
 
 namespace Zergatul.Net.Tls
 {
     internal class TlsUtils
     {
-        private static System.Random _rnd = new System.Random();
+        private ISecureRandom _random;
+
+        public TlsUtils(ISecureRandom random)
+        {
+            this._random = random;
+        }
 
         public uint GetGMTUnixTime()
         {
@@ -18,7 +24,7 @@ namespace Zergatul.Net.Tls
         public byte[] GetRandomBytes(int count)
         {
             var result = new byte[count];
-            _rnd.NextBytes(result);
+            _random.GetBytes(result);
             return result;
         }
 
