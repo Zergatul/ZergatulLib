@@ -52,6 +52,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Zergatul.Cryptography\Zergatul.Cryptography.csproj">
+      <Project>{fd292544-74cd-4fcf-b564-efa21ef197ce}</Project>
+      <Name>Zergatul.Cryptography</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Zergatul.FTP\Zergatul.Ftp.csproj">
       <Project>{ee9a0424-08f0-41da-84e8-5c8db3fe477b}</Project>
       <Name>Zergatul.Ftp</Name>

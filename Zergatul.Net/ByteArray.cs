@@ -164,5 +164,16 @@ namespace Zergatul.Net
                 bytes[i] = (byte)(left[i] ^ right);
             return new ByteArray(bytes);
         }
+
+        public static ByteArray operator ^(ByteArray left, ByteArray right)
+        {
+            if (left.Length != right.Length)
+                throw new InvalidOperationException();
+
+            var bytes = new byte[left.Length];
+            for (int i = 0; i < bytes.Length; i++)
+                bytes[i] = (byte)(left[i] ^ right[i]);
+            return new ByteArray(bytes);
+        }
     }
 }

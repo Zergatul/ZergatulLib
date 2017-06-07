@@ -11,7 +11,10 @@ namespace Zergatul.Net.Tls.CipherSuites
         protected SecurityParameters _secParams;
         protected Role _role;
         protected TlsConnectionKeys _keys;
+
         protected AbstractKeyExchange _keyExchange;
+        protected AbstractHMAC _hmac;
+        protected AbstractBlockCipher _blockCipher;
 
         protected ByteArray _preMasterSecret;
 
@@ -183,7 +186,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                         MAC = ComputeMAC(sequenceNum, data)
                     };
                     ComputePadding(data, blockCiphertext);
-
+                    ComputeEncryptedContent(data, blockCiphertext);
                     result.Fragment = blockCiphertext;
                     break;
                 default:
@@ -203,7 +206,10 @@ namespace Zergatul.Net.Tls.CipherSuites
             fragment.Padding = new ByteArray(padding);
         }
 
-        protected abstract ByteArray MAC(ByteArray arg1, ByteArray arg2);
+        private void ComputeEncryptedContent(TLSCompressed data, GenericBlockCiphertext fragment)
+        {
+            _blockCipher.Encrypt(fragment.IV, )
+        }
 
         public ByteArray ComputeMAC(ulong sequenceNum, TLSCompressed data)
         {
@@ -225,7 +231,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                 MAC
                     The MAC algorithm specified by SecurityParameters.mac_algorithm.
             */
-            return MAC(_role == Role.Client ? _keys.,
+            return _hmac.Compute(MACEncryptKey,
                 new ByteArray(sequenceNum) +
                 new ByteArray((byte)data.Type) +
                 new ByteArray((ushort)data.Version) +

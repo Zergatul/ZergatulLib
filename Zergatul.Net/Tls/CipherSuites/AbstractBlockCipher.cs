@@ -1,0 +1,49 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Zergatul.Net.Tls.CipherSuites
+{
+    internal abstract class AbstractBlockCipher
+    {
+        protected BlockCipherMode _mode;
+        protected int _blockSizeBits;
+        protected int _blockSizeBytes;
+
+        public AbstractBlockCipher(BlockCipherMode mode, int blockSizeBits)
+        {
+            this._mode = mode;
+            this._blockSizeBits = blockSizeBits;
+            this._blockSizeBytes = blockSizeBits / 8;
+        }
+
+        protected abstract ByteArray EncryptBlock(ByteArray block, ByteArray key);
+
+        public ByteArray Encrypt(ByteArray IV, ByteArray data, ByteArray key)
+        {
+            if (IV.Length % _blockSizeBytes != 0)
+                throw new ArgumentException("Invalid IV size");
+            if (data.Length % _blockSizeBytes != 0)
+                throw new ArgumentException("Invalid data size");
+
+            var result = new ByteArray();
+            switch (_mode)
+            {
+                case BlockCipherMode.CBC:
+                    for (int i = 0; i < data.Length / _blockSizeBytes; i++)
+                    {
+                        var plainText = data.SubArray(i * _blockSizeBytes, _blockSizeBytes);
+                        var cipherText = EncryptBlock(IV ^ plainText, key);
+                        result += cipherText;
+                        IV = cipherText;
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            return result;
+        }
+    }
+}

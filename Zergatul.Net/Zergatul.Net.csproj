@@ -55,8 +55,11 @@
     <Compile Include="Tls\BinaryWriter.cs" />
     <Compile Include="Tls\Certificate.cs" />
     <Compile Include="Tls\ChangeCipherSpec.cs" />
+    <Compile Include="Tls\CipherSuites\AbstractBlockCipher.cs" />
     <Compile Include="Tls\CipherSuites\AbstractKeyExchange.cs" />
     <Compile Include="Tls\CipherSuites\AbstractHMAC.cs" />
+    <Compile Include="Tls\CipherSuites\AES256.cs" />
+    <Compile Include="Tls\CipherSuites\BlockCipherMode.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuiteType.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuite.cs" />
     <Compile Include="Tls\CipherSuites\ClientKeyExchangeResult.cs" />
