@@ -23,6 +23,7 @@ namespace Zergatul.Net.Tls
             CipherSuites.Length * 2 + 2 + // CipherSuites
             2 + // Compression Methods
             2 + ExtensionsLength); // Extensions
+        public override bool Encrypted => false;
 
         private ushort ExtensionsLength => (ushort)Extensions.DefaultIfEmpty().Sum(e => 4 + e.Length);
 

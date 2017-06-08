@@ -9,14 +9,18 @@ namespace Zergatul.Net.Tls.CipherSuites
     internal abstract class AbstractBlockCipher
     {
         protected BlockCipherMode _mode;
+        protected int _keySizeBits;
+        protected int _keySizeBytes;
         protected int _blockSizeBits;
         protected int _blockSizeBytes;
 
-        public AbstractBlockCipher(BlockCipherMode mode, int blockSizeBits)
+        public AbstractBlockCipher(BlockCipherMode mode, int blockSizeBits, int keySizeBits)
         {
             this._mode = mode;
             this._blockSizeBits = blockSizeBits;
             this._blockSizeBytes = blockSizeBits / 8;
+            this._keySizeBits = keySizeBits;
+            this._keySizeBytes = keySizeBits / 8;
         }
 
         protected abstract ByteArray EncryptBlock(ByteArray block, ByteArray key);

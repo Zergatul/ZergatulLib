@@ -16,6 +16,8 @@ namespace Zergatul.Net.Tls
         internal int Position { get; private set; }
         private int? _limit;
 
+        private List<byte> _tracking;
+
         public BinaryReader(Stream stream)
         {
             this._stream = stream;
@@ -35,7 +37,7 @@ namespace Zergatul.Net.Tls
         private void FillBuffer(int count)
         {
             if (count > _buffer.Length)
-                throw new InvalidOperationException("Invalid buffer length");
+                _buffer = new byte[count];
 
             if (_stream != null)
             {
@@ -54,6 +56,10 @@ namespace Zergatul.Net.Tls
             }
 
             Position += count;
+
+            if (_tracking != null)
+                for (int i = 0; i < count; i++)
+                    _tracking.Add(_buffer[i]);
         }
 
         public byte ReadByte()
@@ -64,25 +70,10 @@ namespace Zergatul.Net.Tls
 
         public byte[] ReadBytes(int count)
         {
+            FillBuffer(count);
+
             var result = new byte[count];
-
-            if (_stream != null)
-            {
-                int totalRead = 0;
-                while (true)
-                {
-                    totalRead += _stream.Read(result, totalRead, count - totalRead);
-                    if (totalRead == count)
-                        break;
-                }
-            }
-
-            if (_array != null)
-            {
-                Array.Copy(_array, Position, result, 0, count);
-            }
-
-            Position += count;
+            Array.Copy(_buffer, result, count);
 
             return result;
         }
@@ -115,6 +106,16 @@ namespace Zergatul.Net.Tls
         public ReadCounter StartCounter(int totalBytes)
         {
             return new ReadCounter(this, totalBytes);
+        }
+
+        public void StartTracking(List<byte> data)
+        {
+            this._tracking = data;
+        }
+
+        public void StopTracking()
+        {
+            this._tracking = null;
         }
 
         public IDisposable SetReadLimit(int totalBytes)

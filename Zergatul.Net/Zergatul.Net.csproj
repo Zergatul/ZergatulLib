@@ -64,6 +64,7 @@
     <Compile Include="Tls\CipherSuites\CipherSuite.cs" />
     <Compile Include="Tls\CipherSuites\ClientKeyExchangeResult.cs" />
     <Compile Include="Tls\CipherSuites\DHEKeyExchange.cs" />
+    <Compile Include="Tls\CipherSuites\HMACSHA1.cs" />
     <Compile Include="Tls\CipherSuites\HMACSHA256.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_CBC_SHA.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_GCM_SHA384.cs" />

@@ -9,6 +9,7 @@ namespace Zergatul.Net.Tls
     internal class BinaryWriter
     {
         private List<byte> _list;
+        private List<byte> _tracking;
 
         public BinaryWriter(List<byte> list)
         {
@@ -17,7 +18,7 @@ namespace Zergatul.Net.Tls
 
         public void WriteByte(byte value)
         {
-            _list.Add(value);
+            ListAdd(value);
         }
 
         public void WriteBytes(byte[] value)
@@ -25,7 +26,7 @@ namespace Zergatul.Net.Tls
             if (value == null)
                 return;
 
-            _list.AddRange(value);
+            ListAddRange(value);
         }
 
         public void WriteBytes(ByteArray value)
@@ -33,13 +34,14 @@ namespace Zergatul.Net.Tls
             if (value == null)
                 return;
 
-            value.AddTo(_list);
+            for (int i = 0; i < value.Parts.Count; i++)
+                ListAddRange(value.Parts[i]);
         }
 
         public void WriteShort(ushort value)
         {
-            _list.Add((byte)((value >> 8) & 0xFF));
-            _list.Add((byte)(value & 0xFF));
+            ListAdd((byte)((value >> 8) & 0xFF));
+            ListAdd((byte)(value & 0xFF));
         }
 
         public void WriteUInt24(int value)
@@ -49,17 +51,39 @@ namespace Zergatul.Net.Tls
             if (value >= (1 << 24))
                 throw new InvalidOperationException("value cannot be greater than max uint24");
 
-            _list.Add((byte)((value >> 16) & 0xFF));
-            _list.Add((byte)((value >> 8) & 0xFF));
-            _list.Add((byte)(value & 0xFF));
+            ListAdd((byte)((value >> 16) & 0xFF));
+            ListAdd((byte)((value >> 8) & 0xFF));
+            ListAdd((byte)(value & 0xFF));
         }
 
         public void WriteUInt32(uint value)
         {
-            _list.Add((byte)((value >> 24) & 0xFF));
-            _list.Add((byte)((value >> 16) & 0xFF));
-            _list.Add((byte)((value >> 8) & 0xFF));
-            _list.Add((byte)(value & 0xFF));
+            ListAdd((byte)((value >> 24) & 0xFF));
+            ListAdd((byte)((value >> 16) & 0xFF));
+            ListAdd((byte)((value >> 8) & 0xFF));
+            ListAdd((byte)(value & 0xFF));
+        }
+
+        private void ListAdd(byte value)
+        {
+            _list.Add(value);
+            _tracking?.Add(value);
+        }
+
+        private void ListAddRange(IEnumerable<byte> collection)
+        {
+            _list.AddRange(collection);
+            _tracking?.AddRange(collection);
+        }
+
+        public void StartTracking(List<byte> data)
+        {
+            _tracking = data;
+        }
+
+        public void StopTracking()
+        {
+            _tracking = null;
         }
     }
 }

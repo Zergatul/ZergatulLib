@@ -9,7 +9,7 @@ namespace Zergatul.Net.Tls.CipherSuites
     internal class AES256 : AbstractBlockCipher
     {
         public AES256(BlockCipherMode mode)
-            : base(mode, 256)
+            : base(mode, 128, 256)
         {
 
         }
@@ -17,7 +17,8 @@ namespace Zergatul.Net.Tls.CipherSuites
         protected override ByteArray EncryptBlock(ByteArray block, ByteArray key)
         {
             var rijndael = new System.Security.Cryptography.RijndaelManaged();
-            rijndael.BlockSize = 256;
+            rijndael.BlockSize = 128;
+            rijndael.KeySize = 256;
             rijndael.Key = key.ToArray();
             rijndael.Mode = System.Security.Cryptography.CipherMode.ECB;
             rijndael.Padding = System.Security.Cryptography.PaddingMode.None;

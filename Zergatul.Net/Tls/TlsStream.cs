@@ -23,30 +23,27 @@ namespace Zergatul.Net.Tls
     public class TlsStream
     {
         private Stream _innerStream;
-        private InterceptionStream _interceptionStream;
         private BinaryReader _reader;
         private TlsUtils _utils;
         private ISecureRandom _random;
 
         internal CipherSuite SelectedCipher;
+        private Role _role;
         private X509Certificate2 _serverCertificate;
 
         private ServerDHParams DHParams;
 
-        private ByteArray _handshakeData;
+        internal List<byte> HandshakeData;
 
         private SecurityParameters _secParams;
-        private ulong _clientSequenceNum;
-        private ulong _serverSequenceNum;
+        internal ulong ClientSequenceNum;
+        internal ulong ServerSequenceNum;
 
         public TlsStream(Stream innerStream, ISecureRandom random = null)
         {
             this._innerStream = innerStream;
-            this._interceptionStream = new InterceptionStream(innerStream);
-            this._interceptionStream.OnReadData += _interceptionStream_OnReadData;
-            this._interceptionStream.OnWriteData += _interceptionStream_OnWriteData;
-            this._handshakeData = new ByteArray();
-            this._reader = new BinaryReader(_interceptionStream);
+            this.HandshakeData = new List<byte>();
+            this._reader = new BinaryReader(innerStream);
 
             this._random = random ?? new DefaultSecureRandom();
 
@@ -57,6 +54,8 @@ namespace Zergatul.Net.Tls
 
         public void AuthenticateAsClient(string host)
         {
+            _role = Role.Client;
+
             var random = new Random
             {
                 GMTUnixTime = _utils.GetGMTUnixTime(),
@@ -64,7 +63,7 @@ namespace Zergatul.Net.Tls
             };
             _secParams.ClientRandom = new ByteArray(random.ToArray());
 
-            var message = new RecordMessage
+            var message = new RecordMessage(this)
             {
                 RecordType = ContentType.Handshake,
                 Version = ProtocolVersion.Tls12,
@@ -154,13 +153,13 @@ namespace Zergatul.Net.Tls
                     }
                 }
             };
-            message.Write(_interceptionStream);
+            message.Write(_innerStream);
 
             message = new RecordMessage(this);
             message.OnContentMessageRead += OnContentMessage;
             message.Read(_reader);
 
-            message = new RecordMessage
+            message = new RecordMessage(this)
             {
                 RecordType = ContentType.Handshake,
                 Version = ProtocolVersion.Tls12,
@@ -173,11 +172,11 @@ namespace Zergatul.Net.Tls
                     }
                 }
             };
-            message.Write(_interceptionStream);
+            message.Write(_innerStream);
 
             SelectedCipher.CalculateMasterSecret();
 
-            message = new RecordMessage
+            message = new RecordMessage(this)
             {
                 RecordType = ContentType.ChangeCipherSpec,
                 Version = ProtocolVersion.Tls12,
@@ -186,29 +185,36 @@ namespace Zergatul.Net.Tls
                     new ChangeCipherSpec()
                 }
             };
+            // RFC 5246 // Page 63
+            /*
+                Note: ChangeCipherSpec messages, alerts, and any other record types
+                are not handshake messages and are not included in the hash
+                computations.
+            */
             message.Write(_innerStream);
 
             SelectedCipher.GenerateKeyMaterial(_secParams);
 
-            _clientSequenceNum = 0;
-            _serverSequenceNum = 0;
+            ClientSequenceNum = 0;
+            ServerSequenceNum = 0;
 
-            message = new RecordMessage
+            message = new RecordMessage(this)
             {
                 RecordType = ContentType.Handshake,
                 Version = ProtocolVersion.Tls12,
+                Encrypted = true,
                 ContentMessages = new List<ContentMessage>
                 {
                     new HandshakeMessage
                     {
                         MessageType = HandshakeType.Finished,
-                        Body = SelectedCipher.GetFinished(_handshakeData, _clientSequenceNum)
+                        Body = SelectedCipher.GetFinished(new ByteArray(HandshakeData.ToArray()))
                     }
                 }
             };
-            message.Write(_interceptionStream);
+            message.Write(_innerStream);
 
-            message = new RecordMessage();
+            message = new RecordMessage(this);
             message.OnContentMessageRead += OnContentMessage;
             message.Read(_reader);
         }
@@ -231,7 +237,7 @@ namespace Zergatul.Net.Tls
 
         private void OnServerHello(ServerHello message)
         {
-            SelectedCipher = CipherSuite.Resolve(message.CipherSuite, _secParams, _random);
+            SelectedCipher = CipherSuite.Resolve(message.CipherSuite, _secParams, _role, _random);
             _secParams.ServerRandom = new ByteArray(message.Random.ToArray());
         }
 
@@ -274,14 +280,35 @@ namespace Zergatul.Net.Tls
 
         #endregion
 
-        private void _interceptionStream_OnWriteData(object sender, WriteDataEventArgs e)
+        #region Sequnce Numbers
+
+        internal ulong EncodingSequenceNum
         {
-            _handshakeData = _handshakeData + e.Data;
+            get
+            {
+                if (_role == Role.Client)
+                    return ClientSequenceNum;
+                if (_role == Role.Server)
+                    return ServerSequenceNum;
+                throw new TlsStreamException("Invalid role");
+            }
         }
 
-        private void _interceptionStream_OnReadData(object sender, ReadDataEventArgs e)
+        internal void IncEncodingSequenceNum()
         {
-            _handshakeData = _handshakeData + e.Data;
+            if (_role == Role.Client)
+            {
+                ClientSequenceNum++;
+                return;
+            }
+            if (_role == Role.Server)
+            {
+                ServerSequenceNum++;
+                return;
+            }
+            throw new TlsStreamException("Invalid role");
         }
+
+        #endregion
     }
 }

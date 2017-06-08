@@ -11,6 +11,16 @@ namespace Zergatul.Net.Tls
         public ContentType Type;
         public ProtocolVersion Version;
         public ushort Length;
+        public ByteArray Content;
         public GenericCiphertext Fragment;
+
+        public ByteArray ToBytes()
+        {
+            var result = new ByteArray();
+            if (Fragment is GenericBlockCiphertext)
+                result += (Fragment as GenericBlockCiphertext).IV;
+            result += Content;
+            return result;
+        }
     }
 }

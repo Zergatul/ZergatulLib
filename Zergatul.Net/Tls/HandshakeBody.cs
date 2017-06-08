@@ -9,6 +9,7 @@ namespace Zergatul.Net.Tls
     internal abstract class HandshakeBody
     {
         public abstract ushort Length { get; }
+        public abstract bool Encrypted { get; }
         public abstract void Read(BinaryReader reader);
         public abstract void WriteTo(BinaryWriter writer);
     }

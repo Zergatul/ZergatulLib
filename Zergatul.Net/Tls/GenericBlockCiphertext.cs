@@ -9,7 +9,6 @@ namespace Zergatul.Net.Tls
     class GenericBlockCiphertext : GenericCiphertext
     {
         public ByteArray IV;
-        public ByteArray Content;
         public ByteArray MAC;
         public ByteArray Padding;
         public byte PaddingLength;

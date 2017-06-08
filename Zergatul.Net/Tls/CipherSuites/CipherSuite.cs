@@ -41,6 +41,18 @@ namespace Zergatul.Net.Tls.CipherSuites
             }
         }
 
+        protected ByteArray BlockCipherEncryptKey
+        {
+            get
+            {
+                if (_role == Role.Client)
+                    return _keys.ClientEncKey;
+                if (_role == Role.Server)
+                    return _keys.ServerEncKey;
+                throw new TlsStreamException("Invalid role");
+            }
+        }
+
         public virtual void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
         {
             _keyExchange.ReadServerKeyExchange(message, reader);
@@ -55,18 +67,21 @@ namespace Zergatul.Net.Tls.CipherSuites
 
         public virtual void CalculateMasterSecret()
         {
-            // RFC 5246 // Page 63
+            // RFC 5246
+            // https://tools.ietf.org/html/rfc5246#section-8.1
             // The master secret is always exactly 48 bytes in length.
             _secParams.MasterSecret = PseudoRandomFunction(_preMasterSecret, "master secret", _secParams.ClientRandom + _secParams.ServerRandom, 48);
 
-            // RFC 5246 // Page 63
+            // RFC 5246
+            // https://tools.ietf.org/html/rfc5246#section-8.1
             // The pre_master_secret should be deleted from memory once the master_secret has been computed.
             _preMasterSecret.ClearMemory();
         }
 
-        public virtual Finished GetFinished(ByteArray data, ulong sequenceNum)
+        public virtual Finished GetFinished(ByteArray data)
         {
-            // RFC 5246 // Page 62
+            // RFC 5246
+            // https://tools.ietf.org/html/rfc5246#section-7.4.9
             /*
                 In previous versions of TLS, the verify_data was always 12 octets
                 long.  In the current version of TLS, it depends on the cipher
@@ -78,9 +93,10 @@ namespace Zergatul.Net.Tls.CipherSuites
                 MUST be at least 12 bytes.
             */
             string label = _role == Role.Client ? "client finished" : "server finished";
+            var verifyData = PseudoRandomFunction(_secParams.MasterSecret, label, Hash(data), 12);
             return new Finished
             {
-                Data = PseudoRandomFunction(_secParams.MasterSecret, label, Hash(data), 12)
+                Data = verifyData
             };
         }
 
@@ -169,7 +185,31 @@ namespace Zergatul.Net.Tls.CipherSuites
             position += secParams.FixedIVLength;
         }
 
-        public TLSCiphertext Encode(TLSCompressed data, ulong sequenceNum)
+        public ByteArray ProcessPlaintext(ByteArray data, ulong sequenceNum)
+        {
+            var plaintext = new TLSPlaintext
+            {
+                Type = ContentType.Handshake,
+                Version = ProtocolVersion.Tls12,
+                Length = (ushort)data.Length,
+                Fragment = data
+            };
+            var ciphertext = Encode(Compress(plaintext), sequenceNum);
+            return ciphertext.ToBytes();
+        }
+
+        protected TLSCompressed Compress(TLSPlaintext data)
+        {
+            return new TLSCompressed
+            {
+                Type = data.Type,
+                Version = data.Version,
+                Length = data.Length,
+                Fragment = data.Fragment
+            };
+        }
+
+        protected TLSCiphertext Encode(TLSCompressed data, ulong sequenceNum)
         {
             var result = new TLSCiphertext
             {
@@ -186,7 +226,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                         MAC = ComputeMAC(sequenceNum, data)
                     };
                     ComputePadding(data, blockCiphertext);
-                    ComputeEncryptedContent(data, blockCiphertext);
+                    ComputeEncryptedContent(data, result, blockCiphertext);
                     result.Fragment = blockCiphertext;
                     break;
                 default:
@@ -198,7 +238,7 @@ namespace Zergatul.Net.Tls.CipherSuites
 
         private void ComputePadding(TLSCompressed data, GenericBlockCiphertext fragment)
         {
-            int modulo = (data.Length + _secParams.MACLength + 1) / _secParams.BlockLength;
+            int modulo = (data.Length + _secParams.MACLength + 1) % _secParams.BlockLength;
             fragment.PaddingLength = (byte)(_secParams.BlockLength - modulo);
             var padding = new byte[fragment.PaddingLength];
             for (int i = 0; i < padding.Length; i++)
@@ -206,9 +246,13 @@ namespace Zergatul.Net.Tls.CipherSuites
             fragment.Padding = new ByteArray(padding);
         }
 
-        private void ComputeEncryptedContent(TLSCompressed data, GenericBlockCiphertext fragment)
+        private void ComputeEncryptedContent(TLSCompressed dataCompressed, TLSCiphertext dataCiphertext, GenericBlockCiphertext fragment)
         {
-            _blockCipher.Encrypt(fragment.IV, )
+            dataCiphertext.Content = _blockCipher.Encrypt(
+                fragment.IV,
+                dataCompressed.Fragment + fragment.MAC + fragment.Padding + new ByteArray(fragment.PaddingLength),
+                BlockCipherEncryptKey);
+            dataCiphertext.Length = (ushort)(fragment.IV.Length + dataCiphertext.Content.Length);
         }
 
         public ByteArray ComputeMAC(ulong sequenceNum, TLSCompressed data)

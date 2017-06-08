@@ -16,6 +16,7 @@ namespace Zergatul.Net.Tls
         public CipherSuiteType CipherSuite;
         public List<TlsExtension> Extensions = new List<TlsExtension>();
         public override ushort Length => 0;
+        public override bool Encrypted => false;
 
         public override void Read(BinaryReader reader)
         {

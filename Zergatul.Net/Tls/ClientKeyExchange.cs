@@ -19,6 +19,7 @@ namespace Zergatul.Net.Tls
                 throw new NotImplementedException();
             }
         }
+        public override bool Encrypted => false;
 
         public override void Read(BinaryReader reader)
         {

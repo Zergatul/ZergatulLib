@@ -25,6 +25,7 @@ namespace Zergatul.Net.Tls
                 throw new NotImplementedException();
             }
         }
+        public override bool Encrypted => false;
 
         public ServerKeyExchange(CipherSuite cipher)
         {

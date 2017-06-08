@@ -9,6 +9,7 @@ namespace Zergatul.Net.Tls
     internal class Finished : HandshakeBody
     {
         public override ushort Length => (ushort)Data.Length;
+        public override bool Encrypted => true;
 
         public ByteArray Data;
 
