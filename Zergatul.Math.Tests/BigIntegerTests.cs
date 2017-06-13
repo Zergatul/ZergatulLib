@@ -433,6 +433,17 @@ namespace Zergatul.Math.Tests
         }
 
         [TestMethod]
+        public void Division_10()
+        {
+            var bi1 = new BigInteger(997);
+            var bi2 = new BigInteger(997);
+            BigInteger quotient, remainder;
+            BigInteger.Division(bi1, bi2, out quotient, out remainder);
+            Assert.IsTrue(quotient == 1);
+            Assert.IsTrue(remainder == 0);
+        }
+
+        [TestMethod]
         public void ExtendedEuclideanInt64_1()
         {
             long a = 4294967296;

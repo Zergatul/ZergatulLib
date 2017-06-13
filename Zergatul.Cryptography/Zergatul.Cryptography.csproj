@@ -51,6 +51,10 @@
       <Project>{ab665131-7c0a-4424-97ef-e5a613584988}</Project>
       <Name>Zergatul.Math</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Zergatul.System\Zergatul.csproj">
+      <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
+      <Name>Zergatul</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

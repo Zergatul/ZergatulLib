@@ -289,6 +289,8 @@ namespace Zergatul.Net.Tls.CipherSuites
             {
                 /*case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
                     return new TLS_DHE_RSA_WITH_AES_256_GCM_SHA384();*/
+                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+                    return new TLS_DHE_RSA_WITH_AES_256_CBC_SHA(secParams, role, random);
                 case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
                     return new TLS_DHE_RSA_WITH_AES_256_CBC_SHA(secParams, role, random);
                 default:

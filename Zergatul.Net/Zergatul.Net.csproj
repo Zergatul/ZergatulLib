@@ -58,6 +58,7 @@
     <Compile Include="Tls\CipherSuites\AbstractBlockCipher.cs" />
     <Compile Include="Tls\CipherSuites\AbstractKeyExchange.cs" />
     <Compile Include="Tls\CipherSuites\AbstractHMAC.cs" />
+    <Compile Include="Tls\CipherSuites\AES128.cs" />
     <Compile Include="Tls\CipherSuites\AES256.cs" />
     <Compile Include="Tls\CipherSuites\BlockCipherMode.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuiteType.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Tls\CipherSuites\DHEKeyExchange.cs" />
     <Compile Include="Tls\CipherSuites\HMACSHA1.cs" />
     <Compile Include="Tls\CipherSuites\HMACSHA256.cs" />
+    <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_128_CBC_SHA.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_CBC_SHA.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_GCM_SHA384.cs" />
     <Compile Include="Tls\CipherType.cs" />
@@ -128,6 +130,10 @@
     <ProjectReference Include="..\Zergatul.Math\Zergatul.Math.csproj">
       <Project>{ab665131-7c0a-4424-97ef-e5a613584988}</Project>
       <Name>Zergatul.Math</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul.System\Zergatul.csproj">
+      <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
+      <Name>Zergatul</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

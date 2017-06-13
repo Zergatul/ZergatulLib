@@ -38,7 +38,6 @@ namespace Zergatul.Net.Tls.CipherSuites
             };
             message.Signature = reader.ReadBytes(reader.ReadShort());
 
-            _dhKeyLength = message.Params.DH_p.Length;
             _g = new BigInteger(message.Params.DH_g, ByteOrder.BigEndian);
             _p = new BigInteger(message.Params.DH_p, ByteOrder.BigEndian);
             _Ys = new BigInteger(message.Params.DH_Ys, ByteOrder.BigEndian);
@@ -50,12 +49,12 @@ namespace Zergatul.Net.Tls.CipherSuites
             dh.CalculateForBSide();
             return new ClientKeyExchangeResult
             {
-                PreMasterSecret = new ByteArray(dh.ZZ.ToBytes(ByteOrder.BigEndian, _dhKeyLength)),
+                PreMasterSecret = new ByteArray(dh.ZZ.ToBytes(ByteOrder.BigEndian)),
                 Message = new ClientKeyExchange
                 {
                     DHPublic = new ClientDiffieHellmanPublic
                     {
-                        DH_Yc = dh.Yb.ToBytes(ByteOrder.BigEndian, _dhKeyLength)
+                        DH_Yc = dh.Yb.ToBytes(ByteOrder.BigEndian)
                     }
                 }
             };

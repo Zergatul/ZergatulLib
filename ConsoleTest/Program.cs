@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Crypto.Tls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -61,7 +60,7 @@ namespace Test
             Console.ReadLine();*/
         }
 
-        class MyTlsClient : DefaultTlsClient
+        /*class MyTlsClient : DefaultTlsClient
         {
             public override TlsAuthentication GetAuthentication()
             {
@@ -82,6 +81,6 @@ namespace Test
             {
                 // validate server certificate
             }
-        }
+        }*/
     }
 }

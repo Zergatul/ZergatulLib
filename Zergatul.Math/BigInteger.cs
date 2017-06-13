@@ -147,6 +147,35 @@ namespace Zergatul.Math
             }
         }
 
+        /// <summary>
+        /// Generates random number in range [0..value-1]
+        /// </summary>
+        public static BigInteger Random(BigInteger value, IRandom random)
+        {
+            if (value.IsZero)
+                throw new InvalidOperationException();
+
+            var bytes = value.ToBytes(ByteOrder.BigEndian);
+            var result = new byte[bytes.Length];
+            bool finished = false;
+            while (!finished)
+            {
+                bool highBytesEqual = true;
+                for (int i = 0; i < result.Length; i++)
+                {
+                    random.GetBytes(result, i, 1);
+                    if (highBytesEqual && result[i] > bytes[i])
+                        break;
+                    if (highBytesEqual && result[i] < bytes[i])
+                        highBytesEqual = false;
+                    if (i == result.Length - 1)
+                        finished = true;
+                }
+            }
+
+            return new BigInteger(result, ByteOrder.BigEndian);
+        }
+
         #endregion
 
         #region Public methods
@@ -841,7 +870,7 @@ namespace Zergatul.Math
                 if (calcQuotient)
                     q[i - yLen] = nextQuotWord;
 
-                while (x[xLen - 1] == 0)
+                while (xLen > 0 && x[xLen - 1] == 0)
                     xLen--;
             }
 

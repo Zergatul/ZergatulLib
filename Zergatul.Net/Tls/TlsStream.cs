@@ -267,6 +267,9 @@ namespace Zergatul.Net.Tls
                         case HashAlgorithm.SHA1:
                             oid = System.Security.Cryptography.CryptoConfig.MapNameToOID("SHA1");
                             break;
+                        case HashAlgorithm.SHA256:
+                            oid = System.Security.Cryptography.CryptoConfig.MapNameToOID("SHA256");
+                            break;
                         default:
                             throw new NotImplementedException();
                     }

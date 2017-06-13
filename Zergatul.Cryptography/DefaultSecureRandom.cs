@@ -20,5 +20,10 @@ namespace Zergatul.Cryptography
         {
             _rng.GetBytes(data);
         }
+
+        public void GetBytes(byte[] data, int offset, int count)
+        {
+            _rng.GetBytes(data, offset, count);
+        }
     }
 }

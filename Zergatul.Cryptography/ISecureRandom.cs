@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography
 {
-    public interface ISecureRandom
+    public interface ISecureRandom : IRandom
     {
-        void GetBytes(byte[] data);
     }
 }

@@ -50,10 +50,7 @@ namespace Zergatul.Cryptography
 
         public void CalculateForBSide()
         {
-            var bytes = new byte[42];
-            _rnd.GetBytes(bytes);
-
-            Xb = new BigInteger(bytes, ByteOrder.BigEndian);
+            Xb = BigInteger.Random(p, _rnd);
 
             Yb = BigInteger.ModularExponentiation(g, Xb, p);
             ZZ = BigInteger.ModularExponentiation(Ya, Xb, p);
