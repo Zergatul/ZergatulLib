@@ -63,7 +63,6 @@
     <Compile Include="Tls\CipherSuites\BlockCipherMode.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuiteType.cs" />
     <Compile Include="Tls\CipherSuites\CipherSuite.cs" />
-    <Compile Include="Tls\CipherSuites\ClientKeyExchangeResult.cs" />
     <Compile Include="Tls\CipherSuites\DHEKeyExchange.cs" />
     <Compile Include="Tls\CipherSuites\HMACSHA1.cs" />
     <Compile Include="Tls\CipherSuites\HMACSHA256.cs" />

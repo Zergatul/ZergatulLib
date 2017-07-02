@@ -12,6 +12,12 @@ namespace Zergatul.Net.Tls
         public uint GMTUnixTime;
         public byte[] RandomBytes;
 
+        public void ReadFrom(BinaryReader reader)
+        {
+            GMTUnixTime = reader.ReadUInt32();
+            RandomBytes = reader.ReadBytes(28);
+        }
+
         public void WriteTo(BinaryWriter writer)
         {
             writer.WriteUInt32(GMTUnixTime);

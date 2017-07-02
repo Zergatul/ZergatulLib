@@ -9,6 +9,11 @@ namespace Zergatul.Net.Tls.CipherSuites
 {
     internal class HMACSHA1 : AbstractHMAC
     {
+        public HMACSHA1(ByteArray secretKey)
+            : base(secretKey, 64, 20)
+        {
+        }
+
         protected override ByteArray Hash(ByteArray data)
         {
             var sha1 = new SHA1Managed();

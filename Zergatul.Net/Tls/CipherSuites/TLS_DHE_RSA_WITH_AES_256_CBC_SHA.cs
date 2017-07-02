@@ -13,7 +13,6 @@ namespace Zergatul.Net.Tls.CipherSuites
             base(secParams, role, random)
         {
             this._keyExchange = new DHEKeyExchange(random);
-            this._hmac = new HMACSHA1();
             this._blockCipher = new AES256(BlockCipherMode.CBC);
 
             secParams.CipherType = CipherType.Block;
@@ -22,6 +21,11 @@ namespace Zergatul.Net.Tls.CipherSuites
             secParams.RecordIVLength = 16;
             secParams.FixedIVLength = 0;
             secParams.MACLength = 20;
+        }
+
+        protected override void InitHMAC()
+        {
+            this._hmac = new HMACSHA1(MACEncryptKey);
         }
     }
 }

@@ -43,6 +43,9 @@ namespace Zergatul.Net.Tls
         {
             switch (MessageType)
             {
+                case HandshakeType.ClientHello:
+                    Body = new ClientHello();
+                    break;
                 case HandshakeType.ServerHello:
                     Body = new ServerHello();
                     break;
@@ -54,6 +57,9 @@ namespace Zergatul.Net.Tls
                     break;
                 case HandshakeType.ServerHelloDone:
                     Body = new ServerHelloDone();
+                    break;
+                case HandshakeType.ClientKeyExchange:
+                    Body = new ClientKeyExchange(_cipher);
                     break;
                 case HandshakeType.Finished:
                     Body = new Finished();

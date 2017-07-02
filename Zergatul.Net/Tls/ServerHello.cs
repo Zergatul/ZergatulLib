@@ -15,8 +15,17 @@ namespace Zergatul.Net.Tls
         public byte[] SessionID = new byte[0];
         public CipherSuiteType CipherSuite;
         public List<TlsExtension> Extensions = new List<TlsExtension>();
-        public override ushort Length => 0;
+        public override ushort Length => (ushort)
+            (2 +  // ServerVersion
+            32 + // Random
+            1 + SessionID.Length + // Session
+            2 + // CipherSuite
+            1 + // Compression Method
+            2 + // Extension Length
+            ExtensionsLength);
         public override bool Encrypted => false;
+
+        private ushort ExtensionsLength => (ushort)Extensions.Sum(e => 4 + e.Length);
 
         public override void Read(BinaryReader reader)
         {
@@ -43,7 +52,20 @@ namespace Zergatul.Net.Tls
 
         public override void WriteTo(BinaryWriter writer)
         {
+            writer.WriteShort((ushort)ServerVersion);
+            Random.WriteTo(writer);
+            writer.WriteByte((byte)SessionID.Length);
+            // TODO: assume no session
+            writer.WriteShort((ushort)CipherSuite);
+            writer.WriteByte(0); // compression method
 
+            writer.WriteShort(ExtensionsLength);
+            foreach (var ext in Extensions)
+            {
+                writer.WriteShort((ushort)ext.Type);
+                writer.WriteShort(ext.Length);
+                writer.WriteBytes(ext.Data);
+            }
         }
     }
 }

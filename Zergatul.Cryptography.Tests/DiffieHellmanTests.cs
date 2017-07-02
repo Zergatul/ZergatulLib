@@ -15,8 +15,8 @@ namespace Zergatul.Cryptography.Tests
             var dh = new DiffieHellman(
                 new BigInteger(2),
                 new BigInteger(997),
-                new BigInteger(67),
                 random);
+            dh.Ya = new BigInteger(67);
             dh.CalculateForBSide();
             var serverSharedSecret = BigInteger.ModularExponentiation(dh.Yb, new BigInteger(516), dh.p);
             Assert.IsTrue(serverSharedSecret == dh.ZZ);

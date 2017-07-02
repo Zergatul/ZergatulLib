@@ -10,8 +10,6 @@ namespace Zergatul.Net.Tls
 {
     internal class ServerKeyExchange : HandshakeBody
     {
-        private CipherSuite _cipher;
-
         public ServerDHParams Params;
         public ServerECDHParams ECParams;
 
@@ -22,10 +20,16 @@ namespace Zergatul.Net.Tls
         {
             get
             {
-                throw new NotImplementedException();
+                // TODO temp
+                var list = new List<byte>();
+                var bw = new BinaryWriter(list);
+                WriteTo(bw);
+                return (ushort)list.Count;
             }
         }
         public override bool Encrypted => false;
+
+        private CipherSuite _cipher;
 
         public ServerKeyExchange(CipherSuite cipher)
         {
@@ -39,7 +43,7 @@ namespace Zergatul.Net.Tls
 
         public override void WriteTo(BinaryWriter writer)
         {
-            throw new NotImplementedException();
+            _cipher.WriteServerKeyExchange(this, writer);
         }
     }
 }

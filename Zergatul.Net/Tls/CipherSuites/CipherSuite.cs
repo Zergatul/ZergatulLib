@@ -18,15 +18,11 @@ namespace Zergatul.Net.Tls.CipherSuites
 
         protected ByteArray _preMasterSecret;
 
-        private HMACSHA256 _hmacSHA256;
-
         public CipherSuite(SecurityParameters secParams, Role role, ISecureRandom random)
         {
             this._secParams = secParams;
             this._role = role;
             this._random = random;
-
-            this._hmacSHA256 = new HMACSHA256();
         }
 
         protected ByteArray MACEncryptKey
@@ -53,16 +49,40 @@ namespace Zergatul.Net.Tls.CipherSuites
             }
         }
 
+        public virtual ServerKeyExchange GetServerKeyExchange()
+        {
+            var message = new ServerKeyExchange(this);
+            _keyExchange.GetServerKeyExchange(message);
+            return message;
+        }
+
         public virtual void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
         {
             _keyExchange.ReadServerKeyExchange(message, reader);
         }
 
+        public virtual void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
+        {
+            _keyExchange.WriteServerKeyExchange(message, writer);
+        }
+
         public virtual ClientKeyExchange GetClientKeyExchange()
         {
-            var result = _keyExchange.GenerateClientKeyExchange();
-            _preMasterSecret = result.PreMasterSecret;
-            return result.Message;
+            var message = new ClientKeyExchange(this);
+            _keyExchange.GetClientKeyExchange(message);
+            _preMasterSecret = _keyExchange.PreMasterSecret;
+            return message;
+        }
+
+        public virtual void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader)
+        {
+            _keyExchange.ReadClientKeyExchange(message, reader);
+            _preMasterSecret = _keyExchange.PreMasterSecret;
+        }
+
+        public virtual void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
+        {
+            _keyExchange.WriteClientKeyExchange(message, writer);
         }
 
         public virtual void CalculateMasterSecret()
@@ -108,7 +128,8 @@ namespace Zergatul.Net.Tls.CipherSuites
 
         protected ByteArray HMACHash(ByteArray secret, ByteArray seed)
         {
-            return _hmacSHA256.Compute(secret, seed);
+            var hmac = new HMACSHA256(secret);
+            return hmac.Compute(seed);
         }
 
         protected ByteArray PHash(ByteArray secret, ByteArray seed, int length)
@@ -183,6 +204,8 @@ namespace Zergatul.Net.Tls.CipherSuites
             position += secParams.FixedIVLength;
             _keys.ServerIV = keyBlock.SubArray(position, secParams.FixedIVLength);
             position += secParams.FixedIVLength;
+
+            InitHMAC();
         }
 
         public ByteArray ProcessPlaintext(ByteArray data, ulong sequenceNum)
@@ -255,6 +278,8 @@ namespace Zergatul.Net.Tls.CipherSuites
             dataCiphertext.Length = (ushort)(fragment.IV.Length + dataCiphertext.Content.Length);
         }
 
+        protected abstract void InitHMAC();
+
         public ByteArray ComputeMAC(ulong sequenceNum, TLSCompressed data)
         {
             // RFC 5246 // Page 21
@@ -275,7 +300,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                 MAC
                     The MAC algorithm specified by SecurityParameters.mac_algorithm.
             */
-            return _hmac.Compute(MACEncryptKey,
+            return _hmac.Compute(
                 new ByteArray(sequenceNum) +
                 new ByteArray((byte)data.Type) +
                 new ByteArray((ushort)data.Version) +

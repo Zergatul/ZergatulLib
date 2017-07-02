@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Net.Tls.CipherSuites;
 
 namespace Zergatul.Net.Tls
 {
@@ -21,20 +22,21 @@ namespace Zergatul.Net.Tls
         }
         public override bool Encrypted => false;
 
+        private CipherSuite _cipher;
+
+        public ClientKeyExchange(CipherSuite cipher)
+        {
+            this._cipher = cipher;
+        }
+
         public override void Read(BinaryReader reader)
         {
-            throw new NotImplementedException();
+            _cipher.ReadClientKeyExchange(this, reader);
         }
 
         public override void WriteTo(BinaryWriter writer)
         {
-            if (DHPublic != null)
-            {
-                writer.WriteShort((ushort)DHPublic.DH_Yc.Length);
-                writer.WriteBytes(DHPublic.DH_Yc);
-                return;
-            }
-            throw new NotImplementedException();
+            _cipher.WriteClientKeyExchange(this, writer);
         }
     }
 }

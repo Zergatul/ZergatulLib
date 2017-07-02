@@ -219,6 +219,99 @@ namespace Zergatul.Net.Tls
             message.Read(_reader);
         }
 
+        public void AuthenticateAsServer(string host, X509Certificate2 certificate)
+        {
+            _role = Role.Server;
+
+            var random = new Random
+            {
+                GMTUnixTime = _utils.GetGMTUnixTime(),
+                RandomBytes = _utils.GetRandomBytes(28)
+            };
+            _secParams.ServerRandom = new ByteArray(random.ToArray());
+
+            var message = new RecordMessage(this);
+            message.OnContentMessageRead += OnContentMessage;
+            message.Read(_reader);
+
+            // TEMP!
+            SelectedCipher = CipherSuite.Resolve(CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA, _secParams, _role, _random);
+
+            message = new RecordMessage(this)
+            {
+                RecordType = ContentType.Handshake,
+                Version = ProtocolVersion.Tls12,
+                ContentMessages = new List<ContentMessage>
+                {
+                    new HandshakeMessage
+                    {
+                        MessageType = HandshakeType.ServerHello,
+                        Body = new ServerHello
+                        {
+                            ServerVersion = ProtocolVersion.Tls12,
+                            Random = random,
+                            CipherSuite = CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+                            Extensions = new List<TlsExtension>
+                            {
+                                new TlsExtension
+                                {
+                                    Type = ExtensionType.RenegotiationInfo,
+                                    Data = new byte[] { 0 }
+                                }
+                            },
+                            SessionID = new byte[0]
+                        }
+                    },
+                    new HandshakeMessage
+                    {
+                        MessageType = HandshakeType.Certificate,
+                        Body = new Certificate
+                        {
+                            Certificates = new List<X509Certificate2>
+                            {
+                                certificate
+                            }
+                        }
+                    }
+                }
+            };
+            message.Write(_innerStream);
+
+            var serverKeyExchange = SelectedCipher.GetServerKeyExchange();
+            // signing
+            var rsa = certificate.PrivateKey as System.Security.Cryptography.RSACryptoServiceProvider;
+            var oid = System.Security.Cryptography.CryptoConfig.MapNameToOID("SHA1");
+            var dhParamsBytes = serverKeyExchange.Params.ToArray();
+            var signedBytes = _secParams.ClientRandom + _secParams.ServerRandom + dhParamsBytes;
+            serverKeyExchange.Signature = rsa.SignData(signedBytes.ToArray(), oid);
+
+            message = new RecordMessage(this)
+            {
+                RecordType = ContentType.Handshake,
+                Version = ProtocolVersion.Tls12,
+                ContentMessages = new List<ContentMessage>
+                {
+                    new HandshakeMessage
+                    {
+                        MessageType = HandshakeType.ServerKeyExchange,
+                        Body = serverKeyExchange
+                    },
+                    new HandshakeMessage
+                    {
+                        MessageType = HandshakeType.ServerHelloDone,
+                        Body = new ServerHelloDone()
+                    }
+                }
+            };
+            message.Write(_innerStream);
+
+            message = new RecordMessage(this);
+            message.OnContentMessageRead += OnContentMessage;
+            message.Read(_reader);
+
+            SelectedCipher.CalculateMasterSecret();
+        }
+
         #region Message read events
 
         internal void OnContentMessage(object sender, ContentMessageReadEventArgs e)
@@ -226,6 +319,8 @@ namespace Zergatul.Net.Tls
             if (e.Message is HandshakeMessage)
             {
                 var message = e.Message as HandshakeMessage;
+                if (message.Body is ClientHello)
+                    OnClientHello(message.Body as ClientHello);
                 if (message.Body is ServerHello)
                     OnServerHello(message.Body as ServerHello);
                 if (message.Body is Certificate)
@@ -233,6 +328,11 @@ namespace Zergatul.Net.Tls
                 if (message.Body is ServerKeyExchange)
                     OnServerKeyExchange(message.Body as ServerKeyExchange);
             }
+        }
+
+        private void OnClientHello(ClientHello message)
+        {
+            _secParams.ClientRandom = new ByteArray(message.Random.ToArray());
         }
 
         private void OnServerHello(ServerHello message)

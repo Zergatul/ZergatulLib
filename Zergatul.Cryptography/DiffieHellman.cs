@@ -16,22 +16,22 @@ namespace Zergatul.Cryptography
         /// <summary>
         /// {A} private key
         /// </summary>
-        public BigInteger Xa { get; private set; }
+        public BigInteger Xa { get; set; }
 
         /// <summary>
         /// {B} private key
         /// </summary>
-        public BigInteger Xb { get; private set; }
+        public BigInteger Xb { get; set; }
 
         /// <summary>
         /// {A} public key
         /// </summary>
-        public BigInteger Ya { get; private set; }
+        public BigInteger Ya { get; set; }
 
         /// <summary>
         /// {B} public key
         /// </summary>
-        public BigInteger Yb { get; private set; }
+        public BigInteger Yb { get; set; }
 
         /// <summary>
         /// Shared secret
@@ -40,12 +40,22 @@ namespace Zergatul.Cryptography
 
         private ISecureRandom _rnd;
 
-        public DiffieHellman(BigInteger g, BigInteger p, BigInteger Ya, ISecureRandom rnd)
+        public DiffieHellman(BigInteger g, BigInteger p, ISecureRandom rnd)
         {
             this.p = p;
             this.g = g;
-            this.Ya = Ya;
             this._rnd = rnd;
+        }
+
+        public void CalculateForASideStep1()
+        {
+            Xa = BigInteger.Random(p, _rnd);
+            Ya = BigInteger.ModularExponentiation(g, Xa, p);
+        }
+
+        public void CalculateForASideStep2()
+        {
+            ZZ = BigInteger.ModularExponentiation(Yb, Xa, p);
         }
 
         public void CalculateForBSide()

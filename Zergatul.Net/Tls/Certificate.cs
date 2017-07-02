@@ -10,14 +10,10 @@ namespace Zergatul.Net.Tls
     internal class Certificate : HandshakeBody
     {
         public List<X509Certificate2> Certificates = new List<X509Certificate2>();
-        public override ushort Length
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public override ushort Length => (ushort)(3 + CertificatesLength);
         public override bool Encrypted => false;
+
+        private int CertificatesLength => Certificates.Sum(c => c.RawData.Length + 3);
 
         public override void Read(BinaryReader reader)
         {
@@ -30,7 +26,12 @@ namespace Zergatul.Net.Tls
 
         public override void WriteTo(BinaryWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteUInt24(CertificatesLength);
+            foreach (var cert in Certificates)
+            {
+                writer.WriteUInt24(cert.RawData.Length);
+                writer.WriteBytes(cert.RawData);
+            }
         }
     }
 }

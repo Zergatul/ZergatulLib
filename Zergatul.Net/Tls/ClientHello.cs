@@ -29,7 +29,38 @@ namespace Zergatul.Net.Tls
 
         public override void Read(BinaryReader reader)
         {
+            ClientVersion = (ProtocolVersion)reader.ReadShort();
 
+            Random = new Random();
+            Random.ReadFrom(reader);
+
+            byte sessionIDLength = reader.ReadByte();
+            if (sessionIDLength == 0)
+                SessionID = null;
+            else
+                throw new NotImplementedException();
+
+            ushort cipherSuitesLength = reader.ReadShort();
+            if (cipherSuitesLength % 2 == 1 || cipherSuitesLength == 0)
+                throw new TlsStreamException("Invalid CipherSuites Length");
+            CipherSuites = new CipherSuiteType[cipherSuitesLength / 2];
+            for (int i = 0; i < CipherSuites.Length; i++)
+                CipherSuites[i] = (CipherSuiteType)reader.ReadShort();
+
+            // Compression methods, skip for now
+            byte compressionMethodsLength = reader.ReadByte();
+            for (int i = 0; i < compressionMethodsLength; i++)
+                reader.ReadByte();
+
+            ushort extensionLength = reader.ReadShort();
+            var counter = reader.StartCounter(extensionLength);
+            while (counter.CanRead)
+            {
+                var ext = new TlsExtension();
+                ext.Type = (ExtensionType)reader.ReadShort();
+                ushort extLength = reader.ReadShort();
+                ext.Data = reader.ReadBytes(extLength);
+            }
         }
 
         public override void WriteTo(BinaryWriter writer)
@@ -54,7 +85,6 @@ namespace Zergatul.Net.Tls
             writer.WriteByte(1);
             writer.WriteByte(0);
 
-            // no extensions
             writer.WriteShort(ExtensionsLength);
             for (int i = 0; i < Extensions.Length; i++)
             {
