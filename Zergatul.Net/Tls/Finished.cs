@@ -8,14 +8,13 @@ namespace Zergatul.Net.Tls
 {
     internal class Finished : HandshakeBody
     {
-        public override ushort Length => (ushort)Data.Length;
-        public override bool Encrypted => true;
-
         public ByteArray Data;
+
+        public Finished() : base(HandshakeType.Finished) { }
 
         public override void Read(BinaryReader reader)
         {
-            //Data = reader.ReadToEnd();
+            Data = new ByteArray(reader.ReadToEnd());
         }
 
         public override void WriteTo(BinaryWriter writer)

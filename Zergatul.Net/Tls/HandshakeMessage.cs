@@ -11,37 +11,41 @@ namespace Zergatul.Net.Tls
     {
         private CipherSuite _cipher;
 
-        public HandshakeType MessageType;
-        public override ushort Length => (ushort)(Body.Length + 4);
         public HandshakeBody Body;
 
-        public HandshakeMessage(CipherSuite cipher = null)
+        public HandshakeMessage(HandshakeBody body, CipherSuite cipher = null)
         {
+            this.Body = body;
             this._cipher = cipher;
         }
 
         public override void Read(BinaryReader reader)
         {
-            MessageType = (HandshakeType)reader.ReadByte();
+            var type = (HandshakeType)reader.ReadByte();
             var length = reader.ReadUInt24();
 
             using (reader.SetReadLimit(length))
             {
-                ResolveHandshakeBody();
+                ResolveHandshakeBody(type);
                 Body.Read(reader);
             }
         }
 
         public override void Write(BinaryWriter writer)
         {
-            writer.WriteByte((byte)MessageType);
-            writer.WriteUInt24(Body.Length);
-            Body.WriteTo(writer);
+            writer.WriteByte((byte)Body.Type);
+
+            var content = new List<byte>();
+            var contentWriter = new BinaryWriter(content);
+            Body.WriteTo(contentWriter);
+
+            writer.WriteUInt24(content.Count);
+            writer.WriteBytes(content.ToArray());
         }
 
-        private void ResolveHandshakeBody()
+        private void ResolveHandshakeBody(HandshakeType type)
         {
-            switch (MessageType)
+            switch (type)
             {
                 case HandshakeType.ClientHello:
                     Body = new ClientHello();

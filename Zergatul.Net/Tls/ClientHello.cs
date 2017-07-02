@@ -11,28 +11,20 @@ namespace Zergatul.Net.Tls
     internal class ClientHello : HandshakeBody
     {
         public ProtocolVersion ClientVersion;
-        public Random Random;
+        public byte[] Random;
         public byte[] SessionID = new byte[0];
         public CipherSuiteType[] CipherSuites;
         public TlsExtension[] Extensions = new TlsExtension[0];
 
-        public override ushort Length => (ushort)
-            (2 + // Version
-            32 + // Random
-            1 + SessionID.Length + // SessionID
-            CipherSuites.Length * 2 + 2 + // CipherSuites
-            2 + // Compression Methods
-            2 + ExtensionsLength); // Extensions
-        public override bool Encrypted => false;
-
         private ushort ExtensionsLength => (ushort)Extensions.DefaultIfEmpty().Sum(e => 4 + e.Length);
+
+        public ClientHello() : base(HandshakeType.ClientHello) { }
 
         public override void Read(BinaryReader reader)
         {
             ClientVersion = (ProtocolVersion)reader.ReadShort();
 
-            Random = new Random();
-            Random.ReadFrom(reader);
+            Random = reader.ReadBytes(32);
 
             byte sessionIDLength = reader.ReadByte();
             if (sessionIDLength == 0)
@@ -67,7 +59,7 @@ namespace Zergatul.Net.Tls
         {
             writer.WriteShort((ushort)ClientVersion);
 
-            Random.WriteTo(writer);
+            writer.WriteBytes(Random);
 
             if (SessionID != null)
             {

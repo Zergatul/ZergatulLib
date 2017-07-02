@@ -11,20 +11,10 @@ namespace Zergatul.Net.Tls
     {
         public ClientDiffieHellmanPublic DHPublic;
 
-        public override ushort Length
-        {
-            get
-            {
-                if (DHPublic != null)
-                    return (ushort)(2 + DHPublic.DH_Yc.Length);
-                throw new NotImplementedException();
-            }
-        }
-        public override bool Encrypted => false;
-
         private CipherSuite _cipher;
 
         public ClientKeyExchange(CipherSuite cipher)
+            : base(HandshakeType.ClientKeyExchange)
         {
             this._cipher = cipher;
         }

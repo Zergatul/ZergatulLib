@@ -11,30 +11,19 @@ namespace Zergatul.Net.Tls
     internal class ServerHello : HandshakeBody
     {
         public ProtocolVersion ServerVersion;
-        public Random Random;
+        public byte[] Random;
         public byte[] SessionID = new byte[0];
         public CipherSuiteType CipherSuite;
         public List<TlsExtension> Extensions = new List<TlsExtension>();
-        public override ushort Length => (ushort)
-            (2 +  // ServerVersion
-            32 + // Random
-            1 + SessionID.Length + // Session
-            2 + // CipherSuite
-            1 + // Compression Method
-            2 + // Extension Length
-            ExtensionsLength);
-        public override bool Encrypted => false;
 
         private ushort ExtensionsLength => (ushort)Extensions.Sum(e => 4 + e.Length);
+
+        public ServerHello() : base(HandshakeType.ServerHello) { }
 
         public override void Read(BinaryReader reader)
         {
             ServerVersion = (ProtocolVersion)reader.ReadShort();
-            Random = new Random
-            {
-                GMTUnixTime = reader.ReadUInt32(),
-                RandomBytes = reader.ReadBytes(28)
-            };
+            Random = reader.ReadBytes(32);
             SessionID = reader.ReadBytes(reader.ReadByte());
             CipherSuite = (CipherSuiteType)reader.ReadShort();
             var compressionMethod = reader.ReadByte();
@@ -53,7 +42,7 @@ namespace Zergatul.Net.Tls
         public override void WriteTo(BinaryWriter writer)
         {
             writer.WriteShort((ushort)ServerVersion);
-            Random.WriteTo(writer);
+            writer.WriteBytes(Random);
             writer.WriteByte((byte)SessionID.Length);
             // TODO: assume no session
             writer.WriteShort((ushort)CipherSuite);

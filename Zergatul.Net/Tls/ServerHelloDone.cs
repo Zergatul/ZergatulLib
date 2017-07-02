@@ -8,8 +8,7 @@ namespace Zergatul.Net.Tls
 {
     internal class ServerHelloDone : HandshakeBody
     {
-        public override ushort Length => 0;
-        public override bool Encrypted => false;
+        public ServerHelloDone() : base(HandshakeType.ServerHelloDone) { }
 
         public override void Read(BinaryReader reader)
         {

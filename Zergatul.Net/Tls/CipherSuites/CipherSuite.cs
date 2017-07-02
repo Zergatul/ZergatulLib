@@ -13,8 +13,10 @@ namespace Zergatul.Net.Tls.CipherSuites
         protected TlsConnectionKeys _keys;
 
         protected AbstractKeyExchange _keyExchange;
-        protected AbstractHMAC _hmac;
         protected AbstractBlockCipher _blockCipher;
+        protected HMACBuilder _hmacBuilder;
+        protected AbstractHMAC _clientHMAC;
+        protected AbstractHMAC _serverHMAC;
 
         protected ByteArray _preMasterSecret;
 
@@ -25,14 +27,26 @@ namespace Zergatul.Net.Tls.CipherSuites
             this._random = random;
         }
 
-        protected ByteArray MACEncryptKey
+        protected AbstractHMAC EncryptionMAC
         {
             get
             {
                 if (_role == Role.Client)
-                    return _keys.ClientMACkey;
+                    return _clientHMAC;
                 if (_role == Role.Server)
-                    return _keys.ServerMACkey;
+                    return _serverHMAC;
+                throw new TlsStreamException("Invalid role");
+            }
+        }
+
+        protected AbstractHMAC DecryptionMAC
+        {
+            get
+            {
+                if (_role == Role.Client)
+                    return _serverHMAC;
+                if (_role == Role.Server)
+                    return _clientHMAC;
                 throw new TlsStreamException("Invalid role");
             }
         }
@@ -45,6 +59,18 @@ namespace Zergatul.Net.Tls.CipherSuites
                     return _keys.ClientEncKey;
                 if (_role == Role.Server)
                     return _keys.ServerEncKey;
+                throw new TlsStreamException("Invalid role");
+            }
+        }
+
+        protected ByteArray BlockCipherDecryptKey
+        {
+            get
+            {
+                if (_role == Role.Client)
+                    return _keys.ServerEncKey;
+                if (_role == Role.Server)
+                    return _keys.ClientEncKey;
                 throw new TlsStreamException("Invalid role");
             }
         }
@@ -98,7 +124,7 @@ namespace Zergatul.Net.Tls.CipherSuites
             _preMasterSecret.ClearMemory();
         }
 
-        public virtual Finished GetFinished(ByteArray data)
+        public virtual ByteArray GetFinishedVerifyData(ByteArray data, Role role)
         {
             // RFC 5246
             // https://tools.ietf.org/html/rfc5246#section-7.4.9
@@ -112,18 +138,22 @@ namespace Zergatul.Net.Tls.CipherSuites
                 Future cipher suites MAY specify other lengths but such length
                 MUST be at least 12 bytes.
             */
-            string label = _role == Role.Client ? "client finished" : "server finished";
-            var verifyData = PseudoRandomFunction(_secParams.MasterSecret, label, Hash(data), 12);
+            string label = role == Role.Client ? "client finished" : "server finished";
+            return PseudoRandomFunction(_secParams.MasterSecret, label, Hash(data), 12);
+        }
+
+        public virtual Finished GetFinished(ByteArray data)
+        {
             return new Finished
             {
-                Data = verifyData
+                Data = GetFinishedVerifyData(data, _role)
             };
         }
 
         protected virtual ByteArray Hash(ByteArray data)
         {
             var sha256 = new System.Security.Cryptography.SHA256Managed();
-            return new ByteArray(data.ToArray());
+            return new ByteArray(sha256.ComputeHash(data.ToArray()));
         }
 
         protected ByteArray HMACHash(ByteArray secret, ByteArray seed)
@@ -160,7 +190,7 @@ namespace Zergatul.Net.Tls.CipherSuites
             return PHash(secret, Encoding.ASCII.GetBytes(label) + seed, length);
         }
 
-        public void GenerateKeyMaterial(SecurityParameters secParams)
+        public void GenerateKeyMaterial()
         {
             // RFC 5426 // Page 25
             /*
@@ -172,10 +202,10 @@ namespace Zergatul.Net.Tls.CipherSuites
                       SecurityParameters.client_random);
             */
             var keyBlock = PseudoRandomFunction(
-                secParams.MasterSecret,
+                _secParams.MasterSecret,
                 "key expansion",
-                secParams.ServerRandom + secParams.ClientRandom,
-                2 * (secParams.MACLength + secParams.EncKeyLength + secParams.FixedIVLength));
+                _secParams.ServerRandom + _secParams.ClientRandom,
+                2 * (_secParams.MACLength + _secParams.EncKeyLength + _secParams.FixedIVLength));
 
             // RFC 5426 // Page 25
             /*
@@ -192,28 +222,117 @@ namespace Zergatul.Net.Tls.CipherSuites
             int position = 0;
             _keys = new TlsConnectionKeys();
 
-            _keys.ClientMACkey = keyBlock.SubArray(position, secParams.MACLength);
-            position += secParams.MACLength;
-            _keys.ServerMACkey = keyBlock.SubArray(position, secParams.MACLength);
-            position += secParams.MACLength;
-            _keys.ClientEncKey = keyBlock.SubArray(position, secParams.EncKeyLength);
-            position += secParams.EncKeyLength;
-            _keys.ServerEncKey = keyBlock.SubArray(position, secParams.EncKeyLength);
-            position += secParams.EncKeyLength;
-            _keys.ClientIV = keyBlock.SubArray(position, secParams.FixedIVLength);
-            position += secParams.FixedIVLength;
-            _keys.ServerIV = keyBlock.SubArray(position, secParams.FixedIVLength);
-            position += secParams.FixedIVLength;
+            _keys.ClientMACkey = keyBlock.SubArray(position, _secParams.MACLength);
+            position += _secParams.MACLength;
+            _keys.ServerMACkey = keyBlock.SubArray(position, _secParams.MACLength);
+            position += _secParams.MACLength;
+            _keys.ClientEncKey = keyBlock.SubArray(position, _secParams.EncKeyLength);
+            position += _secParams.EncKeyLength;
+            _keys.ServerEncKey = keyBlock.SubArray(position, _secParams.EncKeyLength);
+            position += _secParams.EncKeyLength;
+            _keys.ClientIV = keyBlock.SubArray(position, _secParams.FixedIVLength);
+            position += _secParams.FixedIVLength;
+            _keys.ServerIV = keyBlock.SubArray(position, _secParams.FixedIVLength);
+            position += _secParams.FixedIVLength;
 
-            InitHMAC();
+            _serverHMAC = _hmacBuilder.Create(_keys.ServerMACkey);
+            _clientHMAC = _hmacBuilder.Create(_keys.ClientMACkey);
         }
 
-        public ByteArray ProcessPlaintext(ByteArray data, ulong sequenceNum)
+        public ByteArray Decode(ByteArray data, ContentType type, ProtocolVersion version, ulong sequenceNum)
+        {
+            var reader = new BinaryReader(data.ToArray());
+            var ciphertext = new TLSCiphertext();
+            switch (_secParams.CipherType)
+            {
+                case CipherType.Block:
+                    using (reader.SetReadLimit(data.Length))
+                    {
+                        ciphertext.Fragment = new GenericBlockCiphertext
+                        {
+                            IV = new ByteArray(reader.ReadBytes(_secParams.RecordIVLength))
+                        };
+                        ciphertext.Content = new ByteArray(reader.ReadToEnd());
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+            return Decompress(Decode(ciphertext, type, version, sequenceNum)).Fragment;
+        }
+
+        protected TLSPlaintext Decompress(TLSCompressed data)
+        {
+            return new TLSPlaintext
+            {
+                Type = data.Type,
+                Version = data.Version,
+                Length = data.Length,
+                Fragment = data.Fragment
+            };
+        }
+
+        protected TLSCompressed Decode(TLSCiphertext data, ContentType type, ProtocolVersion version, ulong sequenceNum)
+        {
+            var result = new TLSCompressed();
+            ComputeDecryptedContent(data, result, type, version, sequenceNum, data.Fragment as GenericBlockCiphertext);
+            return result;
+        }
+
+        private void ComputeDecryptedContent(TLSCiphertext dataCiphertext, TLSCompressed dataCompressed, ContentType type, ProtocolVersion version, ulong sequenceNum, GenericBlockCiphertext fragment)
+        {
+            var data = _blockCipher.Decrypt(fragment.IV, dataCiphertext.Content, BlockCipherDecryptKey).ToArray();
+            data = ValidateAndRemovePadding(data);
+            data = ValidateAndRemoveMAC(data, type, version, sequenceNum);
+            dataCompressed.Fragment = new ByteArray(data);
+        }
+
+        private byte[] ValidateAndRemovePadding(byte[] data)
+        {
+            byte last = data[data.Length - 1];
+            if (last + 1 > data.Length)
+                throw new TlsStreamException("Invalid padding length");
+
+            for (int i = data.Length - 1 - last; i < data.Length; i++)
+                if (data[i] != last)
+                    throw new TlsStreamException("Invalid padding");
+
+            byte[] result = new byte[data.Length - last - 1];
+            Array.Copy(data, result, result.Length);
+            return result;
+        }
+
+        private byte[] ValidateAndRemoveMAC(byte[] data, ContentType type, ProtocolVersion version, ulong sequenceNum)
+        {
+            if (data.Length < _secParams.MACLength)
+                throw new TlsStreamException("Invalid MAC length");
+
+            var mac = new byte[_secParams.MACLength];
+            Array.Copy(data, data.Length - mac.Length, mac, 0, mac.Length);
+
+            var result = new byte[data.Length - mac.Length];
+            Array.Copy(data, result, result.Length);
+
+            var calculatedMAC = DecryptionMAC.Compute(
+                new ByteArray(sequenceNum) +
+                new ByteArray((byte)type) +
+                new ByteArray((ushort)version) +
+                new ByteArray((ushort)result.Length) +
+                result);
+
+            for (int i = 0; i < mac.Length; i++)
+                if (mac[i] != calculatedMAC[i])
+                    throw new TlsStreamException("Invalid MAC");
+
+            return result;
+        }
+
+        public ByteArray Encode(ByteArray data, ContentType type, ProtocolVersion version, ulong sequenceNum)
         {
             var plaintext = new TLSPlaintext
             {
-                Type = ContentType.Handshake,
-                Version = ProtocolVersion.Tls12,
+                Type = type,
+                Version = version,
                 Length = (ushort)data.Length,
                 Fragment = data
             };
@@ -278,8 +397,6 @@ namespace Zergatul.Net.Tls.CipherSuites
             dataCiphertext.Length = (ushort)(fragment.IV.Length + dataCiphertext.Content.Length);
         }
 
-        protected abstract void InitHMAC();
-
         public ByteArray ComputeMAC(ulong sequenceNum, TLSCompressed data)
         {
             // RFC 5246 // Page 21
@@ -300,7 +417,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                 MAC
                     The MAC algorithm specified by SecurityParameters.mac_algorithm.
             */
-            return _hmac.Compute(
+            return EncryptionMAC.Compute(
                 new ByteArray(sequenceNum) +
                 new ByteArray((byte)data.Type) +
                 new ByteArray((ushort)data.Version) +
@@ -315,7 +432,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                 /*case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
                     return new TLS_DHE_RSA_WITH_AES_256_GCM_SHA384();*/
                 case CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-                    return new TLS_DHE_RSA_WITH_AES_256_CBC_SHA(secParams, role, random);
+                    return new TLS_DHE_RSA_WITH_AES_128_CBC_SHA(secParams, role, random);
                 case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
                     return new TLS_DHE_RSA_WITH_AES_256_CBC_SHA(secParams, role, random);
                 default:

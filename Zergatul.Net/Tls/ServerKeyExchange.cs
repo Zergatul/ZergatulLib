@@ -16,22 +16,10 @@ namespace Zergatul.Net.Tls
         public SignatureAndHashAlgorithm SignAndHashAlgo;
         public byte[] Signature;
 
-        public override ushort Length
-        {
-            get
-            {
-                // TODO temp
-                var list = new List<byte>();
-                var bw = new BinaryWriter(list);
-                WriteTo(bw);
-                return (ushort)list.Count;
-            }
-        }
-        public override bool Encrypted => false;
-
         private CipherSuite _cipher;
 
         public ServerKeyExchange(CipherSuite cipher)
+            : base(HandshakeType.ServerKeyExchange)
         {
             this._cipher = cipher;
         }

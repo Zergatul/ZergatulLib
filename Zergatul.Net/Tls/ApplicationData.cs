@@ -6,17 +6,18 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Net.Tls
 {
-    internal class ChangeCipherSpec : ContentMessage
+    internal class ApplicationData : ContentMessage
     {
+        public byte[] Data;
+
         public override void Read(BinaryReader reader)
         {
-            if (reader.ReadByte() != 1)
-                throw new TlsStreamException("Invalid ChangeCipherSpec message");
+            
         }
 
         public override void Write(BinaryWriter writer)
         {
-            writer.WriteByte(1);
+            writer.WriteBytes(Data);
         }
     }
 }
