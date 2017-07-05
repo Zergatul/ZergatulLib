@@ -16,9 +16,9 @@ namespace Zergatul.Net.Tls
         public SignatureAndHashAlgorithm SignAndHashAlgo;
         public byte[] Signature;
 
-        private CipherSuite _cipher;
+        private AbstractCipherSuite _cipher;
 
-        public ServerKeyExchange(CipherSuite cipher)
+        public ServerKeyExchange(AbstractCipherSuite cipher)
             : base(HandshakeType.ServerKeyExchange)
         {
             this._cipher = cipher;

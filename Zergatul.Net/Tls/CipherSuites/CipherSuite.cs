@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Text;
 using Zergatul.Cryptography;
+using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Net.Tls.CipherSuites
 {
-    internal abstract class CipherSuite
+    internal abstract class CipherSuite<KeyExchange, BlockCipher, HashFunction> : AbstractCipherSuite
+        where KeyExchange : AbstractKeyExchange, new()
+        where BlockCipher : AbstractBlockCipher, new()
+        where HashFunction : AbstractHash, new()
     {
         protected ISecureRandom _random;
 
@@ -12,22 +16,24 @@ namespace Zergatul.Net.Tls.CipherSuites
         protected Role _role;
         protected TlsConnectionKeys _keys;
 
-        protected AbstractKeyExchange _keyExchange;
+        protected KeyExchange _keyExchange;
         protected AbstractBlockCipher _blockCipher;
-        protected HMACBuilder _hmacBuilder;
-        protected AbstractHMAC _clientHMAC;
-        protected AbstractHMAC _serverHMAC;
+        protected HMAC<HashFunction> _clientHMAC;
+        protected HMAC<HashFunction> _serverHMAC;
 
         protected ByteArray _preMasterSecret;
 
         public CipherSuite(SecurityParameters secParams, Role role, ISecureRandom random)
         {
+            _keyExchange = new KeyExchange();
+            _keyExchange.Random = random;
+
             this._secParams = secParams;
             this._role = role;
             this._random = random;
         }
 
-        protected AbstractHMAC EncryptionMAC
+        protected HMAC<HashFunction> EncryptionMAC
         {
             get
             {
@@ -39,7 +45,7 @@ namespace Zergatul.Net.Tls.CipherSuites
             }
         }
 
-        protected AbstractHMAC DecryptionMAC
+        protected HMAC<HashFunction> DecryptionMAC
         {
             get
             {
@@ -75,24 +81,24 @@ namespace Zergatul.Net.Tls.CipherSuites
             }
         }
 
-        public virtual ServerKeyExchange GetServerKeyExchange()
+        public override ServerKeyExchange GetServerKeyExchange()
         {
             var message = new ServerKeyExchange(this);
             _keyExchange.GetServerKeyExchange(message);
             return message;
         }
 
-        public virtual void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
+        public override void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
         {
             _keyExchange.ReadServerKeyExchange(message, reader);
         }
 
-        public virtual void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
+        public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
         {
             _keyExchange.WriteServerKeyExchange(message, writer);
         }
 
-        public virtual ClientKeyExchange GetClientKeyExchange()
+        public override ClientKeyExchange GetClientKeyExchange()
         {
             var message = new ClientKeyExchange(this);
             _keyExchange.GetClientKeyExchange(message);
@@ -100,13 +106,13 @@ namespace Zergatul.Net.Tls.CipherSuites
             return message;
         }
 
-        public virtual void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader)
+        public override void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader)
         {
             _keyExchange.ReadClientKeyExchange(message, reader);
             _preMasterSecret = _keyExchange.PreMasterSecret;
         }
 
-        public virtual void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
+        public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
             _keyExchange.WriteClientKeyExchange(message, writer);
         }
@@ -158,8 +164,7 @@ namespace Zergatul.Net.Tls.CipherSuites
 
         protected ByteArray HMACHash(ByteArray secret, ByteArray seed)
         {
-            var hmac = new HMACSHA256(secret);
-            return hmac.Compute(seed);
+            return new HMAC<SHA256>(secret).ComputeHash(seed);
         }
 
         protected ByteArray PHash(ByteArray secret, ByteArray seed, int length)
@@ -235,8 +240,8 @@ namespace Zergatul.Net.Tls.CipherSuites
             _keys.ServerIV = keyBlock.SubArray(position, _secParams.FixedIVLength);
             position += _secParams.FixedIVLength;
 
-            _serverHMAC = _hmacBuilder.Create(_keys.ServerMACkey);
-            _clientHMAC = _hmacBuilder.Create(_keys.ClientMACkey);
+            _serverHMAC = new HMAC<HashFunction>(_keys.ServerMACkey);
+            _clientHMAC = new HMAC<HashFunction>(_keys.ClientMACkey);
         }
 
         public ByteArray Decode(ByteArray data, ContentType type, ProtocolVersion version, ulong sequenceNum)
@@ -313,7 +318,7 @@ namespace Zergatul.Net.Tls.CipherSuites
             var result = new byte[data.Length - mac.Length];
             Array.Copy(data, result, result.Length);
 
-            var calculatedMAC = DecryptionMAC.Compute(
+            var calculatedMAC = DecryptionMAC.ComputeHash(
                 new ByteArray(sequenceNum) +
                 new ByteArray((byte)type) +
                 new ByteArray((ushort)version) +
@@ -417,7 +422,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                 MAC
                     The MAC algorithm specified by SecurityParameters.mac_algorithm.
             */
-            return EncryptionMAC.Compute(
+            return EncryptionMAC.ComputeHash(
                 new ByteArray(sequenceNum) +
                 new ByteArray((byte)data.Type) +
                 new ByteArray((ushort)data.Version) +
@@ -425,16 +430,16 @@ namespace Zergatul.Net.Tls.CipherSuites
                 data.Fragment);
         }
 
-        public static CipherSuite Resolve(CipherSuiteType type, SecurityParameters secParams, Role role, ISecureRandom random)
+        public static AbstractCipherSuite Resolve(CipherSuiteType type, SecurityParameters secParams, Role role, ISecureRandom random)
         {
             switch (type)
             {
                 /*case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
                     return new TLS_DHE_RSA_WITH_AES_256_GCM_SHA384();*/
-                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+                /*case CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
                     return new TLS_DHE_RSA_WITH_AES_128_CBC_SHA(secParams, role, random);
                 case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                    return new TLS_DHE_RSA_WITH_AES_256_CBC_SHA(secParams, role, random);
+                    return new TLS_DHE_RSA_WITH_AES_256_CBC_SHA(secParams, role, random);*/
                 default:
                     throw new NotImplementedException();
             }

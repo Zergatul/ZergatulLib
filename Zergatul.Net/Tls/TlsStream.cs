@@ -22,10 +22,10 @@ namespace Zergatul.Net.Tls
     // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
 
     // TODO
-    // 1. Rewrite Length logic, maybe write to buffer and then use buffer length
-    // 2. Track TLS state
-    // 3. Check message length, allow splitting messages on record layer
-    // 4. Think how to merge 4 handshake messages for server (write should process messsages as soon as it writes)
+    // * Check message length, allow splitting messages on record layer
+    // * Think how to merge 4 handshake messages for server (write should process messsages as soon as it writes) add method writetobuffer and flush buffer
+    // * Read alerts???
+    // * test connection from bouncy to .net sslstream
     public class TlsStream : Stream
     {
         private Stream _innerStream;
@@ -118,6 +118,14 @@ namespace Zergatul.Net.Tls
             }
         }
 
+        private RecordMessage ReadSingleRecordMessage()
+        {
+            var message = new RecordMessage(this);
+            message.OnContentMessage += OnContentMessage;
+            message.Read(_reader);
+            return message;
+        }
+
         private void WriteRecordMessage(RecordMessage message)
         {
             message.OnContentMessage += OnContentMessage;
@@ -175,14 +183,14 @@ namespace Zergatul.Net.Tls
                     /*CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
                     CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,*/
                     CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                    CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+                    //CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
                     /*CipherSuiteType.TLS_RSA_WITH_AES_256_GCM_SHA384,
                     CipherSuiteType.TLS_RSA_WITH_AES_128_GCM_SHA256,
                     CipherSuiteType.TLS_RSA_WITH_AES_256_CBC_SHA256,
                     CipherSuiteType.TLS_RSA_WITH_AES_128_CBC_SHA256,
                     CipherSuiteType.TLS_RSA_WITH_AES_256_CBC_SHA,
                     CipherSuiteType.TLS_RSA_WITH_AES_128_CBC_SHA,*/
-                    CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                    /*CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
                     CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
                     CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
                     CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
@@ -195,7 +203,7 @@ namespace Zergatul.Net.Tls
                     CipherSuiteType.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
                     CipherSuiteType.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
                     CipherSuiteType.TLS_RSA_WITH_RC4_128_SHA,
-                    CipherSuiteType.TLS_RSA_WITH_RC4_128_MD5
+                    CipherSuiteType.TLS_RSA_WITH_RC4_128_MD5*/
                 },
                 Extensions = new TlsExtension[]
                 {
@@ -248,7 +256,7 @@ namespace Zergatul.Net.Tls
             {
                 ServerVersion = ProtocolVersion.Tls12,
                 Random = _secParams.ServerRandom.ToArray(),
-                CipherSuite = CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+                CipherSuite = CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
                 Extensions = new List<TlsExtension>
                 {
                     new TlsExtension
@@ -326,6 +334,8 @@ namespace Zergatul.Net.Tls
                 if (e.FromServer)
                     OnServerChangeCipherSpec();
             }
+            if (e.Message is ApplicationData)
+                OnApplicationData(e.Message as ApplicationData);
         }
 
         private void OnClientHello(ClientHello message)
@@ -479,7 +489,24 @@ namespace Zergatul.Net.Tls
             if (State != ConnectionState.ServerChangeCipherSpec)
                 throw new TlsStreamException("Unexpected Finished message");
 
+            if (validate)
+            {
+                var verifyData1 = SelectedCipher.GetFinishedVerifyData(new ByteArray(_serverFinishedHandshakeData), Role.Server).ToArray();
+                var verifyData2 = message.Data.ToArray();
+                if (verifyData1.Length != verifyData2.Length)
+                    throw new TlsStreamException("Invalid verify_data in Finished message");
+                for (int i = 0; i < verifyData1.Length; i++)
+                    if (verifyData1[i] != verifyData2[i])
+                        throw new TlsStreamException("Invalid verify_data in Finished message");
+            }
+
             State = ConnectionState.ServerFinished;
+        }
+
+        private void OnApplicationData(ApplicationData message)
+        {
+            if (State != ConnectionState.ServerFinished)
+                throw new TlsStreamException("Unexpected ApplicationData message");
         }
 
         #endregion
@@ -583,6 +610,8 @@ namespace Zergatul.Net.Tls
 
         #endregion
 
+        private List<byte> _readBuffer = new List<byte>();
+
         public override void Flush()
         {
             
@@ -590,7 +619,23 @@ namespace Zergatul.Net.Tls
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            while (_readBuffer.Count < count)
+            {
+                var message = ReadSingleRecordMessage();
+                foreach (var cm in message.ContentMessages)
+                    if (cm is ApplicationData)
+                    {
+                        var appData = cm as ApplicationData;
+                        _readBuffer.AddRange(appData.Data);
+                    }
+            }
+
+            for (int i = 0; i < count; i++)
+                buffer[offset + i] = _readBuffer[i];
+
+            _readBuffer.RemoveRange(0, count);
+
+            return count;
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -608,6 +653,12 @@ namespace Zergatul.Net.Tls
                 }
             });
         }
+
+        #endregion
+
+        #region Stream additional methods
+
+        public void Write(byte[] buffer) => Write(buffer, 0, buffer.Length);
 
         #endregion
     }

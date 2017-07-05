@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Math
+namespace Zergatul.Cryptography.BlockCipher
 {
-    public enum ByteOrder
+    public enum BlockCipherMode
     {
-        LittleEndian,
-        BigEndian
+        CBC
     }
 }

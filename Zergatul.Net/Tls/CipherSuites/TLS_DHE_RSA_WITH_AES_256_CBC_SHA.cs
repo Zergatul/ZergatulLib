@@ -14,7 +14,7 @@ namespace Zergatul.Net.Tls.CipherSuites
         {
             this._keyExchange = new DHEKeyExchange(random);
             this._blockCipher = new AES256(BlockCipherMode.CBC);
-            this._hmacBuilder = new HMACSHA256Builder();
+            this._hmacBuilder = new HMACSHA1Builder();
 
             secParams.CipherType = CipherType.Block;
             secParams.EncKeyLength = 32;

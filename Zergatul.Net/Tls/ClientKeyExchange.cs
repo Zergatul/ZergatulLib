@@ -11,9 +11,9 @@ namespace Zergatul.Net.Tls
     {
         public ClientDiffieHellmanPublic DHPublic;
 
-        private CipherSuite _cipher;
+        private AbstractCipherSuite _cipher;
 
-        public ClientKeyExchange(CipherSuite cipher)
+        public ClientKeyExchange(AbstractCipherSuite cipher)
             : base(HandshakeType.ClientKeyExchange)
         {
             this._cipher = cipher;

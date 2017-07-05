@@ -8,7 +8,7 @@ namespace Zergatul.Net.Tls.CipherSuites
 {
     internal abstract class AbstractBlockCipher
     {
-        protected BlockCipherMode _mode;
+        public BlockCipherMode Mode;
         protected int _keySizeBits;
         protected int _keySizeBytes;
         protected int _blockSizeBits;

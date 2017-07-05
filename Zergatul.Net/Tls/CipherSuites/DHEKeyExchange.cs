@@ -16,20 +16,13 @@ namespace Zergatul.Net.Tls.CipherSuites
         private BigInteger _Xs;
         private BigInteger _Ys;
 
-        private ISecureRandom _random;
-
-        public DHEKeyExchange(ISecureRandom random)
-        {
-            this._random = random;
-        }
-
         public override void GetServerKeyExchange(ServerKeyExchange message)
         {
             // RFC 3526, Group #14
             _p = new BigInteger("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956AE515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF", 16);
             _g = new BigInteger(2);
 
-            var dh = new DiffieHellman(_g, _p, _random);
+            var dh = new DiffieHellman(_g, _p, Random);
             dh.CalculateForASideStep1();
             _Xs = dh.Xa;
             _Ys = dh.Ya;
@@ -78,7 +71,7 @@ namespace Zergatul.Net.Tls.CipherSuites
 
         public override void GetClientKeyExchange(ClientKeyExchange message)
         {
-            var dh = new DiffieHellman(_g, _p, _random);
+            var dh = new DiffieHellman(_g, _p, Random);
             dh.Ya = _Ys;
             dh.CalculateForBSide();
 
@@ -97,7 +90,7 @@ namespace Zergatul.Net.Tls.CipherSuites
                 DH_Yc = reader.ReadBytes(reader.ReadShort())
             };
 
-            var dh = new DiffieHellman(_g, _p, _random);
+            var dh = new DiffieHellman(_g, _p, Random);
             dh.Xa = _Xs;
             dh.Yb = new BigInteger(message.DHPublic.DH_Yc, ByteOrder.BigEndian);
             dh.CalculateForASideStep2();

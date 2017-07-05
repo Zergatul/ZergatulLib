@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigInteger.cs" />
-    <Compile Include="ByteOrder.cs" />
     <Compile Include="Int128.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

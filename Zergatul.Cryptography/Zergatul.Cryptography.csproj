@@ -41,8 +41,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockCipher\AbstractBlockCipher.cs" />
+    <Compile Include="BlockCipher\AES.cs" />
+    <Compile Include="BlockCipher\AES256.cs" />
+    <Compile Include="BlockCipher\AES192.cs" />
+    <Compile Include="BlockCipher\AES128.cs" />
+    <Compile Include="BlockCipher\BlockCipherMode.cs" />
+    <Compile Include="BlockCipher\CBCDecryptor.cs" />
+    <Compile Include="BlockCipher\CBCEncryptor.cs" />
+    <Compile Include="BlockCipher\Decryptor.cs" />
+    <Compile Include="BlockCipher\Encryptor.cs" />
+    <Compile Include="Hash\AbstractHash.cs" />
+    <Compile Include="Hash\SHA1.cs" />
+    <Compile Include="Hash\SHA256.cs" />
     <Compile Include="DefaultSecureRandom.cs" />
     <Compile Include="DiffieHellman.cs" />
+    <Compile Include="Hash\HMAC.cs" />
     <Compile Include="ISecureRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

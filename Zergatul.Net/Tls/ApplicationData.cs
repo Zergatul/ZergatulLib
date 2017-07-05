@@ -12,7 +12,7 @@ namespace Zergatul.Net.Tls
 
         public override void Read(BinaryReader reader)
         {
-            
+            Data = reader.ReadToEnd();
         }
 
         public override void Write(BinaryWriter writer)

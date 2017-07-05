@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Cryptography;
 
-namespace Zergatul.Net
+namespace Zergatul
 {
-    internal class ByteArray
+    public class ByteArray
     {
         internal List<byte[]> Parts;
 
@@ -69,7 +68,7 @@ namespace Zergatul.Net
             this.Length = data.Length;
         }
 
-        public ByteArray(ISecureRandom random, int length)
+        public ByteArray(IRandom random, int length)
         {
             if (random == null)
                 throw new ArgumentNullException();

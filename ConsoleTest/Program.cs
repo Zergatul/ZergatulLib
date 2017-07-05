@@ -34,17 +34,22 @@ namespace Test
 
         static void Main(string[] args)
         {
-            /*var tcp = new TcpClient("localhost", 32028);
+            var client = new TcpClient("localhost", 32028);
+            var tls = new TlsStream(client.GetStream());
+            tls.AuthenticateAsClient("localhost");
 
-            TlsStream stream = new TlsStream(tcp.GetStream());*/
+            byte[] buffer = new byte[12];
+            tls.Read(buffer, 0, 12);
 
-            var server = new TcpListener(IPAddress.Any, 32028);
+            Console.WriteLine(Encoding.ASCII.GetString(buffer));
+
+            /*var server = new TcpListener(IPAddress.Any, 32028);
             server.Start();
             var client = server.AcceptTcpClient();
             var tls = new TlsStream(client.GetStream());
             tls.AuthenticateAsServer("localhost", new X509Certificate2("test.p12", "hh87$-Jqo"));
 
-            tls.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);
+            tls.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);*/
 
             Console.ReadLine();
 

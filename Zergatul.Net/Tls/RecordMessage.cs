@@ -100,6 +100,7 @@ namespace Zergatul.Net.Tls
 
             var decodedReader = new BinaryReader(plaintext.ToArray());
             var counter = decodedReader.StartCounter(plaintext.Length);
+            decodedReader.SetReadLimit(plaintext.Length);
             if (RecordType == ContentType.Handshake)
                 decodedReader.StartTracking(_tlsStream.HandshakeData);
 
@@ -113,6 +114,9 @@ namespace Zergatul.Net.Tls
                         break;
                     case ContentType.ChangeCipherSpec:
                         message = new ChangeCipherSpec();
+                        break;
+                    case ContentType.ApplicationData:
+                        message = new ApplicationData();
                         break;
                     default:
                         throw new NotImplementedException();
@@ -180,8 +184,14 @@ namespace Zergatul.Net.Tls
             var rawList = new List<byte>();
             var rawWriter = new BinaryWriter(rawList);
 
+            if (RecordType == ContentType.Handshake)
+                rawWriter.StartTracking(_tlsStream.HandshakeData);
+
             for (int i = 0; i < ContentMessages.Count; i++)
                 ContentMessages[i].Write(rawWriter);
+
+            rawWriter.StopTracking();
+
             var ciphertext = _tlsStream.SelectedCipher.Encode(new ByteArray(rawList.ToArray()), RecordType, Version, _tlsStream.EncodingSequenceNum);
             _tlsStream.IncEncodingSequenceNum();
 

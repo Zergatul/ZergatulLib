@@ -40,7 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ByteArray.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="NotSupportedByProtocolException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -57,8 +56,8 @@
     <Compile Include="Tls\ApplicationData.cs" />
     <Compile Include="Tls\ChangeCipherSpec.cs" />
     <Compile Include="Tls\CipherSuites\AbstractBlockCipher.cs" />
+    <Compile Include="Tls\CipherSuites\AbstractCipherSuite.cs" />
     <Compile Include="Tls\CipherSuites\AbstractKeyExchange.cs" />
-    <Compile Include="Tls\CipherSuites\AbstractHMAC.cs" />
     <Compile Include="Tls\CipherSuites\AES128.cs" />
     <Compile Include="Tls\CipherSuites\AES256.cs" />
     <Compile Include="Tls\CipherSuites\BlockCipherMode.cs" />
@@ -66,8 +65,6 @@
     <Compile Include="Tls\CipherSuites\CipherSuite.cs" />
     <Compile Include="Tls\CipherSuites\DHEKeyExchange.cs" />
     <Compile Include="Tls\CipherSuites\HMACBuilder.cs" />
-    <Compile Include="Tls\CipherSuites\HMACSHA1.cs" />
-    <Compile Include="Tls\CipherSuites\HMACSHA256.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_128_CBC_SHA.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_CBC_SHA.cs" />
     <Compile Include="Tls\CipherSuites\TLS_DHE_RSA_WITH_AES_256_GCM_SHA384.cs" />

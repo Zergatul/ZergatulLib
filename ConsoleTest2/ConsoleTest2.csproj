@@ -52,6 +52,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Zergatul.Cryptography\Zergatul.Cryptography.csproj">
+      <Project>{fd292544-74cd-4fcf-b564-efa21ef197ce}</Project>
+      <Name>Zergatul.Cryptography</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul.Net\Zergatul.Net.csproj">
+      <Project>{41f55f8b-92e7-45de-bd6b-46e0b2175d2a}</Project>
+      <Name>Zergatul.Net</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
