@@ -56,13 +56,9 @@
     <Compile Include="SimpleServer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zergatul.FTP\Zergatul.Ftp.csproj">
-      <Project>{ee9a0424-08f0-41da-84e8-5c8db3fe477b}</Project>
-      <Name>Zergatul.Ftp</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Zergatul.Net\Zergatul.Net.csproj">
-      <Project>{41f55f8b-92e7-45de-bd6b-46e0b2175d2a}</Project>
-      <Name>Zergatul.Net</Name>
+    <ProjectReference Include="..\Zergatul\Zergatul.csproj">
+      <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
+      <Name>Zergatul</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

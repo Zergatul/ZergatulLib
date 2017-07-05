@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
+using Zergatul.Math;
+using Zergatul;
 
 namespace Zergatul.Math.Tests
 {

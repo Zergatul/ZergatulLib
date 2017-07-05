@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Net.Tls;
+using Zergatul.Network.Tls;
 
 namespace ConsoleTest2
 {
@@ -15,8 +15,8 @@ namespace ConsoleTest2
     {
         static void Main(string[] args)
         {
-            RunServer(useDotNetTls: true);
-            //RunClient();
+            //RunServer(useDotNetTls: true);
+            RunClient();
         }
 
         static void RunServer(bool useDotNetTls)

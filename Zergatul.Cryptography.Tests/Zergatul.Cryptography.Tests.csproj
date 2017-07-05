@@ -59,15 +59,7 @@
     <Compile Include="BlockCipherTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zergatul.Cryptography\Zergatul.Cryptography.csproj">
-      <Project>{fd292544-74cd-4fcf-b564-efa21ef197ce}</Project>
-      <Name>Zergatul.Cryptography</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Zergatul.Math\Zergatul.Math.csproj">
-      <Project>{ab665131-7c0a-4424-97ef-e5a613584988}</Project>
-      <Name>Zergatul.Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Zergatul.System\Zergatul.csproj">
+    <ProjectReference Include="..\Zergatul\Zergatul.csproj">
       <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
       <Name>Zergatul</Name>
     </ProjectReference>

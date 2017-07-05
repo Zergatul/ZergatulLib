@@ -1,0 +1,167 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{70DCFA02-0D6B-4220-8E1C-F1B8BA158FAC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Zergatul</RootNamespace>
+    <AssemblyName>Zergatul</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BitHelper.cs" />
+    <Compile Include="ByteArray.cs" />
+    <Compile Include="ByteOrder.cs" />
+    <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
+    <Compile Include="Cryptography\BlockCipher\AES.cs" />
+    <Compile Include="Cryptography\BlockCipher\AES128.cs" />
+    <Compile Include="Cryptography\BlockCipher\AES192.cs" />
+    <Compile Include="Cryptography\BlockCipher\AES256.cs" />
+    <Compile Include="Cryptography\BlockCipher\BlockCipherMode.cs" />
+    <Compile Include="Cryptography\BlockCipher\CBCDecryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\CBCEncryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\Decryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\ECBDecryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\ECBEncryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\Encryptor.cs" />
+    <Compile Include="Cryptography\DefaultSecureRandom.cs" />
+    <Compile Include="Cryptography\DiffieHellman.cs" />
+    <Compile Include="Cryptography\Hash\AbstractHash.cs" />
+    <Compile Include="Cryptography\Hash\HMAC.cs" />
+    <Compile Include="Cryptography\Hash\SHA1.cs" />
+    <Compile Include="Cryptography\Hash\SHA256.cs" />
+    <Compile Include="Cryptography\ISecureRandom.cs" />
+    <Compile Include="Ftp\DefaultFtpListParser.cs" />
+    <Compile Include="Ftp\FtpBlockHeaderDescriptor.cs" />
+    <Compile Include="Ftp\FtpClient.cs" />
+    <Compile Include="Ftp\FtpCommands.cs" />
+    <Compile Include="Ftp\FtpConnection.cs" />
+    <Compile Include="Ftp\FtpControlStreamReader.cs" />
+    <Compile Include="Ftp\FtpDataChannelProtectionLevel.cs" />
+    <Compile Include="Ftp\FtpDataStreamReader.cs" />
+    <Compile Include="Ftp\FtpDataStreamWriter.cs" />
+    <Compile Include="Ftp\FtpException.cs" />
+    <Compile Include="Ftp\FtpFileInfo.cs" />
+    <Compile Include="Ftp\FtpNetworkProtocol.cs" />
+    <Compile Include="Ftp\FtpReplyCode.cs" />
+    <Compile Include="Ftp\FtpRepresentation.cs" />
+    <Compile Include="Ftp\FtpServerException.cs" />
+    <Compile Include="Ftp\FtpServerReply.cs" />
+    <Compile Include="Ftp\FtpTransferMode.cs" />
+    <Compile Include="Ftp\IFtpListParser.cs" />
+    <Compile Include="IRandom.cs" />
+    <Compile Include="Math\BigInteger.cs" />
+    <Compile Include="Math\Int128.cs" />
+    <Compile Include="Network\Constants.cs" />
+    <Compile Include="Network\NotSupportedByProtocolException.cs" />
+    <Compile Include="Network\Proxy\ChainProxy.cs" />
+    <Compile Include="Network\Proxy\HttpProxy.cs" />
+    <Compile Include="Network\Proxy\ProxyBase.cs" />
+    <Compile Include="Network\Proxy\Socks4.cs" />
+    <Compile Include="Network\Proxy\Socks4Exception.cs" />
+    <Compile Include="Network\Proxy\Socks5.cs" />
+    <Compile Include="Network\Proxy\Socks5Exception.cs" />
+    <Compile Include="Network\Tls\ApplicationData.cs" />
+    <Compile Include="Network\Tls\BinaryReader.cs" />
+    <Compile Include="Network\Tls\BinaryWriter.cs" />
+    <Compile Include="Network\Tls\Certificate.cs" />
+    <Compile Include="Network\Tls\ChangeCipherSpec.cs" />
+    <Compile Include="Network\Tls\CipherSuites\AbstractCipherSuite.cs" />
+    <Compile Include="Network\Tls\CipherSuites\AbstractKeyExchange.cs" />
+    <Compile Include="Network\Tls\CipherSuites\CipherSuite.cs" />
+    <Compile Include="Network\Tls\CipherSuites\CipherSuiteType.cs" />
+    <Compile Include="Network\Tls\CipherSuites\DHEKeyExchange.cs" />
+    <Compile Include="Network\Tls\CipherType.cs" />
+    <Compile Include="Network\Tls\ClientDiffieHellmanPublic.cs" />
+    <Compile Include="Network\Tls\ClientHello.cs" />
+    <Compile Include="Network\Tls\ClientKeyExchange.cs" />
+    <Compile Include="Network\Tls\ConnectionState.cs" />
+    <Compile Include="Network\Tls\ContentMessage.cs" />
+    <Compile Include="Network\Tls\ContentMessageReadEventArgs.cs" />
+    <Compile Include="Network\Tls\ContentType.cs" />
+    <Compile Include="Network\Tls\ECBasisType.cs" />
+    <Compile Include="Network\Tls\ECCurve.cs" />
+    <Compile Include="Network\Tls\ECCurveType.cs" />
+    <Compile Include="Network\Tls\ECParameters.cs" />
+    <Compile Include="Network\Tls\ECPoint.cs" />
+    <Compile Include="Network\Tls\Extensions\ExtensionType.cs" />
+    <Compile Include="Network\Tls\Extensions\HashAlgorithm.cs" />
+    <Compile Include="Network\Tls\Extensions\SignatureAlgorithm.cs" />
+    <Compile Include="Network\Tls\Extensions\SignatureAlgorithmsExtension.cs" />
+    <Compile Include="Network\Tls\Extensions\SignatureAndHashAlgorithm.cs" />
+    <Compile Include="Network\Tls\Extensions\TlsExtension.cs" />
+    <Compile Include="Network\Tls\Extensions\TlsExtensionFactory.cs" />
+    <Compile Include="Network\Tls\Finished.cs" />
+    <Compile Include="Network\Tls\GenericAEADCiphertext.cs" />
+    <Compile Include="Network\Tls\GenericBlockCiphertext.cs" />
+    <Compile Include="Network\Tls\GenericCiphertext.cs" />
+    <Compile Include="Network\Tls\GenericStreamCiphertext.cs" />
+    <Compile Include="Network\Tls\HandshakeBody.cs" />
+    <Compile Include="Network\Tls\HandshakeMessage.cs" />
+    <Compile Include="Network\Tls\HandshakeType.cs" />
+    <Compile Include="Network\Tls\InterceptionStream.cs" />
+    <Compile Include="Network\Tls\KeyExchangeAlgorithm.cs" />
+    <Compile Include="Network\Tls\NamedCurve.cs" />
+    <Compile Include="Network\Tls\ProtocolVersion.cs" />
+    <Compile Include="Network\Tls\Random.cs" />
+    <Compile Include="Network\Tls\ReadCounter.cs" />
+    <Compile Include="Network\Tls\ReadDataEventArgs.cs" />
+    <Compile Include="Network\Tls\RecordMessage.cs" />
+    <Compile Include="Network\Tls\Role.cs" />
+    <Compile Include="Network\Tls\SecurityParameters.cs" />
+    <Compile Include="Network\Tls\ServerDHParams.cs" />
+    <Compile Include="Network\Tls\ServerECDHParams.cs" />
+    <Compile Include="Network\Tls\ServerHello.cs" />
+    <Compile Include="Network\Tls\ServerHelloDone.cs" />
+    <Compile Include="Network\Tls\ServerKeyExchange.cs" />
+    <Compile Include="Network\Tls\TLSCiphertext.cs" />
+    <Compile Include="Network\Tls\TLSCompressed.cs" />
+    <Compile Include="Network\Tls\TlsConnectionKeys.cs" />
+    <Compile Include="Network\Tls\TLSPlaintext.cs" />
+    <Compile Include="Network\Tls\TlsStream.cs" />
+    <Compile Include="Network\Tls\TlsStreamException.cs" />
+    <Compile Include="Network\Tls\TlsUtils.cs" />
+    <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
