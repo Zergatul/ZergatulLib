@@ -176,13 +176,14 @@ namespace Zergatul.Network.Tls
                 Random = _secParams.ClientRandom.Array,
                 CipherSuites = new CipherSuiteType[]
                 {
+                    CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
                     /*CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
                     CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
                     CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
                     CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,*/
                     /*CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
                     CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,*/
-                    CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+                    //CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
                     //CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
                     /*CipherSuiteType.TLS_RSA_WITH_AES_256_GCM_SHA384,
                     CipherSuiteType.TLS_RSA_WITH_AES_128_GCM_SHA256,
@@ -256,7 +257,7 @@ namespace Zergatul.Network.Tls
             {
                 ServerVersion = ProtocolVersion.Tls12,
                 Random = _secParams.ServerRandom.Array,
-                CipherSuite = CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+                CipherSuite = CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
                 Extensions = new List<TlsExtension>
                 {
                     new TlsExtension

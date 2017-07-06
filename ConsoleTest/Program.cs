@@ -50,7 +50,7 @@ namespace Test
             tls.AuthenticateAsServer("localhost", new X509Certificate2("test.p12", "hh87$-Jqo"));
 
             tls.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);
-
+            
             Console.ReadLine();
 
             /*SslStream stream = new SslStream(tcp.GetStream(), false, (a1, a2, a3, a4) => true);

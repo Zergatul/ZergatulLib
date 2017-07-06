@@ -15,8 +15,8 @@ namespace ConsoleTest2
     {
         static void Main(string[] args)
         {
-            //RunServer(useDotNetTls: true);
-            RunClient();
+            RunServer(useDotNetTls: true);
+            //RunClient();
         }
 
         static void RunServer(bool useDotNetTls)

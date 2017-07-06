@@ -32,6 +32,10 @@ namespace Zergatul.Network.Tls.CipherSuites
                     return new CipherSuite<DHEKeyExchange, AES128, SHA1>(secParams, role, BlockCipherMode.CBC, random);
                 case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
                     return new CipherSuite<DHEKeyExchange, AES256, SHA1>(secParams, role, BlockCipherMode.CBC, random);
+                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
+                    return new CipherSuite<DHEKeyExchange, AES128, SHA256>(secParams, role, BlockCipherMode.CBC, random);
+                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
+                    return new CipherSuite<DHEKeyExchange, AES256, SHA256>(secParams, role, BlockCipherMode.CBC, random);
                 default:
                     throw new NotImplementedException();
             }
