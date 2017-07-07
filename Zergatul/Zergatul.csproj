@@ -47,6 +47,8 @@
     <Compile Include="Cryptography\Asymmetric\AbstractAsymmetricAlgorithm.cs" />
     <Compile Include="Cryptography\Asymmetric\AbstractKeyExchangeAlgorithm.cs" />
     <Compile Include="Cryptography\Asymmetric\AbstractSignatureAlgorithm.cs" />
+    <Compile Include="Cryptography\Asymmetric\DiffieHellman.cs" />
+    <Compile Include="Cryptography\Asymmetric\DiffieHellmanParameters.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
     <Compile Include="Cryptography\BlockCipher\AES.cs" />
     <Compile Include="Cryptography\BlockCipher\AES128.cs" />

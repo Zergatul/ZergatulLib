@@ -20,7 +20,11 @@ namespace Zergatul.Math
         internal int _wordsLength;
 
         #region Public properties
+
         public bool IsZero => _wordsLength == 0;
+
+        public int BitSize => _wordsLength == 0 ? 0 : 32 * (_wordsLength - 1) + 1 + (int)System.Math.Log(_words[_wordsLength - 1], 2);
+
         #endregion
 
         #region Public constants
@@ -102,6 +106,18 @@ namespace Zergatul.Math
                     _words[i] = (uint)((b0 << 24) | (b1 << 16) | (b2 << 8) | b3);
                 }
             }
+        }
+
+        public BigInteger(uint[] words, ByteOrder order)
+        {
+            this._words = new uint[words.Length];
+            Array.Copy(words, this._words, words.Length);
+
+            if (order == ByteOrder.BigEndian)
+                Array.Reverse(this._words);
+
+            this._wordsLength = words.Length;
+            TruncateLeadingZeros();
         }
 
         public BigInteger(string value, int radix = 10)
@@ -491,12 +507,18 @@ namespace Zergatul.Math
 
         public static bool operator==(BigInteger left, BigInteger right)
         {
+            bool leftnull = ReferenceEquals(left, null);
+            bool rightnull = ReferenceEquals(right, null);
+            if (leftnull && rightnull)
+                return true;
+            if (leftnull ^ rightnull)
+                return false;
             return left.Equals(right);
         }
 
         public static bool operator !=(BigInteger left, BigInteger right)
         {
-            return !left.Equals(right);
+            return !(left == right);
         }
 
         public static bool operator ==(BigInteger left, int right)

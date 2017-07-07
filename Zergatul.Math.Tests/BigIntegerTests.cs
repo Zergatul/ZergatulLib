@@ -262,7 +262,7 @@ namespace Zergatul.Math.Tests
         [TestMethod]
         public void Add_3()
         {
-            int zeros = 50000;
+            int zeros = 5000;
             string number = "9" + new string('0', zeros);
             var bi = new BigInteger(number);
             BigInteger result = BigInteger.Zero;
@@ -488,6 +488,30 @@ namespace Zergatul.Math.Tests
             var bi2 = new BigInteger("02827803280063344426");
             var bi3 = new BigInteger("76224379996895040153");
             Assert.IsTrue(BigInteger.ModularExponentiation(bi1, bi2, bi3).ToString() == "50608764524184452200");
+        }
+
+        [TestMethod]
+        public void BitSize_1()
+        {
+            Assert.IsTrue(BigInteger.Zero.BitSize == 0);
+        }
+
+        [TestMethod]
+        public void BitSize_2()
+        {
+            Assert.IsTrue(BigInteger.One.BitSize == 1);
+        }
+
+        [TestMethod]
+        public void BitSize_3()
+        {
+            Assert.IsTrue(new BigInteger(2).BitSize == 2);
+        }
+
+        [TestMethod]
+        public void BitSize_4()
+        {
+            Assert.IsTrue(new BigInteger(1L << 32).BitSize == 33);
         }
     }
 }

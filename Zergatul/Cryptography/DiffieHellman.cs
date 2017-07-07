@@ -8,7 +8,7 @@ using Zergatul.Math;
 namespace Zergatul.Cryptography
 {
     // https://www.ietf.org/rfc/rfc2631.txt
-    public class DiffieHellman
+    public class DiffieHellmanOld
     {
         public BigInteger p { get; private set; }
         public BigInteger g { get; private set; }
@@ -40,7 +40,7 @@ namespace Zergatul.Cryptography
 
         private ISecureRandom _rnd;
 
-        public DiffieHellman(BigInteger g, BigInteger p, ISecureRandom rnd)
+        public DiffieHellmanOld(BigInteger g, BigInteger p, ISecureRandom rnd)
         {
             this.p = p;
             this.g = g;
