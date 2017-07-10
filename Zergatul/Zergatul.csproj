@@ -68,6 +68,7 @@
     <Compile Include="Cryptography\Hash\SHA1.cs" />
     <Compile Include="Cryptography\Hash\SHA256.cs" />
     <Compile Include="Cryptography\ISecureRandom.cs" />
+    <Compile Include="DefaultRandom.cs" />
     <Compile Include="Ftp\DefaultFtpListParser.cs" />
     <Compile Include="Ftp\FtpBlockHeaderDescriptor.cs" />
     <Compile Include="Ftp\FtpClient.cs" />
@@ -87,7 +88,10 @@
     <Compile Include="Ftp\FtpTransferMode.cs" />
     <Compile Include="Ftp\IFtpListParser.cs" />
     <Compile Include="IRandom.cs" />
+    <Compile Include="Math\ArithmeticException.cs" />
     <Compile Include="Math\BigInteger.cs" />
+    <Compile Include="Math\ECPoint.cs" />
+    <Compile Include="Math\EllipticCurve.cs" />
     <Compile Include="Math\Int128.cs" />
     <Compile Include="Network\Constants.cs" />
     <Compile Include="Network\NotSupportedByProtocolException.cs" />

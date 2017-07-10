@@ -43,13 +43,16 @@ namespace Test
 
             Console.WriteLine(Encoding.ASCII.GetString(buffer));*/
 
-            var server = new TcpListener(IPAddress.Any, 32028);
+            /*var server = new TcpListener(IPAddress.Any, 32028);
             server.Start();
             var client = server.AcceptTcpClient();
             var tls = new TlsStream(client.GetStream());
             tls.AuthenticateAsServer("localhost", new X509Certificate2("test.p12", "hh87$-Jqo"));
 
-            tls.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);
+            tls.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);*/
+
+            var ec = ECPoint.FromBytes(new uint[] { 0x03, 0x188DA80E, 0xB03090F6, 0x7CBF20EB, 0x43A18800, 0xF4FF0AFD, 0x82FF1012 }, EllipticCurve.secp192r1);
+
             
             Console.ReadLine();
 
