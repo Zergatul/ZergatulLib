@@ -72,5 +72,20 @@ namespace Zergatul
                 result[i] = Convert.ToByte(value.Substring(i * 2, 2), 16);
             return result;
         }
+
+        public static ulong SetBit(ulong value, int bit)
+        {
+            return value | (1UL << bit);
+        }
+
+        public static bool CheckBit(ulong value, int bit)
+        {
+            return (value & (1UL << bit)) != 0;
+        }
+
+        public static string ToBin(ulong value)
+        {
+            return Convert.ToString((uint)(value >> 32), 2).PadLeft(32, '0') + Convert.ToString((uint)(value & 0xFFFFFFFF), 2).PadLeft(32, '0');
+        }
     }
 }

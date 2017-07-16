@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Math
+namespace Zergatul.Math.EllipticCurves.PrimeField
 {
     public class ECPoint
     {

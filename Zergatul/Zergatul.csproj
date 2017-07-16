@@ -91,8 +91,11 @@
     <Compile Include="IRandom.cs" />
     <Compile Include="Math\ArithmeticException.cs" />
     <Compile Include="Math\BigInteger.cs" />
-    <Compile Include="Math\ECPoint.cs" />
-    <Compile Include="Math\EllipticCurve.cs" />
+    <Compile Include="Math\BinaryPolynomial.cs" />
+    <Compile Include="Math\EllipticCurves\BinaryField\ECPoint.cs" />
+    <Compile Include="Math\EllipticCurves\BinaryField\EllipticCurve.cs" />
+    <Compile Include="Math\EllipticCurves\PrimeField\ECPoint.cs" />
+    <Compile Include="Math\EllipticCurves\PrimeField\EllipticCurve.cs" />
     <Compile Include="Math\Int128.cs" />
     <Compile Include="Network\Constants.cs" />
     <Compile Include="Network\NotSupportedByProtocolException.cs" />
@@ -166,6 +169,7 @@
     <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

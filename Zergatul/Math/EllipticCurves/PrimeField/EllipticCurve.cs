@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Math
+namespace Zergatul.Math.EllipticCurves.PrimeField
 {
     /// <summary>
-    /// y^2 ≡ x^3 + ax + b (mod p)
+    /// y² ≡ x³ + ax + b (mod p)
     /// </summary>
     public class EllipticCurve
     {
@@ -34,6 +34,8 @@ namespace Zergatul.Math
             this.g = g;
             this.g.Curve = this;
         }
+
+        #region Curves
 
         // TEMPLATE
         /*public static EllipticCurve secp192k1 = new EllipticCurve(
@@ -227,6 +229,7 @@ namespace Zergatul.Math
             },
             n: new BigInteger(new uint[] { 0x01FF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFA, 0x51868783, 0xBF2F966B, 0x7FCC0148, 0xF709A5D0, 0x3BB5C9B8, 0x899C47AE, 0xBB6FB71E, 0x91386409 }, ByteOrder.BigEndian),
             h: 1);
-        
+
+        #endregion
     }
 }
