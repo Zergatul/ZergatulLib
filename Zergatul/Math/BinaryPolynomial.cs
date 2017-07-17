@@ -8,11 +8,36 @@ namespace Zergatul.Math
 {
     public class BinaryPolynomial : IEquatable<BinaryPolynomial>
     {
+        public static readonly BinaryPolynomial Zero = FromPowers();
+        public static readonly BinaryPolynomial One = FromPowers(0);
+
         private static string _superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
 
         private ulong[] _words;
         public int Degree { get; private set; }
         public int StrictWordLength => Degree / 64 + 1;
+
+        private BinaryPolynomial()
+        {
+
+        }
+
+        public BinaryPolynomial(uint[] words, ByteOrder order)
+        {
+            this._words = new ulong[(words.Length + 1) / 2];
+            if (order == ByteOrder.BigEndian)
+            {
+                for (int i = 0; i < this._words.Length; i++)
+                {
+                    ulong low = words[2 * i];
+                    ulong high = 2 * i + 1 < words.Length ? words[2 * i + 1] : 0;
+                    this._words[this._words.Length - 1 - i] = (high << 32) | low;
+                }
+                CalculateRealDegree(words.Length * 32 - 1);
+            }
+            if (order == ByteOrder.LittleEndian)
+                throw new NotImplementedException();
+        }
 
         public bool IsBitSet(int bit)
         {
@@ -21,16 +46,19 @@ namespace Zergatul.Math
             return BitHelper.CheckBit(_words[bit / 64], bit % 64);
         }
 
-        public bool Equals(BinaryPolynomial other)
+        #region System.Object
+
+        public override bool Equals(object obj)
         {
-            if (ReferenceEquals(other, null))
+            if (obj is BinaryPolynomial)
+                return Equals((BinaryPolynomial)obj);
+            else
                 return false;
-            if (this.Degree != other.Degree)
-                return false;
-            for (int i = this.StrictWordLength - 1; i >= 0; i--)
-                if (this._words[i] != other._words[i])
-                    return false;
-            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return _words.GetHashCode();
         }
 
         public override string ToString()
@@ -59,6 +87,26 @@ namespace Zergatul.Math
                 }
             return sb.ToString();
         }
+
+        #endregion
+
+        #region IEquatable<BinaryPolynomial>
+
+        public bool Equals(BinaryPolynomial other)
+        {
+            if (ReferenceEquals(other, null))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+            if (this.Degree != other.Degree)
+                return false;
+            for (int i = this.StrictWordLength - 1; i >= 0; i--)
+                if (this._words[i] != other._words[i])
+                    return false;
+            return true;
+        }
+
+        #endregion
 
         #region Private instance methods
 
@@ -354,6 +402,11 @@ namespace Zergatul.Math
                 // b = b + c
                 Xor(b, c);
             }
+        }
+
+        public static BinaryPolynomial ModularDivision(BinaryPolynomial p1, BinaryPolynomial p2, BinaryPolynomial m)
+        {
+            return ModularMultiplication(p1, ModularInverse(p2, m), m);
         }
 
         #region Private static methods

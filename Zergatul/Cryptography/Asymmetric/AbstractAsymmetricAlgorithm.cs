@@ -10,13 +10,13 @@ namespace Zergatul.Cryptography.Asymmetric
     {
         public abstract PublicKeyClass PublicKey { get; set; }
         public abstract PrivateKeyClass PrivateKey { get; set; }
+        public abstract AlgorithmParameters Parameters { get; set; }
 
         /// <summary>
         /// Key size in bits
         /// </summary>
         public abstract int KeySize { get; }
 
-        public abstract void SetParameters(AlgorithmParameters parameters);
         public abstract void GenerateKeys(ISecureRandom random);
 
         public abstract AbstractSignatureAlgorithm Signature { get; }

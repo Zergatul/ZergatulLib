@@ -31,10 +31,10 @@ namespace Zergatul.Cryptography.Tests
             Assert.IsTrue(dh2.PublicKey == 658);
 
             // 658 ^ 892 mod 997
-            Assert.IsTrue(dh1.KeyExchange.GenerateSharedSecret(dh2.PublicKey) == 249);
+            Assert.IsTrue(dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey) == 249);
 
             // 9 ^ 755 mod 997
-            Assert.IsTrue(dh1.KeyExchange.GenerateSharedSecret(dh2.PublicKey) == 249);
+            Assert.IsTrue(dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey) == 249);
         }
 
         [TestMethod]
@@ -50,7 +50,7 @@ namespace Zergatul.Cryptography.Tests
             dh2.SetParameters(DiffieHellmanParameters.Group14);
             dh2.GenerateKeys(random);
 
-            Assert.IsTrue(dh1.KeyExchange.GenerateSharedSecret(dh2.PublicKey) == dh2.KeyExchange.GenerateSharedSecret(dh1.PublicKey));
+            Assert.IsTrue(dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey) == dh2.KeyExchange.CalculateSharedSecret(dh1.PublicKey));
         }
 
         private class TestRandom : ISecureRandom

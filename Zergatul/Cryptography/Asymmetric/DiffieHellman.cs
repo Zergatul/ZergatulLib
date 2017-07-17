@@ -11,21 +11,16 @@ namespace Zergatul.Cryptography.Asymmetric
     {
         public override BigInteger PrivateKey { get; set; }
         public override BigInteger PublicKey { get; set; }
+        public override DiffieHellmanParameters Parameters { get; set; }
 
-        public override int KeySize => _parameters.p.BitSize;
+        public override int KeySize => Parameters.p.BitSize;
 
-        private DiffieHellmanParameters _parameters;
         private DHKeyExchange _keyExchange;
-
-        public override void SetParameters(DiffieHellmanParameters parameters)
-        {
-            this._parameters = parameters;
-        }
 
         public override void GenerateKeys(ISecureRandom random)
         {
-            PrivateKey = BigInteger.Random(_parameters.p, random);
-            PublicKey = BigInteger.ModularExponentiation(_parameters.g, PrivateKey, _parameters.p);
+            PrivateKey = BigInteger.Random(Parameters.p, random);
+            PublicKey = BigInteger.ModularExponentiation(Parameters.g, PrivateKey, Parameters.p);
         }
 
         public override AbstractSignatureAlgorithm Signature
@@ -59,14 +54,9 @@ namespace Zergatul.Cryptography.Asymmetric
                 this.dh = dh;
             }
 
-            public override BigInteger GenerateSharedSecret(BigInteger publicKey)
+            public override void CalculateSharedSecret(BigInteger publicKey)
             {
-                return BigInteger.ModularExponentiation(publicKey, dh.PrivateKey, dh._parameters.p);
-            }
-
-            public override byte[] GenerateSharedSecretBytes(BigInteger publicKey)
-            {
-                return GenerateSharedSecret(publicKey).ToBytes(ByteOrder.BigEndian, dh.KeySize / 8);
+                SharedSecret = BigInteger.ModularExponentiation(publicKey, dh.PrivateKey, dh.Parameters.p);
             }
         }
     }

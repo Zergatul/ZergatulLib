@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Math.EllipticCurves.PrimeField
 {
-    public class ECPoint
+    public class ECPoint : IEquatable<ECPoint>
     {
         public EllipticCurve Curve;
         public BigInteger x;
@@ -56,6 +56,34 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
 
         #endregion
 
+        #region System.Object
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Curve.GetHashCode() ^ x.GetHashCode() ^ y.GetHashCode();
+        }
+
+        #endregion
+
+        #region IEquatable<ECPoint>
+
+        public bool Equals(ECPoint other)
+        {
+            if (ReferenceEquals(other, null))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+
+            return this.Curve == other.Curve && this.x == other.x && this.y == other.y;
+        }
+
+        #endregion
+
         #region Operations
 
         public static ECPoint Sum(ECPoint p1, ECPoint p2)
@@ -67,12 +95,27 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             if (p1.Curve != p2.Curve)
                 throw new ArgumentException("Points should belong to single curve");
 
-            return ComputePointFromGamma(p2.y - p1.y, p2.x - p1.x, p1, p2, p1.Curve);
-        }
+            EllipticCurve curve = p1.Curve;
+            BigInteger λ;
 
-        public static ECPoint Double(ECPoint p)
-        {
-            return ComputePointFromGamma(3 * p.x * p.x + p.Curve.a, 2 * p.y, p, p, p.Curve);
+            if (p1 == p2)
+                λ = BigInteger.ModularDivision(3 * p1.x * p1.x + curve.a, 2 * p1.y, curve.p);
+            else
+                λ = BigInteger.ModularDivision(p2.y - p1.y, p2.x - p1.x, curve.p);
+
+            var x3 = (λ * λ - p1.x - p2.x) % curve.p;
+            var y3 = (λ * (p1.x - x3) - p1.y) % curve.p;
+            if (x3 < 0)
+                x3 += curve.p;
+            if (y3 < 0)
+                y3 += curve.p;
+
+            return new ECPoint
+            {
+                Curve = curve,
+                x = x3,
+                y = y3
+            };
         }
 
         public static ECPoint Multiplication(ECPoint p, BigInteger m)
@@ -84,7 +127,7 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             {
                 if (m.IsBitSet(i))
                     q = ReferenceEquals(q, null) ? n : Sum(q, n);
-                n = Double(n);
+                n = n + n;
             }
             return q;
         }
@@ -94,50 +137,34 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             return (y * y % Curve.p) == ((x * x * x + Curve.a * x + Curve.b) % Curve.p);
         }
 
-        private static ECPoint ComputePointFromGamma(BigInteger g1, BigInteger g2, ECPoint p1, ECPoint p2, EllipticCurve curve)
-        {
-            if (g1 < 0)
-                g1 += curve.p;
-            if (g2 < 0)
-                g2 += curve.p;
-
-            BigInteger gamma = (g1 * BigInteger.ModularInverse(g2, curve.p)) % curve.p;
-
-            var p3 = new ECPoint();
-            p3.Curve = curve;
-            p3.x = (gamma * gamma - p1.x - p2.x) % curve.p;
-            p3.y = (gamma * (p1.x - p3.x) - p1.y) % curve.p;
-            if (p3.x < 0)
-                p3.x += curve.p;
-            if (p3.y < 0)
-                p3.y += curve.p;
-            return p3;
-        }
-
         #endregion
 
         #region Operators
 
         public static bool operator ==(ECPoint p1, ECPoint p2)
         {
-            bool p1null = ReferenceEquals(p1, null);
-            bool p2null = ReferenceEquals(p2, null);
-            if (p1null && p2null)
-                return true;
-            if (p1null ^ p2null)
-                return false;
-            return ReferenceEquals(p1, p2) || (p1.Curve == p2.Curve && p1.x == p2.x && p1.y == p2.y);
+            if (ReferenceEquals(p1, null))
+                return ReferenceEquals(p2, null);
+            else
+                return p1.Equals(p2);
         }
 
         public static bool operator !=(ECPoint p1, ECPoint p2)
         {
-            bool p1null = ReferenceEquals(p1, null);
-            bool p2null = ReferenceEquals(p2, null);
-            if (p1null && p2null)
-                return false;
-            if (p1null ^ p2null)
-                return true;
-            return !ReferenceEquals(p1, p2) && (p1.Curve != p2.Curve || p1.x == p2.x || p1.y == p2.y);
+            if (ReferenceEquals(p1, null))
+                return !ReferenceEquals(p2, null);
+            else
+                return !p1.Equals(p2);
+        }
+
+        public static ECPoint operator +(ECPoint p1, ECPoint p2)
+        {
+            return Sum(p1, p2);
+        }
+
+        public static ECPoint operator *(BigInteger m, ECPoint p)
+        {
+            return Multiplication(p, m);
         }
 
         #endregion

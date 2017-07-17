@@ -8,6 +8,7 @@ namespace Zergatul.Cryptography.Asymmetric
     {
         public override BigInteger PrivateKey { get; set; }
         public override ECPoint PublicKey { get; set; }
+        public override DiffieHellmanParameters Parameters { get; set; }
 
         public override AbstractKeyExchangeAlgorithm<ECPoint, ECPoint> KeyExchange
         {
@@ -25,8 +26,6 @@ namespace Zergatul.Cryptography.Asymmetric
             }
         }
 
-        
-
         public override AbstractSignatureAlgorithm Signature
         {
             get
@@ -36,11 +35,6 @@ namespace Zergatul.Cryptography.Asymmetric
         }
 
         public override void GenerateKeys(ISecureRandom random)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void SetParameters(DiffieHellmanParameters parameters)
         {
             throw new NotImplementedException();
         }

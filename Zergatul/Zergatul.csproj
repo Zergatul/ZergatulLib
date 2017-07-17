@@ -63,7 +63,6 @@
     <Compile Include="Cryptography\BlockCipher\ECBEncryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\Encryptor.cs" />
     <Compile Include="Cryptography\DefaultSecureRandom.cs" />
-    <Compile Include="Cryptography\DiffieHellman.cs" />
     <Compile Include="Cryptography\Hash\AbstractHash.cs" />
     <Compile Include="Cryptography\Hash\HMAC.cs" />
     <Compile Include="Cryptography\Hash\SHA1.cs" />

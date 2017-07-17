@@ -498,17 +498,17 @@ namespace Zergatul.Math
             remainder = (int)division.Item2;
         }
 
-        public static BigInteger Modulo(BigInteger divident, BigInteger divisor)
+        public static BigInteger Modulo(BigInteger dividend, BigInteger divisor)
         {
-            if (divident.CompareTo(divisor) < 0)
-                return divident;
+            if (dividend.CompareTo(divisor) < 0)
+                return dividend;
 
             if (divisor._sign > 0)
             {
                 BigInteger quotient = null;
                 BigInteger remainder = null;
-                UnsignedDivisionGeneral(divident, divisor, ref quotient, ref remainder, false, true);
-                remainder._sign = divident._sign;
+                UnsignedDivisionGeneral(dividend, divisor, ref quotient, ref remainder, false, true);
+                remainder._sign = dividend._sign;
                 if (remainder._sign == -1)
                     remainder += divisor;
                 return remainder;
@@ -535,6 +535,15 @@ namespace Zergatul.Math
             if (euclidean.y < 0)
                 euclidean.y += modulus;
             return euclidean.y;
+        }
+
+        public static BigInteger ModularDivision(BigInteger dividend, BigInteger divisor, BigInteger modulus)
+        {
+            if (dividend < 0)
+                dividend += modulus;
+            if (divisor < 0)
+                divisor += modulus;
+            return dividend * ModularInverse(divisor, modulus) % modulus;
         }
 
         public static BigInteger ModularExponentiation(BigInteger @base, BigInteger exponent, BigInteger modulus)

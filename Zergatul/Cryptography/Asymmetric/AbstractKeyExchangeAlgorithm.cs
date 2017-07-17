@@ -8,7 +8,8 @@ namespace Zergatul.Cryptography.Asymmetric
 {
     public abstract class AbstractKeyExchangeAlgorithm<PublicKeyClass, SharedSecretClass>
     {
-        public abstract byte[] GenerateSharedSecretBytes(PublicKeyClass publicKey);
-        public abstract SharedSecretClass GenerateSharedSecret(PublicKeyClass publicKey);
+        public virtual SharedSecretClass SharedSecret { get; protected set; }
+
+        public abstract void CalculateSharedSecret(PublicKeyClass publicKey);
     }
 }

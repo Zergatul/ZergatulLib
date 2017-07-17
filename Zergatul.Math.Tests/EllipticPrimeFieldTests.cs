@@ -6,7 +6,7 @@ using Zergatul.Math.EllipticCurves.PrimeField;
 namespace Zergatul.Math.Tests
 {
     [TestClass]
-    public class EllipticTests
+    public class EllipticPrimeFieldTests
     {
         [TestMethod]
         public void Double_1()
@@ -23,7 +23,7 @@ namespace Zergatul.Math.Tests
                 y = new BigInteger(10),
                 Curve = curve
             };
-            var result = ECPoint.Double(point);
+            var result = point + point;
             Assert.IsTrue(result.x == 7);
             Assert.IsTrue(result.y == 12);
         }
@@ -75,7 +75,7 @@ namespace Zergatul.Math.Tests
             };
             foreach (int key in results.Keys)
             {
-                var pm = ECPoint.Multiplication(point, new BigInteger(key));
+                var pm = new BigInteger(key) * point;
                 Assert.IsTrue(pm.x == results[key].Item1);
                 Assert.IsTrue(pm.y == results[key].Item2);
             }
@@ -85,11 +85,11 @@ namespace Zergatul.Math.Tests
         public void Mult_2()
         {
             int sum = 100;
-            ECPoint result = ECPoint.Multiplication(EllipticCurve.secp192r1.g, new BigInteger(sum));
+            ECPoint result = new BigInteger(sum) * EllipticCurve.secp192r1.g;
             for (int i = 1; i < sum / 2; i++)
             {
-                var p1 = ECPoint.Multiplication(EllipticCurve.secp192r1.g, new BigInteger(i));
-                var p2 = ECPoint.Multiplication(EllipticCurve.secp192r1.g, new BigInteger(sum - i));
+                var p1 = new BigInteger(i) * EllipticCurve.secp192r1.g;
+                var p2 = new BigInteger(sum - i) * EllipticCurve.secp192r1.g;
 
                 Assert.IsTrue(ECPoint.Sum(p1, p2) == result);
             }
