@@ -137,5 +137,60 @@ namespace Zergatul.Math.Tests
             var p2 = BinaryPolynomial.FromPowers(68, 60, 3, 2, 1, 0);
             Assert.IsTrue((p1 * p2).ToString() == "x¹³⁸+x¹³⁰+x⁶⁹+x⁶⁸+x⁶⁵+x⁶⁴+x⁶³+x⁶²+x⁶¹+x⁶⁰+x⁸+x⁶+x²+1");
         }
+
+        [TestMethod]
+        public void Square_1()
+        {
+            Assert.IsTrue(BinaryPolynomial.Square(BinaryPolynomial.FromPowers()).ToString() == "0");
+        }
+
+        [TestMethod]
+        public void Square_2()
+        {
+            Assert.IsTrue(BinaryPolynomial.Square(BinaryPolynomial.FromPowers(0)).ToString() == "1");
+        }
+
+        [TestMethod]
+        public void Square_3()
+        {
+            var p = BinaryPolynomial.FromPowers(500, 100, 1, 0);
+            Assert.IsTrue(BinaryPolynomial.Square(p).ToString() == "x¹⁰⁰⁰+x²⁰⁰+x²+1");
+        }
+
+        [TestMethod]
+        public void ModularInverse_1()
+        {
+            var p = BinaryPolynomial.FromPowers(1);
+            var m = BinaryPolynomial.FromPowers(2, 0);
+            var inv = BinaryPolynomial.ModularInverse(p, m);
+            Assert.IsTrue(BinaryPolynomial.ModularMultiplication(p, inv, m).ToString() == "1");
+        }
+
+        [TestMethod]
+        public void ModularInverse_2()
+        {
+            var p = BinaryPolynomial.FromPowers(2, 0);
+            var m = BinaryPolynomial.FromPowers(3, 0);
+            var inv = BinaryPolynomial.ModularInverse(p, m);
+            Assert.IsTrue(inv == null);
+        }
+
+        [TestMethod]
+        public void ModularInverse_3()
+        {
+            var p = BinaryPolynomial.FromPowers(2, 1, 0);
+            var m = BinaryPolynomial.FromPowers(5, 0);
+            var inv = BinaryPolynomial.ModularInverse(p, m);
+            Assert.IsTrue(BinaryPolynomial.ModularMultiplication(p, inv, m).ToString() == "1");
+        }
+
+        [TestMethod]
+        public void ModularInverse_4()
+        {
+            var p = BinaryPolynomial.FromPowers(32, 30, 0);
+            var m = BinaryPolynomial.FromPowers(65, 60, 0);
+            var inv = BinaryPolynomial.ModularInverse(p, m);
+            Assert.IsTrue(BinaryPolynomial.ModularMultiplication(p, inv, m).ToString() == "1");
+        }
     }
 }

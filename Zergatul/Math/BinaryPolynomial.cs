@@ -23,6 +23,8 @@ namespace Zergatul.Math
 
         public bool Equals(BinaryPolynomial other)
         {
+            if (ReferenceEquals(other, null))
+                return false;
             if (this.Degree != other.Degree)
                 return false;
             for (int i = this.StrictWordLength - 1; i >= 0; i--)
@@ -73,12 +75,20 @@ namespace Zergatul.Math
 
         public static bool operator ==(BinaryPolynomial p1, BinaryPolynomial p2)
         {
-            return p1.Equals(p2);
+            if (ReferenceEquals(p1, null))
+            {
+                if (ReferenceEquals(p2, null))
+                    return true;
+                else
+                    return p2.Equals(p1);
+            }
+            else
+                return p1.Equals(p2);
         }
 
         public static bool operator !=(BinaryPolynomial p1, BinaryPolynomial p2)
         {
-            return !p1.Equals(p2);
+            return !(p1 == p2);
         }
 
         public static BinaryPolynomial operator +(BinaryPolynomial p1, BinaryPolynomial p2)
@@ -184,6 +194,26 @@ namespace Zergatul.Math
             return polynomial;
         }
 
+        public static BinaryPolynomial Square(BinaryPolynomial p)
+        {
+            if (p.Degree <= 0)
+                return p;
+
+            ulong[] words = new ulong[p.Degree / 32 + 1];
+            for (int i = p.Degree; i >= 0; i--)
+                if (p.IsBitSet(i))
+                {
+                    int wordIndex = i / 32;
+                    int bitIndex = 2 * (i % 64);
+                    words[wordIndex] = BitHelper.SetBit(words[wordIndex], bitIndex);
+                }
+
+            var polynomial = new BinaryPolynomial();
+            polynomial._words = words;
+            polynomial.Degree = p.Degree * 2;
+            return polynomial;
+        }
+
         public static BinaryPolynomial ModularReduction(BinaryPolynomial p, BinaryPolynomial m)
         {
             int mWordsLength = m.StrictWordLength;
@@ -242,6 +272,90 @@ namespace Zergatul.Math
             return polynomial;
         }
 
+        public static BinaryPolynomial ModularInverse(BinaryPolynomial p, BinaryPolynomial m)
+        {
+            if (p.Degree >= m.Degree)
+                p = ModularReduction(p, m);
+
+            ulong[] b = new ulong[m.StrictWordLength];
+            ulong[] c = new ulong[m.StrictWordLength];
+            ulong[] u = new ulong[m.StrictWordLength];
+            ulong[] v = new ulong[m.StrictWordLength];
+
+            // b = 1
+            b[0] = 1;
+            // c = 0
+            // u = p
+            Array.Copy(p._words, u, System.Math.Min(u.Length, p._words.Length));
+            int uDegree = p.Degree;
+            // v = m
+            Array.Copy(m._words, v, v.Length);
+            int vDegree = m.Degree;
+
+            while (true)
+            {
+                // while x divides u
+                while (uDegree >= 0 && (u[0] & 1) == 0)
+                {
+                    // u = u / x
+                    ShiftRightOneBit(u);
+                    uDegree--;
+
+                    // it x divides b
+                    if ((b[0] & 1) == 0)
+                        // b = b / x
+                        ShiftRightOneBit(b);
+                    else
+                    {
+                        // b = (b + m) / x
+                        Xor(b, m._words);
+                        ShiftRightOneBit(b);
+                    }
+                }
+
+                bool highWordsZero = true;
+                for (int i = 1; i < u.Length; i++)
+                    if (u[i] != 0)
+                    {
+                        highWordsZero = false;
+                        break;
+                    }
+
+                if (highWordsZero && u[0] == 1)
+                {
+                    var polynomial = new BinaryPolynomial();
+                    polynomial._words = b;
+                    polynomial.CalculateRealDegree(m.Degree - 1);
+                    return polynomial;
+                }
+
+                if (highWordsZero && u[0] == 0)
+                    return null;
+
+                if (uDegree < vDegree)
+                {
+                    int buf1 = uDegree;
+                    uDegree = vDegree;
+                    vDegree = buf1;
+
+                    var buf2 = u;
+                    u = v;
+                    v = buf2;
+
+                    buf2 = b;
+                    b = c;
+                    c = buf2;
+                }
+
+                // u = u + v
+                Xor(u, v);
+                while (uDegree >= 0 && !BitHelper.CheckBit(u[uDegree / 64], uDegree % 64))
+                    uDegree--;
+                // b = b + c
+                Xor(b, c);
+            }
+        }
+
         #region Private static methods
 
         private static void ShiftLeftOneBit(ulong[] words)
@@ -252,6 +366,16 @@ namespace Zergatul.Math
                 ulong temp = words[i] >> 63;
                 words[i] = (words[i] << 1) | carry;
                 carry = temp;
+            }
+        }
+
+        private static void ShiftRightOneBit(ulong[] words)
+        {
+            for (int i = 0; i < words.Length; i++)
+            {
+                words[i] = words[i] >> 1;
+                if (i + 1 < words.Length)
+                    words[i] |= words[i + 1] << 63;
             }
         }
 
