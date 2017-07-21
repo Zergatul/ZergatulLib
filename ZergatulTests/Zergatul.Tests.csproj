@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E37E0EFB-9B60-4523-9122-A89071EC52AD}</ProjectGuid>
+    <ProjectGuid>{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Zergatul.Cryptography.Tests</RootNamespace>
-    <AssemblyName>Zergatul.Cryptography.Tests</AssemblyName>
+    <RootNamespace>Zergatul.Tests</RootNamespace>
+    <AssemblyName>Zergatul.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -46,19 +46,13 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
-          <Private>False</Private>
-        </Reference>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
       </ItemGroup>
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="DiffieHellmanTests.cs" />
+    <Compile Include="BitHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HashTests.cs" />
-    <Compile Include="BlockCipherTests.cs" />
-    <Compile Include="RIPEMDTests.cs" />
-    <Compile Include="ARIATests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

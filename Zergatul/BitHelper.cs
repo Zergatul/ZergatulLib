@@ -158,6 +158,14 @@ namespace Zergatul
             return result;
         }
 
+        public static string BytesToHex(byte[] data)
+        {
+            var sb = new StringBuilder(data.Length * 2);
+            for (int i = 0; i < data.Length; i++)
+                sb.Append(Convert.ToString(data[i], 16).PadLeft(2, '0'));
+            return sb.ToString();
+        }
+
         public static ulong SetBit(ulong value, int bit)
         {
             return value | (1UL << bit);
@@ -171,6 +179,44 @@ namespace Zergatul
         public static string ToBin(ulong value)
         {
             return Convert.ToString((uint)(value >> 32), 2).PadLeft(32, '0') + Convert.ToString((uint)(value & 0xFFFFFFFF), 2).PadLeft(32, '0');
+        }
+
+        /// <summary>
+        /// a = a ^ (b <<< bits)
+        /// </summary>
+        public static void RotateLeft128AndXor(byte[] a, int aindex, byte[] b, int bindex, int bits)
+        {
+            int byteShift = bits / 8;
+            int bitShift = bits % 8;
+            if (bitShift != 0)
+            {
+                for (int i = 0; i < 16; i++)
+                {
+                    a[aindex + i] ^= (byte)(b[bindex + (i + byteShift) % 16] << bitShift);
+                    a[aindex + i] ^= (byte)(b[bindex + (i + byteShift + 1) % 16] >> (8 - bitShift));
+                }
+            }
+            else
+                throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// a = a ^ (b >>> bits)
+        /// </summary>
+        public static void RotateRight128AndXor(byte[] a, int aindex, byte[] b, int bindex, int bits)
+        {
+            int byteShift = bits / 8;
+            int bitShift = bits % 8;
+            if (bitShift != 0)
+            {
+                for (int i = 0; i < 16; i++)
+                {
+                    a[aindex + i] ^= (byte)(b[bindex + (32 + i - byteShift) % 16] >> bitShift);
+                    a[aindex + i] ^= (byte)(b[bindex + (32 + i - byteShift - 1) % 16] << (8 - bitShift));
+                }
+            }
+            else
+                throw new NotImplementedException();
         }
     }
 }
