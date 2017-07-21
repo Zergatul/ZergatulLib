@@ -55,9 +55,18 @@
     <Compile Include="Cryptography\BlockCipher\AES128.cs" />
     <Compile Include="Cryptography\BlockCipher\AES192.cs" />
     <Compile Include="Cryptography\BlockCipher\AES256.cs" />
+    <Compile Include="Cryptography\BlockCipher\ARIA.cs" />
+    <Compile Include="Cryptography\BlockCipher\ARIA128.cs" />
+    <Compile Include="Cryptography\BlockCipher\ARIA192.cs" />
+    <Compile Include="Cryptography\BlockCipher\ARIA256.cs" />
     <Compile Include="Cryptography\BlockCipher\BlockCipherMode.cs" />
+    <Compile Include="Cryptography\BlockCipher\Camellia.cs" />
+    <Compile Include="Cryptography\BlockCipher\Camellia256.cs" />
+    <Compile Include="Cryptography\BlockCipher\Camellia192.cs" />
+    <Compile Include="Cryptography\BlockCipher\Camellia128.cs" />
     <Compile Include="Cryptography\BlockCipher\CBCDecryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\CBCEncryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\ChaCha20.cs" />
     <Compile Include="Cryptography\BlockCipher\Decryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\ECBDecryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\ECBEncryptor.cs" />
@@ -66,6 +75,7 @@
     <Compile Include="Cryptography\Hash\AbstractHash.cs" />
     <Compile Include="Cryptography\Hash\HMAC.cs" />
     <Compile Include="Cryptography\Hash\MD5.cs" />
+    <Compile Include="Cryptography\Hash\RIPEMD160.cs" />
     <Compile Include="Cryptography\Hash\SHA1.cs" />
     <Compile Include="Cryptography\Hash\SHA224.cs" />
     <Compile Include="Cryptography\Hash\SHA256.cs" />
