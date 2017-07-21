@@ -12,7 +12,7 @@ namespace Zergatul.Cryptography.Hash
         public abstract int HashSize { get; }
 
         protected List<byte> _buffer;
-        protected long _totalBytes;
+        protected ulong _totalBytes;
         protected byte[] _block;
 
         public AbstractHash()
@@ -35,7 +35,7 @@ namespace Zergatul.Cryptography.Hash
         public void Update(byte[] data)
         {
             _buffer.AddRange(data);
-            _totalBytes += data.LongLength;
+            _totalBytes += (ulong)data.LongLength;
 
             ProcessBuffer();
         }
