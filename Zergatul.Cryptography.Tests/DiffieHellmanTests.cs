@@ -17,11 +17,11 @@ namespace Zergatul.Cryptography.Tests
             var random2 = new TestRandom(new byte[] { 0x02, 0xF3 }); // 755
 
             var dh1 = new DiffieHellman();
-            dh1.SetParameters(new DiffieHellmanParameters(new BigInteger(2), new BigInteger(997)));
+            dh1.Parameters = new DiffieHellmanParameters(new BigInteger(2), new BigInteger(997));
             dh1.GenerateKeys(random1);
 
             var dh2 = new DiffieHellman();
-            dh2.SetParameters(new DiffieHellmanParameters(new BigInteger(2), new BigInteger(997)));
+            dh2.Parameters = new DiffieHellmanParameters(new BigInteger(2), new BigInteger(997));
             dh2.GenerateKeys(random2);
 
             // 2 ^ 892 mod 997
@@ -31,10 +31,12 @@ namespace Zergatul.Cryptography.Tests
             Assert.IsTrue(dh2.PublicKey == 658);
 
             // 658 ^ 892 mod 997
-            Assert.IsTrue(dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey) == 249);
+            dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey);
+            Assert.IsTrue(dh1.KeyExchange.SharedSecret == 249);
 
             // 9 ^ 755 mod 997
-            Assert.IsTrue(dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey) == 249);
+            dh2.KeyExchange.CalculateSharedSecret(dh1.PublicKey);
+            Assert.IsTrue(dh2.KeyExchange.SharedSecret == 249);
         }
 
         [TestMethod]
@@ -43,14 +45,17 @@ namespace Zergatul.Cryptography.Tests
             var random = new DefaultSecureRandom();
 
             var dh1 = new DiffieHellman();
-            dh1.SetParameters(DiffieHellmanParameters.Group14);
+            dh1.Parameters = DiffieHellmanParameters.Group14;
             dh1.GenerateKeys(random);
 
             var dh2 = new DiffieHellman();
-            dh2.SetParameters(DiffieHellmanParameters.Group14);
+            dh2.Parameters = DiffieHellmanParameters.Group14;
             dh2.GenerateKeys(random);
 
-            Assert.IsTrue(dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey) == dh2.KeyExchange.CalculateSharedSecret(dh1.PublicKey));
+            dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey);
+            dh2.KeyExchange.CalculateSharedSecret(dh1.PublicKey);
+
+            Assert.IsTrue(dh1.KeyExchange.SharedSecret == dh2.KeyExchange.SharedSecret);
         }
 
         private class TestRandom : ISecureRandom

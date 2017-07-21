@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Hash
 {
-    public class SHA256 : SHA2_32Bit
+    public class SHA512 : SHA2_64Bit
     {
-        public override int HashSize => 32;
+        public override int HashSize => 64;
 
         protected override void Init()
         {
-            h0 = 0x6A09E667;
-            h1 = 0xBB67AE85;
-            h2 = 0x3C6EF372;
-            h3 = 0xA54FF53A;
-            h4 = 0x510E527F;
-            h5 = 0x9B05688C;
-            h6 = 0x1F83D9AB;
-            h7 = 0x5BE0CD19;
+            h0 = 0x6A09E667F3BCC908;
+            h1 = 0xBB67AE8584CAA73B;
+            h2 = 0x3C6EF372FE94F82B;
+            h3 = 0xA54FF53A5F1D36F1;
+            h4 = 0x510E527FADE682D1;
+            h5 = 0x9B05688C2B3E6C1F;
+            h6 = 0x1F83D9ABFB41BD6B;
+            h7 = 0x5BE0CD19137E2179;
         }
 
         protected override byte[] InternalStateToBytes()

@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Hash
 {
-    public class SHA256 : SHA2_32Bit
+    public class SHA384 : SHA2_64Bit
     {
-        public override int HashSize => 32;
+        public override int HashSize => 48;
 
         protected override void Init()
         {
-            h0 = 0x6A09E667;
-            h1 = 0xBB67AE85;
-            h2 = 0x3C6EF372;
-            h3 = 0xA54FF53A;
-            h4 = 0x510E527F;
-            h5 = 0x9B05688C;
-            h6 = 0x1F83D9AB;
-            h7 = 0x5BE0CD19;
+            h0 = 0xcbbb9d5dc1059ed8;
+            h1 = 0x629a292a367cd507;
+            h2 = 0x9159015a3070dd17;
+            h3 = 0x152fecd8f70e5939;
+            h4 = 0x67332667ffc00b31;
+            h5 = 0x8eb44a8768581511;
+            h6 = 0xdb0c2e0d64f98fa7;
+            h7 = 0x47b5481dbefa4fa4;
         }
 
         protected override byte[] InternalStateToBytes()
@@ -31,8 +31,6 @@ namespace Zergatul.Cryptography.Hash
             list.AddRange(BitHelper.GetBytes(h3, ByteOrder.BigEndian));
             list.AddRange(BitHelper.GetBytes(h4, ByteOrder.BigEndian));
             list.AddRange(BitHelper.GetBytes(h5, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h6, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h7, ByteOrder.BigEndian));
             return list.ToArray();
         }
     }

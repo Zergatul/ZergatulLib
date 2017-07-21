@@ -9,7 +9,6 @@ namespace Zergatul.Cryptography.Hash
     public class SHA1 : AbstractHash
     {
         public override int BlockSize => 64;
-
         public override int HashSize => 20;
 
         uint h0;
@@ -57,7 +56,7 @@ namespace Zergatul.Cryptography.Hash
                 uint k;
                 if (i < 20)
                 {
-                    f = (b & c) | ((~b) & d);
+                    f = (b & c) | (~b & d);
                     k = 0x5A827999;
                 }
                 else if (i < 40)

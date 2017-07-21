@@ -65,8 +65,14 @@
     <Compile Include="Cryptography\DefaultSecureRandom.cs" />
     <Compile Include="Cryptography\Hash\AbstractHash.cs" />
     <Compile Include="Cryptography\Hash\HMAC.cs" />
+    <Compile Include="Cryptography\Hash\MD5.cs" />
     <Compile Include="Cryptography\Hash\SHA1.cs" />
+    <Compile Include="Cryptography\Hash\SHA224.cs" />
     <Compile Include="Cryptography\Hash\SHA256.cs" />
+    <Compile Include="Cryptography\Hash\SHA2_32Bit.cs" />
+    <Compile Include="Cryptography\Hash\SHA2_64Bit.cs" />
+    <Compile Include="Cryptography\Hash\SHA384.cs" />
+    <Compile Include="Cryptography\Hash\SHA512.cs" />
     <Compile Include="Cryptography\ISecureRandom.cs" />
     <Compile Include="DefaultRandom.cs" />
     <Compile Include="Ftp\DefaultFtpListParser.cs" />

@@ -22,8 +22,51 @@ namespace Zergatul
                     (byte)((value >> 08) & 0xFF),
                     (byte)((value >> 00) & 0xFF)
                 };
+
             if (order == ByteOrder.LittleEndian)
-                throw new NotImplementedException();
+                return new byte[]
+                {
+                    (byte)((value >> 00) & 0xFF),
+                    (byte)((value >> 08) & 0xFF),
+                    (byte)((value >> 16) & 0xFF),
+                    (byte)((value >> 24) & 0xFF),
+                    (byte)((value >> 32) & 0xFF),
+                    (byte)((value >> 40) & 0xFF),
+                    (byte)((value >> 48) & 0xFF),
+                    (byte)((value >> 56) & 0xFF)
+                };
+
+            throw new NotImplementedException();
+        }
+
+        public static byte[] GetBytes(ulong value, ByteOrder order)
+        {
+            if (order == ByteOrder.BigEndian)
+                return new byte[]
+                {
+                    (byte)((value >> 56) & 0xFF),
+                    (byte)((value >> 48) & 0xFF),
+                    (byte)((value >> 40) & 0xFF),
+                    (byte)((value >> 32) & 0xFF),
+                    (byte)((value >> 24) & 0xFF),
+                    (byte)((value >> 16) & 0xFF),
+                    (byte)((value >> 08) & 0xFF),
+                    (byte)((value >> 00) & 0xFF)
+                };
+
+            if (order == ByteOrder.LittleEndian)
+                return new byte[]
+                {
+                    (byte)((value >> 00) & 0xFF),
+                    (byte)((value >> 08) & 0xFF),
+                    (byte)((value >> 16) & 0xFF),
+                    (byte)((value >> 24) & 0xFF),
+                    (byte)((value >> 32) & 0xFF),
+                    (byte)((value >> 40) & 0xFF),
+                    (byte)((value >> 48) & 0xFF),
+                    (byte)((value >> 56) & 0xFF)
+                };
+
             throw new NotImplementedException();
         }
 
@@ -38,6 +81,15 @@ namespace Zergatul
                     (byte)((value >> 00) & 0xFF)
                 };
 
+            if (order == ByteOrder.LittleEndian)
+                return new byte[]
+                {
+                    (byte)((value >> 00) & 0xFF),
+                    (byte)((value >> 08) & 0xFF),
+                    (byte)((value >> 16) & 0xFF),
+                    (byte)((value >> 24) & 0xFF)
+                };
+
             throw new NotImplementedException();
         }
 
@@ -50,19 +102,52 @@ namespace Zergatul
                     (data[index + 2] << 08) |
                     (data[index + 3] << 00));
 
+            if (order == ByteOrder.LittleEndian)
+                return (uint)(
+                    (data[index + 0] << 00) |
+                    (data[index + 1] << 08) |
+                    (data[index + 2] << 16) |
+                    (data[index + 3] << 24));
+
             throw new NotImplementedException();
         }
 
         public static uint ToUInt32(byte[] data, ByteOrder order) => ToUInt32(data, 0, order);
+
+        public static ulong ToUInt64(byte[] data, int index, ByteOrder order)
+        {
+            if (order == ByteOrder.BigEndian)
+                return (ulong)(
+                    ((ulong)data[index + 0] << 56) |
+                    ((ulong)data[index + 1] << 48) |
+                    ((ulong)data[index + 2] << 40) |
+                    ((ulong)data[index + 3] << 32) |
+                    ((ulong)data[index + 4] << 24) |
+                    ((ulong)data[index + 5] << 16) |
+                    ((ulong)data[index + 6] << 08) |
+                    ((ulong)data[index + 7] << 00));
+
+            throw new NotImplementedException();
+        }
 
         public static uint RotateRight(uint value, int bits)
         {
             return (value >> bits) | (value << (32 - bits));
         }
 
+        public static ulong RotateRight(ulong value, int bits)
+        {
+            return (value >> bits) | (value << (64 - bits));
+        }
+
         public static uint RotateLeft(uint value, int bits)
         {
             return (value << bits) | (value >> (32 - bits));
+        }
+
+        public static ulong RotateLeft(ulong value, int bits)
+        {
+            return (value << bits) | (value >> (64 - bits));
         }
 
         public static byte[] HexToBytes(string value)
