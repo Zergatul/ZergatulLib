@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Cryptography.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul", "Zergatul\Zergatul.csproj", "{70DCFA02-0D6B-4220-8E1C-F1B8BA158FAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Tests", "ZergatulTests\Zergatul.Tests.csproj", "{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Tests", "Zergatul.Tests\Zergatul.Tests.csproj", "{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

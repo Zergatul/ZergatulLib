@@ -59,6 +59,7 @@
     <Compile Include="BlockCipherTests.cs" />
     <Compile Include="RIPEMDTests.cs" />
     <Compile Include="ARIATests.cs" />
+    <Compile Include="CamelliaTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

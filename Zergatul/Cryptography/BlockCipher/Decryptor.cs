@@ -11,5 +11,7 @@ namespace Zergatul.Cryptography.BlockCipher
         internal AbstractBlockCipher Cipher;
         internal Func<byte[], byte[]> ProcessBlock;
         public abstract byte[] Decrypt(byte[] IV, byte[] data);
+
+        public byte[] Decrypt(byte[] data) => Decrypt(null, data);
     }
 }

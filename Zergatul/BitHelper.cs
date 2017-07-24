@@ -44,28 +44,59 @@ namespace Zergatul
             if (order == ByteOrder.BigEndian)
                 return new byte[]
                 {
-                    (byte)((value >> 56) & 0xFF),
-                    (byte)((value >> 48) & 0xFF),
-                    (byte)((value >> 40) & 0xFF),
-                    (byte)((value >> 32) & 0xFF),
-                    (byte)((value >> 24) & 0xFF),
-                    (byte)((value >> 16) & 0xFF),
-                    (byte)((value >> 08) & 0xFF),
-                    (byte)((value >> 00) & 0xFF)
+                    (byte)(value >> 56),
+                    (byte)(value >> 48),
+                    (byte)(value >> 40),
+                    (byte)(value >> 32),
+                    (byte)(value >> 24),
+                    (byte)(value >> 16),
+                    (byte)(value >> 08),
+                    (byte)(value >> 00)
                 };
 
             if (order == ByteOrder.LittleEndian)
                 return new byte[]
                 {
-                    (byte)((value >> 00) & 0xFF),
-                    (byte)((value >> 08) & 0xFF),
-                    (byte)((value >> 16) & 0xFF),
-                    (byte)((value >> 24) & 0xFF),
-                    (byte)((value >> 32) & 0xFF),
-                    (byte)((value >> 40) & 0xFF),
-                    (byte)((value >> 48) & 0xFF),
-                    (byte)((value >> 56) & 0xFF)
+                    (byte)(value >> 00),
+                    (byte)(value >> 08),
+                    (byte)(value >> 16),
+                    (byte)(value >> 24),
+                    (byte)(value >> 32),
+                    (byte)(value >> 40),
+                    (byte)(value >> 48),
+                    (byte)(value >> 56)
                 };
+
+            throw new NotImplementedException();
+        }
+
+        public static void GetBytes(ulong value, ByteOrder order, byte[] array, int index)
+        {
+            if (order == ByteOrder.BigEndian)
+            {
+                array[index    ] = (byte)(value >> 56);
+                array[index + 1] = (byte)(value >> 48);
+                array[index + 2] = (byte)(value >> 40);
+                array[index + 3] = (byte)(value >> 32);
+                array[index + 4] = (byte)(value >> 24);
+                array[index + 5] = (byte)(value >> 16);
+                array[index + 6] = (byte)(value >> 08);
+                array[index + 7] = (byte)(value);
+                return;
+            }
+
+            if (order == ByteOrder.LittleEndian)
+            {
+                array[index    ] = (byte)(value);
+                array[index + 1] = (byte)(value >> 08);
+                array[index + 2] = (byte)(value >> 16);
+                array[index + 3] = (byte)(value >> 24);
+                array[index + 4] = (byte)(value >> 32);
+                array[index + 5] = (byte)(value >> 40);
+                array[index + 6] = (byte)(value >> 48);
+                array[index + 7] = (byte)(value >> 56);
+                return;
+            }
 
             throw new NotImplementedException();
         }
