@@ -3,36 +3,36 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Cryptography.BlockCipher;
 
-namespace Zergatul.Cryptography.Tests
+namespace Zergatul.Cryptography.Tests.BlockCipher
 {
     [TestClass]
-    public class CamelliaTests
+    public class ARIATests
     {
         [TestMethod]
         public void Key128_1()
         {
             TestEncryptDecrypt(
-                "0123456789abcdeffedcba9876543210",
-                "0123456789abcdeffedcba9876543210",
-                "67673138549669730857065648eabe43");
+                "000102030405060708090a0b0c0d0e0f",
+                "00112233445566778899aabbccddeeff",
+                "d718fbd6ab644c739da95f3be6451778");
         }
 
         [TestMethod]
         public void Key192_1()
         {
             TestEncryptDecrypt(
-                "0123456789abcdeffedcba98765432100011223344556677",
-                "0123456789abcdeffedcba9876543210",
-                "b4993401b3e996f84ee5cee7d79b09b9");
+                "000102030405060708090a0b0c0d0e0f1011121314151617",
+                "00112233445566778899aabbccddeeff",
+                "26449c1805dbe7aa25a468ce263a9e79");
         }
 
         [TestMethod]
         public void Key256_1()
         {
             TestEncryptDecrypt(
-                "0123456789abcdeffedcba987654321000112233445566778899aabbccddeeff",
-                "0123456789abcdeffedcba9876543210",
-                "9acc237dff16d76c20ef7c919e3a7509");
+                "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+                "00112233445566778899aabbccddeeff",
+                "f92bd7c79fb72e2f2b8f80c1972d24fc");
         }
 
         private static void TestEncryptDecrypt(string key, string plaintext, string ciphertext)
@@ -41,20 +41,20 @@ namespace Zergatul.Cryptography.Tests
             byte[] bplain = BitHelper.HexToBytes(plaintext);
             byte[] bcipher = BitHelper.HexToBytes(ciphertext);
 
-            Camellia cam;
+            ARIA aria;
             switch (bkey.Length * 8)
             {
-                case 128: cam = new Camellia128(); break;
-                case 192: cam = new Camellia192(); break;
-                case 256: cam = new Camellia256(); break;
+                case 128: aria = new ARIA128(); break;
+                case 192: aria = new ARIA192(); break;
+                case 256: aria = new ARIA256(); break;
                 default:
                     throw new InvalidOperationException();
             }
 
-            var enc = cam.CreateEncryptor(bkey, BlockCipherMode.ECB);
+            var enc = aria.CreateEncryptor(bkey, BlockCipherMode.ECB);
             Assert.IsTrue(bcipher.SequenceEqual(enc.Encrypt(bplain)));
 
-            var dec = cam.CreateDecryptor(bkey, BlockCipherMode.ECB);
+            var dec = aria.CreateDecryptor(bkey, BlockCipherMode.ECB);
             Assert.IsTrue(bplain.SequenceEqual(dec.Decrypt(bcipher)));
         }
     }

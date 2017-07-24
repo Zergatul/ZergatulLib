@@ -54,12 +54,15 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DiffieHellmanTests.cs" />
+    <Compile Include="Hash\Helper.cs" />
+    <Compile Include="Hash\SHA1Tests.cs" />
+    <Compile Include="Hash\SHA2Tests.cs" />
+    <Compile Include="Hash\MD5Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HashTests.cs" />
-    <Compile Include="BlockCipherTests.cs" />
-    <Compile Include="RIPEMDTests.cs" />
-    <Compile Include="ARIATests.cs" />
-    <Compile Include="CamelliaTests.cs" />
+    <Compile Include="BlockCipher\AESTests.cs" />
+    <Compile Include="Hash\RIPEMDTests.cs" />
+    <Compile Include="BlockCipher\ARIATests.cs" />
+    <Compile Include="BlockCipher\CamelliaTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

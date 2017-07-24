@@ -4,7 +4,7 @@ using System.Text;
 using Zergatul.Cryptography.Hash;
 using System.Linq;
 
-namespace Zergatul.Cryptography.Tests
+namespace Zergatul.Cryptography.Tests.Hash
 {
     [TestClass]
     public class RIPEMDTests
