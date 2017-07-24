@@ -21,19 +21,5 @@ namespace Zergatul.Cryptography.Hash
             h6 = 0x1F83D9ABFB41BD6B;
             h7 = 0x5BE0CD19137E2179;
         }
-
-        protected override byte[] InternalStateToBytes()
-        {
-            var list = new List<byte>(HashSize);
-            list.AddRange(BitHelper.GetBytes(h0, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h1, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h2, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h3, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h4, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h5, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h6, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h7, ByteOrder.BigEndian));
-            return list.ToArray();
-        }
     }
 }

@@ -102,5 +102,22 @@ namespace Zergatul.Cryptography.Hash
             h6 = unchecked(h6 + g);
             h7 = unchecked(h7 + h);
         }
+
+        protected override byte[] InternalStateToBytes()
+        {
+            byte[] hash = new byte[HashSize];
+            BitHelper.GetBytes(h0, ByteOrder.BigEndian, hash,  0);
+            BitHelper.GetBytes(h1, ByteOrder.BigEndian, hash,  8);
+            BitHelper.GetBytes(h2, ByteOrder.BigEndian, hash, 16);
+            BitHelper.GetBytes(h3, ByteOrder.BigEndian, hash, 24);
+            BitHelper.GetBytes(h4, ByteOrder.BigEndian, hash, 32);
+            BitHelper.GetBytes(h5, ByteOrder.BigEndian, hash, 40);
+            if (HashSize > 48)
+            {
+                BitHelper.GetBytes(h6, ByteOrder.BigEndian, hash, 48);
+                BitHelper.GetBytes(h7, ByteOrder.BigEndian, hash, 56);
+            }
+            return hash;
+        }
     }
 }

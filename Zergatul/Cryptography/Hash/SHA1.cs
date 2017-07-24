@@ -92,13 +92,13 @@ namespace Zergatul.Cryptography.Hash
 
         protected override byte[] InternalStateToBytes()
         {
-            var list = new List<byte>(HashSize);
-            list.AddRange(BitHelper.GetBytes(h0, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h1, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h2, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h3, ByteOrder.BigEndian));
-            list.AddRange(BitHelper.GetBytes(h4, ByteOrder.BigEndian));
-            return list.ToArray();
+            byte[] hash = new byte[HashSize];
+            BitHelper.GetBytes(h0, ByteOrder.BigEndian, hash,  0);
+            BitHelper.GetBytes(h1, ByteOrder.BigEndian, hash,  4);
+            BitHelper.GetBytes(h2, ByteOrder.BigEndian, hash,  8);
+            BitHelper.GetBytes(h3, ByteOrder.BigEndian, hash, 12);
+            BitHelper.GetBytes(h4, ByteOrder.BigEndian, hash, 16);
+            return hash;
         }
     }
 }
