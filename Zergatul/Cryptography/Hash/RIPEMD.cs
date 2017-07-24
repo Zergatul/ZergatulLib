@@ -9,9 +9,6 @@ namespace Zergatul.Cryptography.Hash
     public abstract class RIPEMD : AbstractHash
     {
         public override int BlockSize => 64;
-        public override int HashSize => _hashSize;
-
-        private int _hashSize;
 
         protected static readonly byte[] r = new byte[]
         {
@@ -51,11 +48,6 @@ namespace Zergatul.Cryptography.Hash
 
         protected uint h0, h1, h2, h3, h4, h5, h6, h7, h8, h9;
         protected uint[] m = new uint[16];
-
-        public RIPEMD(int hashSize)
-        {
-            this._hashSize = hashSize;
-        }
 
         protected static uint f(uint j, uint x, uint y, uint z)
         {

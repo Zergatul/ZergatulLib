@@ -8,11 +8,7 @@ namespace Zergatul.Cryptography.Hash
 {
     public class RIPEMD320 : RIPEMD
     {
-        public RIPEMD320()
-            : base(40)
-        {
-
-        }
+        public override int HashSize => 40;
 
         protected override void Init()
         {
