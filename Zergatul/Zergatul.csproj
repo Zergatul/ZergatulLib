@@ -75,7 +75,11 @@
     <Compile Include="Cryptography\Hash\AbstractHash.cs" />
     <Compile Include="Cryptography\Hash\HMAC.cs" />
     <Compile Include="Cryptography\Hash\MD5.cs" />
+    <Compile Include="Cryptography\Hash\RIPEMD.cs" />
+    <Compile Include="Cryptography\Hash\RIPEMD128.cs" />
     <Compile Include="Cryptography\Hash\RIPEMD160.cs" />
+    <Compile Include="Cryptography\Hash\RIPEMD256.cs" />
+    <Compile Include="Cryptography\Hash\RIPEMD320.cs" />
     <Compile Include="Cryptography\Hash\SHA1.cs" />
     <Compile Include="Cryptography\Hash\SHA224.cs" />
     <Compile Include="Cryptography\Hash\SHA256.cs" />

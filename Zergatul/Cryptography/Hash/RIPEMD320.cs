@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Hash
 {
-    public class RIPEMD160 : RIPEMD
+    public class RIPEMD320 : RIPEMD
     {
-        public RIPEMD160()
-            : base(20)
+        public RIPEMD320()
+            : base(40)
         {
 
         }
@@ -21,6 +21,11 @@ namespace Zergatul.Cryptography.Hash
             h2 = 0x98BADCFE;
             h3 = 0x10325476;
             h4 = 0xC3D2E1F0;
+            h5 = 0x76543210;
+            h6 = 0xFEDCBA98;
+            h7 = 0x89ABCDEF;
+            h8 = 0x01234567;
+            h9 = 0x3C2D1E0F;
         }
 
         private static uint kp(uint j)
@@ -40,11 +45,11 @@ namespace Zergatul.Cryptography.Hash
             uint c = h2;
             uint d = h3;
             uint e = h4;
-            uint ap = h0;
-            uint bp = h1;
-            uint cp = h2;
-            uint dp = h3;
-            uint ep = h4;
+            uint ap = h5;
+            uint bp = h6;
+            uint cp = h7;
+            uint dp = h8;
+            uint ep = h9;
 
             for (uint i = 0; i < 80; i++)
                 unchecked
@@ -62,16 +67,51 @@ namespace Zergatul.Cryptography.Hash
                     dp = BitHelper.RotateLeft(cp, 10);
                     cp = bp;
                     bp = t;
+
+                    if (i == 15)
+                    {
+                        uint buf = b;
+                        b = bp;
+                        bp = buf;
+                    }
+                    if (i == 31)
+                    {
+                        uint buf = d;
+                        d = dp;
+                        dp = buf;
+                    }
+                    if (i == 47)
+                    {
+                        uint buf = a;
+                        a = ap;
+                        ap = buf;
+                    }
+                    if (i == 63)
+                    {
+                        uint buf = c;
+                        c = cp;
+                        cp = buf;
+                    }
+                    if (i == 79)
+                    {
+                        uint buf = e;
+                        e = ep;
+                        ep = buf;
+                    }
                 }
 
             unchecked
             {
-                uint t = h1 + c + dp;
-                h1 = h2 + d + ep;
-                h2 = h3 + e + ap;
-                h3 = h4 + a + bp;
-                h4 = h0 + b + cp;
-                h0 = t;
+                h0 += a;
+                h1 += b;
+                h2 += c;
+                h3 += d;
+                h4 += e;
+                h5 += ap;
+                h6 += bp;
+                h7 += cp;
+                h8 += dp;
+                h9 += ep;
             }
         }
     }
