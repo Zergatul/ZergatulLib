@@ -9,6 +9,7 @@ namespace Zergatul.Cryptography.Hash
     public class SHA256 : SHA2_32Bit
     {
         public override int HashSize => 32;
+        public override OID OID => OID.SHA256;
 
         protected override void Init()
         {

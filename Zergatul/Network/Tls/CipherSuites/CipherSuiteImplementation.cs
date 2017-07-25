@@ -6,20 +6,15 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls.CipherSuites
 {
-    internal class CipherSuite<KeyExchange, BlockCipher, HashFunction> : AbstractCipherSuite
+    internal class CipherSuiteImplementation<KeyExchange, BlockCipher, HashFunction> : AbstractCipherSuite
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
         where HashFunction : AbstractHash, new()
     {
-        protected ISecureRandom _random;
-
-        protected SecurityParameters _secParams;
-        protected Role _role;
         protected TlsConnectionKeys _keys;
 
         protected KeyExchange _keyExchange;
         protected BlockCipher _blockCipher;
-        protected BlockCipherMode _blockCipherMode;
         protected Encryptor _encryptor;
         protected Decryptor _decryptor;
         protected HMAC<HashFunction> _encryptHMAC;
@@ -27,8 +22,10 @@ namespace Zergatul.Network.Tls.CipherSuites
 
         protected ByteArray _preMasterSecret;
 
-        public CipherSuite(SecurityParameters secParams, Role role, BlockCipherMode mode, ISecureRandom random)
+        public override void Init(SecurityParameters secParams, Role role, BlockCipherMode mode, ISecureRandom random)
         {
+            base.Init(secParams, role, mode, random);
+
             _keyExchange = new KeyExchange();
             _keyExchange.Random = random;
 
@@ -41,10 +38,6 @@ namespace Zergatul.Network.Tls.CipherSuites
             secParams.RecordIVLength = secParams.BlockLength;
             secParams.FixedIVLength = 0;
             secParams.MACLength = (byte)new HashFunction().HashSize;
-
-            this._secParams = secParams;
-            this._role = role;
-            this._random = random;
         }
 
         public override ServerKeyExchange GetServerKeyExchange()

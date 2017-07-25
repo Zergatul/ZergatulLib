@@ -10,6 +10,7 @@ namespace Zergatul.Cryptography.Hash
     {
         public override int BlockSize => 64;
         public override int HashSize => 20;
+        public override OID OID => OID.MD5;
 
         private static int[] s = new int[]
         {

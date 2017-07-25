@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul", "Zergatul\Zergat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Tests", "Zergatul.Tests\Zergatul.Tests.csproj", "{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Tls.Tests", "Zergatul.Tls.Tests\Zergatul.Tls.Tests.csproj", "{7CBC9035-8A2D-4CEE-855A-256B9D139077}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CBC9035-8A2D-4CEE-855A-256B9D139077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CBC9035-8A2D-4CEE-855A-256B9D139077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CBC9035-8A2D-4CEE-855A-256B9D139077}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CBC9035-8A2D-4CEE-855A-256B9D139077}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

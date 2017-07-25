@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
+using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
 using Zergatul.Network.Tls.CipherSuites;
 using Zergatul.Network.Tls.Extensions;
@@ -16,7 +17,7 @@ namespace Zergatul.Network.Tls
     // https://www.ietf.org/rfc/rfc2104.txt
 
     // The Transport Layer Security (TLS) Protocol Version 1.2
-    // https://www.ietf.org/rfc/rfc5246.txt
+    // https://tools.ietf.org/html/rfc5246
 
     // https://tools.ietf.org/search/rfc4492#section-5.1
     // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
@@ -28,6 +29,8 @@ namespace Zergatul.Network.Tls
     // * test connection from bouncy to .net sslstream
     public class TlsStream : Stream
     {
+        public TlsStreamSettings Settings { get; set; }
+
         private Stream _innerStream;
         private BinaryReader _reader;
         private TlsUtils _utils;
@@ -41,6 +44,12 @@ namespace Zergatul.Network.Tls
         private X509Certificate2 _serverCertificate;
         private byte[] _clientFinishedHandshakeData;
         private byte[] _serverFinishedHandshakeData;
+
+        private CipherSuite[] _clientCipherSuites;
+
+        private List<ContentMessage> _messageBuffer;
+
+        private string _clientHost;
 
         internal List<byte> HandshakeData;
 
@@ -59,27 +68,30 @@ namespace Zergatul.Network.Tls
             this._utils = new TlsUtils(this._random);
 
             this._secParams = new SecurityParameters();
+
+            this.Settings = TlsStreamSettings.Default;
         }
 
         public void AuthenticateAsClient(string host)
         {
             Role = Role.Client;
             State = ConnectionState.Start;
+            _clientHost = host;
 
             GenerateRandom();
 
-            WriteHandshakeMessages(GenerateClientHello());
+            WriteHandshakeMessage(GenerateClientHello());
 
             ReadRecordMessage(ConnectionState.ServerHelloDone);
 
-            WriteHandshakeMessages(new HandshakeMessage(SelectedCipher.GetClientKeyExchange()));
+            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetClientKeyExchange()));
 
             WriteChangeCipherSpec();
 
             ClientSequenceNum = 0;
             ServerSequenceNum = 0;
 
-            WriteHandshakeMessages(new HandshakeMessage(SelectedCipher.GetFinished(new ByteArray(_clientFinishedHandshakeData))));
+            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished(new ByteArray(_clientFinishedHandshakeData))));
 
             ReadRecordMessage(ConnectionState.ServerFinished);
         }
@@ -93,17 +105,21 @@ namespace Zergatul.Network.Tls
 
             ReadRecordMessage(ConnectionState.ClientHello);
 
-            WriteHandshakeMessages(GenerateServerHello(), GenerateCertificate(certificate));
-            WriteHandshakeMessages(GenerateServerKeyExchange(certificate), new HandshakeMessage(new ServerHelloDone()));
+            ClearMessageBuffer();
+            WriteHandshakeMessageBuffered(GenerateServerHello());
+            WriteHandshakeMessageBuffered(GenerateCertificate(certificate));
+            WriteHandshakeMessageBuffered(GenerateServerKeyExchange(certificate));
+            WriteHandshakeMessageBuffered(new HandshakeMessage(new ServerHelloDone()));
+            ReleaseMessageBuffer();
+
+            ClientSequenceNum = 0;
+            ServerSequenceNum = 0;
 
             ReadRecordMessage(ConnectionState.ClientFinished);
 
             WriteChangeCipherSpec();
 
-            ClientSequenceNum = 0;
-            ServerSequenceNum = 0;
-
-            WriteHandshakeMessages(new HandshakeMessage(SelectedCipher.GetFinished(new ByteArray(_serverFinishedHandshakeData))));
+            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished(new ByteArray(_serverFinishedHandshakeData))));
         }
 
         #region Private methods
@@ -132,14 +148,39 @@ namespace Zergatul.Network.Tls
             message.Write(_innerStream);
         }
 
-        private void WriteHandshakeMessages(params HandshakeMessage[] messages)
+        private void WriteHandshakeMessage(HandshakeMessage message)
         {
             WriteRecordMessage(new RecordMessage(this)
             {
                 RecordType = ContentType.Handshake,
                 Version = ProtocolVersion.Tls12,
-                ContentMessages = messages.Cast<ContentMessage>().ToList()
+                ContentMessages = new List<ContentMessage> { message }
             });
+        }
+
+        private void ClearMessageBuffer()
+        {
+            if (_messageBuffer != null)
+                _messageBuffer.Clear();
+            else
+                _messageBuffer = new List<ContentMessage>();
+        }
+
+        private void WriteHandshakeMessageBuffered(HandshakeMessage message)
+        {
+            _messageBuffer.Add(message);
+            OnContentMessage(this, new ContentMessageEventArgs(message, false, Role == Role.Server));
+        }
+
+        private void ReleaseMessageBuffer()
+        {
+            var message = new RecordMessage(this)
+            {
+                RecordType = ContentType.Handshake,
+                Version = ProtocolVersion.Tls12,
+                ContentMessages = _messageBuffer
+            };
+            message.Write(_innerStream);
         }
 
         private void WriteChangeCipherSpec()
@@ -174,44 +215,19 @@ namespace Zergatul.Network.Tls
             {
                 ClientVersion = ProtocolVersion.Tls12,
                 Random = _secParams.ClientRandom.Array,
-                CipherSuites = new CipherSuiteType[]
-                {
-                    CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
-                    /*CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                    CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                    CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,*/
-                    /*CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-                    CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,*/
-                    //CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                    //CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                    /*CipherSuiteType.TLS_RSA_WITH_AES_256_GCM_SHA384,
-                    CipherSuiteType.TLS_RSA_WITH_AES_128_GCM_SHA256,
-                    CipherSuiteType.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                    CipherSuiteType.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                    CipherSuiteType.TLS_RSA_WITH_AES_256_CBC_SHA,
-                    CipherSuiteType.TLS_RSA_WITH_AES_128_CBC_SHA,*/
-                    /*CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-                    CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                    CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-                    CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-                    CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-                    CipherSuiteType.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-                    CipherSuiteType.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256,
-                    CipherSuiteType.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256,
-                    CipherSuiteType.TLS_DHE_DSS_WITH_AES_256_CBC_SHA,
-                    CipherSuiteType.TLS_DHE_DSS_WITH_AES_128_CBC_SHA,
-                    CipherSuiteType.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-                    CipherSuiteType.TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA,
-                    CipherSuiteType.TLS_RSA_WITH_RC4_128_SHA,
-                    CipherSuiteType.TLS_RSA_WITH_RC4_128_MD5*/
-                },
+                CipherSuites = Settings.CipherSuites,
                 Extensions = new TlsExtension[]
                 {
-                    new TlsExtension
+                    new ServerNameExtension
                     {
-                        Type = ExtensionType.ServerName,
-                        Data = _utils.HexToBytes("00 0C 00 00 09 6C 6F 63 61 6C-68 6F 73 74")
+                        ServerNameList = new ServerName[]
+                        {
+                            new ServerName
+                            {
+                                NameType = NameType.HostName,
+                                HostName = _clientHost
+                            }
+                        }
                     },
                     new TlsExtension
                     {
@@ -253,11 +269,14 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateServerHello()
         {
+            var commonCiphers = Settings.CipherSuites.Where(cs => _clientCipherSuites.Contains(cs));
+            if (!commonCiphers.Any())
+                throw new TlsStreamException("No common algorithm");
             return new HandshakeMessage(new ServerHello
             {
                 ServerVersion = ProtocolVersion.Tls12,
                 Random = _secParams.ServerRandom.Array,
-                CipherSuite = CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+                CipherSuite = commonCiphers.First(),
                 Extensions = new List<TlsExtension>
                 {
                     new TlsExtension
@@ -328,6 +347,12 @@ namespace Zergatul.Network.Tls
                         OnServerFinished(message.Body as Finished, e.WasRead);
                 }
             }
+            if (e.Message is Alert)
+            {
+                var message = e.Message as Alert;
+                if (message.Level == AlertLevel.Fatal)
+                    throw new TlsStreamException($"TLS Fatal error: {message.Description}");
+            }
             if (e.Message is ChangeCipherSpec)
             {
                 if (e.FromClient)
@@ -345,6 +370,7 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Unexpected ClientHello message");
 
             _secParams.ClientRandom = new ByteArray(message.Random.ToArray());
+            _clientCipherSuites = message.CipherSuites;
 
             State = ConnectionState.ClientHello;
         }
@@ -365,8 +391,8 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.ServerHello)
                 throw new TlsStreamException("Unexpected Certificate message");
 
-            if (message.Certificates.Count == 1)
-                _serverCertificate = message.Certificates[0];
+            if (message.Certificates.Count > 0)
+                _serverCertificate = message.Certificates.First();
             else
                 throw new NotImplementedException();
 
@@ -387,19 +413,9 @@ namespace Zergatul.Network.Tls
 
                     var signedBytes = _secParams.ClientRandom + _secParams.ServerRandom + dhParamsBytes;
 
-                    string oid;
-                    switch (message.SignAndHashAlgo.Hash)
-                    {
-                        case HashAlgorithm.SHA1:
-                            oid = System.Security.Cryptography.CryptoConfig.MapNameToOID("SHA1");
-                            break;
-                        case HashAlgorithm.SHA256:
-                            oid = System.Security.Cryptography.CryptoConfig.MapNameToOID("SHA256");
-                            break;
-                        default:
-                            throw new NotImplementedException();
-                    }
-                    if (!rsa.VerifyData(signedBytes.Array, oid, message.Signature))
+                    AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
+                    hash.Update(signedBytes.Array);
+                    if (!rsa.VerifyHash(hash.ComputeHash(), hash.OID.Text, message.Signature))
                         throw new TlsStreamException("Invalid signature");
                     break;
                 default:

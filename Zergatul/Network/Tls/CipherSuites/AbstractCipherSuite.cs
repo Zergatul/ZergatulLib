@@ -7,6 +7,19 @@ namespace Zergatul.Network.Tls.CipherSuites
 {
     internal abstract class AbstractCipherSuite
     {
+        protected SecurityParameters _secParams;
+        protected Role _role;
+        protected ISecureRandom _random;
+        protected BlockCipherMode _blockCipherMode;
+
+        public virtual void Init(SecurityParameters secParams, Role role, BlockCipherMode mode, ISecureRandom random)
+        {
+            this._secParams = secParams;
+            this._role = role;
+            this._blockCipherMode = mode;
+            this._random = random;
+        }
+
         public abstract ServerKeyExchange GetServerKeyExchange();
         public abstract void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader);
         public abstract void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer);
@@ -24,21 +37,42 @@ namespace Zergatul.Network.Tls.CipherSuites
         public abstract ByteArray Encode(ByteArray data, ContentType type, ProtocolVersion version, ulong sequenceNum);
         public abstract ByteArray Decode(ByteArray data, ContentType type, ProtocolVersion version, ulong sequenceNum);
 
-        public static AbstractCipherSuite Resolve(CipherSuiteType type, SecurityParameters secParams, Role role, ISecureRandom random)
+        public static AbstractCipherSuite Resolve(CipherSuite type, SecurityParameters secParams, Role role, ISecureRandom random)
         {
+            AbstractCipherSuite cs;
             switch (type)
             {
-                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-                    return new CipherSuite<DHEKeyExchange, AES128, SHA1>(secParams, role, BlockCipherMode.CBC, random);
-                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                    return new CipherSuite<DHEKeyExchange, AES256, SHA1>(secParams, role, BlockCipherMode.CBC, random);
-                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
-                    return new CipherSuite<DHEKeyExchange, AES128, SHA256>(secParams, role, BlockCipherMode.CBC, random);
-                case CipherSuiteType.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
-                    return new CipherSuite<DHEKeyExchange, AES256, SHA256>(secParams, role, BlockCipherMode.CBC, random);
+                case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES128, SHA1>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES256, SHA1>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, Camellia128, SHA1>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES128, SHA256>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES256, SHA256>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, Camellia256, SHA1>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, ARIA128, SHA256>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384:
+                    cs = new CipherSuiteImplementation<DHEKeyExchange, ARIA256, SHA384>();
+                    break;
                 default:
                     throw new NotImplementedException();
             }
+
+            cs.Init(secParams, role, BlockCipherMode.CBC, random);
+
+            return cs;
         }
     }
 }

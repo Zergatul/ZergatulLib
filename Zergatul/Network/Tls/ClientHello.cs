@@ -13,7 +13,7 @@ namespace Zergatul.Network.Tls
         public ProtocolVersion ClientVersion;
         public byte[] Random;
         public byte[] SessionID = new byte[0];
-        public CipherSuiteType[] CipherSuites;
+        public CipherSuite[] CipherSuites;
         public TlsExtension[] Extensions = new TlsExtension[0];
 
         private ushort ExtensionsLength => (ushort)Extensions.DefaultIfEmpty().Sum(e => 4 + e.Length);
@@ -35,9 +35,9 @@ namespace Zergatul.Network.Tls
             ushort cipherSuitesLength = reader.ReadShort();
             if (cipherSuitesLength % 2 == 1 || cipherSuitesLength == 0)
                 throw new TlsStreamException("Invalid CipherSuites Length");
-            CipherSuites = new CipherSuiteType[cipherSuitesLength / 2];
+            CipherSuites = new CipherSuite[cipherSuitesLength / 2];
             for (int i = 0; i < CipherSuites.Length; i++)
-                CipherSuites[i] = (CipherSuiteType)reader.ReadShort();
+                CipherSuites[i] = (CipherSuite)reader.ReadShort();
 
             // Compression methods, skip for now
             byte compressionMethodsLength = reader.ReadByte();

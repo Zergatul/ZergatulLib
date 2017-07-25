@@ -28,12 +28,6 @@ namespace Zergatul.Network.Tls.Extensions
 
         }
 
-        public SignatureAlgorithmsExtension(BinaryReader reader)
-            : base(ExtensionType.SignatureAlgorithms, reader)
-        {
-            
-        }
-
         protected override void ParseData()
         {
             var reader = new BinaryReader(_data);

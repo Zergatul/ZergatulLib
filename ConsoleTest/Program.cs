@@ -34,14 +34,38 @@ namespace Test
 
         static void Main(string[] args)
         {
-            /*var client = new TcpClient("localhost", 32028);
-            var tls = new TlsStream(client.GetStream());
-            tls.AuthenticateAsClient("localhost");
+            bool testLocalHost = true;
+            if (testLocalHost)
+            {
+                var client = new TcpClient("localhost", 32028);
+                var tls = new TlsStream(client.GetStream());
+                tls.AuthenticateAsClient("localhost");
 
-            byte[] buffer = new byte[12];
-            tls.Read(buffer, 0, 12);
+                byte[] buffer = new byte[12];
+                tls.Read(buffer, 0, 12);
 
-            Console.WriteLine(Encoding.ASCII.GetString(buffer));*/
+                Console.WriteLine(Encoding.UTF8.GetString(buffer));
+            }
+            else
+            {
+                string host =
+                    //"www.howsmyssl.com"
+                    "ru.wargaming.net"
+                    ;
+
+                var client = new TcpClient(host, 443);
+                var tls = new TlsStream(client.GetStream());
+                tls.AuthenticateAsClient(host);
+
+                string request =
+                    "GET / HTTP/1.0" + Environment.NewLine +
+                    "Host: " + host + Environment.NewLine +
+                    Environment.NewLine;
+                tls.Write(Encoding.ASCII.GetBytes(request));
+                byte[] buffer = new byte[500];
+                tls.Read(buffer, 0, 500);
+                Console.WriteLine(Encoding.UTF8.GetString(buffer));
+            }
 
             /*var server = new TcpListener(IPAddress.Any, 32028);
             server.Start();

@@ -81,5 +81,35 @@ namespace Zergatul.Network.Tls
         {
             _tracking = null;
         }
+
+        public IDisposable WriteShortLengthOfBlock()
+        {
+            var result = new BlockLength();
+            WriteShort(0);
+            result.Writer = this;
+            result.Position = _list.Count;
+            if (_tracking != null)
+                result.TrackingPosition = _tracking.Count;
+            return result;
+        }
+
+        private class BlockLength : IDisposable
+        {
+            public int Position;
+            public int TrackingPosition;
+            public BinaryWriter Writer;
+
+            public void Dispose()
+            {
+                int length = Writer._list.Count - Position;
+                Writer._list[Position - 2] = (byte)(length >> 8);
+                Writer._list[Position - 1] = (byte)(length);
+                if (Writer._tracking != null)
+                {
+                    Writer._tracking[TrackingPosition - 2] = Writer._list[Position - 2];
+                    Writer._tracking[TrackingPosition - 1] = Writer._list[Position - 1];
+                }
+            }
+        }
     }
 }

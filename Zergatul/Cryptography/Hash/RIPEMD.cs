@@ -9,6 +9,13 @@ namespace Zergatul.Cryptography.Hash
     public abstract class RIPEMD : AbstractHash
     {
         public override int BlockSize => 64;
+        public override OID OID
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         protected static readonly byte[] r = new byte[]
         {

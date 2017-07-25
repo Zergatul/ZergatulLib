@@ -11,13 +11,24 @@ namespace Zergatul.Network.Tls.Extensions
         public TlsExtension Read(BinaryReader reader)
         {
             var type = (ExtensionType)reader.ReadShort();
+
+            TlsExtension ext;
             switch (type)
             {
+                case ExtensionType.ServerName:
+                    ext = new ServerNameExtension();
+                    break;
                 case ExtensionType.SignatureAlgorithms:
-                    return new SignatureAlgorithmsExtension(reader);
+                    ext = new SignatureAlgorithmsExtension();
+                    break;
                 default:
-                    return new TlsExtension(type, reader);
+                    ext = new TlsExtension(type);
+                    break;
             }
+
+            ext.Read(reader);
+
+            return ext;
         }
     }
 }

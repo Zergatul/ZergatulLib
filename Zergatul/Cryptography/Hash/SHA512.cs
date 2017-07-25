@@ -9,6 +9,7 @@ namespace Zergatul.Cryptography.Hash
     public class SHA512 : SHA2_64Bit
     {
         public override int HashSize => 64;
+        public override OID OID => OID.SHA512;
 
         protected override void Init()
         {

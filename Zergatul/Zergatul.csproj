@@ -50,6 +50,7 @@
     <Compile Include="Cryptography\Asymmetric\DiffieHellman.cs" />
     <Compile Include="Cryptography\Asymmetric\DiffieHellmanParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDiffieHellman.cs" />
+    <Compile Include="Cryptography\Asymmetric\RSA.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
     <Compile Include="Cryptography\BlockCipher\AES.cs" />
     <Compile Include="Cryptography\BlockCipher\AES128.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Cryptography\Hash\SHA384.cs" />
     <Compile Include="Cryptography\Hash\SHA512.cs" />
     <Compile Include="Cryptography\ISecureRandom.cs" />
+    <Compile Include="Cryptography\OID.cs" />
     <Compile Include="DefaultRandom.cs" />
     <Compile Include="Ftp\DefaultFtpListParser.cs" />
     <Compile Include="Ftp\FtpBlockHeaderDescriptor.cs" />
@@ -125,6 +127,9 @@
     <Compile Include="Network\Proxy\Socks4Exception.cs" />
     <Compile Include="Network\Proxy\Socks5.cs" />
     <Compile Include="Network\Proxy\Socks5Exception.cs" />
+    <Compile Include="Network\Tls\Alert.cs" />
+    <Compile Include="Network\Tls\AlertDescription.cs" />
+    <Compile Include="Network\Tls\AlertLevel.cs" />
     <Compile Include="Network\Tls\ApplicationData.cs" />
     <Compile Include="Network\Tls\BinaryReader.cs" />
     <Compile Include="Network\Tls\BinaryWriter.cs" />
@@ -132,8 +137,8 @@
     <Compile Include="Network\Tls\ChangeCipherSpec.cs" />
     <Compile Include="Network\Tls\CipherSuites\AbstractCipherSuite.cs" />
     <Compile Include="Network\Tls\CipherSuites\AbstractKeyExchange.cs" />
-    <Compile Include="Network\Tls\CipherSuites\CipherSuite.cs" />
-    <Compile Include="Network\Tls\CipherSuites\CipherSuiteType.cs" />
+    <Compile Include="Network\Tls\CipherSuites\CipherSuiteImplementation.cs" />
+    <Compile Include="Network\Tls\CipherSuite.cs" />
     <Compile Include="Network\Tls\CipherSuites\DHEKeyExchange.cs" />
     <Compile Include="Network\Tls\CipherType.cs" />
     <Compile Include="Network\Tls\ClientDiffieHellmanPublic.cs" />
@@ -150,6 +155,7 @@
     <Compile Include="Network\Tls\ECPoint.cs" />
     <Compile Include="Network\Tls\Extensions\ExtensionType.cs" />
     <Compile Include="Network\Tls\Extensions\HashAlgorithm.cs" />
+    <Compile Include="Network\Tls\Extensions\ServerNameExtension.cs" />
     <Compile Include="Network\Tls\Extensions\SignatureAlgorithm.cs" />
     <Compile Include="Network\Tls\Extensions\SignatureAlgorithmsExtension.cs" />
     <Compile Include="Network\Tls\Extensions\SignatureAndHashAlgorithm.cs" />
@@ -184,6 +190,7 @@
     <Compile Include="Network\Tls\TLSPlaintext.cs" />
     <Compile Include="Network\Tls\TlsStream.cs" />
     <Compile Include="Network\Tls\TlsStreamException.cs" />
+    <Compile Include="Network\Tls\TlsStreamSettings.cs" />
     <Compile Include="Network\Tls\TlsUtils.cs" />
     <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

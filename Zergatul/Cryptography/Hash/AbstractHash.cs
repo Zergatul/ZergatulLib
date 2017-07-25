@@ -10,6 +10,7 @@ namespace Zergatul.Cryptography.Hash
     {
         public abstract int BlockSize { get; }
         public abstract int HashSize { get; }
+        public abstract OID OID { get; }
 
         protected List<byte> _buffer;
         protected ulong _totalBytes;

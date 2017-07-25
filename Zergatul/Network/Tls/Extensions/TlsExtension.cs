@@ -35,9 +35,8 @@ namespace Zergatul.Network.Tls.Extensions
             Type = type;
         }
 
-        internal TlsExtension(ExtensionType type, BinaryReader reader)
+        internal void Read(BinaryReader reader)
         {
-            Type = type;
             Data = reader.ReadBytes(reader.ReadShort());
         }
 

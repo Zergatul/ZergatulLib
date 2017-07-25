@@ -76,6 +76,9 @@ namespace Zergatul.Network.Tls
                     case ContentType.ChangeCipherSpec:
                         message = new ChangeCipherSpec();
                         break;
+                    case ContentType.Alert:
+                        message = new Alert();
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
@@ -132,13 +135,13 @@ namespace Zergatul.Network.Tls
 
         public void Write(Stream stream)
         {
-            foreach (var message in ContentMessages)
-                OnContentMessage?.Invoke(this, new ContentMessageEventArgs(message, false, _tlsStream.Role == Role.Server));
-
             if (_tlsStream.WriteEncrypted && RecordType != ContentType.ChangeCipherSpec)
                 WriteEncrypted(stream);
             else
                 WriteRaw(stream);
+
+            foreach (var message in ContentMessages)
+                OnContentMessage?.Invoke(this, new ContentMessageEventArgs(message, false, _tlsStream.Role == Role.Server));
         }
 
         private void WriteRaw(Stream stream)
