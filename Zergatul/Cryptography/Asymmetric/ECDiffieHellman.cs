@@ -38,5 +38,13 @@ namespace Zergatul.Cryptography.Asymmetric
         {
             throw new NotImplementedException();
         }
+
+        public override AbstractAsymmetricEncryption Encryption
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

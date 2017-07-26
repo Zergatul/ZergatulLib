@@ -31,6 +31,14 @@ namespace Zergatul.Cryptography.Asymmetric
             }
         }
 
+        public override AbstractAsymmetricEncryption Encryption
+        {
+            get
+            {
+                throw new NotSupportedException("Diffie Hellman doesn't support ecryption");
+            }
+        }
+
         public override AbstractKeyExchangeAlgorithm<BigInteger, BigInteger> KeyExchange
         {
             get

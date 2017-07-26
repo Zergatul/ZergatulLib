@@ -24,9 +24,8 @@ namespace Zergatul.Network.Tls
 
     // TODO
     // * Check message length, allow splitting messages on record layer
-    // * Think how to merge 4 handshake messages for server (write should process messsages as soon as it writes) add method writetobuffer and flush buffer
-    // * Read alerts???
     // * test connection from bouncy to .net sslstream
+    // * work as proxy stream for another tls stream implementation, for debugging purposes
     public class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }

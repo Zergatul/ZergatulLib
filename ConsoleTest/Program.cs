@@ -13,8 +13,10 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Certificates;
 using Zergatul.Ftp;
 using Zergatul.Math;
+using Zergatul.Network;
 using Zergatul.Network.Proxy;
 using Zergatul.Network.Tls;
 
@@ -34,7 +36,13 @@ namespace Test
 
         static void Main(string[] args)
         {
-            bool testLocalHost = true;
+            //Org.BouncyCastle.Asn1.Asn1Object.FromStream(File.OpenRead("1210.cer"));
+            var element = Zergatul.Network.ASN1.ASN1Element.ReadFrom(File.OpenRead("1210.cer"));
+            //X509v3Certificate cert = new X509v3Certificate(File.OpenRead("1210.cer"));
+
+            return;
+
+            bool testLocalHost = false;
             if (testLocalHost)
             {
                 var client = new TcpClient("localhost", 32028);

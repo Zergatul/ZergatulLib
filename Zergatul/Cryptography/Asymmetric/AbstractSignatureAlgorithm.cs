@@ -17,12 +17,12 @@ namespace Zergatul.Cryptography.Asymmetric
             return SignHash(hashAlgorithm.ComputeHash());
         }
 
-        public abstract bool VerifyHash(byte[] data);
+        public abstract bool VerifyHash(byte[] data, byte[] signature);
 
-        public virtual bool VerifyData(byte[] data, AbstractHash hashAlgorithm)
+        public virtual bool VerifyData(byte[] data, byte[] signature, AbstractHash hashAlgorithm)
         {
             hashAlgorithm.Update(data);
-            return VerifyHash(hashAlgorithm.ComputeHash());
+            return VerifyHash(hashAlgorithm.ComputeHash(), signature);
         }
     }
 }

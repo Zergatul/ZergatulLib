@@ -21,5 +21,6 @@ namespace Zergatul.Cryptography.Asymmetric
 
         public abstract AbstractSignatureAlgorithm Signature { get; }
         public abstract AbstractKeyExchangeAlgorithm<PublicKeyClass, SharedSecretClass> KeyExchange { get; }
+        public abstract AbstractAsymmetricEncryption Encryption { get; }
     }
 }
