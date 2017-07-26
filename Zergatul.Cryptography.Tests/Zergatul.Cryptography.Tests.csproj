@@ -53,7 +53,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="DiffieHellmanTests.cs" />
+    <Compile Include="Asymmetric\DiffieHellmanTests.cs" />
+    <Compile Include="Asymmetric\RSATests.cs" />
     <Compile Include="Hash\Helper.cs" />
     <Compile Include="Hash\SHA1Tests.cs" />
     <Compile Include="Hash\SHA2Tests.cs" />

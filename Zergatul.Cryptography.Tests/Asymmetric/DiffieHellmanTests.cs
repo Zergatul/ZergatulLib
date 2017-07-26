@@ -4,7 +4,7 @@ using Zergatul.Math;
 using System.Collections.Generic;
 using Zergatul.Cryptography.Asymmetric;
 
-namespace Zergatul.Cryptography.Tests
+namespace Zergatul.Cryptography.Tests.Asymmetric
 {
     [TestClass]
     public class DiffieHellmanTests
