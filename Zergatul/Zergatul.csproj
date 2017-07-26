@@ -128,9 +128,14 @@
     <Compile Include="Network\ASN1\ASN1TagNumber.cs" />
     <Compile Include="Network\ASN1\ASN1Class.cs" />
     <Compile Include="Network\ASN1\ASN1ValueType.cs" />
+    <Compile Include="Network\ASN1\BitString.cs" />
     <Compile Include="Network\ASN1\Integer.cs" />
+    <Compile Include="Network\ASN1\Null.cs" />
     <Compile Include="Network\ASN1\ObjectIdentifier.cs" />
+    <Compile Include="Network\ASN1\PrintableString.cs" />
     <Compile Include="Network\ASN1\Sequence.cs" />
+    <Compile Include="Network\ASN1\Set.cs" />
+    <Compile Include="Network\ASN1\UTCTime.cs" />
     <Compile Include="Network\Constants.cs" />
     <Compile Include="Network\NotSupportedByProtocolException.cs" />
     <Compile Include="Network\Proxy\ChainProxy.cs" />

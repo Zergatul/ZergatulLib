@@ -14,15 +14,50 @@ namespace Zergatul.Network.ASN1
 
         protected override void ReadBody(Stream stream)
         {
-            ulong totalRead = 0;
+            long totalRead = 0;
+            ulong number = 0;
+            bool first = true;
+            var sb = new StringBuilder();
+
             while (totalRead < Length)
             {
                 int readResult = stream.ReadByte();
                 if (readResult == -1)
                     throw new EndOfStreamException();
+                totalRead++;
 
                 byte b = (byte)readResult;
+                number += (byte)(b & 0x7F);
+                if ((b & 0x80) != 0)
+                {
+                    if (first)
+                    {
+                        if (number < 40)
+                            sb.Append('0');
+                        else if (number < 80)
+                        {
+                            sb.Append('1');
+                            number -= 40;
+                        }
+                        else
+                        {
+                            sb.Append('2');
+                            number -= 80;
+                        }
+                        first = false;
+                    }
+                    sb.Append('.');
+                    sb.Append(number);
+                    number = 0;
+                }
+                else
+                    checked
+                    {
+                        number *= 128;
+                    }
             }
+
+            OID = new OID(sb.ToString());
         }
     }
 }
