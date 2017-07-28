@@ -11,6 +11,16 @@ namespace Zergatul.Network.ASN1
     {
         public bool Value { get; private set; }
 
+        public Boolean()
+        {
+
+        }
+
+        public Boolean(bool value)
+        {
+            this.Value = value;
+        }
+
         protected override void ReadBody(Stream stream)
         {
             if (Length != 1)

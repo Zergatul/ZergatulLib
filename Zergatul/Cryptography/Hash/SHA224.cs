@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Hash
     public class SHA224 : SHA2_32Bit
     {
         public override int HashSize => 28;
-        public override OID OID => OID.SHA224;
+        public override OID OID => OID.JointISOITUT.Country.US.Organization.Gov.CSOR.NISTAlgorithm.HashAlgs.SHA224;
 
         protected override void Init()
         {

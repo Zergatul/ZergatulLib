@@ -414,7 +414,7 @@ namespace Zergatul.Network.Tls
 
                     AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
                     hash.Update(signedBytes.Array);
-                    if (!rsa.VerifyHash(hash.ComputeHash(), hash.OID.Text, message.Signature))
+                    if (!rsa.VerifyHash(hash.ComputeHash(), hash.OID.DotNotation, message.Signature))
                         throw new TlsStreamException("Invalid signature");
                     break;
                 default:

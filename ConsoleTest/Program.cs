@@ -37,9 +37,28 @@ namespace Test
         static void Main(string[] args)
         {
             string cerfile = "2330.cer";
-            var obj = Org.BouncyCastle.Asn1.Asn1Object.FromStream(File.OpenRead(cerfile));
-            var element = Zergatul.Network.ASN1.ASN1Element.ReadFrom(File.OpenRead(cerfile));
-            //X509v3Certificate cert = new X509v3Certificate(File.OpenRead("1210.cer"));
+            var cert = new X509v3Certificate(cerfile);
+            var cert2 = new X509Certificate2(cerfile);
+
+            if (cert.SerialNumberString == cert2.SerialNumber)
+                Console.WriteLine("Serial number ok!");
+            else
+                throw new Exception();
+
+            if (cert.NotBefore == cert2.NotBefore)
+                Console.WriteLine("NotBefore ok!");
+            else
+                throw new Exception();
+
+            if (cert.NotAfter == cert2.NotAfter)
+                Console.WriteLine("NotAfter ok!");
+            else
+                throw new Exception();
+
+            if (cert.Issuer == cert2.Issuer)
+                Console.WriteLine("Issuer ok!");
+            else
+                throw new Exception();
 
             return;
 

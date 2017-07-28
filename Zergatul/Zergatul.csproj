@@ -78,6 +78,9 @@
     <Compile Include="Cryptography\BlockCipher\Encryptor.cs" />
     <Compile Include="Cryptography\Certificates\ASN1CertificateSyntax.cs" />
     <Compile Include="Cryptography\Certificates\CertificateParseException.cs" />
+    <Compile Include="Cryptography\Certificates\PrivateKey.cs" />
+    <Compile Include="Cryptography\Certificates\PublicKey.cs" />
+    <Compile Include="Cryptography\Certificates\X509Extension.cs" />
     <Compile Include="Cryptography\Certificates\X509v3Certificate.cs" />
     <Compile Include="Cryptography\DefaultSecureRandom.cs" />
     <Compile Include="Cryptography\Hash\AbstractHash.cs" />

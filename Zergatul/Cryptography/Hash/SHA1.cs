@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Hash
     {
         public override int BlockSize => 64;
         public override int HashSize => 20;
-        public override OID OID => OID.SHA1;
+        public override OID OID => OID.ISO.IdentifiedOrganization.OIW.SECSIG.Algorithms.SHA1;
 
         uint h0;
         uint h1;

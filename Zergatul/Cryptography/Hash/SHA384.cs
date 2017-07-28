@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Hash
     public class SHA384 : SHA2_64Bit
     {
         public override int HashSize => 48;
-        public override OID OID => OID.SHA384;
+        public override OID OID => OID.JointISOITUT.Country.US.Organization.Gov.CSOR.NISTAlgorithm.HashAlgs.SHA384;
 
         protected override void Init()
         {

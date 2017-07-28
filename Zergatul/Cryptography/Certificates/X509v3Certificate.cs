@@ -10,6 +10,18 @@ namespace Zergatul.Cryptography.Certificates
 {
     public class X509v3Certificate
     {
+        public X509Extension[] Extensions { get; private set; }
+        public bool HasPrivateKey => PrivateKey != null;
+        public string Issuer { get; private set; }
+        public DateTime NotBefore { get; private set; }
+        public DateTime NotAfter { get; private set; }
+        public PrivateKey PrivateKey { get; private set; }
+        public PublicKey PublicKey { get; private set; }
+        public byte[] SerialNumber { get; private set; }
+        public string SerialNumberString => BitHelper.BytesToHex(SerialNumber).ToUpper();
+        public OID SignatureAlgorithm { get; private set; }
+        public string Thumbprint { get; private set; }
+
         public X509v3Certificate(byte[] data)
         {
             using (var ms = new MemoryStream(data))
@@ -21,36 +33,31 @@ namespace Zergatul.Cryptography.Certificates
             ReadFromStream(stream);
         }
 
+        public X509v3Certificate(string filename)
+        {
+            using (var fs = File.OpenRead(filename))
+                ReadFromStream(fs);
+        }
+
         private void ReadFromStream(Stream stream)
         {
-            ASN1Element asn1 = ASN1Element.ReadFrom(stream);
-            if (asn1 is Sequence)
-            {
-                var certificate = (Sequence)asn1;
-                if (certificate.Elements.Count == 3)
-                {
+            var asn1 = ASN1Element.ReadFrom(stream);
+            var syntax = ASN1CertificateSyntax.FromASN1Element(asn1);
 
-                }
-            }
+            if (syntax.TbsCertificate.Version.Value != 2)
+                throw new NotImplementedException("Only X509 v3 certificates are supported");
 
-            throw new CertificateParseException();
-        }
+            SerialNumber = syntax.TbsCertificate.SerialNumber.Raw;
 
-        private bool IsCertificate(ASN1Element element)
-        {
+            NotBefore = syntax.TbsCertificate.Validity.NotBefore.Date;
+            NotAfter = syntax.TbsCertificate.Validity.NotAfter.Date;
 
-        }
+            if (syntax.TbsCertificate.Issuer.RDN.Any(ra => ra.Any(r => !(r.Value is PrintableString))))
+                throw new NotImplementedException("Only Printable String is supported");
 
-        private bool IsSignatureAlgorithm(ASN1Element element)
-        {
-            if (element is Sequence)
-            {
-                var ai = (Sequence)element;
-                if (ai.Length >= 2)
-                    return ai.Elements[0] is ObjectIdentifier;
-            }
-
-            return false;
+            var issuerParts = syntax.TbsCertificate.Issuer.RDN.SelectMany(ra => ra);
+            Issuer = string.Join(", ",
+                issuerParts.Reverse().Select(r => r.Type.OID.ShortName + "=" + ((PrintableString)r.Value).Value));
         }
     }
 }

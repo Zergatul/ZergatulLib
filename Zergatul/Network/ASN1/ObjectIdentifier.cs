@@ -57,7 +57,12 @@ namespace Zergatul.Network.ASN1
                     }
             }
 
-            OID = new OID(sb.ToString());
+            string oidString = sb.ToString();
+            var oid = OID.All.SingleOrDefault(o => o.DotNotation == oidString);
+            if (oid != null)
+                this.OID = oid;
+            else
+                this.OID = new OID(oidString);
         }
     }
 }

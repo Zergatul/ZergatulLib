@@ -39,6 +39,8 @@ namespace Zergatul.Network.ASN1
                         break;
                 }
             }
+            else
+                result.TagNumberEx = (byte)result.Number;
 
             return result;
         }
