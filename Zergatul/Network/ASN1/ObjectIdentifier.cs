@@ -28,7 +28,7 @@ namespace Zergatul.Network.ASN1
 
                 byte b = (byte)readResult;
                 number += (byte)(b & 0x7F);
-                if ((b & 0x80) != 0)
+                if ((b & 0x80) == 0)
                 {
                     if (first)
                     {

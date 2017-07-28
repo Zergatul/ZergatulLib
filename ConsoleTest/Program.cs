@@ -36,8 +36,9 @@ namespace Test
 
         static void Main(string[] args)
         {
-//            Org.BouncyCastle.Asn1.Asn1Object.FromStream(File.OpenRead("1210.cer"));
-            var element = Zergatul.Network.ASN1.ASN1Element.ReadFrom(File.OpenRead("1210.cer"));
+            string cerfile = "2330.cer";
+            var obj = Org.BouncyCastle.Asn1.Asn1Object.FromStream(File.OpenRead(cerfile));
+            var element = Zergatul.Network.ASN1.ASN1Element.ReadFrom(File.OpenRead(cerfile));
             //X509v3Certificate cert = new X509v3Certificate(File.OpenRead("1210.cer"));
 
             return;

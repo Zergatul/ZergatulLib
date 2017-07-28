@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,14 +13,34 @@ namespace Zergatul.Network.ASN1
         public ASN1ValueType ValueType;
         public ASN1TagNumber Number;
 
-        public static ASN1Tag FromByte(byte value)
+        public int TagNumberEx;
+
+        public static ASN1Tag FromByte(byte value, Stream stream, out int length)
         {
-            return new ASN1Tag
+            length = 1;
+            ASN1Tag result = new ASN1Tag
             {
                 Class = (ASN1TagClass)(value >> 6),
                 ValueType = (ASN1ValueType)((value >> 5) & 1),
                 Number = (ASN1TagNumber)(value & 0x1F)
             };
+
+            if ((int)result.Number == 0x1F)
+            {
+                result.TagNumberEx = 0;
+                while (true)
+                {
+                    int readResult = stream.ReadByte();
+                    if (readResult == -1)
+                        throw new EndOfStreamException();
+                    length++;
+                    result.TagNumberEx = checked(result.TagNumberEx * 128 + (readResult & 0x7F));
+                    if ((readResult & 0x80) == 0)
+                        break;
+                }
+            }
+
+            return result;
         }
     }
 }

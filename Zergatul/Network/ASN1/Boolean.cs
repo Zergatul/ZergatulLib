@@ -7,20 +7,19 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Network.ASN1
 {
-    public class BitString : ASN1Element
+    public class Boolean : ASN1Element
     {
-        public int PadBits { get; private set; }
-        public byte[] Data { get; private set; }
+        public bool Value { get; private set; }
 
         protected override void ReadBody(Stream stream)
         {
-            if (Length < 1)
-                throw new InvalidOperationException();
+            if (Length != 1)
+                throw new NotImplementedException();
+
             int readResult = stream.ReadByte();
             if (readResult == -1)
                 throw new EndOfStreamException();
-            PadBits = readResult;
-            Data = ReadBuffer(stream, checked((int)Length - 1));
+            Value = readResult != 0;
         }
     }
 }

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Network.ASN1
 {
+    // https://habrahabr.ru/post/150757/
+    // https://habrahabr.ru/post/150888/
     public abstract class ASN1Element
     {
         public ASN1Tag Tag { get; protected set; }
@@ -21,32 +23,52 @@ namespace Zergatul.Network.ASN1
             if (result == -1)
                 throw new EndOfStreamException();
 
-            int headerLength = 1;
+            int tagLength;
+            ASN1Tag tag = ASN1Tag.FromByte((byte)result, stream, out tagLength);
+            int lenLength;
+            long length = ReadLength(stream, out lenLength);
 
-            ASN1Tag tag = ASN1Tag.FromByte((byte)result);
-            int read;
-            long length = ReadLength(stream, out read);
-            headerLength += read;
+            if (length == long.MinValue)
+                throw new NotImplementedException("Indefinite length not implemented");
+
+            if (tag.Class == ASN1TagClass.Application)
+                throw new NotImplementedException("Application tag class not implemented");
 
             if (tag.Class == ASN1TagClass.ContextSpecific)
-                return ReadFrom(stream);
+            {
+                var cs = new ContextSpecific();
+                cs.Tag = tag;
+                cs.HeaderLength = tagLength + lenLength;
+                cs.Length = length;
+                cs.ReadBody(stream);
+                return cs;
+            }
 
             ASN1Element element;
             switch (tag.Number)
             {
                 case ASN1TagNumber.EOC:
                     throw new NotImplementedException();
+                case ASN1TagNumber.BOOLEAN:
+                    element = new Boolean();
+                    break;
                 case ASN1TagNumber.INTEGER:
                     element = new Integer();
                     break;
                 case ASN1TagNumber.BIT_STRING:
                     element = new BitString();
                     break;
+                case ASN1TagNumber.OCTET_STRING:
+                    element = new OctetString();
+                    break;
                 case ASN1TagNumber.NULL:
                     element = new Null();
                     break;
                 case ASN1TagNumber.OBJECT_IDENTIFIER:
                     element = new ObjectIdentifier();
+                    break;
+                case ASN1TagNumber.UTF8String:
+                    element = new UTF8String();
                     break;
                 case ASN1TagNumber.SEQUENCE:
                     element = new Sequence();
@@ -65,7 +87,7 @@ namespace Zergatul.Network.ASN1
             }
 
             element.Tag = tag;
-            element.HeaderLength = headerLength;
+            element.HeaderLength = tagLength + lenLength;
             element.Length = length;
             element.ReadBody(stream);
 
