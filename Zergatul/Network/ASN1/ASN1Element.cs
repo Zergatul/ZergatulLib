@@ -44,54 +44,71 @@ namespace Zergatul.Network.ASN1
                 return cs;
             }
 
-            ASN1Element element;
-            switch (tag.Number)
-            {
-                case ASN1TagNumber.EOC:
-                    throw new NotImplementedException();
-                case ASN1TagNumber.BOOLEAN:
-                    element = new Boolean();
-                    break;
-                case ASN1TagNumber.INTEGER:
-                    element = new Integer();
-                    break;
-                case ASN1TagNumber.BIT_STRING:
-                    element = new BitString();
-                    break;
-                case ASN1TagNumber.OCTET_STRING:
-                    element = new OctetString();
-                    break;
-                case ASN1TagNumber.NULL:
-                    element = new Null();
-                    break;
-                case ASN1TagNumber.OBJECT_IDENTIFIER:
-                    element = new ObjectIdentifier();
-                    break;
-                case ASN1TagNumber.UTF8String:
-                    element = new UTF8String();
-                    break;
-                case ASN1TagNumber.SEQUENCE:
-                    element = new Sequence();
-                    break;
-                case ASN1TagNumber.SET:
-                    element = new Set();
-                    break;
-                case ASN1TagNumber.PrintableString:
-                    element = new PrintableString();
-                    break;
-                case ASN1TagNumber.UTCTime:
-                    element = new UTCTime();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
+            ASN1Element element = Resolve(tag.Number);
             element.Tag = tag;
             element.HeaderLength = tagLength + lenLength;
             element.Length = length;
             element.ReadBody(stream);
 
             return element;
+        }
+
+        public static ASN1Element ReadFrom(byte[] data)
+        {
+            using (var ms = new MemoryStream(data))
+                return ReadFrom(ms);
+        }
+
+        public ASN1Element ApplyRules(Dictionary<int, Type> rules)
+        {
+            var cs = this as ContextSpecific;
+            if (cs != null && cs.IsImplicit)
+            {
+                if (rules.ContainsKey(cs.Tag.TagNumberEx))
+                {
+                    var element = (ASN1Element)Activator.CreateInstance(rules[cs.Tag.TagNumberEx]);
+                    element.Tag = Tag;
+                    element.HeaderLength = HeaderLength;
+                    element.Length = Length;
+                    element.ReadBody(new MemoryStream(cs.Implicit));
+                    return element;
+                }
+            }
+
+            throw new NotImplementedException();
+        }
+
+        protected static ASN1Element Resolve(ASN1TagNumber tag)
+        {
+            switch (tag)
+            {
+                case ASN1TagNumber.EOC:
+                    throw new NotImplementedException();
+                case ASN1TagNumber.BOOLEAN:
+                    return new Boolean();
+                case ASN1TagNumber.INTEGER:
+                    return new Integer();
+                case ASN1TagNumber.BIT_STRING:
+                    return new BitString();
+                case ASN1TagNumber.OCTET_STRING:
+                    return new OctetString();
+                case ASN1TagNumber.NULL:
+                    return new Null();
+                case ASN1TagNumber.OBJECT_IDENTIFIER:
+                    return new ObjectIdentifier();
+                case ASN1TagNumber.UTF8String:
+                    return new UTF8String();
+                case ASN1TagNumber.SEQUENCE:
+                    return new Sequence();
+                case ASN1TagNumber.SET:
+                    return new Set();
+                case ASN1TagNumber.PrintableString:
+                    return new PrintableString();
+                case ASN1TagNumber.UTCTime:
+                    return new UTCTime();
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         private static long ReadLength(Stream stream, out int read)

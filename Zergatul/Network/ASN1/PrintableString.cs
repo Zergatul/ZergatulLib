@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Network.ASN1
 {
-    public class PrintableString : ASN1Element
+    public class PrintableString : ASN1StringElement
     {
-        public string Value { get; private set; }
-
         protected override void ReadBody(Stream stream)
         {
             byte[] buffer = ReadBuffer(stream, checked((int)Length));

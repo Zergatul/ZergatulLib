@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Asn1;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +14,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Zergatul;
 using Zergatul.Cryptography.Certificates;
 using Zergatul.Ftp;
 using Zergatul.Math;
@@ -36,7 +38,13 @@ namespace Test
 
         static void Main(string[] args)
         {
-            string cerfile = "2330.cer";
+            //DownloadOIDs.Go("1.3.6.1.5.5.7.3", "1.txt");
+            //return;
+
+            //var obj = Asn1Object.FromByteArray(BitHelper.HexToBytes("3026302406082b060105050730018618687474703a2f2f6f6373702e64696769636572742e636f6d"));
+            //return;
+
+            string cerfile = "1210.cer";
             var cert = new X509v3Certificate(cerfile);
             var cert2 = new X509Certificate2(cerfile);
 
@@ -59,6 +67,18 @@ namespace Test
                 Console.WriteLine("Issuer ok!");
             else
                 throw new Exception();
+
+            if (cert.Subject == cert2.Subject)
+                Console.WriteLine("Subject ok!");
+            else
+                throw new Exception();
+
+            if (cert.SignatureAlgorithm.DotNotation == cert2.SignatureAlgorithm.Value)
+                Console.WriteLine("SignatureAlgorithm ok!");
+            else
+                throw new Exception();
+
+            cert.PublicKey.ResolveAlgorithm();
 
             return;
 

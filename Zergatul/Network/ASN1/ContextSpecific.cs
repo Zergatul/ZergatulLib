@@ -10,6 +10,8 @@ namespace Zergatul.Network.ASN1
     public class ContextSpecific : ASN1Element
     {
         public List<ASN1Element> Elements { get; private set; }
+        public byte[] Implicit { get; private set; }
+        public bool IsImplicit => Implicit != null;
 
         public ContextSpecific()
         {
@@ -19,7 +21,10 @@ namespace Zergatul.Network.ASN1
         protected override void ReadBody(Stream stream)
         {
             if (Tag.ValueType == ASN1ValueType.Primitive)
-                throw new NotImplementedException(); // implicit
+            {
+                Implicit = ReadBuffer(stream, checked((int)Length));
+                return;
+            }
 
             if (Tag.ValueType == ASN1ValueType.Constructed)
             {

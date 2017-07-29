@@ -1,0 +1,383 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <oid value="1" id="iso" class="ISO" desc="International Organization for Standardization (ISO)">
+    <oid value="2" id="member-body" class="MemberBody" desc="ISO Member Bodies">
+      <oid value="840" id="us" class="US" desc="United States of America">
+        <oid value="113549" id="rsadsi" class="RSADSI" desc="RSA® Security Limited Liability Company (LLC)">
+          <oid value="1" id="pkcs" class="PKCS" desc="Public-Key Cryptography Standards (PKCS)">
+            <oid value="1" id="pkcs-1" class="PKCS1" desc="Public-Key Cryptography Standards #1 (PKCS#1)">
+              <!--<oid value="0" id="modules" class="modules" desc="ASN.1 modules" />-->
+              <oid value="1" id="rsaEncryption" class="RSA" desc="Rivest, Shamir and Adleman (RSA) encryption (and signing)" />
+              <oid value="2" id="md2WithRSAEncryption" class="MD2WithRSA" desc="Message Digest 2 (MD2) checksum with Rivest, Shamir and Adleman (RSA) encryption" />
+              <oid value="3" id="md4withRSAEncryption" class="MD4WithRSA" desc="Message Digest 4 (MD4) checksum with Rivest, Shamir and Adleman (RSA) encryption" />
+              <oid value="4" id="md5WithRSAEncryption" class="MD5WithRSA" desc="Rivest, Shamir and Adleman (RSA) encryption with Message Digest 5 (MD5) signature" />
+              <oid value="5" id="sha1-with-rsa-signature" class="SHA1WithRSASignature" desc="Rivest, Shamir and Adleman (RSA) with Secure Hash Algorithm (SHA-1) signature" />
+              <oid value="6" id="rsaOAEPEncryptionSET" class="RSAOAEPEncryptionSET" desc="Rivest, Shamir and Adleman (RSA) Optimal Asymmetric Encryption Padding (OAEP) encryption set" />
+              <oid value="7" id="id-RSAES-OAEP" class="RSAESOAEP" desc="Public-key encryption scheme combining Optimal Asymmetric Encryption Padding (OAEP) with the Rivest, Shamir and Adleman Encryption Scheme (RSAES)" />
+              <oid value="8" id="id-mgf1" class="MGF1" desc="Rivest, Shamir and Adleman (RSA) algorithm that uses the Mask Generator Function 1 (MGF1)" />
+              <oid value="9" id="id-pSpecified" class="PSpecified" desc="Rivest, Shamir and Adleman (RSA) algorithm (szOID_RSA_PSPECIFIED)" />
+              <oid value="10" id="rsassa-pss" class="RSASSAPSS" desc="Rivest, Shamir, Adleman (RSA) Signature Scheme with Appendix - Probabilistic Signature Scheme (RSASSA-PSS)" />
+              <oid value="11" id="sha256WithRSAEncryption" class="SHA256WithRSA" desc="Secure Hash Algorithm 256 (SHA256) with Rivest, Shamir and Adleman (RSA) encryption" />
+              <oid value="12" id="sha384WithRSAEncryption" class="SHA384WithRSA" desc="Secure Hash Algorithm 384 (SHA384) with Rivest, Shamir and Adleman (RSA) Encryption" />
+              <oid value="13" id="sha512WithRSAEncryption" class="SHA512WithRSA" desc="Secure Hash Algorithm SHA-512 with Rivest, Shamir and Adleman (RSA) encryption" />
+              <oid value="14" id="sha224WithRSAEncryption" class="SHA224WithRSA" desc="Secure Hash Algorithm SHA-224 with Rivest, Shamir and Adleman (RSA) encryption (PKCS#1 version 1.5)" />
+              <oid value="15" id="sha512-224WithRSAEncryption" class="SHA512_224WithRSA" desc="Secure Hash Algorithm SHA-512/224 with Rivest, Shamir and Adleman (RSA) encryption" />
+              <oid value="16" id="sha512-256WithRSAEncryption" class="SHA512_256WithRSA" desc="SHA-512/256 hash algorithm with Rivest, Shamir and Adleman (RSA) encryption" />
+            </oid>
+          </oid>
+          <oid value="2" id="digestAlgorithm" class="DigestAlgorithm" desc="Digest algorithms">
+            <oid value="2" id="md2" class="MD2" desc="Message Digest #2 (MD2)" />
+            <oid value="4" id="md4" class="MD4" desc="Rivest, Shamir and Adleman (RSA) algorithm coupled with an Message Digest 4 (MD4) message digest algorithm that hashes the message contents before signing" />
+            <oid value="5" id="md5" class="MD5" desc="Rivest, Shamir and Adleman (RSA) algorithm coupled with an Message Digest #5 (MD5) algorithm that hashes the message contents before signing" />
+            <oid value="7" id="hmacWithSHA1" class="HMACWithSHA1" desc="HMAC-SHA-1 pseudorandom function for key generation defined in PKCS-5 ver 2.0" />
+            <oid value="8" id="hmacWithSHA224" class="HMACWithSHA224" desc="HMAC-SHA-224 message authentication scheme" />
+            <oid value="9" id="hmacWithSHA256" class="HMACWithSHA256" desc="HMAC-SHA-256 message authentication scheme" />
+            <oid value="10" id="hmacWithSHA384" class="HMACWithSHA384" desc="HMAC-SHA-384 message authentication scheme" />
+            <oid value="11" id="hmacWithSHA512" class="HMACWithSHA512" desc="HMAC-SHA-512 message authentication scheme" />
+            <oid value="12" id="hhmacWithSHA512-224" class="HHMACWithSHA512_224" desc="Keyed-Hash Message Authentication Code (HMAC) based on Secure Hash Algorithm 2 (SHA-2) with variable key length 512 and variable output value 224" />
+            <oid value="13" id="hhmacWithSHA512-256" class="HHMACWithSHA512_256" desc="Keyed-Hash Message Authentication Code (HMAC) based on Secure Hash Algorithm 2 (SHA-2) with variable key length 512 and variable output value 256" />
+          </oid>
+          <oid value="3" id="encryptionAlgorithm" class="EncryptionAlgorithm" desc="Encryption algorithm">
+            <oid value="2" id="rc2-cbc" class="RC2CBC" desc="Voice encryption using Rivest Cipher (RC2)-compatible (56 bit) or RC2-compatible in Cipher Block Chaining (CBC) mode and 512-bit DH-group" />
+            <oid value="3" id="rc2ECB" class="RC2ECB" desc="RSADSI encryptionAlgorithm" />
+            <oid value="4" id="rc4" class="RC4" desc="Rivest, Shamir and Adleman (RSA) that uses the Rivest Cipher 4 (RC4) block cipher algorithm coupled with a cipher-block chaining mode of operation" />
+            <oid value="5" id="rc4WithMAC" class="RC4WithMAC" desc="RSADSI encryptionAlgorithm" />
+            <oid value="6" id="desx-CBC" class="DESXCBC" desc="RSADSI encryptionAlgorithm" />
+            <oid value="7" id="des-ede3-cbc" class="DESEDE3CBC" desc="Triple Data Encryption Standard (DES) algorithm coupled with a cipher-block chaining mode of operation (szOID_RSA_DES_EDE3_CBC)" />
+            <oid value="8" id="rc5CBC" class="RC5CBC" desc="RSADSI encryptionAlgorithm" />
+            <oid value="9" id="rc5-CBCPad" class="RC5CBCPad" desc="Rivest Cipher 5 (RC5) symmetric cipher used with Cipher Block Chaining (CBC) pad mode of operation" />
+            <oid value="10" id="desCDMF" class="DESCDMF" desc="RSADSI encryptionAlgorithm&#xA;&#xA;Formerly called CDMFCBCPad" />
+            <oid value="17" id="17" desc="des-ede3" />
+          </oid>
+          <oid value="6" id="6" desc="rsadsiLdap" />
+          <oid value="7" id="7" desc="PKCS-7" />
+        </oid>
+      </oid>
+    </oid>
+    <oid value="3" id="identified-organization" class="IdentifiedOrganization" desc="Organization identification schemes registered according to ISO/IEC 6523-2">
+      <oid value="6" id="dod" class="DOD" desc="United States Department of Defense (DoD)">
+        <oid value="1" id="internet" class="Internet" desc="Internet">
+          <oid value="4" id="private" class="Private" desc="Private projects">
+            <oid value="1" id="enterprise" class="Enterprise" desc="Private enterprises">
+              <oid value="311" id="311" class="Microsoft" desc="Microsoft">
+                <oid value="60" id="ev" class="EV" desc="Extended validation">
+                  <oid value="2" id="2" class="_2" desc="Extended validation for certificate subject matter">
+                    <oid value="1" id="1" class="_1" desc="">
+                      <oid value="1" id="jurisdictionOfIncorporationLocalityName" class="JurisdictionOfIncorporationLocalityName" desc="" />
+                      <oid value="2" id="jurisdictionOfIncorporationStateOrProvinceName" class="JurisdictionOfIncorporationStateOrProvinceName" desc="" />
+                      <oid value="3" id="jurisdictionOfIncorporationCountryName" class="JurisdictionOfIncorporationCountryName" desc="" />
+                    </oid>
+                  </oid>
+                </oid>
+              </oid>
+            </oid>
+          </oid>
+          <oid value="5" id="security" class="Security" desc="Structure and identification of Management Information (SMI) security codes">
+            <oid value="5" id="mechanisms" class="Mechanisms" desc="Security mechanisms">
+              <oid value="7" id="pkix" class="PKIX" desc="Public-Key Infrastructure using X.509 (PKIX)">
+                <oid value="1" id="pe" class="PE" desc="Public-Key Infrastructure using X.509 (PKIX) certificate extensions">
+                  <oid value="1" id="authorityInfoAccess" class="AuthorityInfoAccess" desc="Certificate Authority Information Access" />
+                  <oid value="2" id="biometricInfo" class="BiometricInfo" desc="&quot;biometricInfo&quot; Rec. ITU-T X.509 v3 certificate extension" />
+                  <oid value="3" id="qcStatements" class="QCStatements" desc="&quot;qcStatements&quot; Rec. ITU-T X.509 v3 certificate extension" />
+                  <oid value="4" id="auditIdentity" class="AuditIdentity" desc="Public-Key Infrastructure using X.509 (PKIX) private extension &quot;acAuditIdentity&quot;" />
+                  <oid value="5" id="id-pe-acTargeting" class="ACTargeting" desc="Private extension acTargeting" />
+                  <oid value="6" id="aaControls" class="AAControls" desc="AA Controls.&#xA;&#xA;During AC validation a relying party has to answer the question: is this AC issuer trusted to issue ACs containing this attribute? The AAControls PKC extension MAY be used to help answer the question. The AAControls extension is intended to be used in CA and AC issuer PKCs." />
+                  <!--<oid value="7" id="7" class="7" desc="PKIX private extension sbgp-ipAddrBlock" />
+                  <oid value="8" id="8" class="8" desc="PKIX private extension sbgp-autonomousSysNum" />-->
+                  <oid value="9" id="id-pe-sbgp-routerIdentifier" class="SBGPRouterIdentifier" desc="Private extension sbgp-routerIdentifier" />
+                  <oid value="10" id="proxying" class="Proxying" desc="PKIX private extension acProxying" />
+                  <oid value="11" id="subjectInfoAccess" class="SubjectInfoAccess" desc="PKIX private extension" />
+                  <oid value="12" id="id-pe-logotype" class="Logotype" desc="id-pe-logotype" />
+                  <oid value="13" id="id-pe-wlanSSID" class="WLANSSID" desc="Wireless Local Area Network (LAN) Service Set IDentifier (SSID)" />
+                  <oid value="14" id="id-pe-proxyCertInfo" class="ProxyCertInfo" desc="id-pe-proxyCertInfo" />
+                  <oid value="15" id="15" class="ACPolicies" desc="id-pe-ac-policies" />
+                  <oid value="16" id="16" class="Warranty" desc="id-pe-warranty" />
+                  <oid value="17" id="id-pe-sim" class="Sim" desc="Private extension sim" />
+                  <!--<oid value="18" id="18" class="18" desc="id-pe-cmsContentConstraints" />
+                  <oid value="19" id="19" class="19" desc="id-pe-otherCerts" />
+                  <oid value="20" id="20" class="20" desc="id-pe-wrappedApexContinKey" />-->
+                  <oid value="21" id="id-pe-clearanceConstraints" class="ClearanceConstraints" desc="id-pe-clearanceConstraints" />
+                  <oid value="22" id="id-pe-skiSemantics" class="SkiSemantics" desc="Private extension skiSemantics" />
+                  <oid value="23" id="nsa" class="NSA" desc="No Secrecy Afforded (NSA) Certificate Extension" />
+                  <oid value="24" id="id-pe-tlsfeature" class="TlsFeature" desc="Transport Layer Security (TLS) feature extension" />
+                  <oid value="25" id="id-pe-mud-url" class="MUDUrl" desc="MUDCertExtensions extension" />
+                  <oid value="26" id="id-pe-TNAuthList" class="TNAuthList" desc="Telephone Number (TN) authorization list certificate extension" />
+                  <oid value="27" id="id-pe-JWTClaimConstraints" class="JWTClaimConstraints" desc="JavaScript Object Notation (JSON) Web Token (JWT) claim constraints certificate extension" />
+                </oid>
+                <oid value="3" id="kp" class="KP" desc="Extended Key Purposes (KPs)">
+                  <oid value="1" id="serverAuth" class="ServerAuth" desc="Indicates that a certificate can be used as a Secure Sockets Layer (SSL) server certificate" />
+                  <oid value="2" id="clientAuth" class="ClientAuth" desc="Indicates that a certificate can be used as a Secure Sockets Layer (SSL) client certificate" />
+                  <oid value="3" id="codeSigning" class="CodeSigning" desc="Indicates that a certificate can be used for code signing" />
+                  <oid value="4" id="emailProtection" class="EmailProtection" desc="Indicates that a certificate can be used for protecting email (signing, encryption, key agreement)" />
+                  <oid value="5" id="id-kp-ipsecEndSystem" class="IPsecEndSystem" desc="Internet Protocol SECurity (IPSEC) end system certificate" />
+                  <oid value="6" id="id-kp-ipsecTunnel" class="IPsecTunnel" desc="Internet Protocol SECurity (IPSEC) tunnel certificate" />
+                  <oid value="7" id="id-kp-ipsecUser" class="IPsecUser" desc="Internet Protocol SECurity (IPSEC) user certificate" />
+                  <oid value="8" id="timeStamping" class="TimeStamping" desc="PKIX key purpose timeStamping&#xA;&#xA;Indicates that a certificate can be used to bind the hash of an object to a time from a trusted time source." />
+                  <oid value="9" id="ocspSigning" class="OCSPSigning" desc="Indicates that a Rec. ITU-T X.509 certificates corresponding private key may be used by an authority to sign OCSP-Responses" />
+                  <oid value="10" id="dvcs" class="DVCS" desc="PKIX key purpose dvcs" />
+                  <oid value="11" id="id-kp-sbgpCertAAServerAuth" class="SBGPCertAAServerAuth" desc="sbgpCertAAServerAuth key purpose" />
+                  <oid value="12" id="id-kp-scvp-responder" class="SCVPResponder" desc="id-kp-scvp-responder key purpose" />
+                  <oid value="13" id="id-kp-eapOverPPP" class="EAPOverPPP" desc="Extended key usage value: id-kp-eapOverPPP" />
+                  <oid value="14" id="id-kp-eapOverLAN" class="EAPOverLAN" desc="Extended key usage: id-kp-eapOverLAN" />
+                  <oid value="15" id="id-kp-scvpServer" class="SCVPServer" desc="id-kp-scvpServer" />
+                  <oid value="16" id="id-kp-scvpClient" class="SCVPClient" desc="id-kp-scvpClient" />
+                  <oid value="17" id="id-kp-ipsecIKE" class="IPsecIKE" desc="Internet Key Exchange (IKE)" />
+                  <!--<oid value="18" id="18" class="18" desc="capwapAC" />-->
+                  <oid value="19" id="id-kp-capwapWTP" class="CAPWAPWTP" desc="Control And Provisioning of Wireless Access Points (CAPWAP), Wireless Termination Points (WTP)" />
+                  <oid value="20" id="id-kp-sipDomain" class="SIPDomain" desc="Extended Key Usage (EKU) values for Session Initiation Protocol (SIP) domains" />
+                  <oid value="21" id="secureShellClient" class="SecureShellClient" desc="id-kp-secureShellClient (indicates that the key can be used for a Secure Shell client)" />
+                  <oid value="22" id="secureShellServer" class="SecureShellServer" desc="id-kp-secureShellServer (indicates that the key can be used for a Secure Shell server)" />
+                  <!--<oid value="23" id="23" class="23" desc="Extended key usage value: id-kp-sendRouter" />
+                  <oid value="24" id="24" class="24" desc="Extended key usage value: id-kp-sendProxy" />
+                  <oid value="25" id="25" class="25" desc="Extended key usage value: id-kp-sendOwner" />
+                  <oid value="26" id="26" class="26" desc="Extended key usage value: id-kp-sendProxiedOwner" />-->
+                  <oid value="27" id="id-kp-cmcCA" class="CMCCA" desc="id-kp-cmcCA" />
+                  <oid value="28" id="id-kp-cmcRA" class="CMCRA" desc="id-kp-cmcRA" />
+                  <oid value="29" id="id-kp-cmcArchive" class="CMCArchive" desc="id-kp-cmcArchive" />
+                  <oid value="30" id="id-kp-bgpsec-router" class="BGPsecRouter" desc="id-kp-bgpsec-router key purpose" />
+                </oid>
+                <oid value="48" id="ad" class="AD" desc="Access descriptors">
+                  <oid value="1" id="ocsp" class="OCSP" desc="Online Certificate Status Protocol (OCSP)" />
+                </oid>
+              </oid>
+            </oid>
+          </oid>
+        </oid>
+      </oid>
+      <oid value="14" id="oiw" class="OIW" desc="National Institute of Standards and Technology (NIST) Open Systems Environment (OSE) Implementors Workshop (OIW)">
+        <oid value="3" id="secsig" class="SECSIG" desc="Open Systems Environment (OSE) Implementors Workshop (OIW) Security Special Interest Group (SIG)">
+          <oid value="2" id="algorithms" class="Algorithms" desc="Open Systems Environment (OSE) Implementors Workshop (OIW) Security Special Interest Group (SIG) defined algorithms">
+            <oid value="1" id="rsa" class="RSA" desc="Rivest, Shamir and Adleman (RSA)" />
+            <oid value="2" id="md4WithRSA" class="MD4WithRSA" desc="Security Rivest, Shamir and Adleman (RSA) algorithm applied to a hash created by using the Message Digest 4 (MD4) algorithm" />
+            <oid value="3" id="md5WithRSA" class="MD5WithRSA" desc="Security Rivest, Shamir and Adleman (RSA) algorithm applied to a hash created by using the Message Digest 5 (MD5) algorithm" />
+            <oid value="4" id="md4WithRSAEncryption" class="MD4WithRSAEncryption" desc="Security &quot;RSA2&quot; algorithm applied to a hash created by using the Message Digest 4 (MD4) algorithm" />
+            <oid value="6" id="desECB" class="DESECB" desc="Security Data Encryption Standard (DES) algorithm coupled with a electronic codebook mode of operation" />
+            <oid value="7" id="desCBC" class="DESCBC" desc="Voice encryption using 56-bit Data Encryption Standard (DES) in Cipher Block Chaining (CBC) mode and 512-bit DH-group" />
+            <oid value="8" id="desOFB" class="DESOFB" desc="Data Encryption Standard (DES) algorithm coupled with a cipher-block chaining mode of operation" />
+            <oid value="9" id="desCFB" class="DESCFB" desc="Data Encryption Standard (DES) algorithm coupled with a output feedback mode of operation" />
+            <oid value="10" id="desMAC" class="DESMAC" desc="56-bit Data Encryption Standard (DES) algorithm coupled with a 64-bit Message Authentication Code (MAC) that hashes both the pre-image and the key (see ISO/IEC 9797)" />
+            <oid value="11" id="rsaSignature" class="RSASignature" desc="Rivest, Shamir and Adleman (RSA) signature algorithm" />
+            <oid value="12" id="dsa" class="DSA" desc="Digital Signature Algorithm (DSA)" />
+            <oid value="13" id="dsaWithSHA" class="DSAWithSHA" desc="Security Digital Signature Algorithm (DSA) that uses the Secure Hash Algorithm (SHA) to hash the message contents" />
+            <oid value="14" id="mdc2WithRSASignature" class="MDC2WithRSASignature" desc="Rivest, Shamir and Adleman (RSA) algorithm that uses the Modification Detection Code 2 (MDC2) or Meyer-Schilling hash function" />
+            <oid value="15" id="shaWithRSASignature" class="SHAWithRSASignature" desc="Rivest, Shamir and Adleman (RSA) algorithm coupled with the Secure Hash Algorithm (SHA) (Oddball using ISO/IEC 9796-2 padding rules)" />
+            <oid value="16" id="dhWithCommonModulus" class="DHWithCommonModulus" desc="Diffie-Hellman (DH) key exchange algorithm with common modulus algorithm" />
+            <oid value="17" id="desEDE" class="DESEDE" desc="Voice encryption using Data Encryption Standard (DES) (168-bit) algorithm coupled with the Encrypt-Decrypt-Encrypt (EDE) multiple encryption mode of operation" />
+            <oid value="18" id="sha" class="SHA" desc="Secure Hash Algorithm (SHA)" />
+            <oid value="19" id="mdc-2" class="MDC2" desc="Modification Detection Code 2 (MDC2) or Meyer-Schilling hash function" />
+            <oid value="20" id="dsaCommon" class="DSACommon" desc="Digital Signature Algorithm (DSA)" />
+            <oid value="21" id="dsaCommonWithSHA" class="DSACommonWithSHA" desc="Digital Signature Algorithm (DSA) coupled with the Secure Hash Algorithm (SHA)" />
+            <oid value="22" id="rsa-key-transport" class="RSAKeyTransport" desc="Rivest, Shamir and Adleman (RSA) key transport attribute" />
+            <oid value="23" id="keyed-hash-seal" class="KeyedHashSeal" desc="Keyed hash seal algorithm" />
+            <oid value="24" id="md2WithRSASignature" class="MD2WithRSASignature" desc="Rivest, Shamir and Adleman (RSA) algorithm coupled with the Message Digest 2 (MD2) hashing algorithm (oddball using ISO/IEC 9796-2 padding rules)" />
+            <oid value="25" id="md5WithRSASignature" class="MD5WithRSASignature" desc="Rivest, Shamir and Adleman (RSA) algorithm coupled with the Message Digest 5 (MD5) hashing algorithm (Oddball using ISO/IEC 9796-2 padding rules)" />
+            <oid value="26" id="sha-1" class="SHA1" desc="Secure Hash Algorithm, revision 1 (SHA-1)" />
+            <oid value="27" id="dsaWithSHA1" class="DSAWithSHA1" desc="Digital Signature Algorithm (DSA) that uses the Secure Hash Algorithm 1 (SHA1) producing a 320-bit signature" />
+            <oid value="28" id="dsaWithCommonSHA1" class="DSAWithCommonSHA1" desc="Digital Signature Algorithm (DSA) that uses the Secure Hash Algorithm 1 (SHA1) with Common Parameters producing a 320-bit signature" />
+            <oid value="29" id="sha-1WithRSAEncryption" class="SHA1WithRSAEncryption" desc="Rivest, Shamir and Adleman (RSA) algorithm that uses the Secure Hash Algorithm 1 (SHA1) (obsolete)" />
+          </oid>
+        </oid>
+      </oid>
+    </oid>
+  </oid>
+  <oid value="2" id="joint-iso-itu-t" class="JointISOITUT" desc="Areas of joint work between ISO/IEC (International Organization for Standardization/International Electrotechnical Commission) and ITU-T (International Telecommunications Union - Telecommunication standardization sector), and other international work">
+    <oid value="5" id="ds" class="DS" desc="Directory Services">
+      <oid value="4" id="attributeType" class="AttributeType" desc="Attribute types">
+        <oid value="0" id="objectClass" class="ObjectClass" desc="Object classes" />
+        <oid value="1" id="aliasedEntryName" class="AliasedEntryName" desc="Attribute type &quot;Aliased entry name&quot;" />
+        <oid value="2" id="knowledgeInformation" class="KnowledgeInformation" desc="knowledgeInformation attribute type" />
+        <oid value="3" id="commonName" class="CommonName" short="CN" desc="Common name" />
+        <oid value="4" id="surname" class="Surname" desc="Attribute &quot;surname&quot;" />
+        <oid value="5" id="serialNumber" class="SerialNumber" short="SERIALNUMBER" desc="Serial number attribute type" />
+        <oid value="6" id="countryName" class="CountryName" short="C" desc="Country name" />
+        <oid value="7" id="localityName" class="LocalityName" short="L" desc="Locality Name" />
+        <oid value="8" id="stateOrProvinceName" class="StateOrProvinceName" short="S" desc="State or Province name" />
+        <oid value="9" id="streetAddress" class="StreetAddress" short="STREET" desc="Street address" />
+        <oid value="10" id="organizationName" class="OrganizationName" short="O" desc="Organization name" />
+        <oid value="11" id="organizationalUnitName" class="OrganizationalUnitName" short="OU" desc="Organizational unit name" />
+        <oid value="12" id="title" class="Title" desc="Title attribute type" />
+        <oid value="13" id="description" class="Description" desc="Description attribute type" />
+        <oid value="14" id="searchGuide" class="SearchGuide" desc="Search guide attribute type" />
+        <oid value="15" id="businessCategory" class="BusinessCategory" desc="Business category attribute type" />
+        <oid value="16" id="postalAddress" class="PostalAddress" desc="Postal address attribute type" />
+        <oid value="17" id="postalCode" class="PostalCode" short="PostalCode" desc="Postal code attribute type" />
+        <oid value="18" id="postOfficeBox" class="PostOfficeBox" desc="Post office box attribute type" />
+        <oid value="19" id="physicalDeliveryOfficeName" class="PhysicalDeliveryOfficeName" desc="physicalDeliveryOfficeName attribute type" />
+        <oid value="20" id="telephoneNumber" class="TelephoneNumber" desc="Telephone number attribute type" />
+        <oid value="21" id="telexNumber" class="TelexNumber" desc="Telex number attribute type" />
+        <oid value="22" id="teletexTerminalIdentifier" class="TeletexTerminalIdentifier" desc="Teletex terminal identifier attribute type" />
+        <oid value="23" id="facsimileTelephoneNumber" class="FacsimileTelephoneNumber" desc="Facsimile telephone number attribute type" />
+        <oid value="24" id="x121Address" class="X121Address" desc="X121 address attribute type" />
+        <oid value="25" id="internationalISDNNumber" class="InternationalISDNNumber" desc="International ISDN (Integrated Services Digital Network) number attribute type" />
+        <oid value="26" id="registeredAddress" class="RegisteredAddress" desc="Registered address attribute type" />
+        <oid value="27" id="destinationIndicator" class="DestinationIndicator" desc="Destination indicator attribute type" />
+        <oid value="28" id="preferredDeliveryMethod" class="PreferredDeliveryMethod" desc="Preferred delivery method attribute type" />
+        <oid value="29" id="presentationAddress" class="PresentationAddress" desc="Presentation address attribute type" />
+        <oid value="30" id="supportedApplicationContext" class="SupportedApplicationContext" desc="Supported application context attribute type" />
+        <oid value="31" id="member" class="Member" desc="Member attribute type" />
+        <oid value="32" id="owner" class="Owner" desc="Owner attribute type" />
+        <oid value="33" id="roleOccupant" class="RoleOccupant" desc="Role occupant attribute type" />
+        <oid value="34" id="seeAlso" class="SeeAlso" desc="seeAlso attribute type" />
+        <oid value="35" id="userPassword" class="UserPassword" desc="userPassword attribute type" />
+        <oid value="36" id="userCertificate" class="UserCertificate" desc="&quot;userCertificate&quot; attribute type" />
+        <oid value="37" id="cACertificate" class="CACertificate" desc="&quot;cAcertificate&quot; attribute type" />
+        <oid value="38" id="authorityRevocationList" class="AuthorityRevocationList" desc="&quot;authorityRevocationList&quot; attribute type" />
+        <oid value="39" id="certificateRevocationList" class="CertificateRevocationList" desc="&quot;certificateRevocationList&quot; attribute type" />
+        <oid value="40" id="crossCertificatePair" class="CrossCertificatePair" desc="&quot;crossCertificatePair&quot; attribute type" />
+        <oid value="41" id="name" class="Name" desc="&quot;name&quot; attribute type" />
+        <oid value="42" id="givenName" class="GivenName" desc="&quot;givenName&quot; attribute type" />
+        <oid value="43" id="initials" class="Initials" desc="&quot;initials&quot; attribute type" />
+        <oid value="44" id="generationQualifier" class="GenerationQualifier" desc="&quot;generationQualifier&quot; attribute type" />
+        <oid value="45" id="uniqueIdentifier" class="UniqueIdentifier" desc="&quot;uniqueIdentifier&quot; attribute type" />
+        <oid value="46" id="dnQualifier" class="DNQualifier" desc="&quot;dnQualifier&quot; attribute type" />
+        <oid value="47" id="enhancedSearchGuide" class="EnhancedSearchGuide" desc="&quot;enhancedSearchGuide&quot; attribute type" />
+        <oid value="48" id="protocolInformation" class="ProtocolInformation" desc="&quot;protocolInformation&quot; attribute type" />
+        <oid value="49" id="distinguishedName" class="DistinguishedName" desc="&quot;distinguishedName&quot; attribute type" />
+        <oid value="50" id="uniqueMember" class="UniqueMember" desc="&quot;uniqueMember&quot; attribute type" />
+        <oid value="51" id="houseIdentifier" class="HouseIdentifier" desc="&quot;houseIdentifier&quot; attribute type" />
+        <oid value="52" id="supportedAlgorithms" class="SupportedAlgorithms" desc="&quot;supportedAlgorithms&quot; attribute type" />
+        <oid value="53" id="deltaRevocationList" class="DeltaRevocationList" desc="&quot;deltaRevocationList&quot; attribute type" />
+        <oid value="54" id="dmdName" class="DMDName" desc="&quot;dmdName&quot; attribute type" />
+        <oid value="55" id="clearance" class="Clearance" desc="Attribute type &quot;Clearance&quot;" />
+        <oid value="56" id="defaultDirQop" class="DefaultDirQop" desc="Attribute type &quot;Default Dir Qop&quot;" />
+        <oid value="57" id="attributeIntegrityInfo" class="AttributeIntegrityInfo" desc="Attribute type &quot;Attribute integrity info&quot;" />
+        <oid value="58" id="attributeCertificate" class="AttributeCertificate" desc="attributeCertificate attribute type" />
+        <oid value="59" id="attributeCertificateRevocationList" class="AttributeCertificateRevocationList" desc="attributeCertificateRevocationList attribute type" />
+        <oid value="60" id="confKeyInfo" class="ConfKeyInfo" desc="Attribute type &quot;Conf key info&quot;" />
+        <oid value="61" id="aACertificate" class="AACertificate" desc="aACertificate attribute type" />
+        <oid value="62" id="attributeDescriptorCertificate" class="AttributeDescriptorCertificate" desc="attributeDescriptorCertificate attribute type" />
+        <oid value="63" id="attributeAuthorityRevocationList" class="AttributeAuthorityRevocationList" desc="attributeAuthorityRevocationList attribute type" />
+        <oid value="64" id="family-information" class="FamilyInformation" desc="Family-information attribute type" />
+        <oid value="65" id="pseudonym" class="Pseudonym" desc="Pseudonym attribute type" />
+        <oid value="66" id="communicationsService" class="CommunicationsService" desc="communicationsService attribute type" />
+        <oid value="67" id="communicationsNetwork" class="CommunicationsNetwork" desc="communicationsNetwork attribute type" />
+        <oid value="68" id="certificationPracticeStmt" class="CertificationPracticeStmt" desc="certificationPracticeStmt attribute type (Certification practice statement attribute)" />
+        <oid value="69" id="certificatePolicy" class="CertificatePolicy" desc="certificatePolicy attribute type" />
+        <oid value="70" id="pkiPath" class="PKIPath" desc="pkiPath attribute type" />
+        <oid value="71" id="privPolicy" class="PrivPolicy" desc="privPolicy attribute type" />
+        <oid value="72" id="role" class="Role" desc="role attribute type" />
+        <oid value="73" id="delegationPath" class="DelegationPath" desc="delegationPath attribute type" />
+        <oid value="74" id="protPrivPolicy" class="ProtPrivPolicy" desc="protPrivPolicy ATTRIBUTE ::= {&#xA;WITH SYNTAX AttributeCertificate&#xA;EQUALITY MATCHING RULE attributeCertificateExactMatch&#xA;ID id-at-protPrivPolicy }" />
+        <oid value="75" id="xMLPrivilegeInfo" class="XMLPrivilegeInfo" desc="xmlPrivilegeInfo ATTRIBUTE ::= {&#xA;WITH SYNTAX UTF8String --contains XML-encoded privilege information&#xA;ID id-at-xMLPrivilegeInfo }" />
+        <oid value="76" id="xmlPrivPolicy" class="XMLPrivPolicy" desc="xmlPrivPolicy" />
+        <oid value="77" id="uuidpair" class="UUIDPair" desc="uUIDPair" />
+        <oid value="78" id="tagOid" class="TagOid" desc="tagOid ATTRIBUTE ::= {&#xA;WITH SYNTAX OBJECT IDENTIFIER&#xA;EQUALITY MATCHING RULE objectIdentifierMatch&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX oid.&amp;amp;id&#xA;LDAP-NAME {&quot;tagOid&quot;}&#xA;ID id-at-tagOid }" />
+        <oid value="79" id="uiiFormat" class="UIIFormat" desc="uiiFormat ATTRIBUTE ::= {&#xA;WITH SYNTAX UiiFormat&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX uiiForm.&amp;amp;id&#xA;LDAP-NAME {&quot;uiiFormat&quot;}&#xA;ID id-at-uiiFormat }" />
+        <oid value="80" id="uiiInUrh" class="UIIInUrh" desc="uiiInUrn ATTRIBUTE ::= {&#xA;WITH SYNTAX UTF8String&#xA;EQUALITY MATCHING RULE caseExactMatch&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;uiiInUrn&quot;}&#xA;ID id-at-uiiInUrn }" />
+        <oid value="81" id="contentUrl" class="ContentUrl" desc="contentUrl ATTRIBUTE ::= {&#xA;SUBTYPE OF url&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;contentUrl&quot;}&#xA;ID id-at-contentUrl }" />
+        <oid value="82" id="permission" class="Permission" desc="permission ATTRIBUTE ::= {&#xA;WITH SYNTAX DualStringSyntax&#xA;EQUALITY MATCHING RULE dualStringMatch&#xA;ID id-at-permission }" />
+        <oid value="83" id="uri" class="Uri" desc="uri ATTRIBUTE ::= {&#xA;WITH SYNTAX URI&#xA;EQUALITY MATCHING RULE uriMatch&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;uri&quot;}&#xA;ID id-at-uri }" />
+        <oid value="84" id="pwdAttribute" class="PwdAttribute" desc="pwdAttribute ATTRIBUTE ::= {&#xA;WITH SYNTAX ATTRIBUTE.&amp;amp;id&#xA;EQUALITY MATCHING RULE objectIdentifierMatch&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX oid.&amp;amp;id&#xA;LDAP-NAME {&quot;pwdAttribute&quot;}&#xA;ID id-at-pwdAttribute }" />
+        <oid value="85" id="userPwd" class="UserPwd" desc="userPwd ATTRIBUTE ::= {&#xA;WITH SYNTAX UserPwd&#xA;EQUALITY MATCHING RULE userPwdMatch&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX userPwdDescription.&amp;amp;id&#xA;LDAP-NAME {&quot;userPwd&quot;}&#xA;ID id-at-userPwd }" />
+        <oid value="86" id="urn" class="Urn" desc="urn ATTRIBUTE ::= {&#xA;SUBTYPE OF uri&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;urn&quot;}&#xA;ID id-at-urn }" />
+        <oid value="87" id="url" class="Url" desc="url ATTRIBUTE ::= {&#xA;SUBTYPE OF uri&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;url&quot;}&#xA;ID id-at-url }" />
+        <oid value="88" id="utmCoordinates" class="UTMCoordinates" desc="utmCoordinates ATTRIBUTE ::= {&#xA;WITH SYNTAX UtmCoordinates&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX utmCoords.&amp;amp;id&#xA;LDAP-NAME {&quot;utmCoordinates&quot;}&#xA;ID id-at-utmCoordinates }" />
+        <oid value="89" id="urnC" class="UrnC" desc="urnC ATTRIBUTE ::= {&#xA;WITH SYNTAX PrintableString&#xA;EQUALITY MATCHING RULE caseExactMatch&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX printableString.&amp;amp;id&#xA;LDAP-NAME {&quot;urnC&quot;}&#xA;ID id-at-urnC }" />
+        <oid value="90" id="uii" class="Uii" desc="uii ATTRIBUTE ::= {&#xA;WITH SYNTAX BIT STRING&#xA;EQUALITY MATCHING RULE bitStringMatch&#xA;LDAP-SYNTAX bitString.&amp;amp;id&#xA;LDAP-NAME {&quot;uii&quot;}&#xA;ID id-at-uii }" />
+        <oid value="91" id="epc" class="Epc" desc="epc ATTRIBUTE ::= {&#xA;WITH SYNTAX BIT STRING&#xA;EQUALITY MATCHING RULE bitStringMatch&#xA;LDAP-SYNTAX bitString.&amp;amp;id&#xA;LDAP-NAME {&quot;epc&quot;}&#xA;ID id-at-epc }" />
+        <oid value="92" id="tagAfi" class="TagAfi" desc="tagAfi ATTRIBUTE ::= {&#xA;WITH SYNTAX OCTET STRING&#xA;EQUALITY MATCHING RULE octetStringMatch&#xA;LDAP-SYNTAX octetString.&amp;amp;id&#xA;LDAP-NAME {&quot;tagAfi&quot;}&#xA;ID id-at-tagAfi }" />
+        <oid value="93" id="epcFormat" class="EpcFormat" desc="epcFormat ATTRIBUTE ::= {&#xA;WITH SYNTAX EpcFormat&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX epcForm.&amp;amp;id&#xA;LDAP-NAME {&quot;epcFormat&quot;}&#xA;ID id-at-epcFormat }" />
+        <oid value="94" id="epcInUrn" class="EpcInUrn" desc="epcInUrn ATTRIBUTE ::= {&#xA;SUBTYPE OF urn&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;epcInUrn&quot;}&#xA;ID id-at-epcInUrn }" />
+        <oid value="95" id="ldapUrl" class="LDAPUrl" desc="ldapUrl ATTRIBUTE ::= {&#xA;SUBTYPE OF url&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;ldapUrl&quot;}&#xA;ID id-at-ldapUrl }" />
+        <oid value="97" id="organizationIdentifier" class="OrganizationIdentifier" desc="organizationIdentifier ATTRIBUTE ::= {&#xA;WITH SYNTAX UnboundedDirectoryString&#xA;EQUALITY MATCHING RULE caseIgnoreMatch&#xA;SUBSTRINGS MATCHING RULE caseIgnoreSubstringsMatch&#xA;SINGLE VALUE TRUE&#xA;LDAP-SYNTAX directoryString.&amp;amp;id&#xA;LDAP-NAME {&quot;organizationIdentifier&quot;}&#xA;ID id-at-organizationIdentifier}" />
+      </oid>
+      <oid value="29" id="certificateExtension" class="CertificateExtension" desc="Certificate extensions">
+        <oid value="1" id="authorityKeyIdentifier" class="AuthorityKeyIdentifierObsolete" desc="X.509 old Authority Key Identifier&#xA;&#xA;Deprecated, use {2 5 29 35} instead" />
+        <oid value="2" id="keyAttributes" class="KeyAttributesObsolete" desc="Obsolete" />
+        <oid value="3" id="certificatePolicies" class="CertificatePoliciesObsolete" desc="Certificate policies (obsolete but can be found in some VeriSign-issued certificates)" />
+        <oid value="4" id="keyUsageRestriction" class="KeyUsageRestrictionObsolete" desc="Obsolete" />
+        <oid value="5" id="policyMapping" class="PolicyMappingObsolete" desc="Obsolete" />
+        <oid value="6" id="subtreesConstraint" class="SubtreesConstraintObsolete" desc="Obsolete" />
+        <oid value="7" id="subjectAltName" class="SubjectAltNameObsolete" desc="Obsolete" />
+        <oid value="8" id="issuerAltName" class="IssuerAltNameObsolete" desc="Obsolete" />
+        <oid value="9" id="subjectDirectoryAttributes" class="SubjectDirectoryAttributes" desc="Subject directory attributes certificate extension" />
+        <oid value="10" id="basicConstraints" class="BasicConstraintsObsolete" desc="X.509 id-ce (deprecated)" />
+        <!--<oid value="11" id="11" class="11" desc="Obsolete" />
+        <oid value="12" id="12" class="12" desc="Obsolete" />
+        <oid value="13" id="13" class="13" desc="Obsolete" />-->
+        <oid value="14" id="subjectKeyIdentifier" class="SubjectKeyIdentifier" desc="Subject key identifier" />
+        <oid value="15" id="keyUsage" class="KeyUsage" desc="Key usage" />
+        <oid value="16" id="privateKeyUsagePeriod" class="PrivateKeyUsagePeriod" desc="Private key usage period" />
+        <oid value="17" id="subjectAltName" class="SubjectAltName" desc="Subject alternative name" />
+        <oid value="18" id="issuerAltName" class="IssuerAltName" desc="Issuer alternative name" />
+        <oid value="19" id="basicConstraints" class="BasicConstraints" desc="Basic constraints" />
+        <oid value="20" id="cRLNumber" class="CRLNumber" desc="Certificate Revocation List (CRL) number" />
+        <oid value="21" id="reasonCode" class="ReasonCode" desc="Reason code" />
+        <oid value="22" id="expirationDate" class="ExpirationDate" desc="Expiration date" />
+        <oid value="23" id="instructionCode" class="InstructionCode" desc="Hold instruction code" />
+        <oid value="24" id="invalidityDate" class="InvalidityDate" desc="Invalidity date" />
+        <oid value="25" id="cRLDistributionPoints" class="CRLDistributionPointsObsolete" desc="Obsolete" />
+        <oid value="26" id="issuingDistributionPoint" class="IssuingDistributionPointObsolete" desc="Obsolete" />
+        <oid value="27" id="deltaCRLIndicator" class="DeltaCRLIndicator" desc="Certificate Revocation List (CRL) indicator" />
+        <oid value="28" id="issuingDistributionPoint" class="IssuingDistributionPoint" desc="Issuing distribution point" />
+        <oid value="29" id="certificateIssuer" class="CertificateIssuer" desc="Certificate issuer" />
+        <oid value="30" id="nameConstraints" class="NameConstraints" desc="Name constraints" />
+        <oid value="31" id="cRLDistributionPoints" class="CRLDistributionPoints" desc="Certificate Revocation List (CRL) distribution points" />
+        <oid value="32" id="certificatePolicies" class="CertificatePolicies" desc="Certificate policies" />
+        <oid value="33" id="policyMappings" class="PolicyMappings" desc="Policy mappings" />
+        <oid value="34" id="policyConstraints" class="PolicyConstraints1" desc="Policy constraints" />
+        <oid value="35" id="authorityKeyIdentifier" class="AuthorityKeyIdentifier" desc="Authority key identifier" />
+        <oid value="36" id="policyConstraints" class="PolicyConstraints2" desc="Policy constraints" />
+        <oid value="37" id="extKeyUsage" class="ExtKeyUsage" desc="Certificate extension: &quot;extKeyUsage&quot; (Extended key usage)" />
+        <oid value="38" id="authorityAttributeIdentifier" class="AuthorityAttributeIdentifier" desc="Certificate extension: &quot;authorityAttributeIdentifier&quot;" />
+        <oid value="39" id="roleSpecCertIdentifier" class="RoleSpecCertIdentifier" desc="Certificate extension: &quot;roleSpecCertIdentifier&quot; (Role specification certificate identifier extension)" />
+        <oid value="40" id="cRLStreamIdentifier" class="CRLStreamIdentifier" desc="Certificate extension: &quot;cRLStreamIdentifier&quot;" />
+        <oid value="41" id="basicAttConstraints" class="BasicAttConstraints" desc="Certificate extension: &quot;basicAttConstraints&quot;" />
+        <oid value="42" id="delegatedNameConstraints" class="DelegatedNameConstraints" desc="Certificate extension: &quot;delegatedNameConstraints&quot;" />
+        <oid value="43" id="timeSpecification" class="TimeSpecification" desc="Certificate extension: &quot;timeSpecification&quot;" />
+        <oid value="44" id="cRLScope" class="CRLScope" desc="Certificate extension: &quot;cRLScope&quot;" />
+        <oid value="45" id="statusReferrals" class="StatusReferrals" desc="Certificate extension: &quot;statusReferrals&quot;" />
+        <oid value="46" id="freshestCRL" class="FreshestCRL" desc="Certificate extension: &quot;freshestCRL&quot;" />
+        <oid value="47" id="orderedList" class="OrderedList" desc="Certificate extension: &quot;orderedList&quot;" />
+        <oid value="48" id="attributeDescriptor" class="AttributeDescriptor" desc="Certificate extension: &quot;attributeDescriptor&quot;" />
+        <oid value="49" id="userNotice" class="UserNotice" desc="Certificate extension: &quot;userNotice&quot;" />
+        <oid value="50" id="sOAIdentifier" class="SOAIdentifier" desc="Certificate extension: &quot;sOAIdentifier&quot;" />
+        <oid value="51" id="baseUpdateTime" class="BaseUpdateTime" desc="Certificate extension: &quot;baseUpdateTime&quot;" />
+        <oid value="52" id="acceptableCertPolicies" class="AcceptableCertPolicies" desc="Certificate extension: &quot;acceptableCertPolicies&quot;&#xA;(Acceptable certificate policies extension)" />
+        <oid value="53" id="deltaInfo" class="DeltaInfo" desc="Certificate extension: &quot;deltaInfo&quot;" />
+        <oid value="54" id="inhibitAnyPolicy" class="InhibitAnyPolicy" desc="X.509 version 3 certificate extension Inhibit Any-policy&#xA;&#xA;The inhibit any-policy extension can be used in certificates issued to CAs. The inhibit any-policy indicates that the special anyPolicy OID, with the value { 2 5 29 32 0 }, is not considered an explicit match for other certificate policies. The value indicates the number of additional certificates that may appear in the path before anyPolicy is no longer permitted. For example, a value of one indicates that anyPolicy may be processed in certificates issued by the subject of this certificate, but not in additional certificates in the path.&#xA;&#xA;This extension MUST be critical.&#xA;&#xA;InhibitAnyPolicy ::= SkipCerts&#xA;SkipCerts ::= INTEGER (0..MAX)" />
+        <oid value="55" id="targetInformation" class="TargetInformation" desc="Certificate extension: &quot;targetInformation&quot; (Targeting information extension)" />
+        <oid value="56" id="noRevAvail" class="NoRevAvail" desc="Certificate extension: &quot;noRevAvail&quot; (No revocation information extension)" />
+        <oid value="57" id="acceptablePrivilegePolicies" class="AcceptablePrivilegePolicies" desc="Certificate extension: &quot;acceptablePrivilegePolicies&quot;" />
+        <oid value="58" id="id-ce-toBeRevoked" class="ToBeRevoked" desc="id-ce-toBeRevoked" />
+        <oid value="59" id="id-ce-RevokedGroups" class="RevokedGroups" desc="id-ce-RevokedGroups" />
+        <oid value="60" id="id-ce-expiredCertsOnCRL" class="ExpiredCertsOnCRL" desc="id-ce-expiredCertsOnCRL" />
+        <oid value="61" id="indirectIssuer" class="IndirectIssuer" desc="(Attribute) certificate extension: &quot;indirectIssuer&quot;" />
+        <oid value="62" id="id-ce-noAssertion" class="NoAssertion" desc="id-ce-noAssertion" />
+        <oid value="63" id="id-ce-aAissuingDistributionPoint" class="AAissuingDistributionPoint" desc="id-ce-aAissuingDistributionPoint" />
+        <oid value="64" id="id-ce-issuedOnBehaIFOF" class="IssuedOnBehaIFOF" desc="id-ce-issuedOnBehaIFOF" />
+        <oid value="65" id="id-ce-singleUse" class="SingleUse" desc="id-ce-singleUse" />
+        <oid value="66" id="id-ce-groupAC" class="GroupAC" desc="id-ce-groupAC" />
+        <oid value="67" id="id-ce-allowedAttAss" class="AllowedAttAss" desc="id-ce-allowedAttAss" />
+        <oid value="68" id="id-ce-attributeMappings" class="AttributeMappings" desc="id-ce-attributeMappings" />
+        <oid value="69" id="id-ce-holderNameConstraints" class="HolderNameConstraints" desc="id-ce-holderNameConstraints" />
+      </oid>
+    </oid>
+    <oid value="16" id="country" class="Country" desc="Joint (ITU-T and ISO/IEC) registration within a country">
+      <oid value="840" id="us" class="US" desc="United States of America">
+        <oid value="1" id="organization" class="Organization" desc="American organizations">
+          <oid value="101" id="gov" class="Gov" desc="US government">
+            <oid value="3" id="csor" class="CSOR" desc="Computer Security Objects Register (CSOR)">
+              <oid value="4" id="nistAlgorithm" class="NISTAlgorithm" desc="NIST Algorithm">
+                <oid value="2" id="hashAlgs" class="HashAlgs" desc="Secure Hash Algorithms">
+                  <oid value="1" id="sha256" class="SHA256" desc="Secure Hash Algorithm that uses a 256 bit key (SHA256)" />
+                  <oid value="2" id="sha384" class="SHA384" desc="Secure hashing algorithm that uses a 384 bit key (SHA384)" />
+                  <oid value="3" id="sha512" class="SHA512" desc="Secure Hash Algorithm that uses a 512 bit key (SHA512)" />
+                  <oid value="4" id="sha224" class="SHA224" desc="A 224-bit One-way Hash Function: SHA-224" />
+                  <oid value="5" id="sha512-224" class="SHA512_224" desc="SHA512-224 algorithm" />
+                  <oid value="6" id="sha512-256" class="SHA512_256" desc="SHA512-256 algorithm" />
+                  <!--<oid value="7" id="7" class="7" desc="SHA3-224 algorithm" />
+                  <oid value="8" id="8" class="8" desc="SHA3-256 algorithm" />
+                  <oid value="9" id="9" class="9" desc="SHA3-384 algorithm" />
+                  <oid value="10" id="10" class="10" desc="SHA3-512 hash algorithm" />
+                  <oid value="11" id="11" class="11" desc="Secure Hash Algorithm KEccak (SHAKE) 128 cryptographic hash function" />
+                  <oid value="12" id="12" class="12" desc="Secure Hash Algorithm KEccak (SHAKE) 256 cryptographic hash function" />-->
+                </oid>
+              </oid>
+            </oid>
+          </oid>
+        </oid>
+      </oid>
+    </oid>
+  </oid>
+</root>

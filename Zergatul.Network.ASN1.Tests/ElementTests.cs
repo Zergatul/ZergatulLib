@@ -11,31 +11,28 @@ namespace Zergatul.Network.ASN1.Tests
         [TestMethod]
         public void ObjectIdentifier_1()
         {
-            var ms = new MemoryStream(new byte[] { 0x06, 0x03, 0x01, 0x85, 0x03 });
-            var e = ASN1Element.ReadFrom(ms);
+            var e = ASN1Element.ReadFrom(new byte[] { 0x06, 0x03, 0x01, 0x85, 0x03 });
 
             Assert.IsTrue(e.GetType() == typeof(ObjectIdentifier));
-            Assert.IsTrue(((ObjectIdentifier)e).OID.Text == "0.1.643");
+            Assert.IsTrue(((ObjectIdentifier)e).OID.DotNotation == "0.1.643");
         }
 
         [TestMethod]
         public void ObjectIdentifier_2()
         {
-            var ms = new MemoryStream(new byte[] { 0x06, 0x04, 0x01, 0x86, 0xF7, 0x0D });
-            var e = ASN1Element.ReadFrom(ms);
+            var e = ASN1Element.ReadFrom(new byte[] { 0x06, 0x04, 0x01, 0x86, 0xF7, 0x0D });
 
             Assert.IsTrue(e.GetType() == typeof(ObjectIdentifier));
-            Assert.IsTrue(((ObjectIdentifier)e).OID.Text == "0.1.113549");
+            Assert.IsTrue(((ObjectIdentifier)e).OID.DotNotation == "0.1.113549");
         }
 
         [TestMethod]
         public void ObjectIdentifier_3()
         {
-            var ms = new MemoryStream(new byte[] { 0x06, 0x04, 0x01, 0x83, 0x80, 0x00 });
-            var e = ASN1Element.ReadFrom(ms);
+            var e = ASN1Element.ReadFrom(new byte[] { 0x06, 0x04, 0x01, 0x83, 0x80, 0x00 });
 
             Assert.IsTrue(e.GetType() == typeof(ObjectIdentifier));
-            Assert.IsTrue(((ObjectIdentifier)e).OID.Text == "0.1.49152");
+            Assert.IsTrue(((ObjectIdentifier)e).OID.DotNotation == "0.1.49152");
         }
     }
 }

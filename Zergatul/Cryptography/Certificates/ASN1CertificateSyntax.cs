@@ -3,6 +3,7 @@ using Zergatul.Network.ASN1;
 
 namespace Zergatul.Cryptography.Certificates
 {
+    // https://tools.ietf.org/html/rfc5280
     internal class ASN1CertificateSyntax
     {
         public TBSCertificate TbsCertificate;
@@ -146,10 +147,13 @@ namespace Zergatul.Cryptography.Certificates
                             var type = seq.Elements[0] as ObjectIdentifier;
                             if (type == null)
                                 return null;
+                            var value = seq.Elements[1] as ASN1StringElement;
+                            if (value == null)
+                                return null;
                             rdns.Add(new RelativeDistinguishedName
                             {
                                 Type = type,
-                                Value = seq.Elements[1]
+                                Value = value
                             });
                         }
                         sets.Add(rdns.ToArray());
@@ -299,7 +303,7 @@ namespace Zergatul.Cryptography.Certificates
         internal class RelativeDistinguishedName
         {
             public ObjectIdentifier Type;
-            public ASN1Element Value;
+            public ASN1StringElement Value;
         }
 
         internal class Validity

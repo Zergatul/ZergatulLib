@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Network;
 using Zergatul.Network.ASN1;
 
 namespace Zergatul.Cryptography.Certificates
@@ -13,6 +14,7 @@ namespace Zergatul.Cryptography.Certificates
         public X509Extension[] Extensions { get; private set; }
         public bool HasPrivateKey => PrivateKey != null;
         public string Issuer { get; private set; }
+        public string Subject { get; private set; }
         public DateTime NotBefore { get; private set; }
         public DateTime NotAfter { get; private set; }
         public PrivateKey PrivateKey { get; private set; }
@@ -52,12 +54,21 @@ namespace Zergatul.Cryptography.Certificates
             NotBefore = syntax.TbsCertificate.Validity.NotBefore.Date;
             NotAfter = syntax.TbsCertificate.Validity.NotAfter.Date;
 
-            if (syntax.TbsCertificate.Issuer.RDN.Any(ra => ra.Any(r => !(r.Value is PrintableString))))
-                throw new NotImplementedException("Only Printable String is supported");
+            Issuer = FormatName(syntax.TbsCertificate.Issuer);
+            Subject = FormatName(syntax.TbsCertificate.Subject);
 
-            var issuerParts = syntax.TbsCertificate.Issuer.RDN.SelectMany(ra => ra);
-            Issuer = string.Join(", ",
-                issuerParts.Reverse().Select(r => r.Type.OID.ShortName + "=" + ((PrintableString)r.Value).Value));
+            SignatureAlgorithm = syntax.SignatureAlgorithm.Algorithm.OID;
+
+            PublicKey = new PublicKey(syntax.TbsCertificate.SubjectPublicKeyInfo);
+
+            Extensions = syntax.TbsCertificate.Extensions.Select(ext => X509Extension.Parse(ext)).ToArray();
+        }
+
+        private static string FormatName(ASN1CertificateSyntax.Name name)
+        {
+            var parts = name.RDN.SelectMany(ra => ra);
+            return string.Join(", ",
+                parts.Reverse().Select(r => (r.Type.OID.ShortName ?? "OID." + r.Type.OID.DotNotation) + "=" + r.Value.Value));
         }
     }
 }

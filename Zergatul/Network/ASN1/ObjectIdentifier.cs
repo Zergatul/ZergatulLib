@@ -58,7 +58,7 @@ namespace Zergatul.Network.ASN1
             }
 
             string oidString = sb.ToString();
-            var oid = OID.All.SingleOrDefault(o => o.DotNotation == oidString);
+            var oid = OID.Find(oidString);
             if (oid != null)
                 this.OID = oid;
             else

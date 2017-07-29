@@ -884,6 +884,8 @@ namespace Zergatul.Math
 
         #region Operators
 
+        #region Comparison
+
         public static bool operator==(BigInteger left, BigInteger right)
         {
             bool leftnull = ReferenceEquals(left, null);
@@ -940,6 +942,10 @@ namespace Zergatul.Math
             return left.CompareTo(right) < 0;
         }
 
+        #endregion
+
+        #region Bit
+
         public static BigInteger operator >>(BigInteger left, int right)
         {
             return ShiftRight(left, right);
@@ -949,6 +955,10 @@ namespace Zergatul.Math
         {
             return ShiftLeft(left, right);
         }
+
+        #endregion
+
+        #region Arithmetic
 
         public static BigInteger operator +(BigInteger left, BigInteger right)
         {
@@ -1004,6 +1014,22 @@ namespace Zergatul.Math
         {
             return Modulo(left, right);
         }
+
+        #endregion
+
+        #region Conversion
+
+        public static explicit operator int(BigInteger value)
+        {
+            if (value < int.MinValue || value > int.MaxValue)
+                throw new ArgumentOutOfRangeException();
+
+            if (value.IsZero)
+                return 0;
+            return (int)(value._words[0] * value._sign);
+        }
+
+        #endregion
 
         #endregion
 
