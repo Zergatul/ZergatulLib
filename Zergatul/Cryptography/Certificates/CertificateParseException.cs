@@ -13,5 +13,17 @@ namespace Zergatul.Cryptography.Certificates
         {
 
         }
+
+        public static void ThrowIfTrue(bool value)
+        {
+            if (value)
+                throw new CertificateParseException();
+        }
+
+        public static void ThrowIfFalse(bool value)
+        {
+            if (!value)
+                throw new CertificateParseException();
+        }
     }
 }

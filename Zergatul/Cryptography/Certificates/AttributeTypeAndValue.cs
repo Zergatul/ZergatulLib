@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Zergatul.Network;
+using Zergatul.Network.ASN1;
+
+namespace Zergatul.Cryptography.Certificates
+{
+    public class AttributeTypeAndValue
+    {
+        public OID Type { get; private set; }
+        public object Value { get; private set; }
+
+        internal AttributeTypeAndValue(ASN1Element element)
+        {
+            var seq = element as Sequence;
+
+            CertificateParseException.ThrowIfFalse(seq != null);
+            CertificateParseException.ThrowIfFalse(seq.Elements.Count == 2);
+
+
+        }
+    }
+}

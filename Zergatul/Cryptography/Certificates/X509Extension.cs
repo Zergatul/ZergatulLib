@@ -28,6 +28,8 @@ namespace Zergatul.Cryptography.Certificates
                 ext = new KeyUsage();
             else if (oid == OID.JointISOITUT.DS.CertificateExtension.ExtKeyUsage)
                 ext = new ExtKeyUsage();
+            else if (oid == OID.JointISOITUT.DS.CertificateExtension.CRLDistributionPoints)
+                ext = new CRLDistributionPoints();
             else
                 //throw new NotImplementedException();
                 return null;
