@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network;
 using Zergatul.Network.ASN1;
 
 namespace Zergatul.Cryptography.Certificates
 {
-    /// <summary>
-    /// https://tools.ietf.org/html/rfc5280#section-4.2.2.1
-    /// </summary>
-    public class AuthorityInformationAccess : X509Extension
+    public class CertificatePolicies : X509Extension
     {
-        public IReadOnlyCollection<AccessDescription> Descriptions => _descriptions.AsReadOnly();
+        public IReadOnlyCollection<PolicyInformation> List => _list.AsReadOnly();
 
-        private List<AccessDescription> _descriptions;
+        private List<PolicyInformation> _list;
 
         protected override void Parse(OctetString data)
         {
@@ -25,7 +20,7 @@ namespace Zergatul.Cryptography.Certificates
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);
 
-            _descriptions = seq.Elements.Select(e => new AccessDescription(e)).ToList();
+            _list = seq.Elements.Select(e => new PolicyInformation(e)).ToList();
         }
     }
 }

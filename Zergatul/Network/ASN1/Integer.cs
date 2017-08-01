@@ -13,11 +13,9 @@ namespace Zergatul.Network.ASN1
         public byte[] Raw { get; private set; }
         public BigInteger Value => new BigInteger(Raw, ByteOrder.BigEndian);
 
-        protected override void ReadBody(Stream stream)
+        protected override void ReadBody(byte[] data)
         {
-            Raw = new byte[Length];
-            if (stream.Read(Raw, 0, Raw.Length) != (int)Length)
-                throw new NotImplementedException();
+            Raw = data;
         }
     }
 }

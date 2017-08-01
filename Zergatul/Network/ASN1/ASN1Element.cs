@@ -15,7 +15,12 @@ namespace Zergatul.Network.ASN1
         public long Length { get; protected set; }
         public int HeaderLength { get; protected set; }
 
-        protected abstract void ReadBody(Stream stream);
+        protected virtual void ReadBody(Stream stream)
+        {
+            byte[] data = ReadBuffer(stream, checked((int)Length));
+            ReadBody(data);
+        }
+
         protected virtual void ReadBody(byte[] data)
         {
             throw new NotImplementedException();
@@ -63,25 +68,6 @@ namespace Zergatul.Network.ASN1
                 return ReadFrom(ms);
         }
 
-        public ASN1Element ApplyRules(Dictionary<int, Type> rules)
-        {
-            var cs = this as ContextSpecific;
-            if (cs != null && cs.IsImplicit)
-            {
-                if (rules.ContainsKey(cs.Tag.TagNumberEx))
-                {
-                    var element = (ASN1Element)Activator.CreateInstance(rules[cs.Tag.TagNumberEx]);
-                    element.Tag = Tag;
-                    element.HeaderLength = HeaderLength;
-                    element.Length = Length;
-                    element.ReadBody(new MemoryStream(cs.Implicit));
-                    return element;
-                }
-            }
-
-            throw new NotImplementedException();
-        }
-
         protected static ASN1Element Resolve(ASN1TagNumber tag)
         {
             switch (tag)
@@ -108,6 +94,8 @@ namespace Zergatul.Network.ASN1
                     return new Set();
                 case ASN1TagNumber.PrintableString:
                     return new PrintableString();
+                case ASN1TagNumber.IA5String:
+                    return new IA5String();
                 case ASN1TagNumber.UTCTime:
                     return new UTCTime();
                 default:

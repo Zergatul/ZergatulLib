@@ -13,28 +13,24 @@ namespace Zergatul.Cryptography.Certificates
         protected override void Parse(OctetString data)
         {
             var element = ASN1Element.ReadFrom(data.Raw);
-            var seq = element as Sequence;
-            if (seq != null && (seq.Elements.Count == 1 || seq.Elements.Count == 2))
-            {
-                var b = seq.Elements[0] as Boolean;
-                if (b != null)
-                {
-                    CA = b.Value;
-                    if (seq.Elements.Count == 2)
-                    {
-                        var i = seq.Elements[1] as Integer;
-                        if (i != null)
-                        {
-                            PathLenConstraint = (int)i.Value;
-                            return;
-                        }
-                    }
-                    else
-                        return;
-                }
-            }
 
-            throw new System.InvalidOperationException();
+            var seq = element as Sequence;
+            CertificateParseException.ThrowIfNull(seq);
+
+
+            if (seq.Elements.Count >= 1)
+            {
+                CertificateParseException.ThrowIfFalse(seq.Elements[0] is Boolean);
+                CA = ((Boolean)seq.Elements[0]).Value;
+            }
+            else
+                CA = false;
+
+            if (seq.Elements.Count >= 2)
+            {
+                CertificateParseException.ThrowIfFalse(seq.Elements[1] is Integer);
+                PathLenConstraint = (int)((Integer)seq.Elements[1]).Value;
+            }
         }
     }
 }

@@ -297,6 +297,24 @@ namespace Zergatul.Network
                                     }
 
                                     /// <summary>
+                                    /// 1.3.6.1.5.5.7.2
+                                    /// </summary>
+                                    public static class QT
+                                    {
+                                        public static OID CPS = new OID("1.3.6.1.5.5.7.2.1", "cps");
+                                        public static OID UNotice = new OID("1.3.6.1.5.5.7.2.2", "unotice");
+                                        public static OID TextNotice = new OID("1.3.6.1.5.5.7.2.3", "textNotice");
+
+                                        public static IEnumerable<OID> All => new OID[]
+                                        {
+                                            CPS,
+                                            UNotice,
+                                            TextNotice,
+                                        };
+
+                                    }
+
+                                    /// <summary>
                                     /// 1.3.6.1.5.5.7.3
                                     /// </summary>
                                     public static class KP
@@ -364,15 +382,41 @@ namespace Zergatul.Network
                                     public static class AD
                                     {
                                         public static OID OCSP = new OID("1.3.6.1.5.5.7.48.1", "ocsp");
+                                        public static OID CAIssuers = new OID("1.3.6.1.5.5.7.48.2", "caIssuers");
+                                        public static OID Timestamping = new OID("1.3.6.1.5.5.7.48.3", "timestamping");
+                                        public static OID DVCS = new OID("1.3.6.1.5.5.7.48.4", "id-ad-dvcs");
+                                        public static OID CARepository = new OID("1.3.6.1.5.5.7.48.5", "id-ad-caRepository");
+                                        public static OID ArchiveCutoff = new OID("1.3.6.1.5.5.7.48.6", "id-pkix-ocsp-archive-cutoff");
+                                        public static OID ServiceLocator = new OID("1.3.6.1.5.5.7.48.7", "id-pkix-ocsp-service-locator");
+                                        public static OID XKMS = new OID("1.3.6.1.5.5.7.48.8", "id-ad-xkms");
+                                        public static OID SignedObjectRepository = new OID("1.3.6.1.5.5.7.48.9", "id-ad-signedObjectRepository");
+                                        public static OID RPKIManifest = new OID("1.3.6.1.5.5.7.48.10", "id-ad-rpkiManifest");
+                                        public static OID SignedObject = new OID("1.3.6.1.5.5.7.48.11", "id-ad-signedObject");
+                                        public static OID CMC = new OID("1.3.6.1.5.5.7.48.12", "id-ad-cmc");
+                                        public static OID RPKINotify = new OID("1.3.6.1.5.5.7.48.13", "id-ad-rpkiNotify");
+                                        public static OID StirTNList = new OID("1.3.6.1.5.5.7.48.14", "id-ad-stirTNList");
 
                                         public static IEnumerable<OID> All => new OID[]
                                         {
                                             OCSP,
+                                            CAIssuers,
+                                            Timestamping,
+                                            DVCS,
+                                            CARepository,
+                                            ArchiveCutoff,
+                                            ServiceLocator,
+                                            XKMS,
+                                            SignedObjectRepository,
+                                            RPKIManifest,
+                                            SignedObject,
+                                            CMC,
+                                            RPKINotify,
+                                            StirTNList,
                                         };
 
                                     }
 
-                                    public static IEnumerable<OID> All => (PE.All).Concat(KP.All).Concat(AD.All);
+                                    public static IEnumerable<OID> All => (PE.All).Concat(QT.All).Concat(KP.All).Concat(AD.All);
                                 }
 
                                 public static IEnumerable<OID> All => (PKIX.All);
@@ -903,7 +947,29 @@ namespace Zergatul.Network
                             public static IEnumerable<OID> All => (CSOR.All);
                         }
 
-                        public static IEnumerable<OID> All => (Gov.All);
+                        /// <summary>
+                        /// 2.16.840.1.114412
+                        /// </summary>
+                        public static class DigiCert
+                        {
+                            /// <summary>
+                            /// 2.16.840.1.114412.2
+                            /// </summary>
+                            public static class EVSSLCertificates
+                            {
+                                public static OID DigiCertEVCPS = new OID("2.16.840.1.114412.2.1", "1");
+
+                                public static IEnumerable<OID> All => new OID[]
+                                {
+                                    DigiCertEVCPS,
+                                };
+
+                            }
+
+                            public static IEnumerable<OID> All => (EVSSLCertificates.All);
+                        }
+
+                        public static IEnumerable<OID> All => (Gov.All).Concat(DigiCert.All);
                     }
 
                     public static IEnumerable<OID> All => (Organization.All);
@@ -912,7 +978,37 @@ namespace Zergatul.Network
                 public static IEnumerable<OID> All => (US.All);
             }
 
-            public static IEnumerable<OID> All => (DS.All).Concat(Country.All);
+            /// <summary>
+            /// 2.23
+            /// </summary>
+            public static class InternationalOrganizations
+            {
+                /// <summary>
+                /// 2.23.140
+                /// </summary>
+                public static class CABrowserForum
+                {
+                    /// <summary>
+                    /// 2.23.140.1
+                    /// </summary>
+                    public static class CertificatePolicies
+                    {
+                        public static OID EVGuidelines = new OID("2.23.140.1.1", "ev-guidelines");
+
+                        public static IEnumerable<OID> All => new OID[]
+                        {
+                            EVGuidelines,
+                        };
+
+                    }
+
+                    public static IEnumerable<OID> All => (CertificatePolicies.All);
+                }
+
+                public static IEnumerable<OID> All => (CABrowserForum.All);
+            }
+
+            public static IEnumerable<OID> All => (DS.All).Concat(Country.All).Concat(InternationalOrganizations.All);
         }
 
         public static IEnumerable<OID> All => (ISO.All).Concat(JointISOITUT.All);

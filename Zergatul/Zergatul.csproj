@@ -76,25 +76,38 @@
     <Compile Include="Cryptography\BlockCipher\ECBDecryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\ECBEncryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\Encryptor.cs" />
+    <Compile Include="Cryptography\Certificates\AccessDescription.cs" />
     <Compile Include="Cryptography\Certificates\ASN1CertificateSyntax.cs" />
     <Compile Include="Cryptography\Certificates\AttributeTypeAndValue.cs" />
+    <Compile Include="Cryptography\Certificates\AuthorityKeyIdentifier.cs" />
     <Compile Include="Cryptography\Certificates\BasicConstraints.cs" />
     <Compile Include="Cryptography\Certificates\CertificateParseException.cs" />
+    <Compile Include="Cryptography\Certificates\CertificatePolicies.cs" />
     <Compile Include="Cryptography\Certificates\CRLDistributionPoints.cs" />
     <Compile Include="Cryptography\Certificates\DistributionPoint.cs" />
     <Compile Include="Cryptography\Certificates\DistributionPointName.cs" />
     <Compile Include="Cryptography\Certificates\ExtKeyUsage.cs" />
     <Compile Include="Cryptography\Certificates\GeneralName.cs" />
     <Compile Include="Cryptography\Certificates\GeneralNames.cs" />
+    <Compile Include="Cryptography\Certificates\ICertificateStore.cs" />
     <Compile Include="Cryptography\Certificates\KeyUsage.cs" />
+    <Compile Include="Cryptography\Certificates\NoticeReference.cs" />
     <Compile Include="Cryptography\Certificates\OtherName.cs" />
+    <Compile Include="Cryptography\Certificates\PolicyInformation.cs" />
+    <Compile Include="Cryptography\Certificates\PolicyQualifierInfo.cs" />
     <Compile Include="Cryptography\Certificates\PrivateKey.cs" />
     <Compile Include="Cryptography\Certificates\PublicKey.cs" />
+    <Compile Include="Cryptography\Certificates\Qualifier.cs" />
     <Compile Include="Cryptography\Certificates\ReasonFlags.cs" />
     <Compile Include="Cryptography\Certificates\RelativeDistinguishedName.cs" />
+    <Compile Include="Cryptography\Certificates\SignedCertificateTimestampList.cs" />
+    <Compile Include="Cryptography\Certificates\SubjectAlternativeName.cs" />
+    <Compile Include="Cryptography\Certificates\SubjectKeyIdentifier.cs" />
+    <Compile Include="Cryptography\Certificates\UserNotice.cs" />
+    <Compile Include="Cryptography\Certificates\X509Chain.cs" />
     <Compile Include="Cryptography\Certificates\X509Extension.cs" />
     <Compile Include="Cryptography\Certificates\AuthorityInformationAccess.cs" />
-    <Compile Include="Cryptography\Certificates\X509v3Certificate.cs" />
+    <Compile Include="Cryptography\Certificates\X509Certificate.cs" />
     <Compile Include="Cryptography\DefaultSecureRandom.cs" />
     <Compile Include="Cryptography\Hash\AbstractHash.cs" />
     <Compile Include="Cryptography\Hash\HMAC.cs" />
@@ -112,7 +125,6 @@
     <Compile Include="Cryptography\Hash\SHA384.cs" />
     <Compile Include="Cryptography\Hash\SHA512.cs" />
     <Compile Include="Cryptography\ISecureRandom.cs" />
-    <Compile Include="Network\ASN1\ASN1ContextRules.cs" />
     <Compile Include="Network\ASN1\ASN1ParseException.cs" />
     <Compile Include="Network\ASN1\IA5String.cs" />
     <Compile Include="Network\OID.cs" />
@@ -249,7 +261,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>Powershell -File "$(ProjectDir)Scripts\GenerateOIDs.ps1" -WorkingDir "$(ProjectDir)</PreBuildEvent>
+    <PreBuildEvent>REM Powershell -File "$(ProjectDir)Scripts\GenerateOIDs.ps1" -WorkingDir "$(ProjectDir)</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

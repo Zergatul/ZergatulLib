@@ -30,6 +30,16 @@ namespace Zergatul.Cryptography.Certificates
                 ext = new ExtKeyUsage();
             else if (oid == OID.JointISOITUT.DS.CertificateExtension.CRLDistributionPoints)
                 ext = new CRLDistributionPoints();
+            else if (oid == OID.JointISOITUT.DS.CertificateExtension.AuthorityKeyIdentifier)
+                ext = new AuthorityKeyIdentifier();
+            else if (oid == OID.JointISOITUT.DS.CertificateExtension.SubjectKeyIdentifier)
+                ext = new SubjectKeyIdentifier();
+            else if (oid == OID.JointISOITUT.DS.CertificateExtension.SubjectAltName)
+                ext = new SubjectAlternativeName();
+            else if (oid == OID.JointISOITUT.DS.CertificateExtension.CertificatePolicies)
+                ext = new CertificatePolicies();
+            else if (oid.DotNotation == "1.3.6.1.4.1.11129.2.4.2")
+                ext = new SignedCertificateTimestampList();
             else
                 //throw new NotImplementedException();
                 return null;

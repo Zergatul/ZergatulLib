@@ -1,5 +1,4 @@
-﻿using Org.BouncyCastle.Asn1;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -38,47 +37,63 @@ namespace Test
 
         static void Main(string[] args)
         {
-            //DownloadOIDs.Go("1.3.6.1.5.5.7.3", "1.txt");
+            //DownloadOIDs.Go("1.3.6.1.5.5.7.48", "1.txt");
             //return;
 
             //var obj = Asn1Object.FromByteArray(BitHelper.HexToBytes("3026302406082b060105050730018618687474703a2f2f6f6373702e64696769636572742e636f6d"));
             //return;
 
-            string cerfile = "1.cer";
-            var cert = new X509v3Certificate(cerfile);
-            var cert2 = new X509Certificate2(cerfile);
+            string cerfile1 = "1.cer";
+            string cerfile2 = "2.cer";
+            var cert1m = new Zergatul.Cryptography.Certificates.X509Certificate(cerfile1);
+            var cert2m = new Zergatul.Cryptography.Certificates.X509Certificate(cerfile2);
+            var cert1c = new X509Certificate2(cerfile1);
 
-            if (cert.SerialNumberString == cert2.SerialNumber)
+            #region check base props
+
+            if (cert1m.SerialNumberString == cert1c.SerialNumber)
                 Console.WriteLine("Serial number ok!");
             else
                 throw new Exception();
 
-            if (cert.NotBefore == cert2.NotBefore)
+            if (cert1m.NotBefore == cert1c.NotBefore)
                 Console.WriteLine("NotBefore ok!");
             else
                 throw new Exception();
 
-            if (cert.NotAfter == cert2.NotAfter)
+            if (cert1m.NotAfter == cert1c.NotAfter)
                 Console.WriteLine("NotAfter ok!");
             else
                 throw new Exception();
 
-            if (cert.Issuer == cert2.Issuer)
+            if (cert1m.Issuer == cert1c.Issuer)
                 Console.WriteLine("Issuer ok!");
             else
                 throw new Exception();
 
-            if (cert.Subject == cert2.Subject)
+            if (cert1m.Subject == cert1c.Subject)
                 Console.WriteLine("Subject ok!");
             else
                 throw new Exception();
 
-            if (cert.SignatureAlgorithm.DotNotation == cert2.SignatureAlgorithm.Value)
+            if (cert1m.SignatureAlgorithm.DotNotation == cert1c.SignatureAlgorithm.Value)
                 Console.WriteLine("SignatureAlgorithm ok!");
             else
                 throw new Exception();
 
-            cert.PublicKey.ResolveAlgorithm();
+            #endregion
+
+            cert1m.PublicKey.ResolveAlgorithm();
+
+            Console.WriteLine("1:" + cert1m.Subject);
+            Console.WriteLine("1 SubjKey: " + BitHelper.BytesToHex(cert1m.Extensions.OfType<SubjectKeyIdentifier>().Single().KeyIdentifier));
+            Console.WriteLine("1 AuthKey: " + BitHelper.BytesToHex(cert1m.Extensions.OfType<AuthorityKeyIdentifier>().Single().KeyIdentifier));
+
+            Console.WriteLine();
+
+            Console.WriteLine("2:" + cert2m.Subject);
+            Console.WriteLine("2 SubjKey: " + BitHelper.BytesToHex(cert2m.Extensions.OfType<SubjectKeyIdentifier>().Single().KeyIdentifier));
+            Console.WriteLine("2 AuthKey: " + BitHelper.BytesToHex(cert2m.Extensions.OfType<AuthorityKeyIdentifier>().Single().KeyIdentifier));
 
             return;
 

@@ -92,21 +92,19 @@ namespace Zergatul.Cryptography.Certificates
         protected override void Parse(OctetString data)
         {
             var element = ASN1Element.ReadFrom(data.Raw);
-            var bs = element as BitString;
-            if (bs != null && bs.Data.Length == 1)
-            {
-                DigitalSignature = (bs.Data[0] & 0x01) != 0;
-                ContentCommitment = (bs.Data[0] & 0x02) != 0;
-                KeyEncipherment = (bs.Data[0] & 0x04) != 0;
-                DataEncipherment = (bs.Data[0] & 0x08) != 0;
-                KeyAgreement = (bs.Data[0] & 0x10) != 0;
-                KeyCertSign = (bs.Data[0] & 0x20) != 0;
-                EncipherOnly = (bs.Data[0] & 0x40) != 0;
-                DecipherOnly = (bs.Data[0] & 0x80) != 0;
-                return;
-            }
 
-            throw new InvalidOperationException();
+            var bs = element as BitString;
+            CertificateParseException.ThrowIfFalse(bs != null);
+            CertificateParseException.ThrowIfFalse(bs.Data.Length == 1);
+
+            DigitalSignature = (bs.Data[0] & 0x01) != 0;
+            ContentCommitment = (bs.Data[0] & 0x02) != 0;
+            KeyEncipherment = (bs.Data[0] & 0x04) != 0;
+            DataEncipherment = (bs.Data[0] & 0x08) != 0;
+            KeyAgreement = (bs.Data[0] & 0x10) != 0;
+            KeyCertSign = (bs.Data[0] & 0x20) != 0;
+            EncipherOnly = (bs.Data[0] & 0x40) != 0;
+            DecipherOnly = (bs.Data[0] & 0x80) != 0;
         }
     }
 }

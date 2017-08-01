@@ -44,10 +44,7 @@ namespace Zergatul.Cryptography.Certificates
                     RFC822Name = ((IA5String)cs.Elements[0]).Value;
                     break;
                 case 2:
-                    CertificateParseException.ThrowIfTrue(cs.IsImplicit);
-                    CertificateParseException.ThrowIfFalse(cs.Elements.Count != 1);
-                    CertificateParseException.ThrowIfFalse(cs.Elements[0] is IA5String);
-                    DNSName = ((IA5String)cs.Elements[0]).Value;
+                    DNSName = cs.As<IA5String>().Value;
                     break;
                 case 3:
                     throw new NotImplementedException();

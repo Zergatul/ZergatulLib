@@ -11,9 +11,9 @@ namespace Zergatul.Network.ASN1
     {
         public byte[] Raw { get; private set; }
 
-        protected override void ReadBody(Stream stream)
+        protected override void ReadBody(byte[] data)
         {
-            Raw = ReadBuffer(stream, checked((int)Length));
+            Raw = data;
         }
     }
 }

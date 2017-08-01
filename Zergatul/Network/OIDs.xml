@@ -70,6 +70,9 @@
                   </oid>
                 </oid>
               </oid>
+              <oid value="11129" id="google" class="Google" desc="Google">
+                
+              </oid>
             </oid>
           </oid>
           <oid value="5" id="security" class="Security" desc="Structure and identification of Management Information (SMI) security codes">
@@ -103,6 +106,11 @@
                   <oid value="25" id="id-pe-mud-url" class="MUDUrl" desc="MUDCertExtensions extension" />
                   <oid value="26" id="id-pe-TNAuthList" class="TNAuthList" desc="Telephone Number (TN) authorization list certificate extension" />
                   <oid value="27" id="id-pe-JWTClaimConstraints" class="JWTClaimConstraints" desc="JavaScript Object Notation (JSON) Web Token (JWT) claim constraints certificate extension" />
+                </oid>
+                <oid value="2" id="qt" class ="QT" desc="Public-Key Infrastructure using X.509 (PKIX) policy qualifier types">
+                  <oid value="1" id="cps" class="CPS" desc="PKIX CPS Pointer Qualifier" />
+                  <oid value="2" id="unotice" class="UNotice" desc="Policy qualifier unotice" />
+                  <oid value="3" id="textNotice" class="TextNotice" desc="Policy qualifier textNotice" />
                 </oid>
                 <oid value="3" id="kp" class="KP" desc="Extended Key Purposes (KPs)">
                   <oid value="1" id="serverAuth" class="ServerAuth" desc="Indicates that a certificate can be used as a Secure Sockets Layer (SSL) server certificate" />
@@ -138,6 +146,19 @@
                 </oid>
                 <oid value="48" id="ad" class="AD" desc="Access descriptors">
                   <oid value="1" id="ocsp" class="OCSP" desc="Online Certificate Status Protocol (OCSP)" />
+                  <oid value="2" id="caIssuers" class="CAIssuers" desc="Certificate authority issuers" />
+                  <oid value="3" id="timestamping" class="Timestamping" desc="Time stamping" />
+                  <oid value="4" id="id-ad-dvcs" class="DVCS" desc="Authority information access for Data Validation and Certification Server (DVCS)" />
+                  <oid value="5" id="id-ad-caRepository" class="CARepository" desc="Certificate Authority (CA) repository" />
+                  <oid value="6" id="id-pkix-ocsp-archive-cutoff" class="ArchiveCutoff" desc="Archive cutoff" />
+                  <oid value="7" id="id-pkix-ocsp-service-locator" class="ServiceLocator" desc="Service locator" />
+                  <oid value="8" id="id-ad-xkms" class="XKMS" desc="id-ad-xkms access descriptor" />
+                  <oid value="9" id="id-ad-signedObjectRepository" class="SignedObjectRepository" desc="id-ad-signedObjectRepository" />
+                  <oid value="10" id="id-ad-rpkiManifest" class="RPKIManifest" desc="Resource Public Key Infrastructure (RPKI) manifest access method" />
+                  <oid value="11" id="id-ad-signedObject" class="SignedObject" desc="Signed object" />
+                  <oid value="12" id="id-ad-cmc" class="CMC" desc="Subject information access (used when the subject offers certification services using the Certificate Management over Cryptographic message syntax (CMC) protocol)" />
+                  <oid value="13" id="id-ad-rpkiNotify" class="RPKINotify" desc="id-ad-rpkiNotify access descriptor" />
+                  <oid value="14" id="id-ad-stirTNList" class="StirTNList" desc="id-ad-stirTNList access descriptor" />
                 </oid>
               </oid>
             </oid>
@@ -376,6 +397,18 @@
               </oid>
             </oid>
           </oid>
+          <oid value="114412" id="digicert" class="DigiCert" desc="http://www.digicert.com/">
+            <oid value="2" id="ev-ssl-certificates" class="EVSSLCertificates" desc="Extended Validation (EV) Digital Certificates">
+              <oid value="1" id="1" class="DigiCertEVCPS" desc="DigiCert Extended Validation (EV) Certification Practice Statement (CPS) v. 1.0.3" />
+            </oid>
+          </oid>
+        </oid>
+      </oid>
+    </oid>
+    <oid value="23" id="international-organizations" class="InternationalOrganizations" desc="International organizations">
+      <oid value="140" id="ca-browser-forum" class="CABrowserForum" desc="http://www.cabforum.org/">
+        <oid value="1" id="certificate-policies" class="CertificatePolicies" desc="Certificate policies">
+          <oid value="1" id="ev-guidelines" class="EVGuidelines" desc="Extended Validation (EV) guidelines certificate policy" />
         </oid>
       </oid>
     </oid>

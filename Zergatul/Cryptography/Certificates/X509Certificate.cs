@@ -9,7 +9,7 @@ using Zergatul.Network.ASN1;
 
 namespace Zergatul.Cryptography.Certificates
 {
-    public class X509v3Certificate
+    public class X509Certificate
     {
         public X509Extension[] Extensions { get; private set; }
         public bool HasPrivateKey => PrivateKey != null;
@@ -24,18 +24,18 @@ namespace Zergatul.Cryptography.Certificates
         public OID SignatureAlgorithm { get; private set; }
         public string Thumbprint { get; private set; }
 
-        public X509v3Certificate(byte[] data)
+        public X509Certificate(byte[] data)
         {
             using (var ms = new MemoryStream(data))
                 ReadFromStream(ms);
         }
 
-        public X509v3Certificate(Stream stream)
+        public X509Certificate(Stream stream)
         {
             ReadFromStream(stream);
         }
 
-        public X509v3Certificate(string filename)
+        public X509Certificate(string filename)
         {
             using (var fs = File.OpenRead(filename))
                 ReadFromStream(fs);
