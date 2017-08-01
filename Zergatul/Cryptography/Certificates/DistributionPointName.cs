@@ -13,11 +13,24 @@ namespace Zergatul.Cryptography.Certificates
     public class DistributionPointName
     {
         public GeneralNames FullName { get; private set; }
-        public string NameRelativeToCRLIssuer { get; private set; }
+        public RelativeDistinguishedName NameRelativeToCRLIssuer { get; private set; }
 
         internal DistributionPointName(ASN1Element element)
         {
+            var cs = element as ContextSpecific;
+            CertificateParseException.ThrowIfFalse(cs != null);
 
+            switch (cs.Tag.TagNumberEx)
+            {
+                case 0:
+                    FullName = new GeneralNames(cs.Elements[0]);
+                    break;
+                case 1:
+                    NameRelativeToCRLIssuer = new RelativeDistinguishedName(cs.Elements[0]);
+                    break;
+                default:
+                    throw new CertificateParseException();
+            }
         }
     }
 }

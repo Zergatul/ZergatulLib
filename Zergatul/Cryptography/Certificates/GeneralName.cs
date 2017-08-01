@@ -56,10 +56,7 @@ namespace Zergatul.Cryptography.Certificates
                 case 5:
                     throw new NotImplementedException();
                 case 6:
-                    CertificateParseException.ThrowIfTrue(cs.IsImplicit);
-                    CertificateParseException.ThrowIfFalse(cs.Elements.Count != 1);
-                    CertificateParseException.ThrowIfFalse(cs.Elements[0] is IA5String);
-                    UniformResourceIdentifier = ((IA5String)cs.Elements[0]).Value;
+                    UniformResourceIdentifier = cs.As<IA5String>().Value;
                     break;
                 case 7:
                     CertificateParseException.ThrowIfTrue(cs.IsImplicit);

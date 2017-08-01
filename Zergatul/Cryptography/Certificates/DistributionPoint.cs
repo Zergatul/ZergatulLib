@@ -14,29 +14,28 @@ namespace Zergatul.Cryptography.Certificates
     {
         public DistributionPointName Name { get; private set; }
         public ReasonFlags Reasons { get; private set; }
-        public string CRLIssuer { get; private set; }
+        public GeneralNames CRLIssuer { get; private set; }
 
-        internal static DistributionPoint Parse(ASN1Element element)
+        internal DistributionPoint(ASN1Element element)
         {
-            var result = new DistributionPoint();
-
             var seq = element as Sequence;
-            if (seq != null)
-                foreach (var cs in seq.Elements.Cast<ContextSpecific>())
-                    switch (cs.Tag.TagNumberEx)
-                    {
-                        case 0:
-                            result.Name = DistributionPointName.Parse(cs.Elements[0]);
-                            break;
-                        case 1:
-                            result.Reasons = ReasonFlags.Parse(cs.Elements[1]);
-                            break;
-                        case 2:
-                            result.
-                            break;
-                    }
+            CertificateParseException.ThrowIfFalse(seq != null);
 
-            throw new InvalidOperationException();
+            foreach (var cs in seq.Elements.Cast<ContextSpecific>())
+                switch (cs.Tag.TagNumberEx)
+                {
+                    case 0:
+                        Name = new DistributionPointName(cs.Elements[0]);
+                        break;
+                    case 1:
+                        Reasons = new ReasonFlags(cs.Elements[0]);
+                        break;
+                    case 2:
+                        CRLIssuer = new GeneralNames(cs.Elements[0]);
+                        break;
+                    default:
+                        throw new CertificateParseException();
+                }
         }
     }
 }

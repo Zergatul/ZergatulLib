@@ -15,11 +15,12 @@ namespace Zergatul.Cryptography.Certificates
 
         internal GeneralNames(ASN1Element element)
         {
-            var seq = element as Sequence;
-
-            CertificateParseException.ThrowIfFalse(seq != null);
-
-            _list = seq.Elements.Select(e => new GeneralName(e)).ToList();
+            if (element is Sequence)
+                _list = ((Sequence)element).Elements.Select(e => new GeneralName(e)).ToList();
+            else if (element is ContextSpecific)
+                _list = new List<GeneralName> { new GeneralName(element) };
+            else
+                throw new CertificateParseException();
         }
     }
 }

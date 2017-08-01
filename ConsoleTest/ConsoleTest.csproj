@@ -55,6 +55,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="1.cer" />
+    <None Include="2.cer" />
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>

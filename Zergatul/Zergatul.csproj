@@ -113,6 +113,7 @@
     <Compile Include="Cryptography\Hash\SHA512.cs" />
     <Compile Include="Cryptography\ISecureRandom.cs" />
     <Compile Include="Network\ASN1\ASN1ContextRules.cs" />
+    <Compile Include="Network\ASN1\ASN1ParseException.cs" />
     <Compile Include="Network\ASN1\IA5String.cs" />
     <Compile Include="Network\OID.cs" />
     <Compile Include="DefaultRandom.cs" />

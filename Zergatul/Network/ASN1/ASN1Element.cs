@@ -16,6 +16,10 @@ namespace Zergatul.Network.ASN1
         public int HeaderLength { get; protected set; }
 
         protected abstract void ReadBody(Stream stream);
+        protected virtual void ReadBody(byte[] data)
+        {
+            throw new NotImplementedException();
+        }
 
         public static ASN1Element ReadFrom(Stream stream)
         {
@@ -109,6 +113,11 @@ namespace Zergatul.Network.ASN1
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        protected static void StaticReadBody(ASN1Element element, byte[] data)
+        {
+            element.ReadBody(data);
         }
 
         private static long ReadLength(Stream stream, out int read)

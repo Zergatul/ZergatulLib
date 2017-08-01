@@ -12,7 +12,12 @@ namespace Zergatul.Network.ASN1
         protected override void ReadBody(Stream stream)
         {
             byte[] buffer = ReadBuffer(stream, checked((int)Length));
-            Value = Encoding.ASCII.GetString(buffer);
+            ReadBody(buffer);
+        }
+
+        protected override void ReadBody(byte[] data)
+        {
+            Value = Encoding.ASCII.GetString(data);
         }
     }
 }

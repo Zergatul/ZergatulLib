@@ -32,5 +32,16 @@ namespace Zergatul.Network.ASN1
                     Elements.Add(ReadFrom(stream));
             }
         }
+
+        public T As<T>()
+            where T : ASN1Element, new()
+        {
+            if (!IsImplicit)
+                throw new ASN1ParseException();
+
+            T result = new T();
+            StaticReadBody(result, Implicit);
+            return result;
+        }
     }
 }

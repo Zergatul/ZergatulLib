@@ -44,7 +44,7 @@ namespace Test
             //var obj = Asn1Object.FromByteArray(BitHelper.HexToBytes("3026302406082b060105050730018618687474703a2f2f6f6373702e64696769636572742e636f6d"));
             //return;
 
-            string cerfile = "1210.cer";
+            string cerfile = "1.cer";
             var cert = new X509v3Certificate(cerfile);
             var cert2 = new X509Certificate2(cerfile);
 

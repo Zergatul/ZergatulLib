@@ -20,7 +20,7 @@ namespace Zergatul.Cryptography.Certificates
             var seq = element as Sequence;
             if (seq != null)
             {
-                Points = seq.Elements.Select(e => DistributionPoint.Parse(e)).ToArray();
+                Points = seq.Elements.Select(e => new DistributionPoint(e)).ToArray();
             }
         }
     }
