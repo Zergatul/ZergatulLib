@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Certificate;
 
 namespace Zergatul.Network.Tls
 {
     internal class Certificate : HandshakeBody
     {
-        public List<X509Certificate2> Certificates = new List<X509Certificate2>();
+        public List<X509Certificate> Certificates = new List<X509Certificate>();
 
         private int CertificatesLength => Certificates.Sum(c => c.RawData.Length + 3);
 
@@ -20,7 +20,7 @@ namespace Zergatul.Network.Tls
             var counter = reader.StartCounter(reader.ReadUInt24());
             while (counter.CanRead)
             {
-                Certificates.Add(new X509Certificate2(reader.ReadBytes(reader.ReadUInt24())));
+                Certificates.Add(new X509Certificate(reader.ReadBytes(reader.ReadUInt24())));
             }
         }
 

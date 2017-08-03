@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Encoding;
+using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Asymmetric
@@ -76,6 +78,19 @@ namespace Zergatul.Cryptography.Asymmetric
 
                 BigInteger s = BigInteger.ModularExponentiation(m, _rsa.PrivateKey.d, _rsa.PrivateKey.n);
                 return s.ToBytes(ByteOrder.BigEndian);
+            }
+
+            public override bool VerifyHash(AbstractHash hashAlgorithm, byte[] signature)
+            {
+                BigInteger s = new BigInteger(signature, ByteOrder.BigEndian);
+                BigInteger m = BigInteger.ModularExponentiation(s, _rsa.PublicKey.e, _rsa.PublicKey.n);
+                byte[] em = m.ToBytes(ByteOrder.BigEndian, _rsa.KeySize / 8);
+
+                var enc = EMSA_PKCS1_v1_5.TryParse(em);
+                if (enc == null)
+                    throw new NotImplementedException();
+
+                return enc.DigestAlgorithm.Algorithm == hashAlgorithm.OID && enc.Digest.SequenceEqual(hashAlgorithm.ComputeHash());
             }
 
             public override bool VerifyHash(byte[] data, byte[] signature)

@@ -18,6 +18,7 @@ namespace Zergatul.Cryptography.Asymmetric
         }
 
         public abstract bool VerifyHash(byte[] data, byte[] signature);
+        public abstract bool VerifyHash(AbstractHash hashAlgorithm, byte[] signature);
 
         public virtual bool VerifyData(byte[] data, byte[] signature, AbstractHash hashAlgorithm)
         {

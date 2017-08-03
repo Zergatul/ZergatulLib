@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
+using Zergatul.Cryptography.Certificate;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
 using Zergatul.Network.Tls.CipherSuites;
@@ -40,7 +40,7 @@ namespace Zergatul.Network.Tls
         internal Role Role;
         internal bool WriteEncrypted;
         internal bool ReadEncrypted;
-        private X509Certificate2 _serverCertificate;
+        private X509Certificate _serverCertificate;
         private byte[] _clientFinishedHandshakeData;
         private byte[] _serverFinishedHandshakeData;
 
@@ -95,7 +95,7 @@ namespace Zergatul.Network.Tls
             ReadRecordMessage(ConnectionState.ServerFinished);
         }
 
-        public void AuthenticateAsServer(string host, X509Certificate2 certificate)
+        public void AuthenticateAsServer(string host, X509Certificate certificate)
         {
             Role = Role.Server;
             State = ConnectionState.Start;
@@ -288,26 +288,27 @@ namespace Zergatul.Network.Tls
             });
         }
 
-        private HandshakeMessage GenerateCertificate(X509Certificate2 certificate)
+        private HandshakeMessage GenerateCertificate(X509Certificate certificate)
         {
             return new HandshakeMessage(new Certificate
             {
-                Certificates = new List<X509Certificate2>
+                Certificates = new List<X509Certificate>
                 {
                     certificate
                 }
             });
         }
 
-        private HandshakeMessage GenerateServerKeyExchange(X509Certificate2 certificate)
+        private HandshakeMessage GenerateServerKeyExchange(X509Certificate certificate)
         {
             var serverKeyExchange = SelectedCipher.GetServerKeyExchange();
             // signing
-            var rsa = certificate.PrivateKey as System.Security.Cryptography.RSACryptoServiceProvider;
+            throw new NotImplementedException();
+            /*var rsa = certificate.PrivateKey as System.Security.Cryptography.RSACryptoServiceProvider;
             var oid = System.Security.Cryptography.CryptoConfig.MapNameToOID("SHA1");
             var dhParamsBytes = serverKeyExchange.Params.ToArray();
             var signedBytes = _secParams.ClientRandom + _secParams.ServerRandom + dhParamsBytes;
-            serverKeyExchange.Signature = rsa.SignData(signedBytes.Array, oid);
+            serverKeyExchange.Signature = rsa.SignData(signedBytes.Array, oid);*/
 
             return new HandshakeMessage(serverKeyExchange);
         }
@@ -390,10 +391,11 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.ServerHello)
                 throw new TlsStreamException("Unexpected Certificate message");
 
-            if (message.Certificates.Count > 0)
-                _serverCertificate = message.Certificates.First();
-            else
-                throw new NotImplementedException();
+            var chain = X509Chain.Build(message.Certificates, new WindowsRootCertificateStore());
+            if (!chain.Validate())
+                throw new TlsStreamException("Certificate chain is not trusted");
+
+            _serverCertificate = chain.List.Last();
 
             State = ConnectionState.ServerCertificate;
         }
@@ -403,23 +405,14 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.ServerCertificate)
                 throw new TlsStreamException("Unexpected ServerKeyExchange message");
 
-            switch (message.SignAndHashAlgo.Signature)
-            {
-                case SignatureAlgorithm.RSA:
-                    var rsa = _serverCertificate.PublicKey.Key as System.Security.Cryptography.RSACryptoServiceProvider;
+            AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
+            hash.Update(_secParams.ClientRandom.Array);
+            hash.Update(_secParams.ServerRandom.Array);
+            hash.Update(message.Params.ToArray());
 
-                    var dhParamsBytes = message.Params.ToArray();
-
-                    var signedBytes = _secParams.ClientRandom + _secParams.ServerRandom + dhParamsBytes;
-
-                    AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
-                    hash.Update(signedBytes.Array);
-                    if (!rsa.VerifyHash(hash.ComputeHash(), hash.OID.DotNotation, message.Signature))
-                        throw new TlsStreamException("Invalid signature");
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
+            var assymetricAlgo = _serverCertificate.PublicKey.ResolveAlgorithm();
+            if (!assymetricAlgo.Signature.VerifyHash(hash, message.Signature))
+                throw new TlsStreamException("Invalid signature");
 
             State = ConnectionState.ServerKeyExchange;
         }
