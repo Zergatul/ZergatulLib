@@ -4,7 +4,7 @@ using Zergatul.Cryptography;
 using Zergatul.Cryptography.BlockCipher;
 using Zergatul.Cryptography.Hash;
 
-namespace Zergatul.Network.Tls.CipherSuites
+namespace Zergatul.Network.Tls
 {
     internal class CipherSuiteImplementation<KeyExchange, BlockCipher, HashFunction> : AbstractCipherSuite
         where KeyExchange : AbstractKeyExchange, new()

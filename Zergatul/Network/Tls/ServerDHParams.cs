@@ -12,6 +12,21 @@ namespace Zergatul.Network.Tls
         public byte[] DH_g;
         public byte[] DH_Ys;
 
+        public byte[] Raw;
+
+        public void Read(BinaryReader reader)
+        {
+            var raw = new List<byte>();
+            reader.StartTracking(raw);
+
+            DH_p = reader.ReadBytes(reader.ReadShort());
+            DH_g = reader.ReadBytes(reader.ReadShort());
+            DH_Ys = reader.ReadBytes(reader.ReadShort());
+
+            reader.StopTracking();
+            this.Raw = raw.ToArray();
+        }
+
         public byte[] ToArray()
         {
             var list = new List<byte>();

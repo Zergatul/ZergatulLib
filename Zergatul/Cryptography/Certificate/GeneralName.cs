@@ -18,18 +18,19 @@ namespace Zergatul.Cryptography.Certificate
         public string RFC822Name { get; private set; }
         public string DNSName { get; private set; }
         public object X400Address { get; private set; }
-        public object DirectoryName { get; private set; }
+        public IReadOnlyCollection<RelativeDistinguishedName> DirectoryName => _directoryName.AsReadOnly();
         public object EDIPartyName { get; private set; }
         public string UniformResourceIdentifier { get; private set; }
         public IPAddress IPAddress { get; private set; }
         public OID RegisteredID { get; private set; }
+
+        private List<RelativeDistinguishedName> _directoryName;
 
         internal GeneralName(ASN1Element element)
         {
             var cs = element as ContextSpecific;
 
             CertificateParseException.ThrowIfFalse(cs != null);
-            CertificateParseException.ThrowIfFalse(cs.IsImplicit);
 
             switch (cs.Tag.TagNumberEx)
             {
@@ -49,7 +50,11 @@ namespace Zergatul.Cryptography.Certificate
                 case 3:
                     throw new NotImplementedException();
                 case 4:
-                    throw new NotImplementedException();
+                    CertificateParseException.ThrowIfTrue(cs.IsImplicit);
+                    var seq = cs.Elements[0] as Sequence;
+                    CertificateParseException.ThrowIfNull(seq);
+                    _directoryName = seq.Elements.Select(e => new RelativeDistinguishedName(e)).ToList();
+                    break;
                 case 5:
                     throw new NotImplementedException();
                 case 6:

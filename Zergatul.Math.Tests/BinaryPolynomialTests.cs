@@ -8,6 +8,58 @@ namespace Zergatul.Math.Tests
     public class BinaryPolynomialTests
     {
         [TestMethod]
+        public void Contructor_1()
+        {
+            var p = new BinaryPolynomial(new uint[] { 1, 32 }, ByteOrder.BigEndian);
+            Assert.IsTrue(p.ToString() == "x³²+x⁵");
+        }
+
+        [TestMethod]
+        public void Contructor_2()
+        {
+            var p = new BinaryPolynomial(new uint[] { 1, 32 }, ByteOrder.LittleEndian);
+            Assert.IsTrue(p.ToString() == "x³⁷+1");
+        }
+
+        [TestMethod]
+        public void Contructor_3()
+        {
+            var p = new BinaryPolynomial(new uint[] { 2, 1, 32 }, ByteOrder.BigEndian);
+            Assert.IsTrue(p.ToString() == "x⁶⁵+x³²+x⁵");
+        }
+
+        [TestMethod]
+        public void Contructor_4()
+        {
+            var p = new BinaryPolynomial(new byte[] { 1, 32 }, ByteOrder.BigEndian);
+            Assert.IsTrue(p.ToString() == "x⁸+x⁵");
+        }
+
+        [TestMethod]
+        public void ToBytes_1()
+        {
+            byte[] bytes = new byte[] { 200, 150, 130, 100, 9, 1, 0 };
+            var p = new BinaryPolynomial(bytes.ToArray(), ByteOrder.BigEndian);
+            Assert.IsTrue(p.ToBytes(ByteOrder.BigEndian, 7).SequenceEqual(bytes));
+        }
+
+        [TestMethod]
+        public void ToBytes_2()
+        {
+            byte[] bytes = new byte[] { 0, 0, 0, 200, 150, 130, 100, 9, 1, 0 };
+            var p = new BinaryPolynomial(bytes.ToArray(), ByteOrder.BigEndian);
+            Assert.IsTrue(p.ToBytes(ByteOrder.BigEndian, 10).SequenceEqual(bytes));
+        }
+
+        [TestMethod]
+        public void ToBytes_3()
+        {
+            byte[] bytes = Enumerable.Repeat((byte)0, 100).Concat(Enumerable.Repeat((byte)123, 50)).Concat(Enumerable.Repeat((byte)81, 25)).ToArray();
+            var p = new BinaryPolynomial(bytes.ToArray(), ByteOrder.BigEndian);
+            Assert.IsTrue(p.ToBytes(ByteOrder.BigEndian, 175).SequenceEqual(bytes));
+        }
+
+        [TestMethod]
         public void Add_1()
         {
             var p1 = BinaryPolynomial.FromPowers(0);
@@ -119,7 +171,7 @@ namespace Zergatul.Math.Tests
         {
             var p1 = BinaryPolynomial.FromPowers(256, 74, 38, 3, 0);
             var p2 = BinaryPolynomial.FromPowers(65, 1, 0);
-            Assert.IsTrue((p1 * p2).ToString() == "x³²¹+x²⁵⁷+x²⁵⁶+x¹³⁹+x¹⁰³+x⁷⁵+x⁷⁴+x⁶⁸+x⁶⁵+x³⁹+x³⁸+x⁴+x³+x+1");
+            Assert.IsTrue((p1 * p2).ToString() == "x³²¹+x²⁵c+x²⁵⁶+x¹³⁹+x¹⁰³+x⁷⁵+x⁷⁴+x⁶⁸+x⁶⁵+x³⁹+x³⁸+x⁴+x³+x+1");
         }
 
         [TestMethod]

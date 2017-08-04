@@ -14,6 +14,12 @@ namespace Zergatul.Cryptography.Certificate
 
         public static X509Chain Build(IEnumerable<X509Certificate> certificates, IRootCertificateStore store = null)
         {
+            if (certificates.Count() == 1 && certificates.First().Extensions == null)
+            {
+                // self-signed certificate
+                return new X509Chain { _list = certificates.ToList() };
+            }
+
             var list = new List<X509Certificate>();
 
             var selfSigned = certificates.Where(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Count() == 0);

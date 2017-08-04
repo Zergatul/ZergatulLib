@@ -8,12 +8,11 @@ using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math;
 using Zergatul.Network.Tls.Extensions;
 
-namespace Zergatul.Network.Tls.CipherSuites
+namespace Zergatul.Network.Tls
 {
     internal class DHEKeyExchange : AbstractKeyExchange
     {
         private DiffieHellman _dh;
-        private BigInteger _sharedSecret;
 
         public override void GetServerKeyExchange(ServerKeyExchange message)
         {
@@ -36,17 +35,12 @@ namespace Zergatul.Network.Tls.CipherSuites
 
         public override void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
         {
-            message.Params = new ServerDHParams
-            {
-                DH_p = reader.ReadBytes(reader.ReadShort()),
-                DH_g = reader.ReadBytes(reader.ReadShort()),
-                DH_Ys = reader.ReadBytes(reader.ReadShort())
-            };
-            message.SignAndHashAlgo = new SignatureAndHashAlgorithm
-            {
-                Hash = (HashAlgorithm)reader.ReadByte(),
-                Signature = (SignatureAlgorithm)reader.ReadByte()
-            };
+            message.Params = new ServerDHParams();
+            message.Params.Read(reader);
+
+            message.SignAndHashAlgo = new SignatureAndHashAlgorithm();
+            message.SignAndHashAlgo.Read(reader);
+
             message.Signature = reader.ReadBytes(reader.ReadShort());
 
             _dh = new DiffieHellman();
@@ -66,30 +60,24 @@ namespace Zergatul.Network.Tls.CipherSuites
 
         public override void GetClientKeyExchange(ClientKeyExchange message)
         {
-            message.DHPublic = new ClientDiffieHellmanPublic
-            {
-                DH_Yc = _dh.PublicKey.ToBytes(ByteOrder.BigEndian)
-            };
+            message.DH_Yc = _dh.PublicKey.ToBytes(ByteOrder.BigEndian);
 
             PreMasterSecret = new ByteArray(_dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian));
         }
 
         public override void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader)
         {
-            message.DHPublic = new ClientDiffieHellmanPublic
-            {
-                DH_Yc = reader.ReadBytes(reader.ReadShort())
-            };
+            message.DH_Yc = reader.ReadBytes(reader.ReadShort());
 
-            _dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.DHPublic.DH_Yc, ByteOrder.BigEndian));
+            _dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.DH_Yc, ByteOrder.BigEndian));
 
             PreMasterSecret = new ByteArray(_dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian));
         }
 
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteShort((ushort)message.DHPublic.DH_Yc.Length);
-            writer.WriteBytes(message.DHPublic.DH_Yc);
+            writer.WriteShort((ushort)message.DH_Yc.Length);
+            writer.WriteBytes(message.DH_Yc);
         }
     }
 }

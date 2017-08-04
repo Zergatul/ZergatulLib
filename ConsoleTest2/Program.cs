@@ -48,7 +48,17 @@ namespace ConsoleTest2
                     }
                     else
                     {
-                        tlsStream.AuthenticateAsServer("localhost", cert);
+                        tlsStream.Settings = new TlsStreamSettings
+                        {
+                            CipherSuites = new CipherSuite[]
+                            {
+                                CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                                CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                                CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                                CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                            }
+                        };
+                        tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate(cert.RawData));
                         tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
                     }
                     client.Close();

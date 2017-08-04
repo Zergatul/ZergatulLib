@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractRandom.cs" />
     <Compile Include="BitHelper.cs" />
     <Compile Include="ByteArray.cs" />
     <Compile Include="ByteOrder.cs" />
@@ -51,6 +52,8 @@
     <Compile Include="Cryptography\Asymmetric\DiffieHellman.cs" />
     <Compile Include="Cryptography\Asymmetric\DiffieHellmanParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDiffieHellman.cs" />
+    <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
+    <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSA.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPrivateKey.cs" />
@@ -128,6 +131,7 @@
     <Compile Include="Cryptography\Hash\SHA384.cs" />
     <Compile Include="Cryptography\Hash\SHA512.cs" />
     <Compile Include="Cryptography\ISecureRandom.cs" />
+    <Compile Include="Math\EllipticCurves\IEllipticCurve.cs" />
     <Compile Include="Network\ASN1\ASN1ParseException.cs" />
     <Compile Include="Network\ASN1\IA5String.cs" />
     <Compile Include="Network\OID.cs" />
@@ -196,13 +200,13 @@
     <Compile Include="Network\Tls\BinaryWriter.cs" />
     <Compile Include="Network\Tls\Certificate.cs" />
     <Compile Include="Network\Tls\ChangeCipherSpec.cs" />
-    <Compile Include="Network\Tls\CipherSuites\AbstractCipherSuite.cs" />
-    <Compile Include="Network\Tls\CipherSuites\AbstractKeyExchange.cs" />
-    <Compile Include="Network\Tls\CipherSuites\CipherSuiteImplementation.cs" />
+    <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
+    <Compile Include="Network\Tls\AbstractKeyExchange.cs" />
+    <Compile Include="Network\Tls\CipherSuiteImplementation.cs" />
     <Compile Include="Network\Tls\CipherSuite.cs" />
-    <Compile Include="Network\Tls\CipherSuites\DHEKeyExchange.cs" />
+    <Compile Include="Network\Tls\DHEKeyExchange.cs" />
+    <Compile Include="Network\Tls\ECDHEKeyExchange.cs" />
     <Compile Include="Network\Tls\CipherType.cs" />
-    <Compile Include="Network\Tls\ClientDiffieHellmanPublic.cs" />
     <Compile Include="Network\Tls\ClientHello.cs" />
     <Compile Include="Network\Tls\ClientKeyExchange.cs" />
     <Compile Include="Network\Tls\ConnectionState.cs" />
@@ -213,7 +217,6 @@
     <Compile Include="Network\Tls\ECCurve.cs" />
     <Compile Include="Network\Tls\ECCurveType.cs" />
     <Compile Include="Network\Tls\ECParameters.cs" />
-    <Compile Include="Network\Tls\ECPoint.cs" />
     <Compile Include="Network\Tls\Extensions\ExtensionType.cs" />
     <Compile Include="Network\Tls\Extensions\HashAlgorithm.cs" />
     <Compile Include="Network\Tls\Extensions\ServerNameExtension.cs" />

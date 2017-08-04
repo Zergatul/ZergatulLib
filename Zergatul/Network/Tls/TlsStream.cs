@@ -8,7 +8,6 @@ using Zergatul.Cryptography;
 using Zergatul.Cryptography.Certificate;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
-using Zergatul.Network.Tls.CipherSuites;
 using Zergatul.Network.Tls.Extensions;
 
 namespace Zergatul.Network.Tls
@@ -408,7 +407,10 @@ namespace Zergatul.Network.Tls
             AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
             hash.Update(_secParams.ClientRandom.Array);
             hash.Update(_secParams.ServerRandom.Array);
-            hash.Update(message.Params.ToArray());
+            if (message.Params != null)
+                hash.Update(message.Params.Raw);
+            if (message.ECParams != null)
+                hash.Update(message.ECParams.Raw);
 
             var assymetricAlgo = _serverCertificate.PublicKey.ResolveAlgorithm();
             if (!assymetricAlgo.Signature.VerifyHash(hash, message.Signature))

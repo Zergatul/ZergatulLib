@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
 
-namespace Zergatul.Network.Tls.CipherSuites
+namespace Zergatul.Network.Tls
 {
     internal abstract class AbstractKeyExchange
     {

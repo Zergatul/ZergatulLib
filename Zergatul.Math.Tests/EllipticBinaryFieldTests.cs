@@ -14,6 +14,9 @@ namespace Zergatul.Math.Tests
             EllipticCurve.sect163r1.g.Validate();
             EllipticCurve.sect163r2.g.Validate();
 
+            EllipticCurve.sect193r1.g.Validate();
+            EllipticCurve.sect193r2.g.Validate();
+
             EllipticCurve.sect233k1.g.Validate();
             EllipticCurve.sect233r1.g.Validate();
 

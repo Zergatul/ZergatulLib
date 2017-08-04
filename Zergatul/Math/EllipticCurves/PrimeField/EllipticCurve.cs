@@ -9,7 +9,7 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
     /// <summary>
     /// y² ≡ x³ + ax + b (mod p)
     /// </summary>
-    public class EllipticCurve
+    public class EllipticCurve : IEllipticCurve
     {
         public BigInteger a;
         public BigInteger b;
@@ -35,20 +35,13 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             this.g.Curve = this;
         }
 
-        #region Curves
+        #region IEllipticCurve
 
-        // TEMPLATE
-        /*public static EllipticCurve secp192k1 = new EllipticCurve(
-            p: new BigInteger(new uint[] {  }, ByteOrder.BigEndian),
-            a: new BigInteger(new uint[] {  }, ByteOrder.BigEndian),
-            b: new BigInteger(new uint[] {  }, ByteOrder.BigEndian),
-            g: new ECPoint
-            {
-                x = new BigInteger(new uint[] {  }, ByteOrder.BigEndian),
-                y = new BigInteger(new uint[] {  }, ByteOrder.BigEndian)
-            },
-            n: new BigInteger(new uint[] {  }, ByteOrder.BigEndian),
-            h: 1);*/
+        public int BitSize => n.BitSize;
+
+        #endregion
+
+        #region Curves
 
         public static EllipticCurve secp112r1 = new EllipticCurve(
             p: new BigInteger(new uint[] { 0xDB7C, 0x2ABF62E3, 0x5E668076, 0xBEAD208B }, ByteOrder.BigEndian),

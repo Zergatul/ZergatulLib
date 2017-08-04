@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Math.EllipticCurves
 {
-    internal class ECPoint
+    public interface IEllipticCurve
     {
-        public byte[] Point;
+        int BitSize { get; }
     }
 }

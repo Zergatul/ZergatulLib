@@ -9,7 +9,7 @@ namespace Zergatul.Math.EllipticCurves.BinaryField
     /// <summary>
     /// y² + xy = x³ + ax² + b in F(2ᵐ)
     /// </summary>
-    public class EllipticCurve
+    public class EllipticCurve : IEllipticCurve
     {
         public BinaryPolynomial a;
         public BinaryPolynomial b;
@@ -36,6 +36,12 @@ namespace Zergatul.Math.EllipticCurves.BinaryField
             this.g = g;
             this.g.Curve = this;
         }
+
+        #region IEllipticCurve
+
+        public int BitSize => f.Degree;
+
+        #endregion
 
         #region Curves
 
@@ -76,6 +82,32 @@ namespace Zergatul.Math.EllipticCurves.BinaryField
             },
             m: 163,
             n: new BigInteger(new uint[] { 0x04, 0x00000000, 0x00000000, 0x000292FE, 0x77E70C12, 0xA4234C33 }, ByteOrder.BigEndian),
+            h: 2);
+
+        public static EllipticCurve sect193r1 = new EllipticCurve(
+            a: new BinaryPolynomial(new uint[] { 0x17858FEB, 0x7A989751, 0x69E171F7, 0x7B4087DE, 0x098AC8A9, 0x11DF7B01 }, ByteOrder.BigEndian),
+            b: new BinaryPolynomial(new uint[] { 0xFDFB49BF, 0xE6C3A89F, 0xACADAA7A, 0x1E5BBC7C, 0xC1C2E5D8, 0x31478814 }, ByteOrder.BigEndian),
+            f: BinaryPolynomial.FromPowers(193, 15, 0),
+            g: new ECPoint
+            {
+                x = new BinaryPolynomial(new uint[] { 0x01, 0xF481BC5F, 0x0FF84A74, 0xAD6CDF6F, 0xDEF4BF61, 0x79625372, 0xD8C0C5E1 }, ByteOrder.BigEndian),
+                y = new BinaryPolynomial(new uint[] { 0x00, 0x25E399F2, 0x903712CC, 0xF3EA9E3A, 0x1AD17FB0, 0xB3201B6A, 0xF7CE1B05 }, ByteOrder.BigEndian),
+            },
+            m: 193,
+            n: new BigInteger(new uint[] { 0x01, 0x00000000, 0x00000000, 0x00000000, 0xC7F34A77, 0x8F443ACC, 0x920EBA49 }, ByteOrder.BigEndian),
+            h: 2);
+
+        public static EllipticCurve sect193r2 = new EllipticCurve(
+            a: new BinaryPolynomial(new uint[] { 0x01, 0x63F35A51, 0x37C2CE3E, 0xA6ED8667, 0x190B0BC4, 0x3ECD6997, 0x7702709B }, ByteOrder.BigEndian),
+            b: new BinaryPolynomial(new uint[] { 0x00, 0xC9BB9E89, 0x27D4D64C, 0x377E2AB2, 0x856A5B16, 0xE3EFB7F6, 0x1D4316AE }, ByteOrder.BigEndian),
+            f: BinaryPolynomial.FromPowers(193, 15, 0),
+            g: new ECPoint
+            {
+                x = new BinaryPolynomial(new uint[] { 0x00, 0xD9B67D19, 0x2E0367C8, 0x03F39E1A, 0x7E82CA14, 0xA651350A, 0xAE617E8F }, ByteOrder.BigEndian),
+                y = new BinaryPolynomial(new uint[] { 0x01, 0xCE943356, 0x07C304AC, 0x29E7DEFB, 0xD9CA01F5, 0x96F92722, 0x4CDECF6C }, ByteOrder.BigEndian),
+            },
+            m: 193,
+            n: new BigInteger(new uint[] { 0x01, 0x00000000, 0x00000000, 0x00000001, 0x5AAB561B, 0x005413CC, 0xD4EE99D5 }, ByteOrder.BigEndian),
             h: 2);
 
         public static EllipticCurve sect233k1 = new EllipticCurve(

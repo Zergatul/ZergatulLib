@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography
 {
-    public class DefaultSecureRandom : ISecureRandom
+    public class DefaultSecureRandom : AbstractRandom, ISecureRandom
     {
         RNGCryptoServiceProvider _rng;
 
@@ -16,12 +16,7 @@ namespace Zergatul.Cryptography
             this._rng = new RNGCryptoServiceProvider();
         }
 
-        public void GetBytes(byte[] data)
-        {
-            _rng.GetBytes(data);
-        }
-
-        public void GetBytes(byte[] data, int offset, int count)
+        public override void GetBytes(byte[] data, int offset, int count)
         {
             _rng.GetBytes(data, offset, count);
         }

@@ -3,7 +3,7 @@ using Zergatul.Cryptography;
 using Zergatul.Cryptography.BlockCipher;
 using Zergatul.Cryptography.Hash;
 
-namespace Zergatul.Network.Tls.CipherSuites
+namespace Zergatul.Network.Tls
 {
     internal abstract class AbstractCipherSuite
     {
@@ -42,6 +42,7 @@ namespace Zergatul.Network.Tls.CipherSuites
             AbstractCipherSuite cs;
             switch (type)
             {
+                #region DHE
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
                     cs = new CipherSuiteImplementation<DHEKeyExchange, AES128, SHA1>();
                     break;
@@ -66,6 +67,21 @@ namespace Zergatul.Network.Tls.CipherSuites
                 case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384:
                     cs = new CipherSuiteImplementation<DHEKeyExchange, ARIA256, SHA384>();
                     break;
+                #endregion
+                #region ECDHE
+                case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
+                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES128, SHA1>();
+                    break;
+                case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
+                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES256, SHA1>();
+                    break;
+                case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
+                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES128, SHA256>();
+                    break;
+                case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:
+                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES128, SHA384>();
+                    break;
+                #endregion
                 default:
                     throw new NotImplementedException();
             }

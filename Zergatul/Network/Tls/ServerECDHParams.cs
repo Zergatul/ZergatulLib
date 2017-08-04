@@ -9,10 +9,15 @@ namespace Zergatul.Network.Tls
     internal class ServerECDHParams
     {
         public ECParameters CurveParams;
-        public ECPoint Point;
+        public byte[] Point;
+
+        public byte[] Raw;
 
         public void Read(BinaryReader reader)
         {
+            var raw = new List<byte>();
+            reader.StartTracking(raw);
+
             CurveParams = new ECParameters
             {
                 CurveType = (ECCurveType)reader.ReadByte()
@@ -27,10 +32,10 @@ namespace Zergatul.Network.Tls
                     throw new NotImplementedException();
             }
 
-            Point = new ECPoint
-            {
-                Point = reader.ReadBytes(reader.ReadByte())
-            };
+            Point = reader.ReadBytes(reader.ReadByte());
+
+            reader.StopTracking();
+            this.Raw = raw.ToArray();
         }
     }
 }

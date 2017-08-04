@@ -18,7 +18,7 @@ namespace Zergatul.Cryptography.Tests.Hash
 
         public static string Hash<T>(string input) where T : AbstractHash, new()
         {
-            return Hash<T>(Encoding.ASCII.GetBytes(input));
+            return Hash<T>(System.Text.Encoding.ASCII.GetBytes(input));
         }
     }
 }

@@ -39,10 +39,14 @@ namespace Zergatul.Cryptography.Certificate
             if (element is Sequence)
             {
                 var tbs = (Sequence)element;
-                if (7 <= tbs.Elements.Count && tbs.Elements.Count <= 10)
+                if (6 <= tbs.Elements.Count && tbs.Elements.Count <= 10)
                 {
                     int index = 0;
-                    var ver = GetContextSpecificInnerElement(tbs.Elements[index++]) as Integer; // ?????
+                    Integer ver = null;
+                    if (tbs.Elements[index] is ContextSpecific)
+                    {
+                        ver = GetContextSpecificInnerElement(tbs.Elements[index++]) as Integer; // ?????
+                    }
                     var sn = tbs.Elements[index++] as Integer;
                     var sign = new AlgorithmIdentifier(tbs.Elements[index++]);
                     var iss = ParseName(tbs.Elements[index++]);
@@ -68,7 +72,6 @@ namespace Zergatul.Cryptography.Certificate
                     }
 
                     bool correct =
-                        ver != null &&
                         sn != null &&
                         sign != null &&
                         iss != null &&

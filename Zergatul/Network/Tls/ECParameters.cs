@@ -12,7 +12,7 @@ namespace Zergatul.Network.Tls
 
         public byte[] PrimeP;
         public ECCurve Curve;
-        public ECPoint Base;
+        public byte[] Base;
         public byte[] Order;
         public byte[] Cofactor;
 

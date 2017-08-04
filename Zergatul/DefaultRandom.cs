@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul
 {
-    public class DefaultRandom : IRandom
+    public class DefaultRandom : AbstractRandom
     {
         private Random _rnd;
 
@@ -15,12 +15,7 @@ namespace Zergatul
             _rnd = new Random();
         }
 
-        public void GetBytes(byte[] data)
-        {
-            GetBytes(data, 0, data.Length);
-        }
-
-        public void GetBytes(byte[] data, int offset, int count)
+        public override void GetBytes(byte[] data, int offset, int count)
         {
             for (int i = 0; i < count; i++)
                 data[offset + i] = (byte)_rnd.Next(256);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Crypto.Tls;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -108,39 +109,39 @@ namespace Test
                 "5FB7EE0633E259DBAD0C4C9AE6D38F1A61C7DC25",
                 false);*/
 
-            bool testLocalHost = false;
-            if (testLocalHost)
-            {
-                var client = new TcpClient("localhost", 32028);
-                var tls = new TlsStream(client.GetStream());
-                tls.AuthenticateAsClient("localhost");
+            //bool testLocalHost = false;
+            //if (testLocalHost)
+            //{
+            //    var client = new TcpClient("localhost", 32028);
+            //    var tls = new TlsStream(client.GetStream());
+            //    tls.AuthenticateAsClient("localhost");
 
-                byte[] buffer = new byte[12];
-                tls.Read(buffer, 0, 12);
+            //    byte[] buffer = new byte[12];
+            //    tls.Read(buffer, 0, 12);
 
-                Console.WriteLine(Encoding.UTF8.GetString(buffer));
-            }
-            else
-            {
-                string host =
-                    //"www.howsmyssl.com"
-                    "ru.wargaming.net"
-                    //"ru.4game.com"
-                    ;
+            //    Console.WriteLine(Encoding.UTF8.GetString(buffer));
+            //}
+            //else
+            //{
+            //    string host =
+            //        //"www.howsmyssl.com"
+            //        //"ru.wargaming.net"
+            //        "ru.4game.com"
+            //        ;
 
-                var client = new TcpClient(host, 443);
-                var tls = new TlsStream(client.GetStream());
-                tls.AuthenticateAsClient(host);
+            //    var client = new TcpClient(host, 443);
+            //    var tls = new TlsStream(client.GetStream());
+            //    tls.AuthenticateAsClient(host);
 
-                string request =
-                    "GET / HTTP/1.0" + Environment.NewLine +
-                    "Host: " + host + Environment.NewLine +
-                    Environment.NewLine;
-                tls.Write(Encoding.ASCII.GetBytes(request));
-                byte[] buffer = new byte[500];
-                tls.Read(buffer, 0, 500);
-                Console.WriteLine(Encoding.UTF8.GetString(buffer));
-            }
+            //    string request =
+            //        "GET / HTTP/1.0" + Environment.NewLine +
+            //        "Host: " + host + Environment.NewLine +
+            //        Environment.NewLine;
+            //    tls.Write(Encoding.ASCII.GetBytes(request));
+            //    byte[] buffer = new byte[500];
+            //    tls.Read(buffer, 0, 500);
+            //    Console.WriteLine(Encoding.UTF8.GetString(buffer));
+            //}
 
             // b13ec36903f8bf4701d498261a0802ef63642bc3
 
@@ -153,9 +154,6 @@ namespace Test
             tls.Write(Encoding.ASCII.GetBytes("Hello"), 0, 5);*/
 
             //var ec = ECPoint.FromBytes(new uint[] { 0x03, 0x188DA80E, 0xB03090F6, 0x7CBF20EB, 0x43A18800, 0xF4FF0AFD, 0x82FF1012 }, EllipticCurve.secp192r1);
-
-
-            Console.ReadLine();
 
             /*SslStream stream = new SslStream(tcp.GetStream(), false, (a1, a2, a3, a4) => true);
             stream.AuthenticateAsClient("localhost", null, System.Security.Authentication.SslProtocols.Tls12, false);
@@ -171,14 +169,14 @@ namespace Test
             stream.Close();
             Console.ReadLine();*/
 
-
-            /*var handler = new TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
+            var tcp = new TcpClient("localhost", 32028);
+            var handler = new TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
             handler.Connect(new MyTlsClient());
             Console.WriteLine(new StreamReader(handler.Stream).ReadToEnd());
-            Console.ReadLine();*/
+            Console.ReadLine();
         }
 
-        /*class MyTlsClient : DefaultTlsClient
+        class MyTlsClient : DefaultTlsClient
         {
             public override TlsAuthentication GetAuthentication()
             {
@@ -199,6 +197,6 @@ namespace Test
             {
                 // validate server certificate
             }
-        }*/
+        }
     }
 }

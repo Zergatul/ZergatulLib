@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.Tls.CipherSuites;
 
 namespace Zergatul.Network.Tls
 {
     internal class ClientKeyExchange : HandshakeBody
     {
-        public ClientDiffieHellmanPublic DHPublic;
+        public byte[] DH_Yc;
+        public byte[] ECDH_Yc;
 
         private AbstractCipherSuite _cipher;
 

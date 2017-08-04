@@ -58,7 +58,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             Assert.IsTrue(dh1.KeyExchange.SharedSecret == dh2.KeyExchange.SharedSecret);
         }
 
-        private class TestRandom : ISecureRandom
+        private class TestRandom : AbstractRandom, ISecureRandom
         {
             private IEnumerator<byte> _enumerator;
 
@@ -68,12 +68,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
                 this._enumerator.MoveNext();
             }
 
-            public void GetBytes(byte[] data)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void GetBytes(byte[] data, int offset, int count)
+            public override void GetBytes(byte[] data, int offset, int count)
             {
                 for (int i = offset; i < offset + count; i++)
                 {

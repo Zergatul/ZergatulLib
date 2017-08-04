@@ -50,7 +50,7 @@ namespace Zergatul.Cryptography.Certificate
             var asn1 = ASN1Element.ReadFrom(stream);
             var syntax = ASN1CertificateSyntax.FromASN1Element(asn1);
 
-            if (syntax.TbsCertificate.Version.Value != 2)
+            if (syntax.TbsCertificate.Version != null && syntax.TbsCertificate.Version.Value != 2)
                 throw new NotImplementedException("Only X509 v3 certificates are supported");
 
             SerialNumber = syntax.TbsCertificate.SerialNumber.Raw;
@@ -65,7 +65,7 @@ namespace Zergatul.Cryptography.Certificate
 
             PublicKey = new PublicKey(syntax.TbsCertificate.SubjectPublicKeyInfo);
 
-            Extensions = syntax.TbsCertificate.Extensions.Select(ext => X509Extension.Parse(ext)).ToArray();
+            Extensions = syntax.TbsCertificate.Extensions?.Select(ext => X509Extension.Parse(ext)).DefaultIfEmpty().ToArray();
         }
 
         private static string FormatName(ASN1CertificateSyntax.Name name)

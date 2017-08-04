@@ -10,5 +10,11 @@ namespace Zergatul.Network.Tls.Extensions
     {
         public HashAlgorithm Hash;
         public SignatureAlgorithm Signature;
+
+        public void Read(BinaryReader reader)
+        {
+            Hash = (HashAlgorithm)reader.ReadByte();
+            Signature = (SignatureAlgorithm)reader.ReadByte();
+        }
     }
 }

@@ -88,7 +88,8 @@ namespace Zergatul.Network.Tls
                 OnContentMessage?.Invoke(this, new ContentMessageEventArgs(message, true, _tlsStream.Role == Role.Client));
             }
 
-            reader.StopTracking();
+            if (RecordType == ContentType.Handshake)
+                reader.StopTracking();
         }
 
         private void ReadEncrypted(BinaryReader reader)
@@ -104,6 +105,7 @@ namespace Zergatul.Network.Tls
             var decodedReader = new BinaryReader(plaintext.Array);
             var counter = decodedReader.StartCounter(plaintext.Length);
             decodedReader.SetReadLimit(plaintext.Length);
+
             if (RecordType == ContentType.Handshake)
                 decodedReader.StartTracking(_tlsStream.HandshakeData);
 
@@ -130,7 +132,8 @@ namespace Zergatul.Network.Tls
                 OnContentMessage?.Invoke(this, new ContentMessageEventArgs(message, true, _tlsStream.Role == Role.Client));
             }
 
-            decodedReader.StopTracking();
+            if (RecordType == ContentType.Handshake)
+                decodedReader.StopTracking();
         }
 
         public void Write(Stream stream)

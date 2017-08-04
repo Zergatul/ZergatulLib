@@ -22,21 +22,64 @@ namespace Zergatul.Math
 
         }
 
+        public BinaryPolynomial(byte[] words, ByteOrder order)
+        {
+            this._words = new ulong[(words.Length + 7) / 8];
+
+            if (order == ByteOrder.BigEndian)
+                Array.Reverse(words);
+
+            for (int i = 0; i < this._words.Length; i++)
+            {
+                byte b1 = (8 * i + 0 < words.Length) ? words[8 * i + 0] : (byte)0;
+                byte b2 = (8 * i + 1 < words.Length) ? words[8 * i + 1] : (byte)0;
+                byte b3 = (8 * i + 2 < words.Length) ? words[8 * i + 2] : (byte)0;
+                byte b4 = (8 * i + 3 < words.Length) ? words[8 * i + 3] : (byte)0;
+                byte b5 = (8 * i + 4 < words.Length) ? words[8 * i + 4] : (byte)0;
+                byte b6 = (8 * i + 5 < words.Length) ? words[8 * i + 5] : (byte)0;
+                byte b7 = (8 * i + 6 < words.Length) ? words[8 * i + 6] : (byte)0;
+                byte b8 = (8 * i + 7 < words.Length) ? words[8 * i + 7] : (byte)0;
+                this._words[i] =
+                    ((ulong)b8 << 56) |
+                    ((ulong)b7 << 48) |
+                    ((ulong)b6 << 40) |
+                    ((ulong)b5 << 32) |
+                    ((ulong)b4 << 24) |
+                    ((ulong)b3 << 16) |
+                    ((ulong)b2 << 08) |
+                    ((ulong)b1 << 00);
+            }
+
+            CalculateRealDegree(words.Length * 8 - 1);
+        }
+
         public BinaryPolynomial(uint[] words, ByteOrder order)
         {
             this._words = new ulong[(words.Length + 1) / 2];
+
             if (order == ByteOrder.BigEndian)
+                Array.Reverse(words);
+
+            for (int i = 0; i < this._words.Length; i++)
             {
-                for (int i = 0; i < this._words.Length; i++)
-                {
-                    ulong low = words[2 * i];
-                    ulong high = 2 * i + 1 < words.Length ? words[2 * i + 1] : 0;
-                    this._words[this._words.Length - 1 - i] = (high << 32) | low;
-                }
-                CalculateRealDegree(words.Length * 32 - 1);
+                ulong low = words[2 * i];
+                ulong high = 2 * i + 1 < words.Length ? words[2 * i + 1] : 0;
+                this._words[i] = (high << 32) | low;
             }
-            if (order == ByteOrder.LittleEndian)
-                throw new NotImplementedException();
+
+            CalculateRealDegree(words.Length * 32 - 1);
+        }
+
+        public static BinaryPolynomial Random(int degree, IRandom random)
+        {
+            ulong[] words = new ulong[degree / 64 + 1];
+            for (int i = 0; i < words.Length; i++)
+                words[i] = random.GetUInt64();
+
+            if (degree % 64 != 63)
+                words[words.Length - 1] &= (1UL << (degree % 64)) - 1;
+
+            return new BinaryPolynomial { _words = words, Degree = degree };
         }
 
         public bool IsBitSet(int bit)
@@ -44,6 +87,23 @@ namespace Zergatul.Math
             if (bit > Degree)
                 return false;
             return BitHelper.CheckBit(_words[bit / 64], bit % 64);
+        }
+
+        public byte[] ToBytes(ByteOrder order, int length)
+        {
+            byte[] result = new byte[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                int index = i / 8;
+                ulong value = index < _words.Length ? _words[index] : 0;
+                result[i] = (byte)(value >> ((i % 8) * 8));
+            }
+
+            if (order == ByteOrder.BigEndian)
+                Array.Reverse(result);
+
+            return result;
         }
 
         #region System.Object

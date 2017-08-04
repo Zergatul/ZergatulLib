@@ -10,5 +10,7 @@ namespace Zergatul
     {
         void GetBytes(byte[] data);
         void GetBytes(byte[] data, int offset, int count);
+
+        ulong GetUInt64();
     }
 }

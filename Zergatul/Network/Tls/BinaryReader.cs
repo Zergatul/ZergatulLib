@@ -16,7 +16,7 @@ namespace Zergatul.Network.Tls
         internal int Position { get; private set; }
         private int? _limit;
 
-        private List<byte> _tracking;
+        private List<List<byte>> _tracking = new List<List<byte>>();
 
         public BinaryReader(Stream stream)
         {
@@ -58,8 +58,9 @@ namespace Zergatul.Network.Tls
             Position += count;
 
             if (_tracking != null)
-                for (int i = 0; i < count; i++)
-                    _tracking.Add(_buffer[i]);
+                for (int t = 0; t < _tracking.Count; t++)
+                    for (int i = 0; i < count; i++)
+                        _tracking[t].Add(_buffer[i]);
         }
 
         public byte ReadByte()
@@ -110,12 +111,12 @@ namespace Zergatul.Network.Tls
 
         public void StartTracking(List<byte> data)
         {
-            this._tracking = data;
+            this._tracking.Add(data);
         }
 
         public void StopTracking()
         {
-            this._tracking = null;
+            this._tracking.RemoveAt(this._tracking.Count - 1);
         }
 
         public IDisposable SetReadLimit(int totalBytes)

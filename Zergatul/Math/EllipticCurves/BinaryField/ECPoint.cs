@@ -121,6 +121,11 @@ namespace Zergatul.Math.EllipticCurves.BinaryField
             return Sum(p1, p2);
         }
 
+        public static ECPoint operator *(BinaryPolynomial bp, ECPoint p)
+        {
+            return Multiplication(p, bp);
+        }
+
         #endregion
     }
 }
