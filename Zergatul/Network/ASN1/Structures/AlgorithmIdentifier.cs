@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Zergatul.Network;
 using Zergatul.Network.ASN1;
 
-namespace Zergatul.Cryptography.Certificate
+namespace Zergatul.Network.ASN1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5280#section-4.1.1.2
@@ -16,16 +16,21 @@ namespace Zergatul.Cryptography.Certificate
         public OID Algorithm { get; private set; }
         public ASN1Element Parameters { get; private set; }
 
-        internal AlgorithmIdentifier(ASN1Element element)
+        public static AlgorithmIdentifier TryParse(ASN1Element element)
         {
             var seq = element as Sequence;
-            CertificateParseException.ThrowIfNull(seq);
-            CertificateParseException.ThrowIfFalse(seq.Elements.Count == 2);
+            if (seq == null || seq.Elements.Count != 2)
+                return null;
 
-            CertificateParseException.ThrowIfFalse(seq.Elements[0] is ObjectIdentifier);
-            Algorithm = ((ObjectIdentifier)seq.Elements[0]).OID;
+            var oi = seq.Elements[0] as ObjectIdentifier;
+            if (oi == null)
+                return null;
 
-            Parameters = seq.Elements[1];
+            return new AlgorithmIdentifier
+            {
+                Algorithm = oi.OID,
+                Parameters = seq.Elements[1]
+            };
         }
     }
 }

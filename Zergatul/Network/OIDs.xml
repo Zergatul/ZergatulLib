@@ -24,6 +24,14 @@
               <oid value="15" id="sha512-224WithRSAEncryption" class="SHA512_224WithRSA" desc="Secure Hash Algorithm SHA-512/224 with Rivest, Shamir and Adleman (RSA) encryption" />
               <oid value="16" id="sha512-256WithRSAEncryption" class="SHA512_256WithRSA" desc="SHA-512/256 hash algorithm with Rivest, Shamir and Adleman (RSA) encryption" />
             </oid>
+            <oid value="7" id="pkcs-7" class="PKCS7" desc="Public-Key Cryptography Standards (PKCS) #7">
+              <oid value="1" id="data" class="Data" desc="PKCS#7 ASN.1 Data type" />
+              <oid value="2" id="signedData" class="SignedData" desc="PKCS#7 ASN.1 SignedData type" />
+              <oid value="2" id="signedData" class="SignedData" desc="PKCS#7 ASN.1 SignedData type" />
+              <oid value="3" id="envelopedData" class="EnvelopedData" desc="PKCS#7 ASN.1 EnvelopedData type" />
+              <oid value="4" id="signedAndEnvelopedData" class="SignedAndEnvelopedData" desc="PKCS#7 ASN.1 SignedAndEnvelopedData type" />
+              <oid value="5" id="EncryptedData" class="EncryptedData" desc="PKCS#7 ASN.1 EncryptedData type" />
+            </oid>
           </oid>
           <oid value="2" id="digestAlgorithm" class="DigestAlgorithm" desc="Digest algorithms">
             <oid value="2" id="md2" class="MD2" desc="Message Digest #2 (MD2)" />
@@ -70,9 +78,9 @@
                   </oid>
                 </oid>
               </oid>
-              <oid value="11129" id="google" class="Google" desc="Google">
+              <!--<oid value="11129" id="google" class="Google" desc="Google">
                 
-              </oid>
+              </oid>-->
             </oid>
           </oid>
           <oid value="5" id="security" class="Security" desc="Structure and identification of Management Information (SMI) security codes">

@@ -15,7 +15,7 @@ namespace Zergatul.Cryptography.Certificate
         public OID Algorithm { get; private set; }
         public byte[] Key { get; private set; }
 
-        internal PublicKey(ASN1CertificateSyntax.SubjectPublicKeyInfo keyInfo)
+        internal PublicKey(X509CertificateSyntax.SubjectPublicKeyInfo keyInfo)
         {
             if (!(keyInfo.Algorithm.Parameters is Null))
                 throw new NotImplementedException();

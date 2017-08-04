@@ -15,6 +15,9 @@ namespace ConsoleTest2
     {
         static void Main(string[] args)
         {
+            var zcrt = new Zergatul.Cryptography.Certificate.X509Certificate("test.p12");
+            return;
+
             var cert = new X509Certificate2("test.p12", "hh87$-Jqo");
             RunServer(useDotNetTls: false);
             //RunClient();

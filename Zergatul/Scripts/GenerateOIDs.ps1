@@ -71,6 +71,7 @@ function ProcessOIDElement($XElement, $SB, $Depth, $TotalValue)
 
     if (($subClasses.Length -gt 0) -and ($subMembers.Length -gt 0))
     {
+        Write-Host $XElement
         throw "Not implemented"
     }
 

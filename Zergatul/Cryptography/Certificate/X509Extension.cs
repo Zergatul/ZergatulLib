@@ -15,7 +15,7 @@ namespace Zergatul.Cryptography.Certificate
 
         protected abstract void Parse(OctetString data);
 
-        internal static X509Extension Parse(ASN1CertificateSyntax.Extension asn1raw)
+        internal static X509Extension Parse(X509CertificateSyntax.Extension asn1raw)
         {
             OID oid = asn1raw.ExtnID.OID;
 

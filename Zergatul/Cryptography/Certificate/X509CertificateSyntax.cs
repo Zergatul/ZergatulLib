@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
 using Zergatul.Network.ASN1;
+using Zergatul.Network.ASN1.Structures;
 
 namespace Zergatul.Cryptography.Certificate
 {
     // TODO: change parsing like other elements
     // https://tools.ietf.org/html/rfc5280
-    internal class ASN1CertificateSyntax
+    internal class X509CertificateSyntax
     {
         public TBSCertificate TbsCertificate;
         public AlgorithmIdentifier SignatureAlgorithm;
         public BitString SignatureValue;
 
-        public static ASN1CertificateSyntax FromASN1Element(ASN1Element element)
+        public static X509CertificateSyntax TryParse(ASN1Element element)
         {
             if (element is Sequence)
             {
@@ -19,10 +20,10 @@ namespace Zergatul.Cryptography.Certificate
                 if (certificate.Elements.Count == 3)
                 {
                     var tbs = ParseTBSCertificate(certificate.Elements[0]);
-                    var sa = new AlgorithmIdentifier(certificate.Elements[1]);
+                    var sa = AlgorithmIdentifier.TryParse(certificate.Elements[1]);
                     var sv = certificate.Elements[2] as BitString;
                     if (tbs != null && sa != null && sv != null)
-                        return new ASN1CertificateSyntax
+                        return new X509CertificateSyntax
                         {
                             TbsCertificate = tbs,
                             SignatureAlgorithm = sa,
@@ -48,7 +49,7 @@ namespace Zergatul.Cryptography.Certificate
                         ver = GetContextSpecificInnerElement(tbs.Elements[index++]) as Integer; // ?????
                     }
                     var sn = tbs.Elements[index++] as Integer;
-                    var sign = new AlgorithmIdentifier(tbs.Elements[index++]);
+                    var sign = AlgorithmIdentifier.TryParse(tbs.Elements[index++]);
                     var iss = ParseName(tbs.Elements[index++]);
                     var valid = ParseValidity(tbs.Elements[index++]);
                     var subj = ParseName(tbs.Elements[index++]);
@@ -178,7 +179,7 @@ namespace Zergatul.Cryptography.Certificate
                 var spki = (Sequence)element;
                 if (spki.Elements.Count == 2)
                 {
-                    var algo = new AlgorithmIdentifier(spki.Elements[0]);
+                    var algo = AlgorithmIdentifier.TryParse(spki.Elements[0]);
                     var pubkey = spki.Elements[1] as BitString;
                     if (algo != null && pubkey != null)
                         return new SubjectPublicKeyInfo

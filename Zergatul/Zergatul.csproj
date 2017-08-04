@@ -80,8 +80,9 @@
     <Compile Include="Cryptography\BlockCipher\ECBEncryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\Encryptor.cs" />
     <Compile Include="Cryptography\Certificate\AccessDescription.cs" />
-    <Compile Include="Cryptography\Certificate\AlgorithmIdentifier.cs" />
-    <Compile Include="Cryptography\Certificate\ASN1CertificateSyntax.cs" />
+    <Compile Include="Network\ASN1\Structures\AlgorithmIdentifier.cs" />
+    <Compile Include="Cryptography\Certificate\PKCS12CertificateSyntax.cs" />
+    <Compile Include="Cryptography\Certificate\X509CertificateSyntax.cs" />
     <Compile Include="Cryptography\Certificate\AttributeTypeAndValue.cs" />
     <Compile Include="Cryptography\Certificate\AuthorityKeyIdentifier.cs" />
     <Compile Include="Cryptography\Certificate\BasicConstraints.cs" />
@@ -134,6 +135,8 @@
     <Compile Include="Math\EllipticCurves\IEllipticCurve.cs" />
     <Compile Include="Network\ASN1\ASN1ParseException.cs" />
     <Compile Include="Network\ASN1\IA5String.cs" />
+    <Compile Include="Network\ASN1\Structures\ContentInfo.cs" />
+    <Compile Include="Network\ASN1\Structures\DigestInfo.cs" />
     <Compile Include="Network\OID.cs" />
     <Compile Include="DefaultRandom.cs" />
     <Compile Include="Ftp\DefaultFtpListParser.cs" />
@@ -263,12 +266,18 @@
     <None Include="Scripts\GenerateOIDs.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Network\OIDs.xml" />
+    <Content Include="Network\OIDs.xml">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>REM Powershell -File "$(ProjectDir)Scripts\GenerateOIDs.ps1" -WorkingDir "$(ProjectDir)</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

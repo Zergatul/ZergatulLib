@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Certificate;
 using Zergatul.Network.ASN1;
+using Zergatul.Network.ASN1.Structures;
 
 namespace Zergatul.Cryptography.Encoding
 {
@@ -66,15 +67,9 @@ namespace Zergatul.Cryptography.Encoding
             if (seq.Elements.Count != 2)
                 return null;
 
-            AlgorithmIdentifier ai;
-            try
-            {
-                ai = new AlgorithmIdentifier(seq.Elements[0]);
-            }
-            catch (CertificateParseException)
-            {
+            var ai = AlgorithmIdentifier.TryParse(seq.Elements[0]);
+            if (ai == null)
                 return null;
-            }
 
             if (!(seq.Elements[1] is OctetString))
                 return null;

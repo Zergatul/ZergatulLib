@@ -78,7 +78,21 @@ namespace Zergatul.Network
 
                             }
 
-                            public static IEnumerable<OID> All => (PKCS1.All);
+                            /// <summary>
+                            /// 1.2.840.113549.1.7
+                            /// </summary>
+                            public static class PKCS7
+                            {
+                                public static OID Data = new OID("1.2.840.113549.1.7.1", "data");
+
+                                public static IEnumerable<OID> All => new OID[]
+                                {
+                                    Data,
+                                };
+
+                            }
+
+                            public static IEnumerable<OID> All => (PKCS1.All).Concat(PKCS7.All);
                         }
 
                         /// <summary>

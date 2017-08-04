@@ -31,24 +31,34 @@ namespace Zergatul.Cryptography.Certificate
             RawData = data;
 
             using (var ms = new MemoryStream(data))
-                ReadFromStream(ms);
+                ReadFromStreamX509(ms);
         }
 
         public X509Certificate(Stream stream)
         {
-            ReadFromStream(stream);
+            ReadFromStreamX509(stream);
         }
 
         public X509Certificate(string filename)
         {
             using (var fs = File.OpenRead(filename))
-                ReadFromStream(fs);
+                switch (Path.GetExtension(filename))
+                {
+                    case ".cer":
+                        ReadFromStreamX509(fs);
+                        break;
+                    case ".p12":
+                        ReadFromStreamPKCS12(fs);
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
         }
 
-        private void ReadFromStream(Stream stream)
+        private void ReadFromStreamX509(Stream stream)
         {
             var asn1 = ASN1Element.ReadFrom(stream);
-            var syntax = ASN1CertificateSyntax.FromASN1Element(asn1);
+            var syntax = X509CertificateSyntax.TryParse(asn1);
 
             if (syntax.TbsCertificate.Version != null && syntax.TbsCertificate.Version.Value != 2)
                 throw new NotImplementedException("Only X509 v3 certificates are supported");
@@ -68,7 +78,15 @@ namespace Zergatul.Cryptography.Certificate
             Extensions = syntax.TbsCertificate.Extensions?.Select(ext => X509Extension.Parse(ext)).DefaultIfEmpty().ToArray();
         }
 
-        private static string FormatName(ASN1CertificateSyntax.Name name)
+        private void ReadFromStreamPKCS12(Stream stream)
+        {
+            var asn1 = ASN1Element.ReadFrom(stream);
+            var syntax = PKCS12CertificateSyntax.TryParse(asn1);
+
+            var data = ASN1Element.ReadFrom(syntax.AuthSafe.Data);
+        }
+
+        private static string FormatName(X509CertificateSyntax.Name name)
         {
             var parts = name.RDN.SelectMany(ra => ra);
             return string.Join(", ",
