@@ -230,16 +230,8 @@ namespace Zergatul.Network.Tls
                             }
                         }
                     },
-                    new TlsExtension
-                    {
-                        Type = ExtensionType.SupportedGroups,
-                        Data = _utils.HexToBytes("00 04 00 17 00 18")
-                    },
-                    new TlsExtension
-                    {
-                        Type = ExtensionType.ECPointFormats,
-                        Data = _utils.HexToBytes("01 00")
-                    },
+                    new SupportedEllipticCurves(Settings.SupportedCurves),
+                    new SupportedPointFormats(ECPointFormat.Uncompressed),
                     new SignatureAlgorithmsExtension
                     {
                         SupportedAlgorithms = new SignatureAndHashAlgorithm[]

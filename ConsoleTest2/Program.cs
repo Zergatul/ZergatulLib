@@ -59,7 +59,7 @@ namespace ConsoleTest2
                         tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo"));
                         tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
                     }
-                    //client.Close();
+                    client.Close();
                 }
                 catch (Exception ex)
                 {

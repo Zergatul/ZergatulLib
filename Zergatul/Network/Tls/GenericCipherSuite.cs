@@ -6,11 +6,12 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal class CipherSuiteImplementation<KeyExchange, BlockCipher, CipherMode, HashFunction> : AbstractCipherSuite
+    internal class GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, HashFunction, PRFHashFunction> : AbstractCipherSuite
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
         where CipherMode : AbstractBlockCipherMode, new()
         where HashFunction : AbstractHash, new()
+        where PRFHashFunction : AbstractHash, new()
     {
         protected TlsConnectionKeys _keys;
 
@@ -124,13 +125,14 @@ namespace Zergatul.Network.Tls
 
         protected virtual ByteArray Hash(ByteArray data)
         {
-            var sha256 = new System.Security.Cryptography.SHA256Managed();
-            return new ByteArray(sha256.ComputeHash(data.Array));
+            var hash = new PRFHashFunction();
+            hash.Update(data.Array);
+            return new ByteArray(hash.ComputeHash());
         }
 
         protected ByteArray HMACHash(ByteArray secret, ByteArray seed)
         {
-            return new ByteArray(new HMAC<SHA256>(secret.Array).ComputeHash(seed.Array));
+            return new ByteArray(new HMAC<PRFHashFunction>(secret.Array).ComputeHash(seed.Array));
         }
 
         protected ByteArray PHash(ByteArray secret, ByteArray seed, int length)
@@ -409,5 +411,14 @@ namespace Zergatul.Network.Tls
                 new ByteArray(data.Length) +
                 data.Fragment).Array));
         }
+    }
+
+    internal class GenericCipherSuiteDefaultPRF<KeyExchange, BlockCipher, CipherMode, HashFunction> : GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, HashFunction, SHA256>
+        where KeyExchange : AbstractKeyExchange, new()
+        where BlockCipher : AbstractBlockCipher, new()
+        where CipherMode : AbstractBlockCipherMode, new()
+        where HashFunction : AbstractHash, new()
+    {
+
     }
 }

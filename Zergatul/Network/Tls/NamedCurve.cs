@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Network.Tls
 {
-    internal enum NamedCurve : ushort
+    public enum NamedCurve : ushort
     {
         sect163k1 = 1,
         sect163r1 = 2,
@@ -32,6 +32,9 @@ namespace Zergatul.Network.Tls
         secp256k1 = 22,
         secp256r1 = 23,
         secp384r1 = 24,
-        secp521r1 = 25
+        secp521r1 = 25,
+
+        ArbitraryExplicitPrimeCurves = 0xFF01,
+        ArbitraryExplicitChar2Curves = 0xFF02
     }
 }

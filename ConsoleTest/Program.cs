@@ -40,6 +40,12 @@ namespace Test
 
         static void Main(string[] args)
         {
+            //TestMyServerAndBCClient();
+            //TestMyServerAndNETClient();
+            //TestMyClientAndNETServer();
+            ConnectToExternal();
+            return;
+
             //DownloadOIDs.Go("1.2.840.113549.1.12.10.1", "1.txt");
             //return;
 
@@ -116,37 +122,21 @@ namespace Test
                 false);*/
 
             bool testLocalHost = false;
+            byte[] buffer;
             if (testLocalHost)
             {
                 var client = new TcpClient("localhost", 32028);
                 var tls = new TlsStream(client.GetStream());
                 tls.AuthenticateAsClient("localhost");
 
-                byte[] buffer = new byte[12];
+                buffer = new byte[12];
                 tls.Read(buffer, 0, 12);
 
                 Console.WriteLine(Encoding.UTF8.GetString(buffer));
             }
             else
             {
-                string host =
-                    //"www.howsmyssl.com"
-                    //"ru.wargaming.net"
-                    "ru.4game.com"
-                    ;
-
-                var client = new TcpClient(host, 443);
-                var tls = new TlsStream(client.GetStream());
-                tls.AuthenticateAsClient(host);
-
-                string request =
-                    "GET / HTTP/1.0" + Environment.NewLine +
-                    "Host: " + host + Environment.NewLine +
-                    Environment.NewLine;
-                tls.Write(Encoding.ASCII.GetBytes(request));
-                byte[] buffer = new byte[500];
-                tls.Read(buffer, 0, 500);
-                Console.WriteLine(Encoding.UTF8.GetString(buffer));
+                
             }
 
             // b13ec36903f8bf4701d498261a0802ef63642bc3
@@ -174,19 +164,251 @@ namespace Test
             Console.WriteLine(new StreamReader(stream).ReadToEnd());
             stream.Close();
             Console.ReadLine();*/
+        }
 
-            var tcp = new TcpClient("localhost", 32028);
-            var handler = new TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
-            handler.Connect(new MyTlsClient());
-            Console.WriteLine(new StreamReader(handler.Stream).ReadToEnd());
+        private static void ConnectToExternal()
+        {
+            string host =
+                    //"www.howsmyssl.com"
+                    //"ru.wargaming.net"
+                    "ru.4game.com"
+                    ;
+
+            var client = new TcpClient(host, 443);
+            var tls = new TlsStream(client.GetStream());
+            tls.Settings = new TlsStreamSettings
+            {
+                CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
+                {
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
+                },
+                SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
+                {
+                    Zergatul.Network.Tls.NamedCurve.secp384r1,
+                    Zergatul.Network.Tls.NamedCurve.secp256r1
+                }
+            };
+            tls.AuthenticateAsClient(host);
+
+            string request =
+                "GET / HTTP/1.0" + Environment.NewLine +
+                "Host: " + host + Environment.NewLine +
+                Environment.NewLine;
+            tls.Write(Encoding.ASCII.GetBytes(request));
+            byte[] buffer = new byte[500];
+            tls.Read(buffer, 0, 500);
+            Console.WriteLine(Encoding.UTF8.GetString(buffer));
+
+            Console.ReadLine();
+        }
+
+        private static void TestMyServerAndNETClient()
+        {
+            var serverThread = new Thread(() =>
+            {
+                var listener = new TcpListener(IPAddress.Any, 32028);
+                listener.Start();
+
+                var client = listener.AcceptTcpClient();
+                var tlsStream = new TlsStream(client.GetStream());
+                tlsStream.Settings = new TlsStreamSettings
+                {
+                    CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
+                    {
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                    },
+                    SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
+                    {
+                        Zergatul.Network.Tls.NamedCurve.secp256r1
+                    }
+                };
+
+                tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo"));
+                tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
+            });
+
+            var clientThread = new Thread(() =>
+            {
+                var tcp = new TcpClient("localhost", 32028);
+                var ssl = new SslStream(tcp.GetStream(), true, (p1, p2, p3, p4) => true);
+                ssl.AuthenticateAsClient("localhost");
+
+
+                byte[] buffer = new byte[12];
+                ssl.Read(buffer, 0, 12);
+                Console.WriteLine(Encoding.ASCII.GetString(buffer));
+
+                ssl.Close();
+            });
+
+            serverThread.Start();
+            clientThread.Start();
+
+            serverThread.Join();
+            clientThread.Join();
+
+            Console.ReadLine();
+        }
+
+        private static void TestMyClientAndNETServer()
+        {
+            var serverThread = new Thread(() =>
+            {
+                var listener = new TcpListener(IPAddress.Any, 32028);
+                listener.Start();
+
+                var client = listener.AcceptTcpClient();
+
+                var ssl = new SslStream(client.GetStream(), true, (p1, p2, p3, p4) => true);
+                var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2("test.p12", "hh87$-Jqo");
+                ssl.AuthenticateAsServer(cert, false, System.Security.Authentication.SslProtocols.Tls12, false);
+
+                ssl.Write(Encoding.ASCII.GetBytes("Hello World!"));
+
+                ssl.Close();
+            });
+
+            var clientThread = new Thread(() =>
+            {
+                var tcp = new TcpClient("localhost", 32028);
+                var tls = new TlsStream(tcp.GetStream());
+                tls.AuthenticateAsClient("localhost");
+
+                byte[] buffer = new byte[12];
+                tls.Read(buffer, 0, 12);
+                Console.WriteLine(Encoding.ASCII.GetString(buffer));
+            });
+
+            serverThread.Start();
+            clientThread.Start();
+
+            serverThread.Join();
+            clientThread.Join();
+
+            Console.ReadLine();
+        }
+
+        private static void TestMyServerAndBCClient()
+        {
+            var serverThread = new Thread(() =>
+            {
+                var listener = new TcpListener(IPAddress.Any, 32028);
+                listener.Start();
+
+                var client = listener.AcceptTcpClient();
+                var tlsStream = new TlsStream(client.GetStream());
+                tlsStream.Settings = new TlsStreamSettings
+                {
+                    CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
+                    {
+                        /*Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,*/
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                    },
+                    SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
+                    {
+                        Zergatul.Network.Tls.NamedCurve.secp256r1
+                    }
+                };
+
+                tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo"));
+                tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
+            });
+
+            var clientThread = new Thread(() =>
+            {
+                var tcp = new TcpClient("localhost", 32028);
+                var handler = new TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
+                handler.Connect(new MyTlsClient(Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384));
+
+                byte[] buffer = new byte[12];
+                handler.Stream.Read(buffer, 0, 12);
+                Console.WriteLine(Encoding.ASCII.GetString(buffer));
+
+                handler.Close();
+            });
+
+            serverThread.Start();
+            clientThread.Start();
+
+            serverThread.Join();
+            clientThread.Join();
+
+            Console.ReadLine();
+        }
+
+        private static void TestMyClientAndBCServer()
+        {
+            var serverThread = new Thread(() =>
+            {
+                var listener = new TcpListener(IPAddress.Any, 32028);
+                listener.Start();
+
+                var client = listener.AcceptTcpClient();
+                var handler = new TlsServerProtocol(client.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
+                handler.Accept(new MyTlsServer());
+
+                //tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo"));
+                //tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
+            });
+
+            var clientThread = new Thread(() =>
+            {
+                var tcp = new TcpClient("localhost", 32028);
+                var handler = new TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
+                handler.Connect(new MyTlsClient());
+
+                byte[] buffer = new byte[12];
+                handler.Stream.Read(buffer, 0, 12);
+                Console.WriteLine(Encoding.ASCII.GetString(buffer));
+
+                handler.Close();
+            });
+
+            serverThread.Start();
+            clientThread.Start();
+
+            serverThread.Join();
+            clientThread.Join();
+
             Console.ReadLine();
         }
 
         class MyTlsClient : DefaultTlsClient
         {
+            private Zergatul.Network.Tls.CipherSuite[] _suites;
+
+            public MyTlsClient(params Zergatul.Network.Tls.CipherSuite[] suites)
+            {
+                this._suites = suites;
+            }
+
             public override TlsAuthentication GetAuthentication()
             {
                 return new MyTlsAuthentication();
+            }
+
+            public override int[] GetCipherSuites()
+            {
+                if (_suites.Length == 0)
+                    return base.GetCipherSuites();
+                else
+                    return _suites.Select(cs => (int)cs).ToArray();
+            }
+        }
+
+        class MyTlsServer : DefaultTlsServer
+        {
+            protected override TlsSignerCredentials GetRsaSignerCredentials()
+            {
+                return null;
             }
         }
 

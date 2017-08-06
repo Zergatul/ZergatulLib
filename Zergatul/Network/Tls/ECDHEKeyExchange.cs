@@ -72,7 +72,7 @@ namespace Zergatul.Network.Tls
 
         public override void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader)
         {
-            message.ECDH_Yc= reader.ReadBytes(reader.ReadByte());
+            message.ECDH_Yc = reader.ReadBytes(reader.ReadByte());
 
             _ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECDH_Yc, _ecdh.Parameters));
 

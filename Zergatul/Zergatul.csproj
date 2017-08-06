@@ -218,7 +218,7 @@
     <Compile Include="Network\Tls\ChangeCipherSpec.cs" />
     <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
     <Compile Include="Network\Tls\AbstractKeyExchange.cs" />
-    <Compile Include="Network\Tls\CipherSuiteImplementation.cs" />
+    <Compile Include="Network\Tls\GenericCipherSuite.cs" />
     <Compile Include="Network\Tls\CipherSuite.cs" />
     <Compile Include="Network\Tls\DHEKeyExchange.cs" />
     <Compile Include="Network\Tls\ECDHEKeyExchange.cs" />
@@ -233,12 +233,15 @@
     <Compile Include="Network\Tls\ECCurve.cs" />
     <Compile Include="Network\Tls\ECCurveType.cs" />
     <Compile Include="Network\Tls\ECParameters.cs" />
+    <Compile Include="Network\Tls\ECPointFormat.cs" />
     <Compile Include="Network\Tls\Extensions\ExtensionType.cs" />
     <Compile Include="Network\Tls\Extensions\HashAlgorithm.cs" />
     <Compile Include="Network\Tls\Extensions\ServerNameExtension.cs" />
     <Compile Include="Network\Tls\Extensions\SignatureAlgorithm.cs" />
     <Compile Include="Network\Tls\Extensions\SignatureAlgorithmsExtension.cs" />
     <Compile Include="Network\Tls\Extensions\SignatureAndHashAlgorithm.cs" />
+    <Compile Include="Network\Tls\Extensions\SupportedEllipticCurves.cs" />
+    <Compile Include="Network\Tls\Extensions\SupportedPointFormats.cs" />
     <Compile Include="Network\Tls\Extensions\TlsExtension.cs" />
     <Compile Include="Network\Tls\Extensions\TlsExtensionFactory.cs" />
     <Compile Include="Network\Tls\Finished.cs" />

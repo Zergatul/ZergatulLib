@@ -44,42 +44,42 @@ namespace Zergatul.Network.Tls
             {
                 #region DHE
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES128, CBC, SHA1>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES128, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES256, CBC, SHA1>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES256, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES128, CBC, SHA256>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES128, CBC, SHA256>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, AES256, CBC, SHA256>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES256, CBC, SHA256>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, ARIA128, CBC, SHA256>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, ARIA128, CBC, SHA256>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, ARIA256, CBC, SHA384>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, ARIA256, CBC, SHA384>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, Camellia128, CBC, SHA1>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, Camellia128, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA:
-                    cs = new CipherSuiteImplementation<DHEKeyExchange, Camellia256, CBC, SHA1>();
+                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, Camellia256, CBC, SHA1>();
                     break;
                 #endregion
                 #region ECDHE
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
-                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES128, CBC, SHA1>();
+                    cs = new GenericCipherSuiteDefaultPRF<ECDHEKeyExchange, AES128, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
-                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES256, CBC, SHA1>();
+                    cs = new GenericCipherSuiteDefaultPRF<ECDHEKeyExchange, AES256, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
-                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES128, CBC, SHA256>();
+                    cs = new GenericCipherSuiteDefaultPRF<ECDHEKeyExchange, AES128, CBC, SHA256>();
                     break;
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:
-                    cs = new CipherSuiteImplementation<ECDHEKeyExchange, AES256, CBC, SHA384>();
+                    cs = new GenericCipherSuite<ECDHEKeyExchange, AES256, CBC, SHA384, SHA384>();
                     break;
                 #endregion
                 default:
