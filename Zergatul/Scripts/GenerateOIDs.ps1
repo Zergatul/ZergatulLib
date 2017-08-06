@@ -69,30 +69,39 @@ function ProcessOIDElement($XElement, $SB, $Depth, $TotalValue)
 
     [void]$SB.AppendLine()
 
-    if (($subClasses.Length -gt 0) -and ($subMembers.Length -gt 0))
+    if (($subClasses.Length -gt 0) -or ($subMembers.Length -gt 0))
     {
-        Write-Host $XElement
-        throw "Not implemented"
-    }
+        [void]$SB.Append($spaces + 'public static IEnumerable<OID> All => ')
 
-    [void]$SB.Append($spaces + 'public static IEnumerable<OID> All => ')
-
-    if ($subClasses.Length -gt 0)
-    {
-        $a = $subClasses | ForEach-Object { $_ + '.All' }
-        [void]$SB.Append('(' + [System.String]::Join(').Concat(', $a) + ');');
-    }
-
-    if ($subMembers.Length -gt 0)
-    {
-        $a = $subMembers | ForEach-Object { $spaces + '    ' + $_ + ',' }
-        [void]$SB.AppendLine('new OID[]')
-        [void]$SB.AppendLine($spaces + '{')
-        foreach ($m in $a)
+        if ($subClasses.Length -gt 0)
         {
-            [void]$SB.AppendLine($m)
+            $a = $subClasses | ForEach-Object { $_ + '.All' }
+            [void]$SB.Append('(' + [System.String]::Join(').Concat(', $a) + ')')
         }
-        [void]$SB.AppendLine($spaces + '};')
+
+        if ($subMembers.Length -gt 0)
+        {
+            if ($subClasses.Length -gt 0)
+            {
+                [void]$SB.Append('.Concat(')
+            }
+
+            $a = $subMembers | ForEach-Object { $spaces + '    ' + $_ + ',' }
+            [void]$SB.AppendLine('new OID[]')
+            [void]$SB.AppendLine($spaces + '{')
+            foreach ($m in $a)
+            {
+                [void]$SB.AppendLine($m)
+            }
+            [void]$SB.Append($spaces + '}')
+
+            if ($subClasses.Length -gt 0)
+            {
+                [void]$SB.Append(')')
+            }
+        }
+
+        [void]$SB.Append(';')
     }
 
     [void]$SB.AppendLine()

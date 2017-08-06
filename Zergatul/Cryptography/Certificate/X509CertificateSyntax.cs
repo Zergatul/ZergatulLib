@@ -20,7 +20,7 @@ namespace Zergatul.Cryptography.Certificate
                 if (certificate.Elements.Count == 3)
                 {
                     var tbs = ParseTBSCertificate(certificate.Elements[0]);
-                    var sa = AlgorithmIdentifier.TryParse(certificate.Elements[1]);
+                    var sa = AlgorithmIdentifier.Parse(certificate.Elements[1]);
                     var sv = certificate.Elements[2] as BitString;
                     if (tbs != null && sa != null && sv != null)
                         return new X509CertificateSyntax
@@ -49,7 +49,7 @@ namespace Zergatul.Cryptography.Certificate
                         ver = GetContextSpecificInnerElement(tbs.Elements[index++]) as Integer; // ?????
                     }
                     var sn = tbs.Elements[index++] as Integer;
-                    var sign = AlgorithmIdentifier.TryParse(tbs.Elements[index++]);
+                    var sign = AlgorithmIdentifier.Parse(tbs.Elements[index++]);
                     var iss = ParseName(tbs.Elements[index++]);
                     var valid = ParseValidity(tbs.Elements[index++]);
                     var subj = ParseName(tbs.Elements[index++]);
@@ -179,7 +179,7 @@ namespace Zergatul.Cryptography.Certificate
                 var spki = (Sequence)element;
                 if (spki.Elements.Count == 2)
                 {
-                    var algo = AlgorithmIdentifier.TryParse(spki.Elements[0]);
+                    var algo = AlgorithmIdentifier.Parse(spki.Elements[0]);
                     var pubkey = spki.Elements[1] as BitString;
                     if (algo != null && pubkey != null)
                         return new SubjectPublicKeyInfo

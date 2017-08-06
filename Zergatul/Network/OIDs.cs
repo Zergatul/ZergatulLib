@@ -75,7 +75,6 @@ namespace Zergatul.Network
                                     SHA512_224WithRSA,
                                     SHA512_256WithRSA,
                                 };
-
                             }
 
                             /// <summary>
@@ -84,15 +83,167 @@ namespace Zergatul.Network
                             public static class PKCS7
                             {
                                 public static OID Data = new OID("1.2.840.113549.1.7.1", "data");
+                                public static OID SignedData = new OID("1.2.840.113549.1.7.2", "signedData");
+                                public static OID EnvelopedData = new OID("1.2.840.113549.1.7.3", "envelopedData");
+                                public static OID SignedAndEnvelopedData = new OID("1.2.840.113549.1.7.4", "signedAndEnvelopedData");
+                                public static OID DigestedData = new OID("1.2.840.113549.1.7.5", "digestedData");
+                                public static OID EncryptedData = new OID("1.2.840.113549.1.7.6", "encryptedData");
+                                public static OID DataWithAttributes = new OID("1.2.840.113549.1.7.7", "dataWithAttributes");
+                                public static OID EncryptedPrivateKeyInfo = new OID("1.2.840.113549.1.7.8", "encryptedPrivateKeyInfo");
 
                                 public static IEnumerable<OID> All => new OID[]
                                 {
                                     Data,
+                                    SignedData,
+                                    EnvelopedData,
+                                    SignedAndEnvelopedData,
+                                    DigestedData,
+                                    EncryptedData,
+                                    DataWithAttributes,
+                                    EncryptedPrivateKeyInfo,
                                 };
-
                             }
 
-                            public static IEnumerable<OID> All => (PKCS1.All).Concat(PKCS7.All);
+                            /// <summary>
+                            /// 1.2.840.113549.1.9
+                            /// </summary>
+                            public static class PKCS9
+                            {
+                                public static OID modules = new OID("1.2.840.113549.1.9.0", "modules");
+                                public static OID EmailAddress = new OID("1.2.840.113549.1.9.1", "emailAddress");
+                                public static OID UnstructuredName = new OID("1.2.840.113549.1.9.2", "unstructuredName");
+                                public static OID ContentType = new OID("1.2.840.113549.1.9.3", "contentType");
+                                public static OID MessageDigest = new OID("1.2.840.113549.1.9.4", "messageDigest");
+                                public static OID SigningTime = new OID("1.2.840.113549.1.9.5", "signing-time");
+                                public static OID CounterSignature = new OID("1.2.840.113549.1.9.6", "countersignature");
+                                public static OID ChallengePassword = new OID("1.2.840.113549.1.9.7", "challengePassword");
+                                public static OID UnstructuredAddress = new OID("1.2.840.113549.1.9.8", "unstructuredAddress");
+                                public static OID ExtendedCertificateAttributes = new OID("1.2.840.113549.1.9.9", "extendedCertificateAttributes");
+                                public static OID IssuerAndSerialNumber = new OID("1.2.840.113549.1.9.10", "issuerAndSerialNumber");
+                                public static OID PasswordCheck = new OID("1.2.840.113549.1.9.11", "passwordCheck");
+                                public static OID PublicKey = new OID("1.2.840.113549.1.9.12", "publicKey");
+                                public static OID SigningDescription = new OID("1.2.840.113549.1.9.13", "signingDescription");
+                                public static OID ExtensionRequest = new OID("1.2.840.113549.1.9.14", "extensionRequest");
+                                public static OID SMIMECapabilities = new OID("1.2.840.113549.1.9.15", "smimeCapabilities");
+                                public static OID SMIME = new OID("1.2.840.113549.1.9.16", "smime");
+                                public static OID PGPKeyID = new OID("1.2.840.113549.1.9.17", "pgpKeyID");
+                                public static OID FriendlyName = new OID("1.2.840.113549.1.9.20", "friendlyName");
+                                public static OID LocalKeyID = new OID("1.2.840.113549.1.9.21", "localKeyID");
+                                /// <summary>
+                                /// 1.2.840.113549.1.9.22
+                                /// </summary>
+                                public static class CertTypes
+                                {
+                                    public static OID X509Certificate = new OID("1.2.840.113549.1.9.22.1", "x509Certificate");
+                                    public static OID SDSICertificate = new OID("1.2.840.113549.1.9.22.2", "sdsiCertificate");
+
+                                    public static IEnumerable<OID> All => new OID[]
+                                    {
+                                        X509Certificate,
+                                        SDSICertificate,
+                                    };
+                                }
+                                public static OID CRLTypes = new OID("1.2.840.113549.1.9.23", "crlTypes");
+                                public static OID OC = new OID("1.2.840.113549.1.9.24", "pkcs-9-oc");
+                                public static OID AT = new OID("1.2.840.113549.1.9.25", "pkcs-9-at");
+                                public static OID SX = new OID("1.2.840.113549.1.9.26", "pkcs-9-sx");
+                                public static OID MR = new OID("1.2.840.113549.1.9.27", "pkcs-9-mr");
+                                public static OID CMSAlgorithmProtect = new OID("1.2.840.113549.1.9.52", "id-aa-CMSAlgorithmProtect");
+
+                                public static IEnumerable<OID> All => (CertTypes.All).Concat(new OID[]
+                                {
+                                    modules,
+                                    EmailAddress,
+                                    UnstructuredName,
+                                    ContentType,
+                                    MessageDigest,
+                                    SigningTime,
+                                    CounterSignature,
+                                    ChallengePassword,
+                                    UnstructuredAddress,
+                                    ExtendedCertificateAttributes,
+                                    IssuerAndSerialNumber,
+                                    PasswordCheck,
+                                    PublicKey,
+                                    SigningDescription,
+                                    ExtensionRequest,
+                                    SMIMECapabilities,
+                                    SMIME,
+                                    PGPKeyID,
+                                    FriendlyName,
+                                    LocalKeyID,
+                                    CRLTypes,
+                                    OC,
+                                    AT,
+                                    SX,
+                                    MR,
+                                    CMSAlgorithmProtect,
+                                });
+                            }
+
+                            /// <summary>
+                            /// 1.2.840.113549.1.12
+                            /// </summary>
+                            public static class PKCS12
+                            {
+                                /// <summary>
+                                /// 1.2.840.113549.1.12.1
+                                /// </summary>
+                                public static class PKCS12PBE
+                                {
+                                    public static OID PBEWithSHA1And128BitRC4 = new OID("1.2.840.113549.1.12.1.1", "pbeWithSHAAnd128BitRC4");
+                                    public static OID PBEWithSHA1And40BitRC4 = new OID("1.2.840.113549.1.12.1.2", "pbeWithSHAAnd40BitRC4");
+                                    public static OID PBEWithSHA1And3KeyTripleDESCBC = new OID("1.2.840.113549.1.12.1.3", "pbeWithSHAAnd3-KeyTripleDES-CBC");
+                                    public static OID PBEWithSHA1And2KeyTripleDESCBC = new OID("1.2.840.113549.1.12.1.4", "pbeWithSHAAnd2-KeyTripleDES-CBC");
+                                    public static OID PBEWithSHA1And128BitRC2CBC = new OID("1.2.840.113549.1.12.1.5", "pbeWithSHAAnd128BitRC2-CBC");
+                                    public static OID PBEWithSHA1And40BitRC2CBC = new OID("1.2.840.113549.1.12.1.6", "pbeWithSHAAnd40BitRC2-CBC");
+
+                                    public static IEnumerable<OID> All => new OID[]
+                                    {
+                                        PBEWithSHA1And128BitRC4,
+                                        PBEWithSHA1And40BitRC4,
+                                        PBEWithSHA1And3KeyTripleDESCBC,
+                                        PBEWithSHA1And2KeyTripleDESCBC,
+                                        PBEWithSHA1And128BitRC2CBC,
+                                        PBEWithSHA1And40BitRC2CBC,
+                                    };
+                                }
+
+                                /// <summary>
+                                /// 1.2.840.113549.1.12.10
+                                /// </summary>
+                                public static class Version1
+                                {
+                                    /// <summary>
+                                    /// 1.2.840.113549.1.12.10.1
+                                    /// </summary>
+                                    public static class BagIds
+                                    {
+                                        public static OID KeyBag = new OID("1.2.840.113549.1.12.10.1.1", "keyBag");
+                                        public static OID PKCS8ShroudedKeyBag = new OID("1.2.840.113549.1.12.10.1.2", "pkcs-8ShroudedKeyBag");
+                                        public static OID CertBag = new OID("1.2.840.113549.1.12.10.1.3", "certBag");
+                                        public static OID CRLBag = new OID("1.2.840.113549.1.12.10.1.4", "crlBag");
+                                        public static OID SecretBag = new OID("1.2.840.113549.1.12.10.1.5", "secretBag");
+                                        public static OID SafeContentsBag = new OID("1.2.840.113549.1.12.10.1.6", "safeContentsBag");
+
+                                        public static IEnumerable<OID> All => new OID[]
+                                        {
+                                            KeyBag,
+                                            PKCS8ShroudedKeyBag,
+                                            CertBag,
+                                            CRLBag,
+                                            SecretBag,
+                                            SafeContentsBag,
+                                        };
+                                    }
+
+                                    public static IEnumerable<OID> All => (BagIds.All);
+                                }
+
+                                public static IEnumerable<OID> All => (PKCS12PBE.All).Concat(Version1.All);
+                            }
+
+                            public static IEnumerable<OID> All => (PKCS1.All).Concat(PKCS7.All).Concat(PKCS9.All).Concat(PKCS12.All);
                         }
 
                         /// <summary>
@@ -124,7 +275,6 @@ namespace Zergatul.Network
                                 HHMACWithSHA512_224,
                                 HHMACWithSHA512_256,
                             };
-
                         }
 
                         /// <summary>
@@ -154,7 +304,6 @@ namespace Zergatul.Network
                                 RC5CBCPad,
                                 DESCDMF,
                             };
-
                         }
 
                         public static IEnumerable<OID> All => (PKCS.All).Concat(DigestAlgorithm.All).Concat(EncryptionAlgorithm.All);
@@ -221,7 +370,6 @@ namespace Zergatul.Network
                                                     JurisdictionOfIncorporationStateOrProvinceName,
                                                     JurisdictionOfIncorporationCountryName,
                                                 };
-
                                             }
 
                                             public static IEnumerable<OID> All => (_1.All);
@@ -307,7 +455,6 @@ namespace Zergatul.Network
                                             TNAuthList,
                                             JWTClaimConstraints,
                                         };
-
                                     }
 
                                     /// <summary>
@@ -325,7 +472,6 @@ namespace Zergatul.Network
                                             UNotice,
                                             TextNotice,
                                         };
-
                                     }
 
                                     /// <summary>
@@ -387,7 +533,6 @@ namespace Zergatul.Network
                                             CMCArchive,
                                             BGPsecRouter,
                                         };
-
                                     }
 
                                     /// <summary>
@@ -427,7 +572,6 @@ namespace Zergatul.Network
                                             RPKINotify,
                                             StirTNList,
                                         };
-
                                     }
 
                                     public static IEnumerable<OID> All => (PE.All).Concat(QT.All).Concat(KP.All).Concat(AD.All);
@@ -520,7 +664,6 @@ namespace Zergatul.Network
                                 DSAWithCommonSHA1,
                                 SHA1WithRSAEncryption,
                             };
-
                         }
 
                         public static IEnumerable<OID> All => (Algorithms.All);
@@ -748,7 +891,6 @@ namespace Zergatul.Network
                         LDAPUrl,
                         OrganizationIdentifier,
                     };
-
                 }
 
                 /// <summary>
@@ -892,7 +1034,6 @@ namespace Zergatul.Network
                         AttributeMappings,
                         HolderNameConstraints,
                     };
-
                 }
 
                 public static IEnumerable<OID> All => (AttributeType.All).Concat(CertificateExtension.All);
@@ -949,7 +1090,6 @@ namespace Zergatul.Network
                                             SHA512_224,
                                             SHA512_256,
                                         };
-
                                     }
 
                                     public static IEnumerable<OID> All => (HashAlgs.All);
@@ -977,7 +1117,6 @@ namespace Zergatul.Network
                                 {
                                     DigiCertEVCPS,
                                 };
-
                             }
 
                             public static IEnumerable<OID> All => (EVSSLCertificates.All);
@@ -1013,7 +1152,6 @@ namespace Zergatul.Network
                         {
                             EVGuidelines,
                         };
-
                     }
 
                     public static IEnumerable<OID> All => (CertificatePolicies.All);

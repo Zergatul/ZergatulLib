@@ -123,7 +123,7 @@ namespace Zergatul.Network.Tls
 
         protected ByteArray HMACHash(ByteArray secret, ByteArray seed)
         {
-            return new HMAC<SHA256>(secret).ComputeHash(seed);
+            return new ByteArray(new HMAC<SHA256>(secret.Array).ComputeHash(seed.Array));
         }
 
         protected ByteArray PHash(ByteArray secret, ByteArray seed, int length)
@@ -201,8 +201,8 @@ namespace Zergatul.Network.Tls
 
             if (_role == Role.Client)
             {
-                _encryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey);
-                _decryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey);
+                _encryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey.Array);
+                _decryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey.Array);
 
                 _encryptor = _blockCipher.CreateEncryptor(_keys.ClientEncKey.Array, _blockCipherMode);
                 _decryptor = _blockCipher.CreateDecryptor(_keys.ServerEncKey.Array, _blockCipherMode);
@@ -210,8 +210,8 @@ namespace Zergatul.Network.Tls
 
             if (_role == Role.Server)
             {
-                _encryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey);
-                _decryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey);
+                _encryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey.Array);
+                _decryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey.Array);
 
                 _encryptor = _blockCipher.CreateEncryptor(_keys.ServerEncKey.Array, _blockCipherMode);
                 _decryptor = _blockCipher.CreateDecryptor(_keys.ClientEncKey.Array, _blockCipherMode);
@@ -293,11 +293,11 @@ namespace Zergatul.Network.Tls
             Array.Copy(data, result, result.Length);
 
             var calculatedMAC = _decryptHMAC.ComputeHash(
-                new ByteArray(sequenceNum) +
+                (new ByteArray(sequenceNum) +
                 new ByteArray((byte)type) +
                 new ByteArray((ushort)version) +
                 new ByteArray((ushort)result.Length) +
-                result);
+                result).Array);
 
             for (int i = 0; i < mac.Length; i++)
                 if (mac[i] != calculatedMAC[i])
@@ -395,12 +395,12 @@ namespace Zergatul.Network.Tls
                 MAC
                     The MAC algorithm specified by SecurityParameters.mac_algorithm.
             */
-            return _encryptHMAC.ComputeHash(
-                new ByteArray(sequenceNum) +
+            return new ByteArray(_encryptHMAC.ComputeHash(
+                (new ByteArray(sequenceNum) +
                 new ByteArray((byte)data.Type) +
                 new ByteArray((ushort)data.Version) +
                 new ByteArray(data.Length) +
-                data.Fragment);
+                data.Fragment).Array));
         }
     }
 }

@@ -16,15 +16,14 @@ namespace Zergatul.Network.ASN1.Structures
         public OID Algorithm { get; private set; }
         public ASN1Element Parameters { get; private set; }
 
-        public static AlgorithmIdentifier TryParse(ASN1Element element)
+        public static AlgorithmIdentifier Parse(ASN1Element element)
         {
             var seq = element as Sequence;
-            if (seq == null || seq.Elements.Count != 2)
-                return null;
+            ParseException.ThrowIfNull(seq);
+            ParseException.ThrowIfNotEqual(seq.Elements.Count, 2);
 
             var oi = seq.Elements[0] as ObjectIdentifier;
-            if (oi == null)
-                return null;
+            ParseException.ThrowIfNull(oi);
 
             return new AlgorithmIdentifier
             {

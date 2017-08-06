@@ -27,10 +27,64 @@
             <oid value="7" id="pkcs-7" class="PKCS7" desc="Public-Key Cryptography Standards (PKCS) #7">
               <oid value="1" id="data" class="Data" desc="PKCS#7 ASN.1 Data type" />
               <oid value="2" id="signedData" class="SignedData" desc="PKCS#7 ASN.1 SignedData type" />
-              <oid value="2" id="signedData" class="SignedData" desc="PKCS#7 ASN.1 SignedData type" />
               <oid value="3" id="envelopedData" class="EnvelopedData" desc="PKCS#7 ASN.1 EnvelopedData type" />
               <oid value="4" id="signedAndEnvelopedData" class="SignedAndEnvelopedData" desc="PKCS#7 ASN.1 SignedAndEnvelopedData type" />
-              <oid value="5" id="EncryptedData" class="EncryptedData" desc="PKCS#7 ASN.1 EncryptedData type" />
+              <oid value="5" id="digestedData" class="DigestedData" desc="PKCS#7 ASN.1 DigestedData type" />
+              <oid value="6" id="encryptedData" class="EncryptedData" desc="PKCS#7 ASN.1 EncryptedData type" />
+              <oid value="7" id="dataWithAttributes" class="DataWithAttributes" desc="" />
+              <oid value="8" id="encryptedPrivateKeyInfo" class="EncryptedPrivateKeyInfo" desc="" />
+            </oid>
+            <oid value="9" id="pkcs-9" class="PKCS9" desc="Public-Key Cryptography Standards (PKCS) #9">
+              <oid value="0" id="modules" class="modules" desc="ASN.1 modules" />
+              <oid value="1" id="emailAddress" class="EmailAddress" desc="Email Address attribute for use in signatures" />
+              <oid value="2" id="unstructuredName" class="UnstructuredName" desc="PKCS#9 unstructuredName" />
+              <oid value="3" id="contentType" class="ContentType" desc="Content type" />
+              <oid value="4" id="messageDigest" class="MessageDigest" desc="Message digest" />
+              <oid value="5" id="signing-time" class="SigningTime" desc="Signing Time" />
+              <oid value="6" id="countersignature" class="CounterSignature" desc="countersignature attribute" />
+              <oid value="7" id="challengePassword" class="ChallengePassword" desc="Challenge Password attribute for use in signatures" />
+              <oid value="8" id="unstructuredAddress" class="UnstructuredAddress" desc="PKCS#9 unstructuredAddress" />
+              <oid value="9" id="extendedCertificateAttributes" class="ExtendedCertificateAttributes" desc="PKCS#9 extendedCertificateAttributes" />
+              <oid value="10" id="issuerAndSerialNumber" class="IssuerAndSerialNumber" desc="Issuer and serial number" />
+              <oid value="11" id="passwordCheck" class="PasswordCheck" desc="Password check" />
+              <oid value="12" id="publicKey" class="PublicKey" desc="Public key" />
+              <oid value="13" id="signingDescription" class="SigningDescription" desc="Signing description" />
+              <oid value="14" id="extensionRequest" class="ExtensionRequest" desc="PKCS#9 experimental extension request" />
+              <oid value="15" id="smimeCapabilities" class="SMIMECapabilities" desc="S/MIME (Multipurpose Internet Mail Extensions) capabilities" />
+              <oid value="16" id="smime" class="SMIME" desc="S/MIME" />
+              <oid value="17" id="pgpKeyID" class="PGPKeyID" desc="Key ID of an OpenPGP Key (e.g., 0x12345678)" />
+              <oid value="20" id="friendlyName" class="FriendlyName" desc="Public-Key Cryptography Standards (PKCS) #9 attribute friendlyName (for PKCS #12)" />
+              <oid value="21" id="localKeyID" class="LocalKeyID" desc="Public-Key Cryptography Standards (PKCS) #9 localKeyID (for PKCS #12)" />
+              <oid value="22" id="certTypes" class="CertTypes" desc="Public-Key Cryptography Standards (PKCS) #9 certTypes (for PKCS #12)">
+                <oid value="1" id="x509Certificate" class="X509Certificate" desc="Public-Key Cryptography Standards (PKCS) #9 x509Certificate (for PKCS #12)" />
+                <oid value="2" id="sdsiCertificate" class="SDSICertificate" desc="Public-Key Cryptography Standards (PKCS) #9 sdsiCertificate (for PKCS #12) " />
+              </oid>
+              <oid value="23" id="crlTypes" class="CRLTypes" desc="Public-Key Cryptography Standards (PKCS) #9 crlTypes (for PKCS #12)" />
+              <oid value="24" id="pkcs-9-oc" class="OC" desc="Object classes" />
+              <oid value="25" id="pkcs-9-at" class="AT" desc="New attributes" />
+              <oid value="26" id="pkcs-9-sx" class="SX" desc="Syntaxes" />
+              <oid value="27" id="pkcs-9-mr" class="MR" desc="Matching rules" />
+              <oid value="52" id="id-aa-CMSAlgorithmProtect" class="CMSAlgorithmProtect" desc="Cryptographic Message Syntax (CMS) algorithm protection attribute" />
+            </oid>
+            <oid value="12" id="pkcs-12" class="PKCS12" desc="Public-Key Cryptography Standard (PKCS) #12" >
+              <oid value="1" id="pkcs-12Pbe" class="PKCS12PBE" desc="PKCS #12 password-based encryption">
+                <oid value="1" id="pbeWithSHAAnd128BitRC4" class="PBEWithSHA1And128BitRC4" desc="Public-Key Cryptography Standards (PKCS) #12 password based encryption with SHA-1 and 128-bit Rivest Cipher 4 (RC4)" />
+                <oid value="2" id="pbeWithSHAAnd40BitRC4" class="PBEWithSHA1And40BitRC4" desc="Public-Key Cryptography Standards (PKCS) #12 password based encryption with SHA-1 and 40-bit Rivest Cipher 4 (RC4)" />
+                <oid value="3" id="pbeWithSHAAnd3-KeyTripleDES-CBC" class="PBEWithSHA1And3KeyTripleDESCBC" desc="Public-Key Cryptography Standards (PKCS) #12 password based encryption with SHA-1 and 3-key triple" />
+                <oid value="4" id="pbeWithSHAAnd2-KeyTripleDES-CBC" class="PBEWithSHA1And2KeyTripleDESCBC" desc="Public-Key Cryptography Standards (PKCS) #12 password based encryption with SHA-1 and 2-key triple" />
+                <oid value="5" id="pbeWithSHAAnd128BitRC2-CBC" class="PBEWithSHA1And128BitRC2CBC" desc="Public-Key Cryptography Standards (PKCS) #12 password based encryption with SHA-1 and 128-bit Rivest Cipher 2 (RC2) Cipher Block Chaining (CBC)" />
+                <oid value="6" id="pbeWithSHAAnd40BitRC2-CBC" class="PBEWithSHA1And40BitRC2CBC" desc="Public-Key Cryptography Standards (PKCS) #12 password based encryption with SHA-1 and 40-bit Rivest Cipher 2 (RC2) Cipher Block Chaining (CBC)" />
+              </oid>
+              <oid value="10" id="pkcs-12Version1" class="Version1" desc="(PKCS) #12 version 1">
+                <oid value="1" id="pkcs-12BagIds" class="BagIds" desc="Bags">
+                  <oid value="1" id="keyBag" class="KeyBag" desc="Key bag" />
+                  <oid value="2" id="pkcs-8ShroudedKeyBag" class="PKCS8ShroudedKeyBag" desc="Public-Key Cryptography Standards (PKCS) #8-shrouded key bag" />
+                  <oid value="3" id="certBag" class="CertBag" desc="Certificate Bag" />
+                  <oid value="4" id="crlBag" class="CRLBag" desc="Public-Key Cryptography Standards (PKCS) #12 Certificate Revocation List (CRL) bag" />
+                  <oid value="5" id="secretBag" class="SecretBag" desc="Secret bag" />
+                  <oid value="6" id="safeContentsBag" class="SafeContentsBag" desc="Public-Key Cryptography Standards (PKCS) #12 safe contents bag" />
+                </oid>
+              </oid>
             </oid>
           </oid>
           <oid value="2" id="digestAlgorithm" class="DigestAlgorithm" desc="Digest algorithms">

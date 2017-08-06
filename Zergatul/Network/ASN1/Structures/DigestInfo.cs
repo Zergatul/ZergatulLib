@@ -14,17 +14,15 @@ namespace Zergatul.Network.ASN1.Structures
         public AlgorithmIdentifier Algorithm { get; private set; }
         public byte[] Digest { get; private set; }
 
-        public static DigestInfo TryParse(ASN1Element element)
+        public static DigestInfo Parse(ASN1Element element)
         {
             var seq = element as Sequence;
-            if (seq == null || seq.Elements.Count != 2)
-                return null;
+            ParseException.ThrowIfNull(seq);
+            ParseException.ThrowIfNotEqual(seq.Elements.Count, 2);
 
-            var ai = AlgorithmIdentifier.TryParse(seq.Elements[0]);
+            var ai = AlgorithmIdentifier.Parse(seq.Elements[0]);
             var os = seq.Elements[1] as OctetString;
-
-            if (ai == null || os == null)
-                return null;
+            ParseException.ThrowIfNull(os);
 
             return new DigestInfo
             {

@@ -36,10 +36,16 @@ namespace Test
         // https://www.rebex.net/ftp-ssl.net/
         // http://www.dart.com/ftp-control-features.aspx
 
+        // TODO: GenerateOIDs, use Lazy<T> ???
+
         static void Main(string[] args)
         {
-            //DownloadOIDs.Go("1.3.6.1.5.5.7.48", "1.txt");
+            //DownloadOIDs.Go("1.2.840.113549.1.12.10.1", "1.txt");
             //return;
+
+            Org.BouncyCastle.Pkcs.Pkcs12Store store = new Org.BouncyCastle.Pkcs.Pkcs12Store();
+            store.Load(new FileStream("../../../ConsoleTest2/test.p12", FileMode.Open), "hh87$-Jqo".ToCharArray());
+            return;
 
             //var obj = Asn1Object.FromByteArray(BitHelper.HexToBytes("3026302406082b060105050730018618687474703a2f2f6f6373702e64696769636572742e636f6d"));
             //return;

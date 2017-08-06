@@ -9,8 +9,16 @@ namespace Zergatul.Cryptography.Hash
 {
     public abstract class AbstractHash
     {
+        /// <summary>
+        /// Block size in bytes
+        /// </summary>
         public abstract int BlockSize { get; }
+
+        /// <summary>
+        /// Hash size in bytes
+        /// </summary>
         public abstract int HashSize { get; }
+
         public abstract OID OID { get; }
 
         protected List<byte> _buffer;
@@ -68,5 +76,13 @@ namespace Zergatul.Cryptography.Hash
         protected abstract void ProcessBlock();
         protected abstract void AddPadding();
         protected abstract byte[] InternalStateToBytes();
+
+        public static AbstractHash Resolve(OID oid)
+        {
+            if (oid == OID.ISO.IdentifiedOrganization.OIW.SECSIG.Algorithms.SHA1)
+                return new SHA1();
+            else
+                throw new NotImplementedException();
+        }
     }
 }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
 using Zergatul.Network.ASN1;
+using Zergatul.Network.ASN1.Structures;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -39,7 +40,7 @@ namespace Zergatul.Cryptography.Certificate
             ReadFromStreamX509(stream);
         }
 
-        public X509Certificate(string filename)
+        public X509Certificate(string filename, string password = null)
         {
             using (var fs = File.OpenRead(filename))
                 switch (Path.GetExtension(filename))
@@ -48,7 +49,7 @@ namespace Zergatul.Cryptography.Certificate
                         ReadFromStreamX509(fs);
                         break;
                     case ".p12":
-                        ReadFromStreamPKCS12(fs);
+                        ReadFromStreamPKCS12(fs, password);
                         break;
                     default:
                         throw new NotSupportedException();
@@ -78,12 +79,25 @@ namespace Zergatul.Cryptography.Certificate
             Extensions = syntax.TbsCertificate.Extensions?.Select(ext => X509Extension.Parse(ext)).DefaultIfEmpty().ToArray();
         }
 
-        private void ReadFromStreamPKCS12(Stream stream)
+        private void ReadFromStreamPKCS12(Stream stream, string password)
         {
             var asn1 = ASN1Element.ReadFrom(stream);
-            var syntax = PKCS12CertificateSyntax.TryParse(asn1);
+            var pkcs12 = PKCS12Store.Parse(asn1, password);
 
-            var data = ASN1Element.ReadFrom(syntax.AuthSafe.Data);
+            var certs = pkcs12.Parts.SelectMany(p => p.Bags.Where(b => b.CertBag != null)).Select(bag => bag.CertBag.X509Certificate).ToArray();
+            var keys = pkcs12.Parts.SelectMany(p => p.Bags.Where(b => b.PKCS8ShroudedKeyBag != null)).Select(bag => bag.PKCS8ShroudedKeyBag.PrivateKey).ToArray();
+
+            if (certs.Length == 0)
+                throw new CertificateParseException("PFX store doesn't contain certificate");
+            if (certs.Length > 1)
+                throw new NotImplementedException();
+
+            ReadFromStreamX509(new MemoryStream(certs[0].RawData));
+            if (keys.Length > 1)
+                throw new NotImplementedException();
+
+            if (keys.Length == 1)
+                PrivateKey = new PrivateKey(keys[0]);
         }
 
         private static string FormatName(X509CertificateSyntax.Name name)

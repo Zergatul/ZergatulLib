@@ -56,6 +56,9 @@
     <Compile Include="Asymmetric\DiffieHellmanTests.cs" />
     <Compile Include="Asymmetric\RSATests.cs" />
     <Compile Include="Asymmetric\ECDiffieHellmanTests.cs" />
+    <Compile Include="BlockCipher\RC2Tests.cs" />
+    <Compile Include="BlockCipher\DESTests.cs" />
+    <Compile Include="Generator\PKCS12v11Tests.cs" />
     <Compile Include="Hash\Helper.cs" />
     <Compile Include="Hash\SHA1Tests.cs" />
     <Compile Include="Hash\SHA2Tests.cs" />

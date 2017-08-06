@@ -147,6 +147,40 @@ namespace Zergatul
             throw new NotImplementedException();
         }
 
+        public static void GetBytes(ushort value, ByteOrder order, byte[] array, int index)
+        {
+            if (order == ByteOrder.BigEndian)
+            {
+                array[index    ] = (byte)(value >> 08);
+                array[index + 1] = (byte)(value);;
+                return;
+            }
+
+            if (order == ByteOrder.LittleEndian)
+            {
+                array[index    ] = (byte)(value);
+                array[index + 1] = (byte)(value >> 08);
+                return;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public static ushort ToUInt16(byte[] data, int index, ByteOrder order)
+        {
+            if (order == ByteOrder.BigEndian)
+                return (ushort)(
+                    (data[index + 0] << 08) |
+                    (data[index + 1] << 00));
+
+            if (order == ByteOrder.LittleEndian)
+                return (ushort)(
+                    (data[index + 0] << 00) |
+                    (data[index + 1] << 08));
+
+            throw new NotImplementedException();
+        }
+
         public static uint ToUInt32(byte[] data, int index, ByteOrder order)
         {
             if (order == ByteOrder.BigEndian)
@@ -184,6 +218,11 @@ namespace Zergatul
             throw new NotImplementedException();
         }
 
+        public static ushort RotateRight(ushort value, int bits)
+        {
+            return (ushort)((value >> bits) | (value << (16 - bits)));
+        }
+
         public static uint RotateRight(uint value, int bits)
         {
             return (value >> bits) | (value << (32 - bits));
@@ -192,6 +231,11 @@ namespace Zergatul
         public static ulong RotateRight(ulong value, int bits)
         {
             return (value >> bits) | (value << (64 - bits));
+        }
+
+        public static ushort RotateLeft(ushort value, int bits)
+        {
+            return (ushort)((value << bits) | (value >> (16 - bits)));
         }
 
         public static uint RotateLeft(uint value, int bits)

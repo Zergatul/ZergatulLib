@@ -58,7 +58,7 @@ namespace Test
                 else
                     throw new InvalidOperationException();
 
-                strong = doc2.DocumentNode.Descendants("strong").Where(e => e.InnerText.Contains("Description")).Single();
+                strong = doc2.DocumentNode.Descendants("strong").Where(e => e.InnerText.Contains("Description")).Last();
                 HtmlAgilityPack.HtmlNode td = strong.ParentNode.NextSibling;
                 do
                 {

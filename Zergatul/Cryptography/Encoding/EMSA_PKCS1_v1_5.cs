@@ -67,7 +67,7 @@ namespace Zergatul.Cryptography.Encoding
             if (seq.Elements.Count != 2)
                 return null;
 
-            var ai = AlgorithmIdentifier.TryParse(seq.Elements[0]);
+            var ai = AlgorithmIdentifier.Parse(seq.Elements[0]);
             if (ai == null)
                 return null;
 

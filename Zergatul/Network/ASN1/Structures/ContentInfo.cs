@@ -13,35 +13,61 @@ namespace Zergatul.Network.ASN1.Structures
     {
         public OID ContentType { get; private set; }
         public byte[] Data { get; private set; }
+        public EncryptedData EncryptedData { get; private set; }
+        public SafeBag[] Bags { get; private set; }
 
-        public static ContentInfo TryParse(ASN1Element element)
+        public static ContentInfo Parse(ASN1Element element)
         {
             var seq = element as Sequence;
-            if (seq == null || seq.Elements.Count < 2)
-                return null;
+            ParseException.ThrowIfNull(seq);
+            ParseException.ThrowIfNotEqual(seq.Elements.Count, 2);
 
             var oi = seq.Elements[0] as ObjectIdentifier;
-            if (oi == null)
-                return null;
+            ParseException.ThrowIfNull(oi);
 
             var cs = seq.Elements[1] as ContextSpecific;
-            if (cs == null || cs.IsImplicit || cs.Tag.TagNumberEx != 0)
-                return null;
-            var content = cs.Elements[0];
+            ParseException.ThrowIfNull(cs);
+            ParseException.ThrowIfTrue(cs.IsImplicit);
+            ParseException.ThrowIfNotEqual(cs.Tag.TagNumberEx, 0);
+            ParseException.ThrowIfNotEqual(cs.Elements.Count, 1);
 
             if (oi.OID == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS7.Data)
             {
-                var os = content as OctetString;
-                if (os == null)
-                    return null;
+                var os = cs.Elements[0] as OctetString;
+                ParseException.ThrowIfNull(os);
+
                 return new ContentInfo
                 {
                     ContentType = oi.OID,
                     Data = os.Raw
                 };
             }
+            else if (oi.OID == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS7.EncryptedData)
+            {
+                return new ContentInfo
+                {
+                    ContentType = oi.OID,
+                    EncryptedData = EncryptedData.Parse(cs.Elements[0])
+                };
+            }
             else
                 throw new NotSupportedException();
+        }
+
+        public void Decrypt(string password)
+        {
+            if (EncryptedData != null)
+                Data = EncryptedData.Decrypt(password);
+
+            var element = ASN1Element.ReadFrom(Data);
+            var seq = element as Sequence;
+            ParseException.ThrowIfNull(seq);
+
+            Bags = seq.Elements.Select(e => SafeBag.Parse(e)).ToArray();
+
+            for (int i = 0; i < Bags.Length; i++)
+                if (Bags[i].PKCS8ShroudedKeyBag != null)
+                    Bags[i].PKCS8ShroudedKeyBag.Decrypt(password);
         }
     }
 }

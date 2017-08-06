@@ -7,46 +7,68 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Cryptography.Hash
 {
-    public class HMAC<T>
+    public class HMAC<T> : HMAC
         where T : AbstractHash, new()
+    {
+        public HMAC(byte[] secretKey)
+            : base(new T(), secretKey)
+        {
+        }
+    }
+
+    public class HMAC
     {
         public int BlockSize => _hash.BlockSize;
         public int HashSize => _hash.HashSize;
 
-        private ByteArray _ipad, _opad;
+        private byte[] _ipad, _opad;
 
         private AbstractHash _hash;
 
-        public HMAC(ByteArray secretKey)
+        public HMAC(AbstractHash hash, byte[] secretKey)
         {
-            _hash = new T();
+            this._hash = hash;
 
             Init(secretKey);
         }
 
-        public ByteArray ComputeHash(ByteArray data)
+        public byte[] ComputeHash(byte[] data)
         {
             // RFC 2104 // Page 2
-            return Hash(_opad + Hash(_ipad + data));
+            _hash.Reset();
+            _hash.Update(_ipad);
+            _hash.Update(data);
+            byte[] h = _hash.ComputeHash();
+
+            _hash.Reset();
+            _hash.Update(_opad);
+            _hash.Update(h);
+            return _hash.ComputeHash();
         }
 
-        private void Init(ByteArray secretKey)
+        private void Init(byte[] secretKey)
         {
             if (secretKey.Length > BlockSize)
-                secretKey = Hash(secretKey);
+            {
+                _hash.Reset();
+                _hash.Update(secretKey);
+                secretKey = _hash.ComputeHash();
+            }
 
             if (secretKey.Length < BlockSize)
-                secretKey = secretKey + new byte[BlockSize - secretKey.Length];
+            {
+                byte[] extSecretkey = new byte[BlockSize];
+                Array.Copy(secretKey, extSecretkey, secretKey.Length);
+                secretKey = extSecretkey;
+            }
 
-            _ipad = secretKey ^ 0x36;
-            _opad = secretKey ^ 0x5C;
-        }
+            _ipad = new byte[BlockSize];
+            for (int i = 0; i < _ipad.Length; i++)
+                _ipad[i] = (byte)(secretKey[i] ^ 0x36);
 
-        protected virtual ByteArray Hash(ByteArray data)
-        {
-            _hash.Reset();
-            _hash.Update(data.Array);
-            return new ByteArray(_hash.ComputeHash());
+            _opad = new byte[BlockSize];
+            for (int i = 0; i < _opad.Length; i++)
+                _opad[i] = (byte)(secretKey[i] ^ 0x5C);
         }
     }
 }
