@@ -26,11 +26,6 @@ namespace Zergatul.Network.Tls
                 DH_g = _dh.Parameters.g.ToBytes(ByteOrder.BigEndian),
                 DH_Ys = _dh.PublicKey.ToBytes(ByteOrder.BigEndian)
             };
-            message.SignAndHashAlgo = new SignatureAndHashAlgorithm
-            {
-                Hash = HashAlgorithm.SHA1,
-                Signature = SignatureAlgorithm.RSA
-            };
         }
 
         public override void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
@@ -51,11 +46,16 @@ namespace Zergatul.Network.Tls
 
         public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteBytes(message.Params.ToArray());
+            writer.WriteBytes(message.Params.ToBytes());
             writer.WriteByte((byte)message.SignAndHashAlgo.Hash);
             writer.WriteByte((byte)message.SignAndHashAlgo.Signature);
             writer.WriteShort((ushort)message.Signature.Length);
             writer.WriteBytes(message.Signature);
+        }
+
+        public override byte[] GetDataToSign(ServerKeyExchange message)
+        {
+            return message.Params.ToBytes();
         }
 
         public override void GetClientKeyExchange(ClientKeyExchange message)

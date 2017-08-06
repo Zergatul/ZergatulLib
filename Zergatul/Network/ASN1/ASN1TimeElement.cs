@@ -9,5 +9,11 @@ namespace Zergatul.Network.ASN1
     public abstract class ASN1TimeElement : ASN1Element
     {
         public DateTime Date { get; protected set; }
+
+        public ASN1TimeElement(ASN1Tag tag)
+            : base(tag)
+        {
+
+        }
     }
 }

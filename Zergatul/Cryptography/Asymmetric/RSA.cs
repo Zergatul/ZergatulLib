@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Zergatul.Cryptography.Encoding;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
+using Zergatul.Network.ASN1;
+using Zergatul.Network.ASN1.Structures;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
@@ -65,6 +67,19 @@ namespace Zergatul.Cryptography.Asymmetric
             public RSASignature(RSA rsa)
             {
                 this._rsa = rsa;
+            }
+
+            public override byte[] SignHash(AbstractHash hashAlgorithm)
+            {
+                var ai = new AlgorithmIdentifier(hashAlgorithm.OID, new Null());
+                var enc = new EMSA_PKCS1_v1_5(ai, hashAlgorithm.ComputeHash(), _rsa.KeySize / 8);
+
+                BigInteger m = new BigInteger(enc.ToBytes(), ByteOrder.BigEndian);
+                if (m >= _rsa.PrivateKey.n)
+                    throw new InvalidOperationException("Data too large for signing");
+
+                BigInteger s = BigInteger.ModularExponentiation(m, _rsa.PrivateKey.d, _rsa.PrivateKey.n);
+                return s.ToBytes(ByteOrder.BigEndian);
             }
 
             public override byte[] SignHash(byte[] data)

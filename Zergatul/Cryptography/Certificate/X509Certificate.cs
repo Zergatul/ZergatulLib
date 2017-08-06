@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.IO;
 using Zergatul.Network;
 using Zergatul.Network.ASN1;
 using Zergatul.Network.ASN1.Structures;
@@ -29,8 +30,6 @@ namespace Zergatul.Cryptography.Certificate
 
         public X509Certificate(byte[] data)
         {
-            RawData = data;
-
             using (var ms = new MemoryStream(data))
                 ReadFromStreamX509(ms);
         }
@@ -56,10 +55,31 @@ namespace Zergatul.Cryptography.Certificate
                 }
         }
 
+        public bool IsSelfSigned()
+        {
+            if (Extensions == null || Extensions.Length == 0)
+                return true;
+
+            var authKeyId = Extensions.OfType<AuthorityKeyIdentifier>().SingleOrDefault();
+            var subjKeyId = Extensions.OfType<SubjectKeyIdentifier>().SingleOrDefault();
+
+            if (authKeyId == null)
+                return true;
+
+            if (subjKeyId != null && subjKeyId.KeyIdentifier.SequenceEqual(authKeyId.KeyIdentifier))
+                return true;
+
+            return false;
+        }
+
         private void ReadFromStreamX509(Stream stream)
         {
-            var asn1 = ASN1Element.ReadFrom(stream);
+            var interception = new InterceptionStream(stream);
+
+            var asn1 = ASN1Element.ReadFrom(interception);
             var syntax = X509CertificateSyntax.TryParse(asn1);
+
+            this.RawData = interception.ReadBytes.ToArray();
 
             if (syntax.TbsCertificate.Version != null && syntax.TbsCertificate.Version.Value != 2)
                 throw new NotImplementedException("Only X509 v3 certificates are supported");

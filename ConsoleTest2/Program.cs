@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network.Tls;
@@ -15,10 +14,6 @@ namespace ConsoleTest2
     {
         static void Main(string[] args)
         {
-            var zcrt = new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo");
-            return;
-
-            var cert = new X509Certificate2("test.p12", "hh87$-Jqo");
             RunServer(useDotNetTls: false);
             //RunClient();
         }
@@ -29,7 +24,7 @@ namespace ConsoleTest2
 
             var listener = new TcpListener(IPAddress.Any, 32028);
             listener.Start();
-            var cert = new X509Certificate2("test.p12", "hh87$-Jqo");
+
             while (true)
             {
                 var client = listener.AcceptTcpClient();
@@ -45,7 +40,7 @@ namespace ConsoleTest2
                 {
                     if (useDotNetTls)
                     {
-                        sslStream.AuthenticateAsServer(cert, false, System.Security.Authentication.SslProtocols.Tls12, false);
+                        sslStream.AuthenticateAsServer(new System.Security.Cryptography.X509Certificates.X509Certificate2("test.p12", "hh87$-Jqo"), false, System.Security.Authentication.SslProtocols.Tls12, false);
                         sslStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
                         sslStream.Close();
                     }
@@ -61,10 +56,10 @@ namespace ConsoleTest2
                                 CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
                             }
                         };
-                        tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate(cert.RawData));
+                        tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo"));
                         tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
                     }
-                    client.Close();
+                    //client.Close();
                 }
                 catch (Exception ex)
                 {

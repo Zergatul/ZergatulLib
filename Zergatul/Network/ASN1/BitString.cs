@@ -12,6 +12,22 @@ namespace Zergatul.Network.ASN1
         public int PadBits { get; private set; }
         public byte[] Data { get; private set; }
 
+        public BitString()
+            : base(new ASN1Tag
+            {
+                Class = ASN1TagClass.Universal,
+                ValueType = ASN1ValueType.Primitive,
+                Number = ASN1TagNumber.BIT_STRING
+            })
+        {
+
+        }
+
+        protected override byte[] BodyToBytes()
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void ReadBody(Stream stream)
         {
             if (Length < 1)

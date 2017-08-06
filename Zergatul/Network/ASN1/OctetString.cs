@@ -11,6 +11,28 @@ namespace Zergatul.Network.ASN1
     {
         public byte[] Raw { get; private set; }
 
+        public OctetString()
+            : base(new ASN1Tag
+            {
+                Class = ASN1TagClass.Universal,
+                ValueType = ASN1ValueType.Primitive,
+                Number = ASN1TagNumber.OCTET_STRING
+            })
+        {
+
+        }
+
+        public OctetString(byte[] raw)
+            : this()
+        {
+            this.Raw = raw;
+        }
+
+        protected override byte[] BodyToBytes()
+        {
+            return Raw;
+        }
+
         protected override void ReadBody(byte[] data)
         {
             Raw = data;

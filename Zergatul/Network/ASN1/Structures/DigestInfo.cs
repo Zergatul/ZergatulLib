@@ -14,6 +14,27 @@ namespace Zergatul.Network.ASN1.Structures
         public AlgorithmIdentifier Algorithm { get; private set; }
         public byte[] Digest { get; private set; }
 
+        private DigestInfo()
+        {
+
+        }
+
+        public DigestInfo(AlgorithmIdentifier ai, byte[] digest)
+        {
+            this.Algorithm = ai;
+            this.Digest = digest;
+        }
+
+        public ASN1Element ToASN1()
+        {
+            return new Sequence(Algorithm.ToASN1(), new OctetString(Digest));
+        }
+
+        public byte[] ToBytes()
+        {
+            return ToASN1().ToBytes();
+        }
+
         public static DigestInfo Parse(ASN1Element element)
         {
             var seq = element as Sequence;

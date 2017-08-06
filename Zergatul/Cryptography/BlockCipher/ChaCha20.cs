@@ -18,12 +18,12 @@ namespace Zergatul.Cryptography.BlockCipher
 
         public override int KeySize => 16;
 
-        public override Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateEncryptor(byte[] key)
         {
             throw new NotImplementedException();
         }
 
-        public override Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateDecryptor(byte[] key)
         {
             throw new NotImplementedException();
         }

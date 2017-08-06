@@ -12,8 +12,19 @@ namespace Zergatul.Network.ASN1
         public List<ASN1Element> Elements { get; private set; }
 
         public Set()
+            : base(new ASN1Tag
+            {
+                Class = ASN1TagClass.Universal,
+                ValueType = ASN1ValueType.Constructed,
+                Number = ASN1TagNumber.SET
+            })
         {
             Elements = new List<ASN1Element>();
+        }
+
+        protected override byte[] BodyToBytes()
+        {
+            throw new NotImplementedException();
         }
 
         protected override void ReadBody(Stream stream)

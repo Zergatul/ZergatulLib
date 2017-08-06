@@ -332,7 +332,7 @@ namespace Zergatul.Cryptography.BlockCipher
             x[i + 15] = y15;
         }
 
-        public override Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateEncryptor(byte[] key)
         {
             byte[] ek;
             switch (Nk)
@@ -344,14 +344,10 @@ namespace Zergatul.Cryptography.BlockCipher
                     throw new NotImplementedException();
             }
 
-            var encryptor = ResolveEncryptor(mode);
-            encryptor.Cipher = this;
-            encryptor.ProcessBlock = ProcessBlock(ek, Nr);
-
-            return encryptor;
+            return ProcessBlock(ek, Nr);
         }
 
-        public override Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateDecryptor(byte[] key)
         {
             byte[] ek;
             switch (Nk)
@@ -362,13 +358,10 @@ namespace Zergatul.Cryptography.BlockCipher
                 default:
                     throw new NotImplementedException();
             }
+
             byte[] dk = ConvertKeys(ek);
 
-            var decryptor = ResolveDecryptor(mode);
-            decryptor.Cipher = this;
-            decryptor.ProcessBlock = ProcessBlock(dk, Nr);
-
-            return decryptor;
+            return ProcessBlock(dk, Nr);
         }
 
         private static Func<byte[], byte[]> ProcessBlock(byte[] ek, int Nr)

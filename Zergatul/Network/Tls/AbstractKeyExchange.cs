@@ -15,6 +15,7 @@ namespace Zergatul.Network.Tls
         public abstract void GetServerKeyExchange(ServerKeyExchange message);
         public abstract void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader);
         public abstract void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer);
+        public abstract byte[] GetDataToSign(ServerKeyExchange message);
 
         public abstract void GetClientKeyExchange(ClientKeyExchange message);
         public abstract void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader);

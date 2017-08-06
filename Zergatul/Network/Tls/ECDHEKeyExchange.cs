@@ -16,8 +16,10 @@ namespace Zergatul.Network.Tls
 
         public override void GetServerKeyExchange(ServerKeyExchange message)
         {
+            var namedCurve = NamedCurve.secp256r1;
+
             _ecdh = new ECDiffieHellman();
-            _ecdh.Parameters = Math.EllipticCurves.PrimeField.EllipticCurve.secp256k1;
+            _ecdh.Parameters = ResolveCurve(namedCurve);
             _ecdh.GenerateKeys(Random);
 
             message.ECParams = new ServerECDHParams
@@ -25,15 +27,9 @@ namespace Zergatul.Network.Tls
                 CurveParams = new ECParameters
                 {
                     CurveType = ECCurveType.NamedCurve,
-                    NamedCurve = NamedCurve.secp256k1
+                    NamedCurve = namedCurve
                 },
                 Point = _ecdh.PublicKey.ToBytes()
-            };
-
-            message.SignAndHashAlgo = new SignatureAndHashAlgorithm
-            {
-                Hash = HashAlgorithm.SHA1,
-                Signature = SignatureAlgorithm.RSA
             };
         }
 
@@ -55,33 +51,48 @@ namespace Zergatul.Network.Tls
 
         public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteBytes(message.ECParams.ToBytes());
+            writer.WriteByte((byte)message.SignAndHashAlgo.Hash);
+            writer.WriteByte((byte)message.SignAndHashAlgo.Signature);
+            writer.WriteShort((ushort)message.Signature.Length);
+            writer.WriteBytes(message.Signature);
+        }
+
+        public override byte[] GetDataToSign(ServerKeyExchange message)
+        {
+            return message.ECParams.ToBytes();
         }
 
         public override void GetClientKeyExchange(ClientKeyExchange message)
         {
             message.ECDH_Yc = _ecdh.PublicKey.ToBytes();
 
-            if (_ecdh.KeyExchange.SharedSecret.PFECPoint != null)
-            {
-                var curve = (Math.EllipticCurves.PrimeField.EllipticCurve)_ecdh.Parameters;
-                PreMasterSecret = new ByteArray(_ecdh.KeyExchange.SharedSecret.PFECPoint.x.ToBytes(ByteOrder.BigEndian, (curve.p.BitSize + 7) / 8));
-            }
-            if (_ecdh.KeyExchange.SharedSecret.BFECPoint != null)
-            {
-                var curve = (Math.EllipticCurves.BinaryField.EllipticCurve)_ecdh.Parameters;
-                PreMasterSecret = new ByteArray(_ecdh.KeyExchange.SharedSecret.BFECPoint.x.ToBytes(ByteOrder.BigEndian, (curve.f.Degree + 7) / 8));
-            }
+            PreMasterSecret = new ByteArray(_ecdh.KeyExchange.SharedSecret.XToBytes());
         }
 
         public override void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader)
         {
-            throw new NotImplementedException();
+            message.ECDH_Yc= reader.ReadBytes(reader.ReadByte());
+
+            _ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECDH_Yc, _ecdh.Parameters));
+
+            /*
+                All ECDH calculations (including parameter and key generation as well
+                as the shared secret calculation) are performed according to [6]
+                using the ECKAS-DH1 scheme with the identity map as key derivation
+                function (KDF), so that the premaster secret is the x-coordinate of
+                the ECDH shared secret elliptic curve point represented as an octet
+                string.  Note that this octet string (Z in IEEE 1363 terminology) as
+                output by FE2OSP, the Field Element to Octet String Conversion
+                Primitive, has constant length for any given field; leading zeros
+                found in this octet string MUST NOT be truncated.
+            */
+            PreMasterSecret = new ByteArray(_ecdh.KeyExchange.SharedSecret.XToBytes());
         }
 
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteShort((ushort)message.ECDH_Yc.Length);
+            writer.WriteByte((byte)message.ECDH_Yc.Length);
             writer.WriteBytes(message.ECDH_Yc);
         }
 

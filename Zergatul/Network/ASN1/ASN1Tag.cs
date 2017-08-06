@@ -15,6 +15,15 @@ namespace Zergatul.Network.ASN1
 
         public int TagNumberEx;
 
+        public void WriteTo(Stream stream)
+        {
+            if ((int)Number == 0x1F)
+                throw new NotImplementedException();
+
+            int value = ((byte)Class << 6) | ((byte)ValueType << 5) | (byte)Number;
+            stream.WriteByte((byte)value);
+        }
+
         public static ASN1Tag FromByte(byte value, Stream stream, out int length)
         {
             length = 1;

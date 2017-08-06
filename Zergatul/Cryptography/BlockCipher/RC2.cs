@@ -126,13 +126,11 @@ namespace Zergatul.Cryptography.BlockCipher
             RMash(R, K, 0);
         }
 
-        public override Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateEncryptor(byte[] key)
         {
             ushort[] K = KeyExpansion(key, _keySizeBits);
 
-            var encryptor = ResolveEncryptor(mode);
-            encryptor.Cipher = this;
-            encryptor.ProcessBlock = (block) =>
+            return (block) =>
             {
                 ushort[] R = new ushort[4];
                 for (int i = 0; i < 4; i++)
@@ -159,17 +157,13 @@ namespace Zergatul.Cryptography.BlockCipher
 
                 return result;
             };
-
-            return encryptor;
         }
 
-        public override Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateDecryptor(byte[] key)
         {
             ushort[] K = KeyExpansion(key, _keySizeBits);
 
-            var decryptor = ResolveDecryptor(mode);
-            decryptor.Cipher = this;
-            decryptor.ProcessBlock = (block) =>
+            return (block) =>
             {
                 ushort[] R = new ushort[4];
                 for (int i = 0; i < 4; i++)
@@ -196,8 +190,6 @@ namespace Zergatul.Cryptography.BlockCipher
 
                 return result;
             };
-
-            return decryptor;
         }
     }
 }

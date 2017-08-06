@@ -12,7 +12,7 @@ namespace Zergatul.Network.Tls
         public byte[] DH_g;
         public byte[] DH_Ys;
 
-        public byte[] Raw;
+        private byte[] _raw;
 
         public void Read(BinaryReader reader)
         {
@@ -24,10 +24,18 @@ namespace Zergatul.Network.Tls
             DH_Ys = reader.ReadBytes(reader.ReadShort());
 
             reader.StopTracking();
-            this.Raw = raw.ToArray();
+
+            this._raw = raw.ToArray();
         }
 
-        public byte[] ToArray()
+        public byte[] ToBytes()
+        {
+            if (_raw == null)
+                _raw = GetRaw();
+            return _raw;
+        }
+
+        private byte[] GetRaw()
         {
             var list = new List<byte>();
             var writer = new BinaryWriter(list);

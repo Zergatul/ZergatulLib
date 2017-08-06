@@ -43,9 +43,9 @@ namespace Test
             //DownloadOIDs.Go("1.2.840.113549.1.12.10.1", "1.txt");
             //return;
 
-            Org.BouncyCastle.Pkcs.Pkcs12Store store = new Org.BouncyCastle.Pkcs.Pkcs12Store();
+            /*Org.BouncyCastle.Pkcs.Pkcs12Store store = new Org.BouncyCastle.Pkcs.Pkcs12Store();
             store.Load(new FileStream("../../../ConsoleTest2/test.p12", FileMode.Open), "hh87$-Jqo".ToCharArray());
-            return;
+            return;*/
 
             //var obj = Asn1Object.FromByteArray(BitHelper.HexToBytes("3026302406082b060105050730018618687474703a2f2f6f6373702e64696769636572742e636f6d"));
             //return;
@@ -115,39 +115,39 @@ namespace Test
                 "5FB7EE0633E259DBAD0C4C9AE6D38F1A61C7DC25",
                 false);*/
 
-            //bool testLocalHost = false;
-            //if (testLocalHost)
-            //{
-            //    var client = new TcpClient("localhost", 32028);
-            //    var tls = new TlsStream(client.GetStream());
-            //    tls.AuthenticateAsClient("localhost");
+            bool testLocalHost = false;
+            if (testLocalHost)
+            {
+                var client = new TcpClient("localhost", 32028);
+                var tls = new TlsStream(client.GetStream());
+                tls.AuthenticateAsClient("localhost");
 
-            //    byte[] buffer = new byte[12];
-            //    tls.Read(buffer, 0, 12);
+                byte[] buffer = new byte[12];
+                tls.Read(buffer, 0, 12);
 
-            //    Console.WriteLine(Encoding.UTF8.GetString(buffer));
-            //}
-            //else
-            //{
-            //    string host =
-            //        //"www.howsmyssl.com"
-            //        //"ru.wargaming.net"
-            //        "ru.4game.com"
-            //        ;
+                Console.WriteLine(Encoding.UTF8.GetString(buffer));
+            }
+            else
+            {
+                string host =
+                    //"www.howsmyssl.com"
+                    //"ru.wargaming.net"
+                    "ru.4game.com"
+                    ;
 
-            //    var client = new TcpClient(host, 443);
-            //    var tls = new TlsStream(client.GetStream());
-            //    tls.AuthenticateAsClient(host);
+                var client = new TcpClient(host, 443);
+                var tls = new TlsStream(client.GetStream());
+                tls.AuthenticateAsClient(host);
 
-            //    string request =
-            //        "GET / HTTP/1.0" + Environment.NewLine +
-            //        "Host: " + host + Environment.NewLine +
-            //        Environment.NewLine;
-            //    tls.Write(Encoding.ASCII.GetBytes(request));
-            //    byte[] buffer = new byte[500];
-            //    tls.Read(buffer, 0, 500);
-            //    Console.WriteLine(Encoding.UTF8.GetString(buffer));
-            //}
+                string request =
+                    "GET / HTTP/1.0" + Environment.NewLine +
+                    "Host: " + host + Environment.NewLine +
+                    Environment.NewLine;
+                tls.Write(Encoding.ASCII.GetBytes(request));
+                byte[] buffer = new byte[500];
+                tls.Read(buffer, 0, 500);
+                Console.WriteLine(Encoding.UTF8.GetString(buffer));
+            }
 
             // b13ec36903f8bf4701d498261a0802ef63642bc3
 

@@ -9,6 +9,22 @@ namespace Zergatul.Network.ASN1
 {
     public class PrintableString : ASN1StringElement
     {
+        public PrintableString()
+            : base(new ASN1Tag
+            {
+                Class = ASN1TagClass.Universal,
+                ValueType = ASN1ValueType.Primitive,
+                Number = ASN1TagNumber.PrintableString
+            })
+        {
+
+        }
+
+        protected override byte[] BodyToBytes()
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void ReadBody(Stream stream)
         {
             byte[] buffer = ReadBuffer(stream, checked((int)Length));

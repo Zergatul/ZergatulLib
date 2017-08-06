@@ -12,9 +12,30 @@ namespace Zergatul.Network.ASN1
     {
         public List<ASN1Element> Elements { get; private set; }
 
-        public Sequence()
+        public Sequence(params ASN1Element[] elements)
+            : base(new ASN1Tag
+            {
+                Class = ASN1TagClass.Universal,
+                ValueType = ASN1ValueType.Constructed,
+                Number = ASN1TagNumber.SEQUENCE
+            })
         {
-            Elements = new List<ASN1Element>();
+            this.Elements = new List<ASN1Element>();
+            if (elements != null)
+                this.Elements.AddRange(elements);
+        }
+
+        protected override byte[] BodyToBytes()
+        {
+            using (var ms = new MemoryStream())
+            {
+                for (int i = 0; i < Elements.Count; i++)
+                {
+                    byte[] buffer = Elements[i].ToBytes();
+                    ms.Write(buffer, 0, buffer.Length);
+                }
+                return ms.ToArray();
+            }
         }
 
         protected override void ReadBody(Stream stream)

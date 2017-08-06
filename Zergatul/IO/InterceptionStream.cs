@@ -5,21 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.IO
 {
     internal class InterceptionStream : Stream
     {
         private Stream _innerStream;
 
-        public delegate void ReadDataEventHandler(object sender, ReadDataEventArgs e);
-        public delegate void WriteDataEventHandler(object sender, WriteDataEventArgs e);
-
-        public event ReadDataEventHandler OnReadData;
-        public event WriteDataEventHandler OnWriteData;
+        public List<byte> ReadBytes;
 
         public InterceptionStream(Stream innerStream)
         {
             this._innerStream = innerStream;
+            this.ReadBytes = new List<byte>();
         }
 
         public override bool CanRead => _innerStream.CanRead;
@@ -52,10 +49,7 @@ namespace Zergatul.Network.Tls
         {
             int bytesRead = _innerStream.Read(buffer, offset, count);
             if (bytesRead > 0)
-                OnReadData?.Invoke(this, new ReadDataEventArgs
-                {
-                    Data = buffer.Skip(offset).Take(bytesRead).ToArray()
-                });
+                ReadBytes.AddRange(buffer.Skip(offset).Take(bytesRead));
 
             return bytesRead;
         }
@@ -73,11 +67,11 @@ namespace Zergatul.Network.Tls
         public override void Write(byte[] buffer, int offset, int count)
         {
             _innerStream.Write(buffer, offset, count);
-            if (count > 0)
+            /*if (count > 0)
                 OnWriteData?.Invoke(this, new WriteDataEventArgs
                 {
                     Data = buffer.Skip(offset).Take(count).ToArray()
-                });
+                });*/
         }
     }
 }

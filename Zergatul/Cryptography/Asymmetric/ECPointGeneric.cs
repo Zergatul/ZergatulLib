@@ -78,6 +78,22 @@ namespace Zergatul.Cryptography.Asymmetric
             throw new InvalidOperationException();
         }
 
+        public byte[] XToBytes()
+        {
+            if (PFECPoint != null)
+            {
+                int length = (PFECPoint.Curve.p.BitSize + 7) / 8;
+                return PFECPoint.x.ToBytes(ByteOrder.BigEndian, length);
+            }
+            if (BFECPoint != null)
+            {
+                int length = (BFECPoint.Curve.f.Degree + 7) / 8;
+                return BFECPoint.x.ToBytes(ByteOrder.BigEndian, length);
+            }
+
+            throw new InvalidOperationException();
+        }
+
         public byte[] ToBytes()
         {
             if (PFECPoint != null)

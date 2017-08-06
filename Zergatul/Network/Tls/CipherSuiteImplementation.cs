@@ -6,15 +6,17 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal class CipherSuiteImplementation<KeyExchange, BlockCipher, HashFunction> : AbstractCipherSuite
+    internal class CipherSuiteImplementation<KeyExchange, BlockCipher, CipherMode, HashFunction> : AbstractCipherSuite
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
+        where CipherMode : AbstractBlockCipherMode, new()
         where HashFunction : AbstractHash, new()
     {
         protected TlsConnectionKeys _keys;
 
         protected KeyExchange _keyExchange;
         protected BlockCipher _blockCipher;
+        protected CipherMode _blockCipherMode;
         protected Encryptor _encryptor;
         protected Decryptor _decryptor;
         protected HMAC<HashFunction> _encryptHMAC;
@@ -22,15 +24,15 @@ namespace Zergatul.Network.Tls
 
         protected ByteArray _preMasterSecret;
 
-        public override void Init(SecurityParameters secParams, Role role, BlockCipherMode mode, ISecureRandom random)
+        public override void Init(SecurityParameters secParams, Role role, ISecureRandom random)
         {
-            base.Init(secParams, role, mode, random);
+            base.Init(secParams, role, random);
 
             _keyExchange = new KeyExchange();
             _keyExchange.Random = random;
 
             _blockCipher = new BlockCipher();
-            _blockCipherMode = mode;
+            _blockCipherMode = new CipherMode();
 
             secParams.CipherType = CipherType.Block;
             secParams.EncKeyLength = (byte)_blockCipher.KeySize;
@@ -55,6 +57,11 @@ namespace Zergatul.Network.Tls
         public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
         {
             _keyExchange.WriteServerKeyExchange(message, writer);
+        }
+
+        public override byte[] GetKeyExchangeDataToSign(ServerKeyExchange message)
+        {
+            return _keyExchange.GetDataToSign(message);
         }
 
         public override ClientKeyExchange GetClientKeyExchange()

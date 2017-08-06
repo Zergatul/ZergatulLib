@@ -16,6 +16,22 @@ namespace Zergatul.Network.ASN1.Structures
         public OID Algorithm { get; private set; }
         public ASN1Element Parameters { get; private set; }
 
+        private AlgorithmIdentifier()
+        {
+
+        }
+
+        public AlgorithmIdentifier(OID algorithm, ASN1Element parameters)
+        {
+            this.Algorithm = algorithm;
+            this.Parameters = parameters;
+        }
+
+        public ASN1Element ToASN1()
+        {
+            return new Sequence(new ObjectIdentifier(Algorithm), Parameters);
+        }
+
         public static AlgorithmIdentifier Parse(ASN1Element element)
         {
             var seq = element as Sequence;

@@ -14,8 +14,19 @@ namespace Zergatul.Network.ASN1
         public bool IsImplicit => Implicit != null;
 
         public ContextSpecific()
+            : base(new ASN1Tag
+            {
+                /*Class = ASN1TagClass.Universal,
+                ValueType = ASN1ValueType.Primitive,
+                Number = ASN1TagNumber.*/
+            })
         {
             Elements = new List<ASN1Element>();
+        }
+
+        protected override byte[] BodyToBytes()
+        {
+            throw new NotImplementedException();
         }
 
         protected override void ReadBody(Stream stream)

@@ -10,6 +10,22 @@ namespace Zergatul.Network.ASN1
 {
     public class UTCTime : ASN1TimeElement
     {
+        public UTCTime()
+            : base(new ASN1Tag
+            {
+                Class = ASN1TagClass.Universal,
+                ValueType = ASN1ValueType.Primitive,
+                Number = ASN1TagNumber.UTCTime
+            })
+        {
+
+        }
+
+        protected override byte[] BodyToBytes()
+        {
+            throw new NotImplementedException();
+        }
+
         protected override void ReadBody(Stream stream)
         {
             byte[] buffer = ReadBuffer(stream, checked((int)Length));

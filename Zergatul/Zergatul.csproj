@@ -59,6 +59,7 @@
     <Compile Include="Cryptography\Asymmetric\RSAPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPublicKey.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
+    <Compile Include="Cryptography\BlockCipher\CipherMode\AbstractBlockCipherMode.cs" />
     <Compile Include="Cryptography\BlockCipher\AES.cs" />
     <Compile Include="Cryptography\BlockCipher\AES128.cs" />
     <Compile Include="Cryptography\BlockCipher\AES192.cs" />
@@ -72,13 +73,11 @@
     <Compile Include="Cryptography\BlockCipher\Camellia256.cs" />
     <Compile Include="Cryptography\BlockCipher\Camellia192.cs" />
     <Compile Include="Cryptography\BlockCipher\Camellia128.cs" />
-    <Compile Include="Cryptography\BlockCipher\CBCDecryptor.cs" />
-    <Compile Include="Cryptography\BlockCipher\CBCEncryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\ChaCha20.cs" />
+    <Compile Include="Cryptography\BlockCipher\CipherMode\CBC.cs" />
+    <Compile Include="Cryptography\BlockCipher\CipherMode\ECB.cs" />
     <Compile Include="Cryptography\BlockCipher\Decryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\DES.cs" />
-    <Compile Include="Cryptography\BlockCipher\ECBDecryptor.cs" />
-    <Compile Include="Cryptography\BlockCipher\ECBEncryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\Encryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\RC2.cs" />
     <Compile Include="Cryptography\BlockCipher\TripleDESEDE.cs" />
@@ -250,7 +249,7 @@
     <Compile Include="Network\Tls\HandshakeBody.cs" />
     <Compile Include="Network\Tls\HandshakeMessage.cs" />
     <Compile Include="Network\Tls\HandshakeType.cs" />
-    <Compile Include="Network\Tls\InterceptionStream.cs" />
+    <Compile Include="IO\InterceptionStream.cs" />
     <Compile Include="Network\Tls\KeyExchangeAlgorithm.cs" />
     <Compile Include="Network\Tls\NamedCurve.cs" />
     <Compile Include="Network\Tls\ProtocolVersion.cs" />

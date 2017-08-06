@@ -11,29 +11,26 @@ namespace Zergatul.Cryptography.BlockCipher
         public abstract int BlockSize { get; }
         public abstract int KeySize { get; }
 
-        protected static Encryptor ResolveEncryptor(BlockCipherMode mode)
+        public abstract Func<byte[], byte[]> CreateEncryptor(byte[] key);
+        public abstract Func<byte[], byte[]> CreateDecryptor(byte[] key);
+
+        public Encryptor CreateEncryptor(byte[] key, AbstractBlockCipherMode mode)
         {
-            switch (mode)
-            {
-                case BlockCipherMode.ECB: return new ECBEncryptor();
-                case BlockCipherMode.CBC: return new CBCEncryptor();
-                default:
-                    throw new NotImplementedException();
-            }
+            var enc = mode.CreateEncryptor();
+            enc.Cipher = this;
+            enc.ProcessBlock = CreateEncryptor(key);
+            return enc;
         }
 
-        protected static Decryptor ResolveDecryptor(BlockCipherMode mode)
+        public Decryptor CreateDecryptor(byte[] key, AbstractBlockCipherMode mode)
         {
-            switch (mode)
-            {
-                case BlockCipherMode.ECB: return new ECBDecryptor();
-                case BlockCipherMode.CBC: return new CBCDecryptor();
-                default:
-                    throw new NotImplementedException();
-            }
+            var dec = mode.CreateDecryptor();
+            dec.Cipher = this;
+            dec.ProcessBlock = CreateDecryptor(key);
+            return dec;
         }
 
-        public abstract Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode);
-        public abstract Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode);
+        public Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode) => CreateEncryptor(key, AbstractBlockCipherMode.Resolve(mode));
+        public Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode) => CreateDecryptor(key, AbstractBlockCipherMode.Resolve(mode));
     }
 }

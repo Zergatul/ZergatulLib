@@ -9,9 +9,9 @@ namespace Zergatul.Cryptography.BlockCipher
     public class TripleDESEDE : AbstractBlockCipher
     {
         public override int BlockSize => 8;
-        public override int KeySize => 21;
+        public override int KeySize => 24;
 
-        public override Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateEncryptor(byte[] key)
         {
             byte[] key1 = new byte[8];
             byte[] key2 = new byte[8];
@@ -22,21 +22,14 @@ namespace Zergatul.Cryptography.BlockCipher
             Array.Copy(key, 16, key3, 0, 8);
 
             var des = new DES();
-            var enc1 = des.CreateEncryptor(key1, BlockCipherMode.ECB);
-            var dec = des.CreateDecryptor(key2, BlockCipherMode.ECB);
-            var enc2 = des.CreateEncryptor(key3, BlockCipherMode.ECB);
+            var enc1 = des.CreateEncryptor(key1);
+            var dec = des.CreateDecryptor(key2);
+            var enc2 = des.CreateEncryptor(key3);
 
-            var encryptor = ResolveEncryptor(mode);
-            encryptor.Cipher = this;
-            encryptor.ProcessBlock = (block) =>
-            {
-                return enc2.Encrypt(dec.Decrypt(enc1.Encrypt(block)));
-            };
-
-            return encryptor;
+            return block => enc2(dec(enc1(block)));
         }
 
-        public override Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateDecryptor(byte[] key)
         {
             byte[] key1 = new byte[8];
             byte[] key2 = new byte[8];
@@ -47,18 +40,11 @@ namespace Zergatul.Cryptography.BlockCipher
             Array.Copy(key, 16, key3, 0, 8);
 
             var des = new DES();
-            var dec1 = des.CreateDecryptor(key1, BlockCipherMode.ECB);
-            var enc = des.CreateEncryptor(key2, BlockCipherMode.ECB);
-            var dec2 = des.CreateDecryptor(key3, BlockCipherMode.ECB);
+            var dec1 = des.CreateDecryptor(key1);
+            var enc = des.CreateEncryptor(key2);
+            var dec2 = des.CreateDecryptor(key3);
 
-            var decryptor = ResolveDecryptor(mode);
-            decryptor.Cipher = this;
-            decryptor.ProcessBlock = (block) =>
-            {
-                return dec1.Decrypt(enc.Encrypt(dec2.Decrypt(block)));
-            };
-
-            return decryptor;
+            return block => dec1(enc(dec2(block)));
         }
     }
 }

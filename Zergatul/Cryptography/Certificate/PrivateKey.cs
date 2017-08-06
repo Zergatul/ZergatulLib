@@ -36,6 +36,7 @@ namespace Zergatul.Cryptography.Certificate
                     n = _keyInfo.RSA.Modulus,
                     e = _keyInfo.RSA.PublicExponent
                 };
+                rsa.Parameters = new RSAParameters { BitSize = rsa.PublicKey.n.BitSize };
                 return rsa;
             }
             else

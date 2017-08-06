@@ -11,7 +11,7 @@ namespace Zergatul.Network.Tls
         public ECParameters CurveParams;
         public byte[] Point;
 
-        public byte[] Raw;
+        private byte[] _raw;
 
         public void Read(BinaryReader reader)
         {
@@ -35,7 +35,37 @@ namespace Zergatul.Network.Tls
             Point = reader.ReadBytes(reader.ReadByte());
 
             reader.StopTracking();
-            this.Raw = raw.ToArray();
+
+            this._raw = raw.ToArray();
+        }
+
+        public byte[] ToBytes()
+        {
+            if (_raw == null)
+                _raw = GetRaw();
+
+            return _raw;
+        }
+
+        private byte[] GetRaw()
+        {
+            var list = new List<byte>();
+            var writer = new BinaryWriter(list);
+
+            writer.WriteByte((byte)CurveParams.CurveType);
+            switch (CurveParams.CurveType)
+            {
+                case ECCurveType.NamedCurve:
+                    writer.WriteShort((ushort)CurveParams.NamedCurve);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            writer.WriteByte((byte)Point.Length);
+            writer.WriteBytes(Point);
+
+            return list.ToArray();
         }
     }
 }

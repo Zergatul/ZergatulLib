@@ -214,13 +214,11 @@ namespace Zergatul.Cryptography.BlockCipher
                     state[i, j] = newState[i, j];
         }
 
-        public override Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateEncryptor(byte[] key)
         {
             uint[] w = KeyExpansion(key);
 
-            var encryptor = ResolveEncryptor(mode);
-            encryptor.Cipher = this;
-            encryptor.ProcessBlock = (block) =>
+            return (block) =>
             {
                 var state = new State();
 
@@ -244,17 +242,13 @@ namespace Zergatul.Cryptography.BlockCipher
 
                 return state.ToArray();
             };
-
-            return encryptor;
         }
 
-        public override Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateDecryptor(byte[] key)
         {
             uint[] w = KeyExpansion(key);
 
-            var decryptor = ResolveDecryptor(mode);
-            decryptor.Cipher = this;
-            decryptor.ProcessBlock = (block) =>
+            return (block) =>
             {
                 var state = new State();
 
@@ -278,8 +272,6 @@ namespace Zergatul.Cryptography.BlockCipher
 
                 return state.ToArray();
             };
-
-            return decryptor;
         }
 
         private class State

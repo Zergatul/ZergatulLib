@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Net.Sockets;
 using Zergatul.Network.Tls;
 using System.Threading;
 using System.Text;
+using Zergatul.Cryptography.Certificate;
 
 namespace Zergatul.Tls.Tests
 {
@@ -14,6 +14,8 @@ namespace Zergatul.Tls.Tests
     {
         private static string MessageToSend = "Hello World!!!";
         private static string MessageResponse = "OK";
+
+        #region DHE_RSA_AES
 
         [TestMethod]
         public void TLS_DHE_RSA_WITH_AES_128_CBC_SHA()
@@ -39,6 +41,68 @@ namespace Zergatul.Tls.Tests
             TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256);
         }
 
+        #endregion
+
+        #region DHE_RSA_ARIA
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384);
+        }
+
+        #endregion
+
+        #region DHE_RSA_CAMELLIA
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA);
+        }
+
+        #endregion
+
+        #region ECDHE_RSA_AES
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384);
+        }
+
+        #endregion
+
         private static void TestCipherSuite(CipherSuite cipher)
         {
             var tlsSettings = new TlsStreamSettings
@@ -52,7 +116,7 @@ namespace Zergatul.Tls.Tests
             byte[] response = null;
             var serverThread = new Thread(() =>
             {
-                var cert = new X509Certificate2(Settings.CertName, Settings.CertPassword);
+                var cert = new X509Certificate(Settings.CertName, Settings.CertPassword);
 
                 var listener = new TcpListener(IPAddress.Any, Settings.Port);
                 listener.Start();

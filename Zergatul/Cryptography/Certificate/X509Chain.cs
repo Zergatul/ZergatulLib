@@ -22,8 +22,7 @@ namespace Zergatul.Cryptography.Certificate
 
             var list = new List<X509Certificate>();
 
-            var selfSigned = certificates.Where(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Count() == 0);
-            if (selfSigned.Count() > 1)
+            if (certificates.Count(c => c.IsSelfSigned())  > 1)
                 throw new InvalidOperationException("There can be only 1 self signed certificate in chain");
 
             if (certificates.Any(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Count() > 1))
@@ -33,7 +32,7 @@ namespace Zergatul.Cryptography.Certificate
 
             // skip self-signed, they should be grabbed from store
             if (store != null)
-                certificates = certificates.Where(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Count() == 1).ToArray();
+                certificates = certificates.Where(c => !c.IsSelfSigned()).ToArray();
 
             if (certificates.Any(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Single().KeyIdentifier == null))
                 throw new NotSupportedException();
@@ -47,7 +46,7 @@ namespace Zergatul.Cryptography.Certificate
                 list.Add(rootLinked[0]);
             }
             else
-                list.Add(selfSigned.Single());
+                list.Add(certificates.Single(c => c.IsSelfSigned()));
 
             while (list.Count < certificates.Count())
             {

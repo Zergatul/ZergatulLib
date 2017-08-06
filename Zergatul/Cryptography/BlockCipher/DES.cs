@@ -213,13 +213,11 @@ namespace Zergatul.Cryptography.BlockCipher
             return rp;
         }
 
-        public override Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateEncryptor(byte[] key)
         {
             ulong[] K = KeyExpansion(key);
 
-            var encryptor = ResolveEncryptor(mode);
-            encryptor.Cipher = this;
-            encryptor.ProcessBlock = (block) =>
+            return (block) =>
             {
                 ulong m = BitHelper.ToUInt64(block, 0, ByteOrder.BigEndian);
 
@@ -246,17 +244,13 @@ namespace Zergatul.Cryptography.BlockCipher
 
                 return BitHelper.GetBytes(mp, ByteOrder.BigEndian);
             };
-
-            return encryptor;
         }
 
-        public override Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateDecryptor(byte[] key)
         {
             ulong[] K = KeyExpansion(key);
 
-            var decryptor = ResolveDecryptor(mode);
-            decryptor.Cipher = this;
-            decryptor.ProcessBlock = (block) =>
+            return (block) =>
             {
                 ulong m = BitHelper.ToUInt64(block, 0, ByteOrder.BigEndian);
 
@@ -283,8 +277,6 @@ namespace Zergatul.Cryptography.BlockCipher
 
                 return BitHelper.GetBytes(mp, ByteOrder.BigEndian);
             };
-
-            return decryptor;
         }
     }
 }

@@ -18,6 +18,36 @@ namespace Zergatul.Cryptography.Encoding
         public AlgorithmIdentifier DigestAlgorithm { get; private set; }
         public byte[] Digest { get; private set; }
 
+        private int _length;
+
+        private EMSA_PKCS1_v1_5()
+        {
+        }
+
+        public EMSA_PKCS1_v1_5(AlgorithmIdentifier ai, byte[] digest, int length)
+        {
+            this.DigestAlgorithm = ai;
+            this.Digest = digest;
+            this._length = length;
+        }
+
+        public byte[] ToBytes()
+        {
+            var di = new DigestInfo(DigestAlgorithm, Digest);
+            var T = di.ToBytes();
+            int psLength = _length - T.Length - 3;
+            if (psLength < 8)
+                throw new InvalidOperationException("Intended encoded message length too short");
+
+            byte[] result = new byte[_length];
+            result[1] = 1;
+            for (int i = 0; i < psLength; i++)
+                result[2 + i] = 0xFF;
+            Array.Copy(T, 0, result, _length - T.Length, T.Length);
+
+            return result;
+        }
+
         public static EMSA_PKCS1_v1_5 TryParse(byte[] data)
         {
             if (data.Length < 11)
@@ -61,23 +91,12 @@ namespace Zergatul.Cryptography.Encoding
                     return null;
                 }
 
-            var seq = element as Sequence;
-            if (seq == null)
-                return null;
-            if (seq.Elements.Count != 2)
-                return null;
-
-            var ai = AlgorithmIdentifier.Parse(seq.Elements[0]);
-            if (ai == null)
-                return null;
-
-            if (!(seq.Elements[1] is OctetString))
-                return null;
+            var di = DigestInfo.Parse(element);
 
             return new EMSA_PKCS1_v1_5
             {
-                DigestAlgorithm = ai,
-                Digest = ((OctetString)seq.Elements[1]).Raw
+                DigestAlgorithm = di.Algorithm,
+                Digest = di.Digest
             };
         }
     }

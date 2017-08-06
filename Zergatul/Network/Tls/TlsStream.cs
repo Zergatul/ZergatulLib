@@ -99,6 +99,9 @@ namespace Zergatul.Network.Tls
             Role = Role.Server;
             State = ConnectionState.Start;
 
+            if (!certificate.HasPrivateKey)
+                throw new TlsStreamException("Certificate with private key is required for server authentification");
+
             GenerateRandom();
 
             ReadRecordMessage(ConnectionState.ClientHello);
@@ -301,13 +304,20 @@ namespace Zergatul.Network.Tls
         private HandshakeMessage GenerateServerKeyExchange(X509Certificate certificate)
         {
             var serverKeyExchange = SelectedCipher.GetServerKeyExchange();
-            // signing
-            throw new NotImplementedException();
-            /*var rsa = certificate.PrivateKey as System.Security.Cryptography.RSACryptoServiceProvider;
-            var oid = System.Security.Cryptography.CryptoConfig.MapNameToOID("SHA1");
-            var dhParamsBytes = serverKeyExchange.Params.ToArray();
-            var signedBytes = _secParams.ClientRandom + _secParams.ServerRandom + dhParamsBytes;
-            serverKeyExchange.Signature = rsa.SignData(signedBytes.Array, oid);*/
+
+            serverKeyExchange.SignAndHashAlgo = new SignatureAndHashAlgorithm
+            {
+                Hash = HashAlgorithm.SHA1,
+                Signature = SignatureAlgorithm.RSA
+            };
+
+            var algo = certificate.PrivateKey.ResolveAlgorithm();
+            var hash = serverKeyExchange.SignAndHashAlgo.Hash.Resolve();
+            hash.Update(_secParams.ClientRandom.Array);
+            hash.Update(_secParams.ServerRandom.Array);
+            hash.Update(SelectedCipher.GetKeyExchangeDataToSign(serverKeyExchange));
+
+            serverKeyExchange.Signature = algo.Signature.SignHash(hash);
 
             return new HandshakeMessage(serverKeyExchange);
         }
@@ -407,10 +417,7 @@ namespace Zergatul.Network.Tls
             AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
             hash.Update(_secParams.ClientRandom.Array);
             hash.Update(_secParams.ServerRandom.Array);
-            if (message.Params != null)
-                hash.Update(message.Params.Raw);
-            if (message.ECParams != null)
-                hash.Update(message.ECParams.Raw);
+            hash.Update(SelectedCipher.GetKeyExchangeDataToSign(message));
 
             var assymetricAlgo = _serverCertificate.PublicKey.ResolveAlgorithm();
             if (!assymetricAlgo.Signature.VerifyHash(hash, message.Signature))

@@ -452,31 +452,23 @@ namespace Zergatul.Cryptography.BlockCipher
             }
         }
 
-        public override Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateEncryptor(byte[] key)
         {
             ulong[] kw, k, ke;
 
             KeySchedule(key, Nk, out kw, out k, out ke);
 
-            var encryptor = ResolveEncryptor(mode);
-            encryptor.Cipher = this;
-            encryptor.ProcessBlock = ProcessBlock(Nr, kw, k, ke);
-
-            return encryptor;
+            return ProcessBlock(Nr, kw, k, ke);
         }
 
-        public override Decryptor CreateDecryptor(byte[] key, BlockCipherMode mode)
+        public override Func<byte[], byte[]> CreateDecryptor(byte[] key)
         {
             ulong[] kw, k, ke;
 
             KeySchedule(key, Nk, out kw, out k, out ke);
             ReverseKeys(kw, k, ke);
 
-            var decryptor = ResolveDecryptor(mode);
-            decryptor.Cipher = this;
-            decryptor.ProcessBlock = ProcessBlock(Nr, kw, k, ke);
-
-            return decryptor;
+            return ProcessBlock(Nr, kw, k, ke);
         }
 
         private static Func<byte[], byte[]> ProcessBlock(int Nr, ulong[] kw, ulong[] k, ulong[] ke)
