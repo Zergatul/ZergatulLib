@@ -29,10 +29,19 @@ namespace Zergatul.Math.Tests
         }
 
         [TestMethod]
-        public void Contructor_4()
+        public void ContructorByte_1()
         {
             var p = new BinaryPolynomial(new byte[] { 1, 32 }, ByteOrder.BigEndian);
             Assert.IsTrue(p.ToString() == "x⁸+x⁵");
+        }
+
+        [TestMethod]
+        public void ContructorByte_2()
+        {
+            var p = new BinaryPolynomial(new byte[] { 1, 32 }, ByteOrder.LittleEndian);
+            Assert.IsTrue(p.ToString() == "x¹³+1");
+
+            Assert.IsTrue(p.ToBytes(ByteOrder.LittleEndian, 2).SequenceEqual(new byte[] { 1, 32 }));
         }
 
         [TestMethod]
@@ -171,7 +180,7 @@ namespace Zergatul.Math.Tests
         {
             var p1 = BinaryPolynomial.FromPowers(256, 74, 38, 3, 0);
             var p2 = BinaryPolynomial.FromPowers(65, 1, 0);
-            Assert.IsTrue((p1 * p2).ToString() == "x³²¹+x²⁵c+x²⁵⁶+x¹³⁹+x¹⁰³+x⁷⁵+x⁷⁴+x⁶⁸+x⁶⁵+x³⁹+x³⁸+x⁴+x³+x+1");
+            Assert.IsTrue((p1 * p2).ToString() == "x³²¹+x²⁵⁷+x²⁵⁶+x¹³⁹+x¹⁰³+x⁷⁵+x⁷⁴+x⁶⁸+x⁶⁵+x³⁹+x³⁸+x⁴+x³+x+1");
         }
 
         [TestMethod]

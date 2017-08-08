@@ -15,14 +15,14 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
 
         public override Decryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock) => new GCMDecryptor(cipher, processBlock, TagLength);
 
-        private static readonly BinaryPolynomial Polynomial = BinaryPolynomial.FromPowers(128, 7, 2, 1, 0);
+        private static readonly BinaryPolynomial Polynomial = BinaryPolynomial.FromPowers(127, 7, 2, 1, 0);
 
         private static byte[] BlockMult(byte[] X, byte[] Y)
         {
-            var xp = new BinaryPolynomial(X, ByteOrder.BigEndian);
-            var yp = new BinaryPolynomial(Y, ByteOrder.BigEndian);
+            var xp = new BinaryPolynomial(X, ByteOrder.LittleEndian);
+            var yp = new BinaryPolynomial(Y, ByteOrder.LittleEndian);
             var mult = BinaryPolynomial.ModularMultiplication(xp, yp, Polynomial);
-            return mult.ToBytes(ByteOrder.BigEndian, 16);
+            return mult.ToBytes(ByteOrder.LittleEndian, 16);
         }
 
         private static byte[] GHash(byte[] H, byte[] X)

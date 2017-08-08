@@ -43,7 +43,8 @@ namespace Test
             //TestMyServerAndBCClient();
             //TestMyServerAndNETClient();
             //TestMyClientAndNETServer();
-            ConnectToExternal();
+            //ConnectToExternal();
+            TestBlockCipher();
             return;
 
             //DownloadOIDs.Go("1.2.840.113549.1.12.10.1", "1.txt");
@@ -121,23 +122,23 @@ namespace Test
                 "5FB7EE0633E259DBAD0C4C9AE6D38F1A61C7DC25",
                 false);*/
 
-            bool testLocalHost = false;
-            byte[] buffer;
-            if (testLocalHost)
-            {
-                var client = new TcpClient("localhost", 32028);
-                var tls = new TlsStream(client.GetStream());
-                tls.AuthenticateAsClient("localhost");
+            //bool testLocalHost = false;
+            //byte[] buffer;
+            //if (testLocalHost)
+            //{
+            //    var client = new TcpClient("localhost", 32028);
+            //    var tls = new TlsStream(client.GetStream());
+            //    tls.AuthenticateAsClient("localhost");
 
-                buffer = new byte[12];
-                tls.Read(buffer, 0, 12);
+            //    buffer = new byte[12];
+            //    tls.Read(buffer, 0, 12);
 
-                Console.WriteLine(Encoding.UTF8.GetString(buffer));
-            }
-            else
-            {
+            //    Console.WriteLine(Encoding.UTF8.GetString(buffer));
+            //}
+            //else
+            //{
                 
-            }
+            //}
 
             // b13ec36903f8bf4701d498261a0802ef63642bc3
 
@@ -164,6 +165,20 @@ namespace Test
             Console.WriteLine(new StreamReader(stream).ReadToEnd());
             stream.Close();
             Console.ReadLine();*/
+        }
+
+        private static void TestBlockCipher()
+        {
+            var cipher = new Org.BouncyCastle.Crypto.Modes.GcmBlockCipher(new Org.BouncyCastle.Crypto.Engines.AesEngine());
+            var @params = new Org.BouncyCastle.Crypto.Parameters.AeadParameters(
+                new Org.BouncyCastle.Crypto.Parameters.KeyParameter(BitHelper.HexToBytes("00000000000000000000000000000000")),
+                16 * 8,
+                BitHelper.HexToBytes("000000000000000000000000"));
+            cipher.Init(true, @params);
+
+            var ciphertext = new byte[32];
+            int len = cipher.ProcessBytes(BitHelper.HexToBytes("00000000000000000000000000000000"), 0, 16, ciphertext, 0);
+            cipher.DoFinal(ciphertext, len);
         }
 
         private static void ConnectToExternal()

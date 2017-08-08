@@ -13,6 +13,7 @@ namespace Zergatul.Math
 
         private static string _superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹";
 
+        // little-endian
         private ulong[] _words;
         public int Degree { get; private set; }
         public int StrictWordLength => Degree / 64 + 1;
@@ -26,29 +27,49 @@ namespace Zergatul.Math
         {
             this._words = new ulong[(words.Length + 7) / 8];
 
+            int byteLen = words.Length;
             if (order == ByteOrder.BigEndian)
-                Array.Reverse(words);
-
-            for (int i = 0; i < this._words.Length; i++)
-            {
-                byte b1 = (8 * i + 0 < words.Length) ? words[8 * i + 0] : (byte)0;
-                byte b2 = (8 * i + 1 < words.Length) ? words[8 * i + 1] : (byte)0;
-                byte b3 = (8 * i + 2 < words.Length) ? words[8 * i + 2] : (byte)0;
-                byte b4 = (8 * i + 3 < words.Length) ? words[8 * i + 3] : (byte)0;
-                byte b5 = (8 * i + 4 < words.Length) ? words[8 * i + 4] : (byte)0;
-                byte b6 = (8 * i + 5 < words.Length) ? words[8 * i + 5] : (byte)0;
-                byte b7 = (8 * i + 6 < words.Length) ? words[8 * i + 6] : (byte)0;
-                byte b8 = (8 * i + 7 < words.Length) ? words[8 * i + 7] : (byte)0;
-                this._words[i] =
-                    ((ulong)b8 << 56) |
-                    ((ulong)b7 << 48) |
-                    ((ulong)b6 << 40) |
-                    ((ulong)b5 << 32) |
-                    ((ulong)b4 << 24) |
-                    ((ulong)b3 << 16) |
-                    ((ulong)b2 << 08) |
-                    ((ulong)b1 << 00);
-            }
+                for (int i = 0; i < this._words.Length; i++)
+                {
+                    byte b1 = (byteLen - 1 - (8 * i + 0) >= 0) ? words[byteLen - 1 - (8 * i + 0)] : (byte)0;
+                    byte b2 = (byteLen - 1 - (8 * i + 1) >= 0) ? words[byteLen - 1 - (8 * i + 1)] : (byte)0;
+                    byte b3 = (byteLen - 1 - (8 * i + 2) >= 0) ? words[byteLen - 1 - (8 * i + 2)] : (byte)0;
+                    byte b4 = (byteLen - 1 - (8 * i + 3) >= 0) ? words[byteLen - 1 - (8 * i + 3)] : (byte)0;
+                    byte b5 = (byteLen - 1 - (8 * i + 4) >= 0) ? words[byteLen - 1 - (8 * i + 4)] : (byte)0;
+                    byte b6 = (byteLen - 1 - (8 * i + 5) >= 0) ? words[byteLen - 1 - (8 * i + 5)] : (byte)0;
+                    byte b7 = (byteLen - 1 - (8 * i + 6) >= 0) ? words[byteLen - 1 - (8 * i + 6)] : (byte)0;
+                    byte b8 = (byteLen - 1 - (8 * i + 7) >= 0) ? words[byteLen - 1 - (8 * i + 7)] : (byte)0;
+                    this._words[i] =
+                        ((ulong)b8 << 56) |
+                        ((ulong)b7 << 48) |
+                        ((ulong)b6 << 40) |
+                        ((ulong)b5 << 32) |
+                        ((ulong)b4 << 24) |
+                        ((ulong)b3 << 16) |
+                        ((ulong)b2 << 08) |
+                        ((ulong)b1 << 00);
+                }
+            if (order == ByteOrder.LittleEndian)
+                for (int i = 0; i < this._words.Length; i++)
+                {
+                    byte b1 = (8 * i + 0) < byteLen ? words[8 * i + 0] : (byte)0;
+                    byte b2 = (8 * i + 1) < byteLen ? words[8 * i + 1] : (byte)0;
+                    byte b3 = (8 * i + 2) < byteLen ? words[8 * i + 2] : (byte)0;
+                    byte b4 = (8 * i + 3) < byteLen ? words[8 * i + 3] : (byte)0;
+                    byte b5 = (8 * i + 4) < byteLen ? words[8 * i + 4] : (byte)0;
+                    byte b6 = (8 * i + 5) < byteLen ? words[8 * i + 5] : (byte)0;
+                    byte b7 = (8 * i + 6) < byteLen ? words[8 * i + 6] : (byte)0;
+                    byte b8 = (8 * i + 7) < byteLen ? words[8 * i + 7] : (byte)0;
+                    this._words[i] =
+                        ((ulong)b8 << 56) |
+                        ((ulong)b7 << 48) |
+                        ((ulong)b6 << 40) |
+                        ((ulong)b5 << 32) |
+                        ((ulong)b4 << 24) |
+                        ((ulong)b3 << 16) |
+                        ((ulong)b2 << 08) |
+                        ((ulong)b1 << 00);
+                }
 
             CalculateRealDegree(words.Length * 8 - 1);
         }
