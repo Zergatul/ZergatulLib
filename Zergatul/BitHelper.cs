@@ -147,6 +147,29 @@ namespace Zergatul
             throw new NotImplementedException();
         }
 
+        public static byte[] GetBytes(int value, ByteOrder order)
+        {
+            if (order == ByteOrder.BigEndian)
+                return new byte[]
+                {
+                    (byte)((value >> 24) & 0xFF),
+                    (byte)((value >> 16) & 0xFF),
+                    (byte)((value >> 08) & 0xFF),
+                    (byte)((value >> 00) & 0xFF)
+                };
+
+            if (order == ByteOrder.LittleEndian)
+                return new byte[]
+                {
+                    (byte)((value >> 00) & 0xFF),
+                    (byte)((value >> 08) & 0xFF),
+                    (byte)((value >> 16) & 0xFF),
+                    (byte)((value >> 24) & 0xFF)
+                };
+
+            throw new NotImplementedException();
+        }
+
         public static void GetBytes(ushort value, ByteOrder order, byte[] array, int index)
         {
             if (order == ByteOrder.BigEndian)

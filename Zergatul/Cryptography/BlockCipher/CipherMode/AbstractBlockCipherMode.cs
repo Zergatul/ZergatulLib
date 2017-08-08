@@ -9,8 +9,8 @@ namespace Zergatul.Cryptography.BlockCipher
 {
     public abstract class AbstractBlockCipherMode
     {
-        public abstract Encryptor CreateEncryptor();
-        public abstract Decryptor CreateDecryptor();
+        public abstract Encryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock);
+        public abstract Decryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock);
 
         public static AbstractBlockCipherMode Resolve(BlockCipherMode mode)
         {
@@ -18,6 +18,7 @@ namespace Zergatul.Cryptography.BlockCipher
             {
                 case BlockCipherMode.ECB: return new ECB();
                 case BlockCipherMode.CBC: return new CBC();
+                case BlockCipherMode.GCM: return new GCM();
                 default:
                     throw new NotImplementedException();
             }

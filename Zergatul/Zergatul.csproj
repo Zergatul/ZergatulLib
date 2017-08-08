@@ -59,6 +59,7 @@
     <Compile Include="Cryptography\Asymmetric\RSAPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPublicKey.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
+    <Compile Include="Cryptography\BlockCipher\AEADCipherData.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\AbstractBlockCipherMode.cs" />
     <Compile Include="Cryptography\BlockCipher\AES.cs" />
     <Compile Include="Cryptography\BlockCipher\AES128.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Cryptography\BlockCipher\ChaCha20.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\CBC.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\ECB.cs" />
+    <Compile Include="Cryptography\BlockCipher\CipherMode\GCM.cs" />
     <Compile Include="Cryptography\BlockCipher\Decryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\DES.cs" />
     <Compile Include="Cryptography\BlockCipher\Encryptor.cs" />

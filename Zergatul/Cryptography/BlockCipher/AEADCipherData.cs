@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.BlockCipher
 {
-    public enum BlockCipherMode
+    public class AEADCipherData
     {
-        ECB,
-        CBC,
-
-        GCM
+        public byte[] CipherText;
+        public byte[] Tag;
     }
 }

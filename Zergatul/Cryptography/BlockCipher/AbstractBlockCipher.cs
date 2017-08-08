@@ -16,18 +16,12 @@ namespace Zergatul.Cryptography.BlockCipher
 
         public Encryptor CreateEncryptor(byte[] key, AbstractBlockCipherMode mode)
         {
-            var enc = mode.CreateEncryptor();
-            enc.Cipher = this;
-            enc.ProcessBlock = CreateEncryptor(key);
-            return enc;
+            return mode.CreateEncryptor(this, CreateEncryptor(key));
         }
 
         public Decryptor CreateDecryptor(byte[] key, AbstractBlockCipherMode mode)
         {
-            var dec = mode.CreateDecryptor();
-            dec.Cipher = this;
-            dec.ProcessBlock = CreateDecryptor(key);
-            return dec;
+            return mode.CreateDecryptor(this, CreateDecryptor(key));
         }
 
         public Encryptor CreateEncryptor(byte[] key, BlockCipherMode mode) => CreateEncryptor(key, AbstractBlockCipherMode.Resolve(mode));
