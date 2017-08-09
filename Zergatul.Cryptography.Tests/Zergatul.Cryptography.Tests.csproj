@@ -59,6 +59,7 @@
     <Compile Include="BlockCipher\RC2Tests.cs" />
     <Compile Include="BlockCipher\DESTests.cs" />
     <Compile Include="BlockCipher\GCMTests.cs" />
+    <Compile Include="BlockCipher\CCMTests.cs" />
     <Compile Include="Generator\PKCS12v11Tests.cs" />
     <Compile Include="Hash\Helper.cs" />
     <Compile Include="Hash\SHA1Tests.cs" />

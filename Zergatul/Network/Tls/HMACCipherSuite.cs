@@ -5,23 +5,31 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
 using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.BlockCipher.CipherMode;
 using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal class HMACCipherSuite<KeyExchange, BlockCipher, CipherMode, HashFunction, PRFHashFunction> : GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, PRFHashFunction>
+    internal class HMACCipherSuite<KeyExchange, BlockCipher, CipherMode, HashFunction, PRFHashFunction> : GenericCipherSuite<KeyExchange, BlockCipher, PRFHashFunction>
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
         where CipherMode : AbstractBlockCipherMode, new()
         where HashFunction : AbstractHash, new()
         where PRFHashFunction : AbstractHash, new()
     {
+        protected CipherMode _blockCipherMode;
+
+        protected BlockCipherEncryptor _encryptor;
+        protected BlockCipherDecryptor _decryptor;
+
         protected HMAC<HashFunction> _encryptHMAC;
         protected HMAC<HashFunction> _decryptHMAC;
 
         public override void Init(SecurityParameters secParams, Role role, ISecureRandom random)
         {
             base.Init(secParams, role, random);
+
+            _blockCipherMode = new CipherMode();
 
             secParams.CipherType = CipherType.Block;
 
@@ -36,8 +44,8 @@ namespace Zergatul.Network.Tls
 
             if (_role == Role.Client)
             {
-                _encryptor = _blockCipher.CreateEncryptor(_keys.ClientEncKey.Array, _blockCipherMode);
-                _decryptor = _blockCipher.CreateDecryptor(_keys.ServerEncKey.Array, _blockCipherMode);
+                _encryptor = _blockCipherMode.CreateEncryptor(_blockCipher, _keys.ClientEncKey.Array);
+                _decryptor = _blockCipherMode.CreateDecryptor(_blockCipher, _keys.ServerEncKey.Array);
 
                 _encryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey.Array);
                 _decryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey.Array);
@@ -45,8 +53,8 @@ namespace Zergatul.Network.Tls
 
             if (_role == Role.Server)
             {
-                _encryptor = _blockCipher.CreateEncryptor(_keys.ServerEncKey.Array, _blockCipherMode);
-                _decryptor = _blockCipher.CreateDecryptor(_keys.ClientEncKey.Array, _blockCipherMode);
+                _encryptor = _blockCipherMode.CreateEncryptor(_blockCipher, _keys.ServerEncKey.Array);
+                _decryptor = _blockCipherMode.CreateDecryptor(_blockCipher, _keys.ClientEncKey.Array);
 
                 _encryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey.Array);
                 _decryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey.Array);

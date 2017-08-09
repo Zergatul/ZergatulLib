@@ -58,11 +58,11 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
 
             var rc2 = new RC2(bkey.Length, bits);
 
-            var enc = rc2.CreateEncryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bcipher.SequenceEqual(enc.Encrypt(bplain)));
+            var enc = rc2.CreateEncryptor(bkey);
+            Assert.IsTrue(bcipher.SequenceEqual(enc(bplain)));
 
-            var dec = rc2.CreateDecryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bplain.SequenceEqual(dec.Decrypt(bcipher)));
+            var dec = rc2.CreateDecryptor(bkey);
+            Assert.IsTrue(bplain.SequenceEqual(dec(bcipher)));
         }
     }
 }

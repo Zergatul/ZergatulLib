@@ -8,18 +8,27 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
 {
     public class ECB : AbstractBlockCipherMode
     {
-        public override Encryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock) => new ECBEncryptor(cipher, processBlock);
+        protected override BlockCipherEncryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
+        {
+            return new ECBEncryptor(cipher, processBlock);
+        }
 
-        public override Decryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock) => new ECBDecryptor(cipher, processBlock);
+        protected override BlockCipherDecryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
+        {
+            return new ECBDecryptor(cipher, processBlock);
+        }
 
-        private class ECBEncryptor : Encryptor
+        private class ECBEncryptor : BlockCipherEncryptor
         {
             public ECBEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
                 : base(cipher, processBlock)
             { }
 
-            public override byte[] Encrypt(byte[] data)
+            public override byte[] Encrypt(byte[] IV, byte[] data)
             {
+                if (IV != null)
+                    throw new ArgumentException("ECB doesn't support IV", nameof(IV));
+
                 if (data == null)
                     throw new ArgumentNullException(nameof(data));
 
@@ -37,26 +46,19 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
 
                 return result.ToArray();
             }
-
-            public override byte[] Encrypt(byte[] IV, byte[] data)
-            {
-                throw new NotSupportedException("ECB doesn't support IV");
-            }
-
-            public override AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] authenticatedData)
-            {
-                throw new NotSupportedException("ECB is not AEAD cipher mode");
-            }
         }
 
-        internal class ECBDecryptor : Decryptor
+        internal class ECBDecryptor : BlockCipherDecryptor
         {
             public ECBDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
                 : base(cipher, processBlock)
             { }
 
-            public override byte[] Decrypt(byte[] data)
+            public override byte[] Decrypt(byte[] IV, byte[] data)
             {
+                if (IV != null)
+                    throw new ArgumentException("ECB doesn't support IV", nameof(IV));
+
                 if (data == null)
                     throw new ArgumentNullException(nameof(data));
 
@@ -73,16 +75,6 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 }
 
                 return result;
-            }
-
-            public override byte[] Decrypt(byte[] IV, byte[] data)
-            {
-                throw new NotSupportedException("ECB doesn't support IV");
-            }
-
-            public override byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] authenticatedData)
-            {
-                throw new NotSupportedException("ECB is not AEAD cipher mode");
             }
         }
     }

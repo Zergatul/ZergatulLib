@@ -21,6 +21,9 @@ namespace Zergatul.Network.Tls
     // AES Galois Counter Mode (GCM) Cipher Suites for TLS
     // https://tools.ietf.org/html/rfc5288
 
+    // AES-CCM Cipher Suites for Transport Layer Security (TLS)
+    // https://tools.ietf.org/html/rfc6655
+
     // https://tools.ietf.org/search/rfc4492#section-5.1
     // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
 

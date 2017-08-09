@@ -8,11 +8,17 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
 {
     public class CBC : AbstractBlockCipherMode
     {
-        public override Encryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock) => new CBCEncryptor(cipher, processBlock);
+        protected override BlockCipherEncryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
+        {
+            return new CBCEncryptor(cipher, processBlock);
+        }
 
-        public override Decryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock) => new CBCDecryptor(cipher, processBlock);
+        protected override BlockCipherDecryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
+        {
+            return new CBCDecryptor(cipher, processBlock);
+        }
 
-        private class CBCEncryptor : Encryptor
+        private class CBCEncryptor : BlockCipherEncryptor
         {
             public CBCEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
                 : base(cipher, processBlock)
@@ -43,19 +49,9 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
 
                 return result;
             }
-
-            public override byte[] Encrypt(byte[] data)
-            {
-                throw new NotSupportedException("CBC requires IV");
-            }
-
-            public override AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] authenticatedData)
-            {
-                throw new NotSupportedException("CBC is not AEAD cipher mode");
-            }
         }
 
-        private class CBCDecryptor : Decryptor
+        private class CBCDecryptor : BlockCipherDecryptor
         {
             public CBCDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
                 : base(cipher, processBlock)
@@ -85,16 +81,6 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 }
 
                 return result;
-            }
-
-            public override byte[] Decrypt(byte[] data)
-            {
-                throw new NotSupportedException("CBC requires IV");
-            }
-
-            public override byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] authenticatedData)
-            {
-                throw new NotSupportedException("CBC is not AEAD cipher mode");
             }
         }
     }

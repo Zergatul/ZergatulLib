@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.BlockCipher.CipherMode;
 using Zergatul.Cryptography.Generator;
 using Zergatul.Cryptography.Hash;
 
@@ -48,7 +49,7 @@ namespace Zergatul.Network.ASN1.Structures
                 byte[] iv = generator.GenerateParameter(hash, PKCS12v11.IDInitialValue, pwd, @params.Salt, @params.Iterations, 8);
 
                 var tripleDES = new TripleDESEDE();
-                var dec = tripleDES.CreateDecryptor(key, BlockCipherMode.CBC);
+                var dec = new CBC().CreateDecryptor(tripleDES, key);
                 data = dec.Decrypt(iv, EncryptedData);
             }
             else

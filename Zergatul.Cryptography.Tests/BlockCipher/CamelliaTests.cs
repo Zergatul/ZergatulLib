@@ -51,11 +51,11 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
                     throw new InvalidOperationException();
             }
 
-            var enc = cam.CreateEncryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bcipher.SequenceEqual(enc.Encrypt(bplain)));
+            var enc = cam.CreateEncryptor(bkey);
+            Assert.IsTrue(bcipher.SequenceEqual(enc(bplain)));
 
-            var dec = cam.CreateDecryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bplain.SequenceEqual(dec.Decrypt(bcipher)));
+            var dec = cam.CreateDecryptor(bkey);
+            Assert.IsTrue(bplain.SequenceEqual(dec(bcipher)));
         }
     }
 }

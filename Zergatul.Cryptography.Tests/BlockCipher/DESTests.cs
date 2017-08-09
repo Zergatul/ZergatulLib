@@ -46,11 +46,11 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
 
             var des = new DES();
 
-            var enc = des.CreateEncryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bcipher.SequenceEqual(enc.Encrypt(bplain)));
+            var enc = des.CreateEncryptor(bkey);
+            Assert.IsTrue(bcipher.SequenceEqual(enc(bplain)));
 
-            var dec = des.CreateDecryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bplain.SequenceEqual(dec.Decrypt(bcipher)));
+            var dec = des.CreateDecryptor(bkey);
+            Assert.IsTrue(bplain.SequenceEqual(dec(bcipher)));
         }
 
         private static void TestEncryptDecrypt(string key, string plaintext, string ciphertext, int iterations)
@@ -61,16 +61,16 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
 
             var des = new DES();
 
-            var enc = des.CreateEncryptor(bkey, BlockCipherMode.ECB);
+            var enc = des.CreateEncryptor(bkey);
             byte[] cipher = bplain;
             for (int i = 0; i < iterations; i++)
-                cipher = enc.Encrypt(cipher);
+                cipher = enc(cipher);
             Assert.IsTrue(bcipher.SequenceEqual(cipher));
 
-            var dec = des.CreateDecryptor(bkey, BlockCipherMode.ECB);
+            var dec = des.CreateDecryptor(bkey);
             byte[] plain = cipher;
             for (int i = 0; i < iterations; i++)
-                plain = dec.Decrypt(plain);
+                plain = dec(plain);
             Assert.IsTrue(bplain.SequenceEqual(plain));
         }
     }

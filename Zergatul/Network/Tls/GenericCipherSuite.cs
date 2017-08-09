@@ -2,23 +2,20 @@
 using System.Text;
 using Zergatul.Cryptography;
 using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.BlockCipher.CipherMode;
 using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal abstract class GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, PRFHashFunction> : AbstractCipherSuite
+    internal abstract class GenericCipherSuite<KeyExchange, BlockCipher, PRFHashFunction> : AbstractCipherSuite
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
-        where CipherMode : AbstractBlockCipherMode, new()
         where PRFHashFunction : AbstractHash, new()
     {
         protected TlsConnectionKeys _keys;
 
         protected KeyExchange _keyExchange;
         protected BlockCipher _blockCipher;
-        protected CipherMode _blockCipherMode;
-        protected Encryptor _encryptor;
-        protected Decryptor _decryptor;
 
         protected ByteArray _preMasterSecret;
 
@@ -30,7 +27,6 @@ namespace Zergatul.Network.Tls
             _keyExchange.Random = random;
 
             _blockCipher = new BlockCipher();
-            _blockCipherMode = new CipherMode();
 
             secParams.EncKeyLength = (byte)_blockCipher.KeySize;
             secParams.BlockLength = (byte)_blockCipher.BlockSize;

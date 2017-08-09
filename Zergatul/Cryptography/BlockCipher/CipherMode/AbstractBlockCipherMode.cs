@@ -9,19 +9,19 @@ namespace Zergatul.Cryptography.BlockCipher
 {
     public abstract class AbstractBlockCipherMode
     {
-        public abstract Encryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock);
-        public abstract Decryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock);
+        protected abstract BlockCipherEncryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock);
+        protected abstract BlockCipherDecryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock);
 
-        public static AbstractBlockCipherMode Resolve(BlockCipherMode mode)
+        public BlockCipherEncryptor CreateEncryptor(AbstractBlockCipher cipher, byte[] key)
         {
-            switch (mode)
-            {
-                case BlockCipherMode.ECB: return new ECB();
-                case BlockCipherMode.CBC: return new CBC();
-                case BlockCipherMode.GCM: return new GCM();
-                default:
-                    throw new NotImplementedException();
-            }
+            var processBlock = cipher.CreateEncryptor(key);
+            return CreateEncryptor(cipher, processBlock);
+        }
+
+        public BlockCipherDecryptor CreateDecryptor(AbstractBlockCipher cipher, byte[] key)
+        {
+            var processBlock = cipher.CreateDecryptor(key);
+            return CreateDecryptor(cipher, processBlock);
         }
     }
 }

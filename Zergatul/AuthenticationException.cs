@@ -4,14 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Cryptography.BlockCipher
+namespace Zergatul
 {
-    public enum BlockCipherMode
+    public class AuthenticationException : Exception
     {
-        ECB,
-        CBC,
-
-        GCM,
-        CCM
     }
 }

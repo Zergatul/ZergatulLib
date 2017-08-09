@@ -7,18 +7,17 @@ using Zergatul.Math;
 
 namespace Zergatul.Cryptography.BlockCipher.CipherMode
 {
-    public class GCM : AbstractBlockCipherMode
+    public class GCM : AbstractAEADCipherMode
     {
-        public int TagLength { get; set; }
-
-        public GCM()
+        protected override AEADEncryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
         {
-            TagLength = 16;
+            return new GCMEncryptor(cipher, processBlock, TagLength);
         }
 
-        public override Encryptor CreateEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock) => new GCMEncryptor(cipher, processBlock, TagLength);
-
-        public override Decryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock) => new GCMDecryptor(cipher, processBlock, TagLength);
+        protected override AEADDecryptor CreateDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock)
+        {
+            return new GCMDecryptor(cipher, processBlock, TagLength);
+        }
 
         private static readonly BinaryPolynomial Polynomial = BinaryPolynomial.FromPowers(128, 7, 2, 1, 0);
 
@@ -178,16 +177,17 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
             return p;
         }
 
-        private class GCMEncryptor : Encryptor
+        private class GCMEncryptor : AEADEncryptor
         {
             int _tagLen;
+            private Func<byte[], byte[]> _processBlock;
 
             public GCMEncryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock, int tagLen)
-                : base(cipher, processBlock)
             {
                 if (cipher.BlockSize != 16)
                     throw new NotSupportedException("Only 128-bit block ciphers are supported");
 
+                this._processBlock = processBlock;
                 this._tagLen = tagLen;
             }
 
@@ -223,28 +223,19 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                     Tag = tag
                 };
             }
-
-            public override byte[] Encrypt(byte[] data)
-            {
-                throw new NotSupportedException("GCM is AEAD cipher mode");
-            }
-
-            public override byte[] Encrypt(byte[] IV, byte[] data)
-            {
-                throw new NotSupportedException("GCM is AEAD cipher mode");
-            }
         }
 
-        private class GCMDecryptor : Decryptor
+        private class GCMDecryptor : AEADDecryptor
         {
             int _tagLen;
+            private Func<byte[], byte[]> _processBlock;
 
             public GCMDecryptor(AbstractBlockCipher cipher, Func<byte[], byte[]> processBlock, int tagLen)
-                : base(cipher, processBlock)
             {
                 if (cipher.BlockSize != 16)
                     throw new NotSupportedException("Only 128-bit block ciphers are supported");
 
+                this._processBlock = processBlock;
                 this._tagLen = tagLen;
             }
 
@@ -272,19 +263,9 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 byte[] T = GCTR(J0, S, _processBlock);
                 for (int i = 0; i < _tagLen; i++)
                     if (T[i] != data.Tag[i])
-                        throw new Exception("Invalid authentication");
+                        throw new AuthenticationException();
 
                 return P;
-            }
-
-            public override byte[] Decrypt(byte[] data)
-            {
-                throw new NotSupportedException("GCM is AEAD cipher mode");
-            }
-
-            public override byte[] Decrypt(byte[] IV, byte[] data)
-            {
-                throw new NotSupportedException("GCM is AEAD cipher mode");
             }
         }
     }

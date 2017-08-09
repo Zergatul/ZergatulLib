@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Cryptography.BlockCipher
+namespace Zergatul.Cryptography.BlockCipher.CipherMode
 {
     public class AEADCipherData
     {

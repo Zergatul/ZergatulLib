@@ -341,8 +341,8 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
 
             var gcm = new GCM();
             gcm.TagLength = 16;
-            var enc = gcm.CreateEncryptor(aes, aes.CreateEncryptor(key));
-            var dec = gcm.CreateDecryptor(aes, aes.CreateEncryptor(key));
+            var enc = gcm.CreateEncryptor(aes, key);
+            var dec = gcm.CreateDecryptor(aes, key);
 
             var data = enc.Encrypt(iv, plain, a);
 

@@ -5,21 +5,29 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
 using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.BlockCipher.CipherMode;
 using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal class AEADCipherSuite<KeyExchange, BlockCipher, CipherMode, PRFHashFunction> : GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, PRFHashFunction>
+    internal class AEADCipherSuite<KeyExchange, BlockCipher, CipherMode, PRFHashFunction> : GenericCipherSuite<KeyExchange, BlockCipher, PRFHashFunction>
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
-        where CipherMode : AbstractBlockCipherMode, new()
+        where CipherMode : AbstractAEADCipherMode, new()
         where PRFHashFunction : AbstractHash, new()
     {
+        protected CipherMode _aeadCipherMode;
+
+        protected AEADEncryptor _encryptor;
+        protected AEADDecryptor _decryptor;
+
         private ulong _explicitNonce;
 
         public override void Init(SecurityParameters secParams, Role role, ISecureRandom random)
         {
             base.Init(secParams, role, random);
+
+            _aeadCipherMode = new CipherMode();
 
             secParams.CipherType = CipherType.AEAD;
 
@@ -36,14 +44,14 @@ namespace Zergatul.Network.Tls
 
             if (_role == Role.Client)
             {
-                _encryptor = _blockCipherMode.CreateEncryptor(_blockCipher, _blockCipher.CreateEncryptor(_keys.ClientEncKey.Array));
-                _decryptor = _blockCipherMode.CreateDecryptor(_blockCipher, _blockCipher.CreateEncryptor(_keys.ServerEncKey.Array));
+                _encryptor = _aeadCipherMode.CreateEncryptor(_blockCipher, _keys.ClientEncKey.Array);
+                _decryptor = _aeadCipherMode.CreateDecryptor(_blockCipher, _keys.ServerEncKey.Array);
             }
 
             if (_role == Role.Server)
             {
-                _encryptor = _blockCipherMode.CreateEncryptor(_blockCipher, _blockCipher.CreateEncryptor(_keys.ServerEncKey.Array));
-                _decryptor = _blockCipherMode.CreateDecryptor(_blockCipher, _blockCipher.CreateEncryptor(_keys.ClientEncKey.Array));
+                _encryptor = _aeadCipherMode.CreateEncryptor(_blockCipher, _keys.ServerEncKey.Array);
+                _decryptor = _aeadCipherMode.CreateDecryptor(_blockCipher, _keys.ClientEncKey.Array);
             }
         }
 
@@ -114,7 +122,7 @@ namespace Zergatul.Network.Tls
     internal class AEADCipherSuiteDefaultPRF<KeyExchange, BlockCipher, CipherMode> : AEADCipherSuite<KeyExchange, BlockCipher, CipherMode, SHA256>
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
-        where CipherMode : AbstractBlockCipherMode, new()
+        where CipherMode : AbstractAEADCipherMode, new()
     {
 
     }

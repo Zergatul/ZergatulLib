@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.BlockCipher.CipherMode;
 using Zergatul.Cryptography.Generator;
 using Zergatul.Cryptography.Hash;
 
@@ -47,7 +48,7 @@ namespace Zergatul.Network.ASN1.Structures
                 byte[] iv = generator.GenerateParameter(hash, PKCS12v11.IDInitialValue, pwd, @params.Salt, @params.Iterations, 8);
 
                 var rc2 = new RC2(5, 40);
-                var dec = rc2.CreateDecryptor(key, BlockCipherMode.CBC);
+                var dec = new CBC().CreateDecryptor(rc2, key);
                 return dec.Decrypt(iv, Content.Content);
             }
             else

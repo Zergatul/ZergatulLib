@@ -60,11 +60,11 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
                     throw new InvalidOperationException();
             }
 
-            var enc = aes.CreateEncryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bcipher.SequenceEqual(enc.Encrypt(bplain)));
+            var enc = aes.CreateEncryptor(bkey);
+            Assert.IsTrue(bcipher.SequenceEqual(enc(bplain)));
 
-            var dec = aes.CreateDecryptor(bkey, BlockCipherMode.ECB);
-            Assert.IsTrue(bplain.SequenceEqual(dec.Decrypt(bcipher)));
+            var dec = aes.CreateDecryptor(bkey);
+            Assert.IsTrue(bplain.SequenceEqual(dec(bcipher)));
         }
     }
 }
