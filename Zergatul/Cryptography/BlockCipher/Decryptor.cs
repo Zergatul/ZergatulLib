@@ -19,6 +19,6 @@ namespace Zergatul.Cryptography.BlockCipher
 
         public abstract byte[] Decrypt(byte[] data);
         public abstract byte[] Decrypt(byte[] IV, byte[] data);
-        public abstract byte[] Decrypt(byte[] IV, byte[] data, byte[] authenticatedData);
+        public abstract byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] authenticatedData);
     }
 }

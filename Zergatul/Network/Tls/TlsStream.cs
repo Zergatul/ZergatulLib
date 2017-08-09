@@ -18,6 +18,9 @@ namespace Zergatul.Network.Tls
     // The Transport Layer Security (TLS) Protocol Version 1.2
     // https://tools.ietf.org/html/rfc5246
 
+    // AES Galois Counter Mode (GCM) Cipher Suites for TLS
+    // https://tools.ietf.org/html/rfc5288
+
     // https://tools.ietf.org/search/rfc4492#section-5.1
     // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
 

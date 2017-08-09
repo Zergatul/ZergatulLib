@@ -41,6 +41,18 @@ namespace Zergatul.Tls.Tests
             TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256);
         }
 
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_AES_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_AES_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384);
+        }
+
         #endregion
 
         #region DHE_RSA_ARIA
@@ -110,6 +122,10 @@ namespace Zergatul.Tls.Tests
                 CipherSuites = new CipherSuite[]
                 {
                     cipher
+                },
+                SupportedCurves = new NamedCurve[]
+                {
+                    NamedCurve.secp256r1
                 }
             };
 

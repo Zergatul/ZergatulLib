@@ -43,45 +43,61 @@ namespace Zergatul.Network.Tls
             switch (type)
             {
                 #region DHE
+                #region RSA
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES128, CBC, SHA1>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, AES128, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES256, CBC, SHA1>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, AES256, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES128, CBC, SHA256>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, AES128, CBC, SHA256>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, AES256, CBC, SHA256>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, AES256, CBC, SHA256>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256:
+                    cs = new AEADCipherSuiteDefaultPRF<DHEKeyExchange, AES128, GCM>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384:
+                    cs = new AEADCipherSuite<DHEKeyExchange, AES256, GCM, SHA384>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, ARIA128, CBC, SHA256>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, ARIA128, CBC, SHA256>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, ARIA256, CBC, SHA384>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, ARIA256, CBC, SHA384>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_CBC_SHA:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, Camellia128, CBC, SHA1>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, Camellia128, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA:
-                    cs = new GenericCipherSuiteDefaultPRF<DHEKeyExchange, Camellia256, CBC, SHA1>();
+                    cs = new HMACCipherSuiteDefaultPRF<DHEKeyExchange, Camellia256, CBC, SHA1>();
                     break;
-                #endregion
+                #endregion RSA
+                #endregion DHE
                 #region ECDHE
+                #region RSA
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:
-                    cs = new GenericCipherSuiteDefaultPRF<ECDHEKeyExchange, AES128, CBC, SHA1>();
+                    cs = new HMACCipherSuiteDefaultPRF<ECDHEKeyExchange, AES128, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:
-                    cs = new GenericCipherSuiteDefaultPRF<ECDHEKeyExchange, AES256, CBC, SHA1>();
+                    cs = new HMACCipherSuiteDefaultPRF<ECDHEKeyExchange, AES256, CBC, SHA1>();
                     break;
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:
-                    cs = new GenericCipherSuiteDefaultPRF<ECDHEKeyExchange, AES128, CBC, SHA256>();
+                    cs = new HMACCipherSuiteDefaultPRF<ECDHEKeyExchange, AES128, CBC, SHA256>();
                     break;
                 case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:
-                    cs = new GenericCipherSuite<ECDHEKeyExchange, AES256, CBC, SHA384, SHA384>();
+                    cs = new HMACCipherSuite<ECDHEKeyExchange, AES256, CBC, SHA384, SHA384>();
                     break;
-                #endregion
+                case CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:
+                    cs = new AEADCipherSuiteDefaultPRF<ECDHEKeyExchange, AES128, GCM>();
+                    break;
+                case CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:
+                    cs = new AEADCipherSuite<ECDHEKeyExchange, AES128, GCM, SHA384>();
+                    break;
+                #endregion RSA
+                #endregion ECDHE
                 default:
                     throw new NotImplementedException();
             }

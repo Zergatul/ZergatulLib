@@ -8,5 +8,6 @@ namespace Zergatul.Network.Tls
 {
     class GenericAEADCiphertext : GenericCiphertext
     {
+        public byte[] NonceExplicit;
     }
 }

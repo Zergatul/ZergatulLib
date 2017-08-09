@@ -19,6 +19,8 @@ namespace Zergatul.Network.Tls
             var result = new ByteArray(new byte[0]);
             if (Fragment is GenericBlockCiphertext)
                 result += (Fragment as GenericBlockCiphertext).IV;
+            if (Fragment is GenericAEADCiphertext)
+                result += (Fragment as GenericAEADCiphertext).NonceExplicit;
             result += Content;
             return result;
         }

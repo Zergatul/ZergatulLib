@@ -52,6 +52,7 @@
     <Compile Include="Cryptography\Asymmetric\DiffieHellman.cs" />
     <Compile Include="Cryptography\Asymmetric\DiffieHellmanParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDiffieHellman.cs" />
+    <Compile Include="Cryptography\Asymmetric\ECDSA.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSA.cs" />
@@ -210,6 +211,7 @@
     <Compile Include="Network\Proxy\Socks4Exception.cs" />
     <Compile Include="Network\Proxy\Socks5.cs" />
     <Compile Include="Network\Proxy\Socks5Exception.cs" />
+    <Compile Include="Network\Tls\AEADCipherSuite.cs" />
     <Compile Include="Network\Tls\Alert.cs" />
     <Compile Include="Network\Tls\AlertDescription.cs" />
     <Compile Include="Network\Tls\AlertLevel.cs" />
@@ -255,6 +257,7 @@
     <Compile Include="Network\Tls\HandshakeMessage.cs" />
     <Compile Include="Network\Tls\HandshakeType.cs" />
     <Compile Include="IO\InterceptionStream.cs" />
+    <Compile Include="Network\Tls\HMACCipherSuite.cs" />
     <Compile Include="Network\Tls\KeyExchangeAlgorithm.cs" />
     <Compile Include="Network\Tls\NamedCurve.cs" />
     <Compile Include="Network\Tls\ProtocolVersion.cs" />

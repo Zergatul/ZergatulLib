@@ -80,7 +80,7 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 throw new NotSupportedException("ECB doesn't support IV");
             }
 
-            public override byte[] Decrypt(byte[] IV, byte[] data, byte[] authenticatedData)
+            public override byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] authenticatedData)
             {
                 throw new NotSupportedException("ECB is not AEAD cipher mode");
             }

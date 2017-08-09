@@ -6,11 +6,10 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal class GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, HashFunction, PRFHashFunction> : AbstractCipherSuite
+    internal abstract class GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, PRFHashFunction> : AbstractCipherSuite
         where KeyExchange : AbstractKeyExchange, new()
         where BlockCipher : AbstractBlockCipher, new()
         where CipherMode : AbstractBlockCipherMode, new()
-        where HashFunction : AbstractHash, new()
         where PRFHashFunction : AbstractHash, new()
     {
         protected TlsConnectionKeys _keys;
@@ -20,8 +19,6 @@ namespace Zergatul.Network.Tls
         protected CipherMode _blockCipherMode;
         protected Encryptor _encryptor;
         protected Decryptor _decryptor;
-        protected HMAC<HashFunction> _encryptHMAC;
-        protected HMAC<HashFunction> _decryptHMAC;
 
         protected ByteArray _preMasterSecret;
 
@@ -35,12 +32,8 @@ namespace Zergatul.Network.Tls
             _blockCipher = new BlockCipher();
             _blockCipherMode = new CipherMode();
 
-            secParams.CipherType = CipherType.Block;
             secParams.EncKeyLength = (byte)_blockCipher.KeySize;
             secParams.BlockLength = (byte)_blockCipher.BlockSize;
-            secParams.RecordIVLength = secParams.BlockLength;
-            secParams.FixedIVLength = 0;
-            secParams.MACLength = (byte)new HashFunction().HashSize;
         }
 
         public override ServerKeyExchange GetServerKeyExchange()
@@ -207,24 +200,6 @@ namespace Zergatul.Network.Tls
             position += _secParams.FixedIVLength;
             _keys.ServerIV = keyBlock.SubArray(position, _secParams.FixedIVLength);
             position += _secParams.FixedIVLength;
-
-            if (_role == Role.Client)
-            {
-                _encryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey.Array);
-                _decryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey.Array);
-
-                _encryptor = _blockCipher.CreateEncryptor(_keys.ClientEncKey.Array, _blockCipherMode);
-                _decryptor = _blockCipher.CreateDecryptor(_keys.ServerEncKey.Array, _blockCipherMode);
-            }
-
-            if (_role == Role.Server)
-            {
-                _encryptHMAC = new HMAC<HashFunction>(_keys.ServerMACkey.Array);
-                _decryptHMAC = new HMAC<HashFunction>(_keys.ClientMACkey.Array);
-
-                _encryptor = _blockCipher.CreateEncryptor(_keys.ServerEncKey.Array, _blockCipherMode);
-                _decryptor = _blockCipher.CreateDecryptor(_keys.ClientEncKey.Array, _blockCipherMode);
-            }
         }
 
         public override ByteArray Decode(ByteArray data, ContentType type, ProtocolVersion version, ulong sequenceNum)
@@ -243,11 +218,23 @@ namespace Zergatul.Network.Tls
                         ciphertext.Content = new ByteArray(reader.ReadToEnd());
                     }
                     break;
+                case CipherType.AEAD:
+                    using (reader.SetReadLimit(data.Length))
+                    {
+                        ciphertext.Fragment = new GenericAEADCiphertext
+                        {
+                            NonceExplicit = reader.ReadBytes(_secParams.RecordIVLength)
+                        };
+                        ciphertext.Content = new ByteArray(reader.ReadToEnd());
+                    }
+                    break;
                 default:
                     throw new NotImplementedException();
             }
             return Decompress(Decode(ciphertext, type, version, sequenceNum)).Fragment;
         }
+
+        protected abstract TLSCompressed Decode(TLSCiphertext data, ContentType type, ProtocolVersion version, ulong sequenceNum);
 
         protected TLSPlaintext Decompress(TLSCompressed data)
         {
@@ -258,61 +245,6 @@ namespace Zergatul.Network.Tls
                 Length = data.Length,
                 Fragment = data.Fragment
             };
-        }
-
-        protected TLSCompressed Decode(TLSCiphertext data, ContentType type, ProtocolVersion version, ulong sequenceNum)
-        {
-            var result = new TLSCompressed();
-            ComputeDecryptedContent(data, result, type, version, sequenceNum, data.Fragment as GenericBlockCiphertext);
-            return result;
-        }
-
-        private void ComputeDecryptedContent(TLSCiphertext dataCiphertext, TLSCompressed dataCompressed, ContentType type, ProtocolVersion version, ulong sequenceNum, GenericBlockCiphertext fragment)
-        {
-            var data = _decryptor.Decrypt(fragment.IV.Array, dataCiphertext.Content.Array);
-            data = ValidateAndRemovePadding(data);
-            data = ValidateAndRemoveMAC(data, type, version, sequenceNum);
-            dataCompressed.Fragment = new ByteArray(data);
-        }
-
-        private byte[] ValidateAndRemovePadding(byte[] data)
-        {
-            byte last = data[data.Length - 1];
-            if (last + 1 > data.Length)
-                throw new TlsStreamException("Invalid padding length");
-
-            for (int i = data.Length - 1 - last; i < data.Length; i++)
-                if (data[i] != last)
-                    throw new TlsStreamException("Invalid padding");
-
-            byte[] result = new byte[data.Length - last - 1];
-            Array.Copy(data, result, result.Length);
-            return result;
-        }
-
-        private byte[] ValidateAndRemoveMAC(byte[] data, ContentType type, ProtocolVersion version, ulong sequenceNum)
-        {
-            if (data.Length < _secParams.MACLength)
-                throw new TlsStreamException("Invalid MAC length");
-
-            var mac = new byte[_secParams.MACLength];
-            Array.Copy(data, data.Length - mac.Length, mac, 0, mac.Length);
-
-            var result = new byte[data.Length - mac.Length];
-            Array.Copy(data, result, result.Length);
-
-            var calculatedMAC = _decryptHMAC.ComputeHash(
-                (new ByteArray(sequenceNum) +
-                new ByteArray((byte)type) +
-                new ByteArray((ushort)version) +
-                new ByteArray((ushort)result.Length) +
-                result).Array);
-
-            for (int i = 0; i < mac.Length; i++)
-                if (mac[i] != calculatedMAC[i])
-                    throw new TlsStreamException("Invalid MAC");
-
-            return result;
         }
 
         public override ByteArray Encode(ByteArray data, ContentType type, ProtocolVersion version, ulong sequenceNum)
@@ -339,86 +271,6 @@ namespace Zergatul.Network.Tls
             };
         }
 
-        protected TLSCiphertext Encode(TLSCompressed data, ulong sequenceNum)
-        {
-            var result = new TLSCiphertext
-            {
-                Type = data.Type,
-                Version = data.Version
-            };
-
-            switch (_secParams.CipherType)
-            {
-                case CipherType.Block:
-                    var blockCiphertext = new GenericBlockCiphertext
-                    {
-                        IV = new ByteArray(_random, _secParams.RecordIVLength),
-                        MAC = ComputeMAC(sequenceNum, data)
-                    };
-                    ComputePadding(data, blockCiphertext);
-                    ComputeEncryptedContent(data, result, blockCiphertext);
-                    result.Fragment = blockCiphertext;
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
-            return result;
-        }
-
-        private void ComputePadding(TLSCompressed data, GenericBlockCiphertext fragment)
-        {
-            int modulo = (data.Length + _secParams.MACLength + 1) % _secParams.BlockLength;
-            fragment.PaddingLength = (byte)(_secParams.BlockLength - modulo);
-            var padding = new byte[fragment.PaddingLength];
-            for (int i = 0; i < padding.Length; i++)
-                padding[i] = fragment.PaddingLength;
-            fragment.Padding = new ByteArray(padding);
-        }
-
-        private void ComputeEncryptedContent(TLSCompressed dataCompressed, TLSCiphertext dataCiphertext, GenericBlockCiphertext fragment)
-        {
-            dataCiphertext.Content = new ByteArray(_encryptor.Encrypt(
-                fragment.IV.Array,
-                (dataCompressed.Fragment + fragment.MAC + fragment.Padding + new ByteArray(fragment.PaddingLength)).Array));
-            dataCiphertext.Length = (ushort)(fragment.IV.Length + dataCiphertext.Content.Length);
-        }
-
-        public ByteArray ComputeMAC(ulong sequenceNum, TLSCompressed data)
-        {
-            // RFC 5246 // Page 21
-            /*
-                The MAC is generated as:
-
-                MAC(MAC_write_key, seq_num +
-                                   TLSCompressed.type +
-                                   TLSCompressed.version +
-                                   TLSCompressed.length +
-                                   TLSCompressed.fragment);
-
-                where "+" denotes concatenation.
-
-                seq_num
-                    The sequence number for this record.
-
-                MAC
-                    The MAC algorithm specified by SecurityParameters.mac_algorithm.
-            */
-            return new ByteArray(_encryptHMAC.ComputeHash(
-                (new ByteArray(sequenceNum) +
-                new ByteArray((byte)data.Type) +
-                new ByteArray((ushort)data.Version) +
-                new ByteArray(data.Length) +
-                data.Fragment).Array));
-        }
-    }
-
-    internal class GenericCipherSuiteDefaultPRF<KeyExchange, BlockCipher, CipherMode, HashFunction> : GenericCipherSuite<KeyExchange, BlockCipher, CipherMode, HashFunction, SHA256>
-        where KeyExchange : AbstractKeyExchange, new()
-        where BlockCipher : AbstractBlockCipher, new()
-        where CipherMode : AbstractBlockCipherMode, new()
-        where HashFunction : AbstractHash, new()
-    {
-
+        protected abstract TLSCiphertext Encode(TLSCompressed data, ulong sequenceNum);
     }
 }
