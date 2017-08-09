@@ -47,7 +47,7 @@ namespace Zergatul.Network.Tls.Extensions
             var data = new List<byte>();
             var writer = new BinaryWriter(data);
 
-            writer.WriteShort((ushort)(_curves.Length * 2 + 2));
+            writer.WriteShort((ushort)(_curves.Length * 2));
             for (int i = 0; i < _curves.Length; i++)
                 writer.WriteShort((ushort)_curves[i]);
 

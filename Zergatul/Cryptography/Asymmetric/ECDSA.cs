@@ -9,18 +9,32 @@ using Zergatul.Math.EllipticCurves;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class ECDSA : AbstractAsymmetricAlgorithm<IEllipticCurve, ECPointGeneric, ECPrivateKey, ECPointGeneric>
+    public class ECDSA : AbstractAsymmetricAlgorithm<ECDSAParameters, ECPointGeneric, ECPrivateKey, ECPointGeneric>
     {
         public override ECPrivateKey PrivateKey { get; set; }
         public override ECPointGeneric PublicKey { get; set; }
-        public override IEllipticCurve Parameters { get; set; }
+        public override ECDSAParameters Parameters { get; set; }
 
-        public override int KeySize => Parameters.BitSize;
+        public override int KeySize => Parameters.Curve.BitSize;
 
         private ECDSASignature _signature;
 
         public override void GenerateKeys(ISecureRandom random)
         {
+            if (Parameters.Curve is Math.EllipticCurves.PrimeField.EllipticCurve)
+            {
+                var curve = (Math.EllipticCurves.PrimeField.EllipticCurve)Parameters.Curve;
+                PrivateKey = new ECPrivateKey
+                {
+                    BigInteger = BigInteger.Random(BigInteger.One, curve.n, random)
+                };
+                PublicKey = new ECPointGeneric
+                {
+                    PFECPoint = PrivateKey.BigInteger * curve.g
+                };
+                return;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -65,7 +79,41 @@ namespace Zergatul.Cryptography.Asymmetric
 
             public override byte[] SignHash(AbstractHash hashAlgorithm)
             {
-                throw new NotImplementedException();
+                byte[] hb = hashAlgorithm.ComputeHash();
+
+                if (_ecdsa.PublicKey.PFECPoint != null)
+                {
+                    var curve = _ecdsa.Parameters.Curve as Math.EllipticCurves.PrimeField.EllipticCurve;
+                    var q = curve.n;
+                    var h = new BigInteger(hb, ByteOrder.BigEndian);
+
+                CalculateK:
+                    // k from [1..q - 1]
+                    var k = BigInteger.Random(BigInteger.One, q, _ecdsa.Parameters.Random);
+
+                    var point = k * curve.g;
+                    var r = point.x % q;
+                    if (r.IsZero)
+                        goto CalculateK;
+
+                    var kInv = BigInteger.ModularInverse(k, q);
+                    var s = kInv * (h + _ecdsa.PrivateKey.BigInteger * r) % q;
+                    if (s.IsZero)
+                        goto CalculateK;
+
+                    int byteLen = (q.BitSize + 7) / 8;
+                    byte[] signature = new byte[byteLen * 2];
+                    Array.Copy(r.ToBytes(ByteOrder.BigEndian, byteLen), signature, byteLen);
+                    Array.Copy(s.ToBytes(ByteOrder.BigEndian, byteLen), 0, signature, byteLen, byteLen);
+
+                    return signature;
+                }
+                if (_ecdsa.PublicKey.BFECPoint != null)
+                {
+
+                }
+
+                throw new InvalidOperationException();
             }
 
             public override byte[] SignHash(byte[] data)
@@ -84,7 +132,7 @@ namespace Zergatul.Cryptography.Asymmetric
 
                 if (_ecdsa.PublicKey.PFECPoint != null)
                 {
-                    var curve = _ecdsa.Parameters as Math.EllipticCurves.PrimeField.EllipticCurve;
+                    var curve = _ecdsa.Parameters.Curve as Math.EllipticCurves.PrimeField.EllipticCurve;
                     var r = new BigInteger(rb, ByteOrder.BigEndian);
                     var s = new BigInteger(sb, ByteOrder.BigEndian);
                     var q = curve.n;

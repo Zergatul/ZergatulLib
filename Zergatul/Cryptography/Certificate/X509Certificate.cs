@@ -47,6 +47,7 @@ namespace Zergatul.Cryptography.Certificate
                     case ".cer":
                         ReadFromStreamX509(fs);
                         break;
+                    case ".pfx":
                     case ".p12":
                         ReadFromStreamPKCS12(fs, password);
                         break;
@@ -117,7 +118,7 @@ namespace Zergatul.Cryptography.Certificate
                 throw new NotImplementedException();
 
             if (keys.Length == 1)
-                PrivateKey = new PrivateKey(keys[0]);
+                PrivateKey = new PrivateKey(this, keys[0]);
         }
 
         private static string FormatName(X509CertificateSyntax.Name name)

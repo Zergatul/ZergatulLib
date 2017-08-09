@@ -47,7 +47,7 @@ namespace Zergatul.Network.Tls.Extensions
             var data = new List<byte>();
             var writer = new BinaryWriter(data);
 
-            writer.WriteByte((byte)(_formats.Length + 1));
+            writer.WriteByte((byte)(_formats.Length));
             for (int i = 0; i < _formats.Length; i++)
                 writer.WriteByte((byte)_formats[i]);
 

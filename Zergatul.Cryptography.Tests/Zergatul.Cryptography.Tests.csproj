@@ -56,6 +56,7 @@
     <Compile Include="Asymmetric\DiffieHellmanTests.cs" />
     <Compile Include="Asymmetric\RSATests.cs" />
     <Compile Include="Asymmetric\ECDiffieHellmanTests.cs" />
+    <Compile Include="Asymmetric\ECDSATests.cs" />
     <Compile Include="BlockCipher\RC2Tests.cs" />
     <Compile Include="BlockCipher\DESTests.cs" />
     <Compile Include="BlockCipher\GCMTests.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Hash\RIPEMDTests.cs" />
     <Compile Include="BlockCipher\ARIATests.cs" />
     <Compile Include="BlockCipher\CamelliaTests.cs" />
+    <Compile Include="StaticRandom.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

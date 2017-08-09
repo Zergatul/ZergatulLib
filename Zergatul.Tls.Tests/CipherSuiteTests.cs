@@ -15,6 +15,16 @@ namespace Zergatul.Tls.Tests
         private static string MessageToSend = "Hello World!!!";
         private static string MessageResponse = "OK";
 
+        private static X509Certificate GetRSACert()
+        {
+            return new X509Certificate(Settings.RSACertName, Settings.RSACertPassword);
+        }
+
+        private static X509Certificate GetECDSACert()
+        {
+            return new X509Certificate(Settings.ECDSACertName, Settings.ECDSACertPassword);
+        }
+
         #region DHE_RSA_AES
 
         [TestMethod]
@@ -51,6 +61,30 @@ namespace Zergatul.Tls.Tests
         public void TLS_DHE_RSA_WITH_AES_256_GCM_SHA384()
         {
             TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_AES_128_CCM()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_AES_128_CCM_8()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_AES_256_CCM()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_AES_256_CCM_8()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8);
         }
 
         #endregion
@@ -115,6 +149,22 @@ namespace Zergatul.Tls.Tests
 
         #endregion
 
+        #region ECDHE_ECDSA_AES
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256);
+        }
+
+        #endregion
+
         private static void TestCipherSuite(CipherSuite cipher)
         {
             var tlsSettings = new TlsStreamSettings
@@ -125,17 +175,28 @@ namespace Zergatul.Tls.Tests
                 },
                 SupportedCurves = new NamedCurve[]
                 {
-                    NamedCurve.secp256r1
+                    NamedCurve.secp256r1,
+                    NamedCurve.secp384r1,
+                    NamedCurve.secp521r1
                 }
             };
+
+            var evt = new ManualResetEvent(false);
 
             byte[] response = null;
             var serverThread = new Thread(() =>
             {
-                var cert = new X509Certificate(Settings.CertName, Settings.CertPassword);
+                X509Certificate cert;
+                if (cipher.ToString().Contains("ECDSA"))
+                    cert = GetECDSACert();
+                else if (cipher.ToString().Contains("RSA"))
+                    cert = GetRSACert();
+                else
+                    throw new NotImplementedException();
 
                 var listener = new TcpListener(IPAddress.Any, Settings.Port);
                 listener.Start();
+                evt.Set();
                 try
                 {
                     var serverClient = listener.AcceptTcpClient();
@@ -160,6 +221,7 @@ namespace Zergatul.Tls.Tests
             });
             serverThread.Start();
 
+            evt.WaitOne();
             var client = new TcpClient("localhost", Settings.Port);
             byte[] buffer = null;
             try

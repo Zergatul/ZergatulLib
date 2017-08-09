@@ -8,8 +8,12 @@ namespace Zergatul.Tls.Tests
 {
     static class Settings
     {
-        public static string CertName = "test.p12";
-        public static string CertPassword = "hh87$-Jqo";
+        public static string RSACertName = "rsa-cert.pfx";
+        public static string RSACertPassword = "hh87$-Jqo";
+
+        public static string ECDSACertName = "ecdsa-cert.pfx";
+        public static string ECDSACertPassword = @"\7FoIK*f1{\q";
+
         public static int Port = 32032;
     }
 }

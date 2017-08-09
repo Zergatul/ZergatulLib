@@ -65,7 +65,13 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="ecdsa-cert.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
+    <None Include="rsa-cert.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

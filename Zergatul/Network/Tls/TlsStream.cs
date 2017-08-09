@@ -12,9 +12,6 @@ using Zergatul.Network.Tls.Extensions;
 
 namespace Zergatul.Network.Tls
 {
-    // HMAC: Keyed-Hashing for Message Authentication
-    // https://www.ietf.org/rfc/rfc2104.txt
-
     // The Transport Layer Security (TLS) Protocol Version 1.2
     // https://tools.ietf.org/html/rfc5246
 
@@ -29,7 +26,6 @@ namespace Zergatul.Network.Tls
 
     // TODO
     // * Check message length, allow splitting messages on record layer
-    // * test connection from bouncy to .net sslstream
     // * work as proxy stream for another tls stream implementation, for debugging purposes
     public class TlsStream : Stream
     {
@@ -218,51 +214,54 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateClientHello()
         {
+            var extensions = new List<TlsExtension>
+            {
+                new ServerNameExtension
+                {
+                    ServerNameList = new ServerName[]
+                    {
+                        new ServerName
+                        {
+                            NameType = NameType.HostName,
+                            HostName = _clientHost
+                        }
+                    }
+                },
+                new SignatureAlgorithmsExtension
+                {
+                    SupportedAlgorithms = new SignatureAndHashAlgorithm[]
+                    {
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.RSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.ECDSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA256, Signature = SignatureAlgorithm.RSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA384, Signature = SignatureAlgorithm.RSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.RSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA256, Signature = SignatureAlgorithm.ECDSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA384, Signature = SignatureAlgorithm.ECDSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.ECDSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.DSA },
+                    }
+                },
+                new TlsExtension
+                {
+                    Type = ExtensionType.ExtendedMasterSecret
+                },
+                new TlsExtension
+                {
+                    Type = ExtensionType.RenegotiationInfo,
+                    Data = new byte[] { 0 }
+                }
+            };
+            if (Settings.SupportedCurves?.Length > 0)
+                extensions.Add(new SupportedEllipticCurves(Settings.SupportedCurves));
+            extensions.Add(new SupportedPointFormats(ECPointFormat.Uncompressed));
+
             return new HandshakeMessage(new ClientHello
             {
                 ClientVersion = ProtocolVersion.Tls12,
                 Random = _secParams.ClientRandom.Array,
                 CipherSuites = Settings.CipherSuites,
-                Extensions = new TlsExtension[]
-                {
-                    new ServerNameExtension
-                    {
-                        ServerNameList = new ServerName[]
-                        {
-                            new ServerName
-                            {
-                                NameType = NameType.HostName,
-                                HostName = _clientHost
-                            }
-                        }
-                    },
-                    new SupportedEllipticCurves(Settings.SupportedCurves),
-                    new SupportedPointFormats(ECPointFormat.Uncompressed),
-                    new SignatureAlgorithmsExtension
-                    {
-                        SupportedAlgorithms = new SignatureAndHashAlgorithm[]
-                        {
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.RSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.ECDSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA256, Signature = SignatureAlgorithm.RSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA384, Signature = SignatureAlgorithm.RSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.RSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA256, Signature = SignatureAlgorithm.ECDSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA384, Signature = SignatureAlgorithm.ECDSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.ECDSA },
-                            new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.DSA },
-                        }
-                    },
-                    new TlsExtension
-                    {
-                        Type = ExtensionType.ExtendedMasterSecret
-                    },
-                    new TlsExtension
-                    {
-                        Type = ExtensionType.RenegotiationInfo,
-                        Data = new byte[] { 0 }
-                    }
-                }
+                Extensions = extensions.ToArray()
             });
         }
 
@@ -358,7 +357,7 @@ namespace Zergatul.Network.Tls
             {
                 var message = e.Message as Alert;
                 if (message.Level == AlertLevel.Fatal)
-                    throw new TlsStreamException($"TLS Fatal error: {message.Description}");
+                    throw new TlsStreamException($"TLS Fatal error: {message.Description}. Current state: {State}");
             }
             if (e.Message is ChangeCipherSpec)
             {

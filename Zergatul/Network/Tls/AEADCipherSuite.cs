@@ -17,6 +17,7 @@ namespace Zergatul.Network.Tls
         where PRFHashFunction : AbstractHash, new()
     {
         protected CipherMode _aeadCipherMode;
+        protected int _tagLength = 16;
 
         protected AEADEncryptor _encryptor;
         protected AEADDecryptor _decryptor;
@@ -87,18 +88,18 @@ namespace Zergatul.Network.Tls
 
             var aeadData = new AEADCipherData
             {
-                CipherText = new byte[data.Content.Length - 16],
-                Tag = new byte[16]
+                CipherText = new byte[data.Content.Length - _tagLength],
+                Tag = new byte[_tagLength]
             };
 
             Array.Copy(data.Content.Array, 0, aeadData.CipherText, 0, aeadData.CipherText.Length);
-            Array.Copy(data.Content.Array, aeadData.CipherText.Length, aeadData.Tag, 0, 16);
+            Array.Copy(data.Content.Array, aeadData.CipherText.Length, aeadData.Tag, 0, _tagLength);
 
             var result = new TLSCompressed
             {
                 Version = version,
                 Type = type,
-                Length = (ushort)(data.Content.Length - 16)
+                Length = (ushort)(data.Content.Length - _tagLength)
             };
 
             var decrypted = _decryptor.Decrypt(IV, aeadData, GetAdditionalData(result, sequenceNum));

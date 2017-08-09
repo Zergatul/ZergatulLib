@@ -36,7 +36,7 @@ namespace Zergatul.Network.ASN1.Structures
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);
-            ParseException.ThrowIfNotEqual(seq.Elements.Count, 2);
+            ParseException.ThrowIfNotInRange(seq.Elements.Count, 1, 2);
 
             var oi = seq.Elements[0] as ObjectIdentifier;
             ParseException.ThrowIfNull(oi);
@@ -44,7 +44,7 @@ namespace Zergatul.Network.ASN1.Structures
             return new AlgorithmIdentifier
             {
                 Algorithm = oi.OID,
-                Parameters = seq.Elements[1]
+                Parameters = seq.Elements.Count == 1 ? null : seq.Elements[1]
             };
         }
     }

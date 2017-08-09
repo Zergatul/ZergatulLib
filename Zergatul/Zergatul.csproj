@@ -54,6 +54,7 @@
     <Compile Include="Cryptography\Asymmetric\DiffieHellmanParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDiffieHellman.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDSA.cs" />
+    <Compile Include="Cryptography\Asymmetric\ECDSAParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSA.cs" />
@@ -90,6 +91,7 @@
     <Compile Include="Cryptography\BlockCipher\RC2.cs" />
     <Compile Include="Cryptography\BlockCipher\TripleDESEDE.cs" />
     <Compile Include="Cryptography\Certificate\AccessDescription.cs" />
+    <Compile Include="Cryptography\Encoding\ECDSASignatureValue.cs" />
     <Compile Include="Cryptography\Generator\PKCS12v11.cs" />
     <Compile Include="Network\ASN1\Structures\AlgorithmIdentifier.cs" />
     <Compile Include="Cryptography\Certificate\X509CertificateSyntax.cs" />
@@ -148,6 +150,8 @@
     <Compile Include="Network\ASN1\Structures\CertBag.cs" />
     <Compile Include="Network\ASN1\Structures\ContentInfo.cs" />
     <Compile Include="Network\ASN1\Structures\DigestInfo.cs" />
+    <Compile Include="Network\ASN1\Structures\ECParameters.cs" />
+    <Compile Include="Network\ASN1\Structures\ECPrivateKey.cs" />
     <Compile Include="Network\ASN1\Structures\EncryptedContentInfo.cs" />
     <Compile Include="Network\ASN1\Structures\EncryptedData.cs" />
     <Compile Include="Network\ASN1\Structures\EncryptedPrivateKeyInfo.cs" />
@@ -223,6 +227,7 @@
     <Compile Include="Network\Tls\ApplicationData.cs" />
     <Compile Include="Network\Tls\BinaryReader.cs" />
     <Compile Include="Network\Tls\BinaryWriter.cs" />
+    <Compile Include="Network\Tls\CCMCipherSuite.cs" />
     <Compile Include="Network\Tls\Certificate.cs" />
     <Compile Include="Network\Tls\ChangeCipherSpec.cs" />
     <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
@@ -300,7 +305,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>REM Powershell -File "$(ProjectDir)Scripts\GenerateOIDs.ps1" -WorkingDir "$(ProjectDir)</PreBuildEvent>
+    <PreBuildEvent>Powershell -File "$(ProjectDir)Scripts\GenerateOIDs.ps1" -WorkingDir "$(ProjectDir)</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>

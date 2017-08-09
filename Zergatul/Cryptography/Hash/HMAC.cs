@@ -7,6 +7,8 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Cryptography.Hash
 {
+    // HMAC: Keyed-Hashing for Message Authentication
+    // https://www.ietf.org/rfc/rfc2104.txt
     public class HMAC<T> : HMAC
         where T : AbstractHash, new()
     {

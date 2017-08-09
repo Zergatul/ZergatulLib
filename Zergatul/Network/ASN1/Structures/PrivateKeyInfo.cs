@@ -17,6 +17,7 @@ namespace Zergatul.Network.ASN1.Structures
         public object Attributes { get; private set; }
 
         public RSAPrivateKey RSA { get; private set; }
+        public ECPrivateKey EC { get; private set; }
 
         public static PrivateKeyInfo Parse(ASN1Element element)
         {
@@ -39,6 +40,8 @@ namespace Zergatul.Network.ASN1.Structures
 
             if (result.Algorithm.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.RSA)
                 result.RSA = RSAPrivateKey.Parse(ASN1Element.ReadFrom(result.PrivateKey));
+            else if (result.Algorithm.Algorithm == OID.ISO.MemberBody.US.ANSI_X962.KeyType.ECPublicKey)
+                result.EC = ECPrivateKey.Parse(ASN1Element.ReadFrom(result.PrivateKey));
             else
                 throw new NotImplementedException();
 

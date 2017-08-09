@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Asymmetric;
+using Zergatul.Math.EllipticCurves;
 using Zergatul.Network;
 using Zergatul.Network.ASN1;
 
@@ -14,14 +15,29 @@ namespace Zergatul.Cryptography.Certificate
     {
         public OID Algorithm { get; private set; }
         public byte[] Key { get; private set; }
+        public ASN1Element Parameters { get; private set; }
 
         internal PublicKey(X509CertificateSyntax.SubjectPublicKeyInfo keyInfo)
         {
-            if (!(keyInfo.Algorithm.Parameters is Null))
-                throw new NotImplementedException();
-
             this.Algorithm = keyInfo.Algorithm.Algorithm;
             this.Key = keyInfo.SubjectPublicKey.Data;
+            this.Parameters = keyInfo.Algorithm.Parameters;
+        }
+
+        internal IEllipticCurve ResolveCurve()
+        {
+            var oid = (Parameters as ObjectIdentifier)?.OID;
+            if (oid != null)
+            {
+                if (oid == OID.ISO.IdentifiedOrganization.Certicom.Curve.secp521r1)
+                    return Math.EllipticCurves.PrimeField.EllipticCurve.secp521r1;
+                else if (oid == OID.ISO.MemberBody.US.ANSI_X962.Curves.Prime.Prime256v1)
+                    return Math.EllipticCurves.PrimeField.EllipticCurve.secp256r1;
+                else
+                    throw new NotImplementedException();
+            }
+
+            return null;
         }
 
         public AbstractAsymmetricAlgorithm ResolveAlgorithm()
@@ -43,6 +59,23 @@ namespace Zergatul.Cryptography.Certificate
                         BitSize = rsa.PublicKey.n.BitSize
                     };
                     return rsa;
+                }
+                else
+                    throw new NotImplementedException();
+            }
+            else if (Algorithm == OID.ISO.MemberBody.US.ANSI_X962.KeyType.ECPublicKey)
+            {
+                var curve = ResolveCurve();
+                if (curve == null)
+                    throw new InvalidOperationException();
+
+                var ecdsa = new ECDSA();
+                ecdsa.Parameters = new ECDSAParameters { Curve = curve };
+
+                if (curve is Math.EllipticCurves.PrimeField.EllipticCurve)
+                {
+                    ecdsa.PublicKey = ECPointGeneric.Parse(Key, curve);
+                    return ecdsa;
                 }
                 else
                     throw new NotImplementedException();

@@ -21,6 +21,7 @@ using Zergatul.Math;
 using Zergatul.Network;
 using Zergatul.Network.Proxy;
 using Zergatul.Network.Tls;
+using Zergatul.Network.Tls.Extensions;
 
 namespace Test
 {
@@ -45,10 +46,8 @@ namespace Test
             //TestMyClientAndNETServer();
             ConnectToExternal();
             //TestBlockCipher();
+            //DownloadOIDs.Go("1.2.840.10045.3.1", "1.txt");
             return;
-
-            //DownloadOIDs.Go("1.2.840.113549.1.12.10.1", "1.txt");
-            //return;
 
             /*Org.BouncyCastle.Pkcs.Pkcs12Store store = new Org.BouncyCastle.Pkcs.Pkcs12Store();
             store.Load(new FileStream("../../../ConsoleTest2/test.p12", FileMode.Open), "hh87$-Jqo".ToCharArray());
@@ -183,10 +182,20 @@ namespace Test
 
         private static void ConnectToExternal()
         {
+            /*var sc = new SupportedEllipticCurves(new Zergatul.Network.Tls.NamedCurve[]
+            {
+                Zergatul.Network.Tls.NamedCurve.secp384r1,
+                Zergatul.Network.Tls.NamedCurve.secp256r1,
+            });
+            var x = sc.Data;*/
+
+
             string host =
-                    "www.howsmyssl.com"
+                    //"www.howsmyssl.com"
                     //"ru.wargaming.net"
                     //"ru.4game.com"
+                    //"www.tera-online.ru"
+                    "facebook.com"
                     ;
 
             var client = new TcpClient(host, 443);
@@ -195,18 +204,24 @@ namespace Test
             {
                 CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
                 {
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                    /*Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
                     Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
                     Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384
-                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
+                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8,
+                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
+                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8,*/
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
                 },
                 SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
                 {
                     Zergatul.Network.Tls.NamedCurve.secp384r1,
-                    Zergatul.Network.Tls.NamedCurve.secp256r1
+                    Zergatul.Network.Tls.NamedCurve.secp256r1,
                 }
             };
             tls.AuthenticateAsClient(host);
@@ -314,6 +329,7 @@ namespace Test
 
         private static void TestMyServerAndBCClient()
         {
+            bool ECcert = true;
             var serverThread = new Thread(() =>
             {
                 var listener = new TcpListener(IPAddress.Any, 32028);
@@ -337,7 +353,10 @@ namespace Test
                     }
                 };
 
-                tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo"));
+                var cert = ECcert ?
+                    new Zergatul.Cryptography.Certificate.X509Certificate("ec-cert.pfx", @"\7FoIK*f1{\q") :
+                    new Zergatul.Cryptography.Certificate.X509Certificate("rsa-cert.pfx", "hh87$-Jqo");
+                tlsStream.AuthenticateAsServer("localhost", cert);
                 tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
             });
 

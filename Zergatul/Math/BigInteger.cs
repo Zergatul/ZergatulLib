@@ -240,6 +240,17 @@ namespace Zergatul.Math
             return new BigInteger(result, ByteOrder.BigEndian);
         }
 
+        /// <summary>
+        /// Generates random number in range [from..to-1]
+        /// </summary>
+        public static BigInteger Random(BigInteger from, BigInteger to, IRandom random)
+        {
+            if (from >= to)
+                throw new InvalidOperationException();
+
+            return Random(to - from, random) + from;
+        }
+
         #endregion
 
         #region Public methods
