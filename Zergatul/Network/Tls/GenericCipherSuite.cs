@@ -1,20 +1,23 @@
 ﻿using System;
 using System.Text;
 using Zergatul.Cryptography;
+using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.BlockCipher;
 using Zergatul.Cryptography.BlockCipher.CipherMode;
 using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal abstract class GenericCipherSuite<KeyExchange, BlockCipher, PRFHashFunction> : AbstractCipherSuite
+    internal abstract class GenericCipherSuite<KeyExchange, Signature, BlockCipher, PRFHashFunction> : AbstractCipherSuite
         where KeyExchange : AbstractKeyExchange, new()
+        where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
         where PRFHashFunction : AbstractHash, new()
     {
         protected TlsConnectionKeys _keys;
 
         protected KeyExchange _keyExchange;
+        protected Signature _signature;
         protected BlockCipher _blockCipher;
 
         protected ByteArray _preMasterSecret;
@@ -25,6 +28,7 @@ namespace Zergatul.Network.Tls
 
             _keyExchange = new KeyExchange();
             _keyExchange.Random = random;
+            _signature = new Signature();
 
             _blockCipher = new BlockCipher();
 
@@ -71,6 +75,18 @@ namespace Zergatul.Network.Tls
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
             _keyExchange.WriteClientKeyExchange(message, writer);
+        }
+
+        public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)
+        {
+            _signature.SetAlgorithm(algo);
+            return _signature.Sign(hash);
+        }
+
+        public override bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature)
+        {
+            _signature.SetAlgorithm(algo);
+            return _signature.Verify(hash, signature);
         }
 
         public override void CalculateMasterSecret()

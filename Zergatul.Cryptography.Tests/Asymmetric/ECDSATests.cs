@@ -28,7 +28,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             var sha1 = new SHA1();
             sha1.Update(System.Text.Encoding.ASCII.GetBytes("abc"));
 
-            byte[] signature = ecdsa.Signature.SignHash(sha1);
+            var signature = ecdsa.Signature.SignHash(sha1);
 
             // *******************
             var ecdsa2 = new ECDSA();
@@ -112,8 +112,9 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             hash.Reset();
             hash.Update(System.Text.Encoding.ASCII.GetBytes(plain));
 
-            byte[] signature = ecdsa1.Signature.SignHash(hash);
-            Assert.IsTrue(BitHelper.BytesToHex(signature) == r + s);
+            var signature = ecdsa1.Signature.SignHash(hash);
+            Assert.IsTrue(signature.r == new BigInteger(BitHelper.HexToBytes(r), ByteOrder.BigEndian));
+            Assert.IsTrue(signature.s == new BigInteger(BitHelper.HexToBytes(s), ByteOrder.BigEndian));
 
             // *******************
             var ecdsa2 = new ECDSA();
@@ -128,9 +129,8 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
             Assert.IsTrue(ecdsa2.Signature.VerifyHash(hash, signature));
 
-            // change random bit to assure verify hash return false
-            var rnd = new System.Random((int)BitHelper.ToUInt32(signature, ByteOrder.BigEndian));
-            signature[rnd.Next(signature.Length)] ^= (byte)(1 << rnd.Next(8));
+            // change signature to assure verify hash return false
+            signature.s += 1;
 
             hash.Reset();
             hash.Update(System.Text.Encoding.ASCII.GetBytes(plain));

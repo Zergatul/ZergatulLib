@@ -10,8 +10,9 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal class CCMCipherSuite<KeyExchange, BlockCipher> : AEADCipherSuite<KeyExchange, BlockCipher, CCM, SHA256>
+    internal class CCMCipherSuite<KeyExchange, Signature, BlockCipher> : AEADCipherSuite<KeyExchange, Signature, BlockCipher, CCM, SHA256>
         where KeyExchange : AbstractKeyExchange, new()
+        where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
     {
         public CCMCipherSuite(int tagLength = 16)

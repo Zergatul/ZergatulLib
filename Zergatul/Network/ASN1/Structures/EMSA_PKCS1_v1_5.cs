@@ -5,10 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Certificate;
-using Zergatul.Network.ASN1;
-using Zergatul.Network.ASN1.Structures;
 
-namespace Zergatul.Cryptography.Encoding
+namespace Zergatul.Network.ASN1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc8017#section-9.2
@@ -48,13 +46,13 @@ namespace Zergatul.Cryptography.Encoding
             return result;
         }
 
-        public static EMSA_PKCS1_v1_5 TryParse(byte[] data)
+        public static EMSA_PKCS1_v1_5 Parse(byte[] data)
         {
             if (data.Length < 11)
-                return null;
+                throw new ParseException();
 
             if (data[0] != 0 || data[1] != 1)
-                return null;
+                throw new ParseException();
 
             int index = 2;
             int psLength = 0;
@@ -64,18 +62,18 @@ namespace Zergatul.Cryptography.Encoding
                 psLength++;
             }
             if (psLength < 8)
-                return null;
+                throw new ParseException();
 
             if (index >= data.Length)
-                return null;
+                throw new ParseException();
 
             if (data[index] != 0)
-                return null;
+                throw new ParseException();
 
             index++;
 
             if (index >= data.Length)
-                return null;
+                throw new ParseException();
 
             ASN1Element element;
 
@@ -84,11 +82,11 @@ namespace Zergatul.Cryptography.Encoding
                 {
                     element = ASN1Element.ReadFrom(ms);
                     if (ms.Position != ms.Length)
-                        return null;
+                        throw new ParseException();
                 }
                 catch (EndOfStreamException)
                 {
-                    return null;
+                    throw new ParseException();
                 }
 
             var di = DigestInfo.Parse(element);

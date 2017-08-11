@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class RSAParameters
+    public class NullParam
     {
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Cryptography.Encoding;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
 using Zergatul.Network.ASN1;
@@ -12,13 +11,13 @@ using Zergatul.Network.ASN1.Structures;
 namespace Zergatul.Cryptography.Asymmetric
 {
     // https://tools.ietf.org/html/rfc8017
-    public class RSA : AbstractAsymmetricAlgorithm<RSAParameters, RSAPublicKey, RSAPrivateKey, BigInteger>
+    public class RSA : AbstractAsymmetricAlgorithm<RSAParameters, RSAPublicKey, RSAPrivateKey, NullParam, BigInteger>
     {
         public override RSAPrivateKey PrivateKey { get; set; }
         public override RSAPublicKey PublicKey { get; set; }
         public override RSAParameters Parameters { get; set; }
 
-        public override int KeySize => Parameters.BitSize;
+        public override int KeySize => PublicKey.n.BitSize;
 
         private RSASignature _signature;
         private RSAEncryption _encryption;
@@ -28,7 +27,7 @@ namespace Zergatul.Cryptography.Asymmetric
             throw new NotImplementedException();
         }
 
-        public override AbstractKeyExchangeAlgorithm<RSAPublicKey, BigInteger> KeyExchange
+        public override AbstractKeyExchangeAlgorithm<RSAPublicKey, NullParam> KeyExchange
         {
             get
             {
@@ -46,7 +45,7 @@ namespace Zergatul.Cryptography.Asymmetric
             }
         }
 
-        public override AbstractSignatureAlgorithm Signature
+        public override AbstractSignatureAlgorithm<BigInteger> Signature
         {
             get
             {
@@ -60,7 +59,7 @@ namespace Zergatul.Cryptography.Asymmetric
             }
         }
 
-        private class RSASignature : AbstractSignatureAlgorithm
+        private class RSASignature : AbstractSignatureAlgorithm<BigInteger>
         {
             private RSA _rsa;
 
@@ -69,50 +68,22 @@ namespace Zergatul.Cryptography.Asymmetric
                 this._rsa = rsa;
             }
 
-            public override byte[] SignHash(AbstractHash hashAlgorithm)
-            {
-                var ai = new AlgorithmIdentifier(hashAlgorithm.OID, new Null());
-                var enc = new EMSA_PKCS1_v1_5(ai, hashAlgorithm.ComputeHash(), _rsa.KeySize / 8);
-
-                BigInteger m = new BigInteger(enc.ToBytes(), ByteOrder.BigEndian);
-                if (m >= _rsa.PrivateKey.n)
-                    throw new InvalidOperationException("Data too large for signing");
-
-                BigInteger s = BigInteger.ModularExponentiation(m, _rsa.PrivateKey.d, _rsa.PrivateKey.n);
-                return s.ToBytes(ByteOrder.BigEndian);
-            }
-
-            public override byte[] SignHash(byte[] data)
+            public override BigInteger SignHash(byte[] hash)
             {
                 if (_rsa.PrivateKey == null)
                     throw new InvalidOperationException("PrivateKey is required for signing");
 
-                BigInteger m = new BigInteger(data, ByteOrder.BigEndian);
+                BigInteger m = new BigInteger(hash, ByteOrder.BigEndian);
                 if (m >= _rsa.PrivateKey.n)
                     throw new InvalidOperationException("Data too large for signing");
 
-                BigInteger s = BigInteger.ModularExponentiation(m, _rsa.PrivateKey.d, _rsa.PrivateKey.n);
-                return s.ToBytes(ByteOrder.BigEndian);
+                return BigInteger.ModularExponentiation(m, _rsa.PrivateKey.d, _rsa.PrivateKey.n);
             }
 
-            public override bool VerifyHash(AbstractHash hashAlgorithm, byte[] signature)
+            public override bool VerifyHash(byte[] hash, BigInteger signature)
             {
-                BigInteger s = new BigInteger(signature, ByteOrder.BigEndian);
-                BigInteger m = BigInteger.ModularExponentiation(s, _rsa.PublicKey.e, _rsa.PublicKey.n);
-                byte[] em = m.ToBytes(ByteOrder.BigEndian, _rsa.KeySize / 8);
-
-                var enc = EMSA_PKCS1_v1_5.TryParse(em);
-                if (enc == null)
-                    throw new NotImplementedException();
-
-                return enc.DigestAlgorithm.Algorithm == hashAlgorithm.OID && enc.Digest.SequenceEqual(hashAlgorithm.ComputeHash());
-            }
-
-            public override bool VerifyHash(byte[] data, byte[] signature)
-            {
-                BigInteger s = new BigInteger(signature, ByteOrder.BigEndian);
-                BigInteger m1 = BigInteger.ModularExponentiation(s, _rsa.PublicKey.e, _rsa.PublicKey.n);
-                BigInteger m2 = new BigInteger(data, ByteOrder.BigEndian);
+                BigInteger m1 = BigInteger.ModularExponentiation(signature, _rsa.PublicKey.e, _rsa.PublicKey.n);
+                BigInteger m2 = new BigInteger(hash, ByteOrder.BigEndian);
                 return m1 == m2;
             }
         }

@@ -54,10 +54,6 @@ namespace Zergatul.Cryptography.Certificate
                         n = ((Integer)seq.Elements[0]).Value,
                         e = ((Integer)seq.Elements[1]).Value
                     };
-                    rsa.Parameters = new RSAParameters
-                    {
-                        BitSize = rsa.PublicKey.n.BitSize
-                    };
                     return rsa;
                 }
                 else

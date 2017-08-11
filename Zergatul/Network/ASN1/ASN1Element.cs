@@ -177,7 +177,7 @@ namespace Zergatul.Network.ASN1
                 l >>= 8;
             }
 
-            stream.WriteByte((byte)octets);
+            stream.WriteByte((byte)(octets | 0x80));
 
             for (int i = 0; i < octets; i++)
                 stream.WriteByte((byte)(length >> (8 * (octets - 1 - i))));

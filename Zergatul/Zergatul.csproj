@@ -55,13 +55,16 @@
     <Compile Include="Cryptography\Asymmetric\ECDiffieHellman.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDSA.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDSAParameters.cs" />
+    <Compile Include="Cryptography\Asymmetric\ECDSASignature.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
+    <Compile Include="Cryptography\Asymmetric\NullParam.cs" />
     <Compile Include="Cryptography\Asymmetric\RSA.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPublicKey.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
+    <Compile Include="Cryptography\BlockCipher\AbstractStreamCipher.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\AEADCipherData.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\AbstractAEADCipherMode.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\AbstractBlockCipherMode.cs" />
@@ -88,10 +91,11 @@
     <Compile Include="Cryptography\BlockCipher\CipherMode\BlockCipherDecryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\DES.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\BlockCipherEncryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\KeyStream.cs" />
     <Compile Include="Cryptography\BlockCipher\RC2.cs" />
     <Compile Include="Cryptography\BlockCipher\TripleDESEDE.cs" />
     <Compile Include="Cryptography\Certificate\AccessDescription.cs" />
-    <Compile Include="Cryptography\Encoding\ECDSASignatureValue.cs" />
+    <Compile Include="Network\ASN1\Structures\ECDSASignatureValue.cs" />
     <Compile Include="Cryptography\Generator\PKCS12v11.cs" />
     <Compile Include="Network\ASN1\Structures\AlgorithmIdentifier.cs" />
     <Compile Include="Cryptography\Certificate\X509CertificateSyntax.cs" />
@@ -127,7 +131,7 @@
     <Compile Include="Cryptography\Certificate\AuthorityInformationAccess.cs" />
     <Compile Include="Cryptography\Certificate\X509Certificate.cs" />
     <Compile Include="Cryptography\DefaultSecureRandom.cs" />
-    <Compile Include="Cryptography\Encoding\EMSA_PKCS1_v1_5.cs" />
+    <Compile Include="Network\ASN1\Structures\EMSA_PKCS1_v1_5.cs" />
     <Compile Include="Cryptography\Hash\AbstractHash.cs" />
     <Compile Include="Cryptography\Hash\HMAC.cs" />
     <Compile Include="Cryptography\Hash\MD5.cs" />
@@ -220,6 +224,7 @@
     <Compile Include="Network\Proxy\Socks4Exception.cs" />
     <Compile Include="Network\Proxy\Socks5.cs" />
     <Compile Include="Network\Proxy\Socks5Exception.cs" />
+    <Compile Include="Network\Tls\AbstractSignature.cs" />
     <Compile Include="Network\Tls\AEADCipherSuite.cs" />
     <Compile Include="Network\Tls\Alert.cs" />
     <Compile Include="Network\Tls\AlertDescription.cs" />
@@ -232,6 +237,7 @@
     <Compile Include="Network\Tls\ChangeCipherSpec.cs" />
     <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
     <Compile Include="Network\Tls\AbstractKeyExchange.cs" />
+    <Compile Include="Network\Tls\ECDSASignature.cs" />
     <Compile Include="Network\Tls\GenericCipherSuite.cs" />
     <Compile Include="Network\Tls\CipherSuite.cs" />
     <Compile Include="Network\Tls\DHEKeyExchange.cs" />
@@ -276,6 +282,7 @@
     <Compile Include="Network\Tls\ReadDataEventArgs.cs" />
     <Compile Include="Network\Tls\RecordMessage.cs" />
     <Compile Include="Network\Tls\Role.cs" />
+    <Compile Include="Network\Tls\RSASignature.cs" />
     <Compile Include="Network\Tls\SecurityParameters.cs" />
     <Compile Include="Network\Tls\ServerDHParams.cs" />
     <Compile Include="Network\Tls\ServerECDHParams.cs" />

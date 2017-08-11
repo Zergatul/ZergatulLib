@@ -4,7 +4,7 @@ using Zergatul.Math.EllipticCurves;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class ECDiffieHellman : AbstractAsymmetricAlgorithm<IEllipticCurve, ECPointGeneric, ECPrivateKey, ECPointGeneric>
+    public class ECDiffieHellman : AbstractAsymmetricAlgorithm<IEllipticCurve, ECPointGeneric, ECPrivateKey, ECPointGeneric, NullParam>
     {
         public override ECPrivateKey PrivateKey { get; set; }
         public override ECPointGeneric PublicKey { get; set; }
@@ -46,7 +46,7 @@ namespace Zergatul.Cryptography.Asymmetric
             throw new InvalidOperationException();
         }
 
-        public override AbstractSignatureAlgorithm Signature
+        public override AbstractSignatureAlgorithm<NullParam> Signature
         {
             get
             {

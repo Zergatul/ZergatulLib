@@ -123,6 +123,9 @@ namespace Zergatul.Network.Tls
                     case ContentType.ApplicationData:
                         message = new ApplicationData();
                         break;
+                    case ContentType.Alert:
+                        message = new Alert();
+                        break;
                     default:
                         throw new NotImplementedException();
                 }

@@ -7,24 +7,32 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public abstract class AbstractSignatureAlgorithm
+    public abstract class AbstractSignatureAlgorithm<SignatureClass>
     {
-        public abstract byte[] SignHash(byte[] data);
+        public abstract SignatureClass SignHash(byte[] hash);
 
-        public abstract byte[] SignHash(AbstractHash hashAlgorithm);
-
-        public virtual byte[] SignData(byte[] data, AbstractHash hashAlgorithm)
+        public SignatureClass SignHash(AbstractHash hashAlgorithm)
         {
+            return SignHash(hashAlgorithm.ComputeHash());
+        }
+
+        public SignatureClass SignData(AbstractHash hashAlgorithm, byte[] data)
+        {
+            hashAlgorithm.Reset();
             hashAlgorithm.Update(data);
             return SignHash(hashAlgorithm.ComputeHash());
         }
 
-        public abstract bool VerifyHash(byte[] data, byte[] signature);
+        public abstract bool VerifyHash(byte[] hash, SignatureClass signature);
 
-        public abstract bool VerifyHash(AbstractHash hashAlgorithm, byte[] signature);
-
-        public virtual bool VerifyData(byte[] data, byte[] signature, AbstractHash hashAlgorithm)
+        public bool VerifyHash(AbstractHash hashAlgorithm, SignatureClass signature)
         {
+            return VerifyHash(hashAlgorithm.ComputeHash(), signature);
+        }
+
+        public bool VerifyData(AbstractHash hashAlgorithm, byte[] data, SignatureClass signature)
+        {
+            hashAlgorithm.Reset();
             hashAlgorithm.Update(data);
             return VerifyHash(hashAlgorithm.ComputeHash(), signature);
         }

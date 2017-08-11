@@ -24,9 +24,15 @@ namespace Zergatul.Network.ASN1
 
         }
 
+        public Integer(BigInteger value)
+            : this()
+        {
+            Raw = value.ToBytes(ByteOrder.BigEndian);
+        }
+
         protected override byte[] BodyToBytes()
         {
-            throw new NotImplementedException();
+            return Raw;
         }
 
         protected override void ReadBody(byte[] data)

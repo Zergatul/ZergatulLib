@@ -27,8 +27,8 @@ namespace Zergatul.Cryptography.Certificate
 
             if (certificates.Any(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Count() > 1))
                 throw new NotSupportedException();
-            if (certificates.Any(c => c.Extensions.OfType<SubjectKeyIdentifier>().Count() != 1))
-                throw new NotSupportedException();
+            /*if (certificates.Any(c => c.Extensions.OfType<SubjectKeyIdentifier>().Count() != 1))
+                throw new NotSupportedException();*/
 
             // skip self-signed, they should be grabbed from store
             if (store != null)
@@ -69,7 +69,7 @@ namespace Zergatul.Cryptography.Certificate
 
         private static IEnumerable<X509Certificate> FindBySubjectKeyId(IEnumerable<X509Certificate> certificates, byte[] subject)
         {
-            return certificates.Where(c => c.Extensions.OfType<SubjectKeyIdentifier>().Single().KeyIdentifier.SequenceEqual(subject));
+            return certificates.Where(c => c.Extensions.OfType<SubjectKeyIdentifier>().SingleOrDefault()?.KeyIdentifier?.SequenceEqual(subject) ?? false);
         }
 
         private static IEnumerable<X509Certificate> FindByAuthorityKeyId(IEnumerable<X509Certificate> certificates, byte[] subject)

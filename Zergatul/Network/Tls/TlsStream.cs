@@ -309,12 +309,13 @@ namespace Zergatul.Network.Tls
             };
 
             var algo = certificate.PrivateKey.ResolveAlgorithm();
+
             var hash = serverKeyExchange.SignAndHashAlgo.Hash.Resolve();
             hash.Update(_secParams.ClientRandom.Array);
             hash.Update(_secParams.ServerRandom.Array);
             hash.Update(SelectedCipher.GetKeyExchangeDataToSign(serverKeyExchange));
 
-            serverKeyExchange.Signature = algo.Signature.SignHash(hash);
+            serverKeyExchange.Signature = SelectedCipher.CreateSignature(algo, hash);
 
             return new HandshakeMessage(serverKeyExchange);
         }
@@ -411,13 +412,14 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.ServerCertificate)
                 throw new TlsStreamException("Unexpected ServerKeyExchange message");
 
+            var algo = _serverCertificate.PublicKey.ResolveAlgorithm();
+
             AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
             hash.Update(_secParams.ClientRandom.Array);
             hash.Update(_secParams.ServerRandom.Array);
             hash.Update(SelectedCipher.GetKeyExchangeDataToSign(message));
 
-            var assymetricAlgo = _serverCertificate.PublicKey.ResolveAlgorithm();
-            if (!assymetricAlgo.Signature.VerifyHash(hash, message.Signature))
+            if (!SelectedCipher.VerifySignature(algo, hash, message.Signature))
                 throw new TlsStreamException("Invalid signature");
 
             State = ConnectionState.ServerKeyExchange;

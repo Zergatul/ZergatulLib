@@ -10,8 +10,9 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Network.Tls
 {
-    internal class AEADCipherSuite<KeyExchange, BlockCipher, CipherMode, PRFHashFunction> : GenericCipherSuite<KeyExchange, BlockCipher, PRFHashFunction>
+    internal class AEADCipherSuite<KeyExchange, Signature, BlockCipher, CipherMode, PRFHashFunction> : GenericCipherSuite<KeyExchange, Signature, BlockCipher, PRFHashFunction>
         where KeyExchange : AbstractKeyExchange, new()
+        where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
         where CipherMode : AbstractAEADCipherMode, new()
         where PRFHashFunction : AbstractHash, new()
@@ -120,8 +121,9 @@ namespace Zergatul.Network.Tls
         }
     }
 
-    internal class AEADCipherSuiteDefaultPRF<KeyExchange, BlockCipher, CipherMode> : AEADCipherSuite<KeyExchange, BlockCipher, CipherMode, SHA256>
+    internal class AEADCipherSuiteDefaultPRF<KeyExchange, Signature, BlockCipher, CipherMode> : AEADCipherSuite<KeyExchange, Signature, BlockCipher, CipherMode, SHA256>
         where KeyExchange : AbstractKeyExchange, new()
+        where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
         where CipherMode : AbstractAEADCipherMode, new()
     {

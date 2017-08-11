@@ -7,6 +7,9 @@ using Zergatul.Network.ASN1;
 
 namespace Zergatul.Cryptography.Certificate
 {
+    /// <summary>
+    /// https://tools.ietf.org/html/rfc3280#page-32
+    /// </summary>
     public class UserNotice
     {
         public NoticeReference NoticeRef { get; private set; }
@@ -17,12 +20,12 @@ namespace Zergatul.Cryptography.Certificate
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);
 
-            if (seq.Elements.Count >= 1)
-                NoticeRef = new NoticeReference(seq.Elements[0]);
-            if (seq.Elements.Count >= 2)
+            for (int i = 0; i < seq.Elements.Count; i++)
             {
-                CertificateParseException.ThrowIfFalse(seq.Elements[1] is ASN1StringElement);
-                ExplicitText = ((ASN1StringElement)seq.Elements[1]).Value;
+                if (seq.Elements[i] is Sequence)
+                    NoticeRef = new NoticeReference(seq.Elements[i]);
+                if (seq.Elements[i] is ASN1StringElement)
+                    ExplicitText = ((ASN1StringElement)seq.Elements[i]).Value;
             }
         }
     }

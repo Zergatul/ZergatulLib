@@ -195,7 +195,19 @@ namespace Test
                     //"ru.wargaming.net"
                     //"ru.4game.com"
                     //"www.tera-online.ru"
-                    "facebook.com"
+                    //"www.facebook.com"
+                    //"security.stackexchange.com"
+                    //"www.avito.ru"
+                    //"ria.ru"
+                    //"kp.ru"
+                    //"lenta.ru" // chacha20-poly1305
+                    //"gazeta.ru"
+                    //"vesti.ru"
+                    //"smi2.ru"
+                    //"rt.com"
+                    //"iz.ru"
+                    //"rg.ru"
+                    "fishki.net"
                     ;
 
             var client = new TcpClient(host, 443);
@@ -204,19 +216,29 @@ namespace Test
             {
                 CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
                 {
-                    /*Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8,*/
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8,
+
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
                     Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,
+
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
                 },
                 SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
                 {
@@ -345,7 +367,7 @@ namespace Test
                         Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
                         Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,*/
                         //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                        Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+                        Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
                     },
                     SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
                     {
@@ -354,7 +376,7 @@ namespace Test
                 };
 
                 var cert = ECcert ?
-                    new Zergatul.Cryptography.Certificate.X509Certificate("ec-cert.pfx", @"\7FoIK*f1{\q") :
+                    new Zergatul.Cryptography.Certificate.X509Certificate("ecdsa-cert.pfx", @"\7FoIK*f1{\q") :
                     new Zergatul.Cryptography.Certificate.X509Certificate("rsa-cert.pfx", "hh87$-Jqo");
                 tlsStream.AuthenticateAsServer("localhost", cert);
                 tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
@@ -364,7 +386,7 @@ namespace Test
             {
                 var tcp = new TcpClient("localhost", 32028);
                 var handler = new TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
-                handler.Connect(new MyTlsClient(Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256));
+                handler.Connect(new MyTlsClient(Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256));
 
                 byte[] buffer = new byte[12];
                 handler.Stream.Read(buffer, 0, 12);
