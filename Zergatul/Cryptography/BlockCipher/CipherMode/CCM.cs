@@ -128,19 +128,19 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 this.L = octLen;
             }
 
-            public override AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] authenticatedData)
+            public override AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] aad)
             {
                 if (IV == null)
                     throw new ArgumentNullException(nameof(IV));
                 if (data == null)
                     throw new ArgumentNullException(nameof(data));
-                if (authenticatedData == null)
-                    throw new ArgumentNullException(nameof(authenticatedData));
+                if (aad == null)
+                    throw new ArgumentNullException(nameof(aad));
 
                 if (IV.Length != 15 - L)
                     throw new ArgumentException($"Nonce should be {15 - L} length", nameof(IV));
 
-                byte[] T = CalculateAuthField(M, L, IV, data, authenticatedData, _processBlock);
+                byte[] T = CalculateAuthField(M, L, IV, data, aad, _processBlock);
 
                 byte[] A = GetInitialCounter(IV, L);
                 long counter = 0;
@@ -185,14 +185,14 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 this.L = octLen;
             }
 
-            public override byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] authenticatedData)
+            public override byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] aad)
             {
                 if (IV == null)
                     throw new ArgumentNullException(nameof(IV));
                 if (data == null)
                     throw new ArgumentNullException(nameof(data));
-                if (authenticatedData == null)
-                    throw new ArgumentNullException(nameof(authenticatedData));
+                if (aad == null)
+                    throw new ArgumentNullException(nameof(aad));
 
                 if (IV.Length != 15 - L)
                     throw new ArgumentException($"Nonce should be {15 - L} length", nameof(IV));
@@ -220,7 +220,7 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                         P[i * 16 + b] = (byte)(S[b] ^ data.CipherText[i * 16 + b]);
                 }
 
-                byte[] T = CalculateAuthField(M, L, IV, P, authenticatedData, _processBlock);
+                byte[] T = CalculateAuthField(M, L, IV, P, aad, _processBlock);
                 for (int i = 0; i < M; i++)
                     if ((T[i] ^ S0[i]) != data.Tag[i])
                         throw new AuthenticationException();

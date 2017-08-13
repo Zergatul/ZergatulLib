@@ -63,6 +63,7 @@ namespace Zergatul.Cryptography.BlockCipher
                 int length = System.Math.Min(_block.Length - _index, count);
                 Array.Copy(_block, _index, buffer, offset, length);
 
+                _index += length;
                 offset += length;
                 count -= length;
             }

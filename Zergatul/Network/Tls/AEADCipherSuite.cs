@@ -109,7 +109,7 @@ namespace Zergatul.Network.Tls
             return result;
         }
 
-        private byte[] GetAdditionalData(TLSCompressed data, ulong sequenceNum)
+        protected byte[] GetAdditionalData(TLSCompressed data, ulong sequenceNum)
         {
             // https://tools.ietf.org/html/rfc5246#section-6.2.3.3
             // additional_data = seq_num + TLSCompressed.type + TLSCompressed.version + TLSCompressed.length;

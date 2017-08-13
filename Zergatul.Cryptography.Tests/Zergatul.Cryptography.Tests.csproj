@@ -62,6 +62,9 @@
     <Compile Include="BlockCipher\GCMTests.cs" />
     <Compile Include="BlockCipher\CCMTests.cs" />
     <Compile Include="BlockCipher\ChaCha20Tests.cs" />
+    <Compile Include="BlockCipher\Poly1305FunctionTests.cs" />
+    <Compile Include="BlockCipher\Poly1305KeyGeneratorTests.cs" />
+    <Compile Include="BlockCipher\Poly1305Tests.cs" />
     <Compile Include="Generator\PKCS12v11Tests.cs" />
     <Compile Include="Hash\Helper.cs" />
     <Compile Include="Hash\SHA1Tests.cs" />

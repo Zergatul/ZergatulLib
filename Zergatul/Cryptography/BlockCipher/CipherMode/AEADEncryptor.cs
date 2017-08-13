@@ -8,6 +8,6 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
 {
     public abstract class AEADEncryptor
     {
-        public abstract AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] authenticatedData);
+        public abstract AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] aad);
     }
 }

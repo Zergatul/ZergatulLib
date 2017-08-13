@@ -21,6 +21,9 @@ namespace Zergatul.Network.Tls
     // AES-CCM Cipher Suites for Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc6655
 
+    // ChaCha20-Poly1305 Cipher Suites for Transport Layer Security (TLS)
+    // https://tools.ietf.org/html/rfc7905
+
     // https://tools.ietf.org/search/rfc4492#section-5.1
     // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
 

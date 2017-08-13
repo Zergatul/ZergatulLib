@@ -65,6 +65,7 @@
     <Compile Include="Cryptography\Asymmetric\RSAPublicKey.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractStreamCipher.cs" />
+    <Compile Include="Cryptography\BlockCipher\BlockBasedStreamCipher.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\AEADCipherData.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\AbstractAEADCipherMode.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\AbstractBlockCipherMode.cs" />
@@ -89,9 +90,12 @@
     <Compile Include="Cryptography\BlockCipher\CipherMode\ECB.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\GCM.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\BlockCipherDecryptor.cs" />
+    <Compile Include="Cryptography\BlockCipher\CipherMode\Poly1305.cs" />
     <Compile Include="Cryptography\BlockCipher\DES.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\BlockCipherEncryptor.cs" />
     <Compile Include="Cryptography\BlockCipher\KeyStream.cs" />
+    <Compile Include="Cryptography\BlockCipher\CipherMode\Poly1305Function.cs" />
+    <Compile Include="Cryptography\BlockCipher\CipherMode\Poly1305KeyGenerator.cs" />
     <Compile Include="Cryptography\BlockCipher\RC2.cs" />
     <Compile Include="Cryptography\BlockCipher\TripleDESEDE.cs" />
     <Compile Include="Cryptography\Certificate\AccessDescription.cs" />
@@ -234,6 +238,7 @@
     <Compile Include="Network\Tls\BinaryWriter.cs" />
     <Compile Include="Network\Tls\CCMCipherSuite.cs" />
     <Compile Include="Network\Tls\Certificate.cs" />
+    <Compile Include="Network\Tls\ChaCha20CipherSuite.cs" />
     <Compile Include="Network\Tls\ChangeCipherSpec.cs" />
     <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
     <Compile Include="Network\Tls\AbstractKeyExchange.cs" />

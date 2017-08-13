@@ -191,16 +191,16 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 this._tagLen = tagLen;
             }
 
-            public override AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] authenticatedData)
+            public override AEADCipherData Encrypt(byte[] IV, byte[] data, byte[] aad)
             {
                 if (IV == null)
                     throw new ArgumentNullException(nameof(IV));
                 if (data == null)
                     throw new ArgumentNullException(nameof(data));
-                if (authenticatedData == null)
-                    throw new ArgumentNullException(nameof(authenticatedData));
+                if (aad == null)
+                    throw new ArgumentNullException(nameof(aad));
 
-                byte[] A = authenticatedData;
+                byte[] A = aad;
                 byte[] H = _processBlock(new byte[16]);
 
                 byte[] J0 = CalculateJ0(H, IV);
@@ -239,16 +239,16 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
                 this._tagLen = tagLen;
             }
 
-            public override byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] authenticatedData)
+            public override byte[] Decrypt(byte[] IV, AEADCipherData data, byte[] aad)
             {
                 if (IV == null)
                     throw new ArgumentNullException(nameof(IV));
                 if (data == null)
                     throw new ArgumentNullException(nameof(data));
-                if (authenticatedData == null)
-                    throw new ArgumentNullException(nameof(authenticatedData));
+                if (aad == null)
+                    throw new ArgumentNullException(nameof(aad));
 
-                byte[] A = authenticatedData;
+                byte[] A = aad;
                 byte[] C = data.CipherText;
                 byte[] H = _processBlock(new byte[16]);
 

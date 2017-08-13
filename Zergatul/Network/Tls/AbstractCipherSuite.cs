@@ -129,6 +129,15 @@ namespace Zergatul.Network.Tls
                 case CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8:
                     cs = new CCMCipherSuite<DHEKeyExchange, RSASignature, AES256>(8);
                     break;
+                case CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
+                    cs = new ChaCha20CipherSuite<ECDHEKeyExchange, RSASignature, SHA256>();
+                    break;
+                case CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:
+                    cs = new ChaCha20CipherSuite<ECDHEKeyExchange, ECDSASignature, SHA256>();
+                    break;
+                case CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256:
+                    cs = new ChaCha20CipherSuite<DHEKeyExchange, RSASignature, SHA256>();
+                    break;
                 default:
                     throw new NotImplementedException();
             }

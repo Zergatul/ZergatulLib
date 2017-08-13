@@ -121,6 +121,28 @@ namespace Zergatul.Tls.Tests
 
         #endregion
 
+        #region DHE_RSA_CHACHA20
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256);
+        }
+
+        #endregion
+
         #region ECDHE_RSA_AES
 
         [TestMethod]
