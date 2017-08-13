@@ -9,10 +9,10 @@ namespace Zergatul.Network.Tls.Extensions
     public class TlsExtension
     {
         public ExtensionType Type;
-        public ushort Length => (ushort)(Data?.Length ?? 0);
+        public virtual ushort Length => (ushort)(Data?.Length ?? 0);
 
         protected byte[] _data;
-        public byte[] Data
+        public virtual byte[] Data
         {
             get
             {
@@ -48,6 +48,21 @@ namespace Zergatul.Network.Tls.Extensions
         protected virtual void FormatData()
         {
 
+        }
+
+        public static TlsExtension Resolve(ExtensionType type)
+        {
+            switch (type)
+            {
+                case ExtensionType.ExtendedMasterSecret:
+                    return new ExtendedMasterSecret();
+                case ExtensionType.SupportedEllipticCurves:
+                    return new SupportedEllipticCurves();
+                case ExtensionType.ECPointFormats:
+                    return new SupportedPointFormats();
+                default:
+                    return new TlsExtension(type);
+            }
         }
     }
 }

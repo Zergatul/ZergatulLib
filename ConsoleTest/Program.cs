@@ -1,4 +1,5 @@
 ﻿using Org.BouncyCastle.Crypto.Tls;
+using Org.BouncyCastle.Pkcs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,6 +43,7 @@ namespace Test
         static void Main(string[] args)
         {
             //TestMyServerAndBCClient();
+            //TestMyClientAndBCServer();
             //TestMyServerAndNETClient();
             //TestMyClientAndNETServer();
             ConnectToExternal();
@@ -216,6 +218,7 @@ namespace Test
             var tls = new TlsStream(client.GetStream());
             tls.Settings = new TlsStreamSettings
             {
+                SupportExtendedMasterSecret = true,
                 CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
                 {
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
@@ -409,30 +412,41 @@ namespace Test
 
         private static void TestMyClientAndBCServer()
         {
+            bool ECcert = false;
+
             var serverThread = new Thread(() =>
             {
                 var listener = new TcpListener(IPAddress.Any, 32028);
                 listener.Start();
 
+                Pkcs12Store store = new Pkcs12Store();
+                store.Load(new FileStream(ECcert ? "ecdsa-cert.pfx" : "rsa-cert.pfx", FileMode.Open), (ECcert ? @"\7FoIK*f1{\q" : "hh87$-Jqo").ToCharArray());
+
                 var client = listener.AcceptTcpClient();
                 var handler = new TlsServerProtocol(client.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
-                handler.Accept(new MyTlsServer());
+                handler.Accept(new MyTlsServer(store));
 
-                //tlsStream.AuthenticateAsServer("localhost", new Zergatul.Cryptography.Certificate.X509Certificate("test.p12", "hh87$-Jqo"));
-                //tlsStream.Write(Encoding.ASCII.GetBytes("Hello World!"));
+                handler.Stream.Write(Encoding.ASCII.GetBytes("Hello World!"), 0, 12);
             });
 
             var clientThread = new Thread(() =>
             {
                 var tcp = new TcpClient("localhost", 32028);
-                var handler = new TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
-                handler.Connect(new MyTlsClient());
+
+                var tlsStream = new TlsStream(tcp.GetStream());
+                tlsStream.Settings = new TlsStreamSettings
+                {
+                    CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
+                    {
+                        Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+                    }
+                };
+                tlsStream.AuthenticateAsClient("localhost");
 
                 byte[] buffer = new byte[12];
-                handler.Stream.Read(buffer, 0, 12);
-                Console.WriteLine(Encoding.ASCII.GetString(buffer));
+                tlsStream.Read(buffer, 0, 12);
 
-                handler.Close();
+                Console.WriteLine(Encoding.ASCII.GetString(buffer));
             });
 
             serverThread.Start();
@@ -469,9 +483,34 @@ namespace Test
 
         class MyTlsServer : DefaultTlsServer
         {
+            private Pkcs12Store _store;
+
+            public MyTlsServer(Pkcs12Store store)
+            {
+                this._store = store;
+            }
+
+            protected override Org.BouncyCastle.Crypto.Tls.ProtocolVersion MinimumVersion => Org.BouncyCastle.Crypto.Tls.ProtocolVersion.TLSv12;
+            protected override Org.BouncyCastle.Crypto.Tls.ProtocolVersion MaximumVersion => Org.BouncyCastle.Crypto.Tls.ProtocolVersion.TLSv12;
+
+            public override Org.BouncyCastle.Crypto.Tls.ProtocolVersion GetServerVersion()
+            {
+                return base.GetServerVersion();
+                //return Org.BouncyCastle.Crypto.Tls.ProtocolVersion.TLSv12;
+            }
+
             protected override TlsSignerCredentials GetRsaSignerCredentials()
             {
-                return null;
+                var cert = new Certificate(new Org.BouncyCastle.Asn1.X509.X509CertificateStructure[]
+                {
+                    _store.GetCertificate("be6f96853dd4066f51238725362420b7b193713c").Certificate.CertificateStructure
+                });
+                return new DefaultTlsSignerCredentials(
+                    this.mContext,
+                    cert,
+                    _store.GetKey("BE6F96853DD4066F51238725362420B7B193713C").Key,
+                    // SHA512, RSA
+                    new SignatureAndHashAlgorithm(6, 1));
             }
         }
 

@@ -10,9 +10,11 @@ namespace Zergatul.Network.Tls
     {
         public CipherSuite[] CipherSuites;
         public NamedCurve[] SupportedCurves;
+        public bool SupportExtendedMasterSecret;
 
         public static TlsStreamSettings Default = new TlsStreamSettings
         {
+            SupportExtendedMasterSecret = true,
             CipherSuites = new CipherSuite[]
             {
                 CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,

@@ -23,5 +23,8 @@ namespace Zergatul.Network.Tls
         public ByteArray MasterSecret;
         public ByteArray ClientRandom;
         public ByteArray ServerRandom;
+
+        public List<byte> HandshakeData;
+        public bool ExtendedMasterSecret;
     }
 }

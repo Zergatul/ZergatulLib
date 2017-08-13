@@ -94,7 +94,15 @@ namespace Zergatul.Network.Tls
             // RFC 5246
             // https://tools.ietf.org/html/rfc5246#section-8.1
             // The master secret is always exactly 48 bytes in length.
-            _secParams.MasterSecret = PseudoRandomFunction(_preMasterSecret, "master secret", _secParams.ClientRandom + _secParams.ServerRandom, 48);
+            if (_secParams.ExtendedMasterSecret)
+            {
+                var sessionHash = Hash(new ByteArray(_secParams.HandshakeData.ToArray()));
+                _secParams.MasterSecret = PseudoRandomFunction(_preMasterSecret, "extended master secret", sessionHash, 48);
+            }
+            else
+            {
+                _secParams.MasterSecret = PseudoRandomFunction(_preMasterSecret, "master secret", _secParams.ClientRandom + _secParams.ServerRandom, 48);
+            }
 
             // RFC 5246
             // https://tools.ietf.org/html/rfc5246#section-8.1

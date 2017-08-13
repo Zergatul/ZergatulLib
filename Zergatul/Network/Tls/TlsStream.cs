@@ -60,6 +60,9 @@ namespace Zergatul.Network.Tls
         internal ulong ClientSequenceNum;
         internal ulong ServerSequenceNum;
 
+        private TlsExtension[] _clientExtensions;
+        private TlsExtension[] _serverExtensions;
+
         public TlsStream(Stream innerStream, ISecureRandom random = null)
         {
             this._innerStream = innerStream;
@@ -71,6 +74,7 @@ namespace Zergatul.Network.Tls
             this._utils = new TlsUtils(this._random);
 
             this._secParams = new SecurityParameters();
+            this._secParams.HandshakeData = this.HandshakeData;
 
             this.Settings = TlsStreamSettings.Default;
         }
@@ -247,14 +251,12 @@ namespace Zergatul.Network.Tls
                 },
                 new TlsExtension
                 {
-                    Type = ExtensionType.ExtendedMasterSecret
-                },
-                new TlsExtension
-                {
                     Type = ExtensionType.RenegotiationInfo,
                     Data = new byte[] { 0 }
                 }
             };
+            if (Settings.SupportExtendedMasterSecret)
+                extensions.Add(new ExtendedMasterSecret());
             if (Settings.SupportedCurves?.Length > 0)
                 extensions.Add(new SupportedEllipticCurves(Settings.SupportedCurves));
             extensions.Add(new SupportedPointFormats(ECPointFormat.Uncompressed));
@@ -273,19 +275,24 @@ namespace Zergatul.Network.Tls
             var commonCiphers = Settings.CipherSuites.Where(cs => _clientCipherSuites.Contains(cs));
             if (!commonCiphers.Any())
                 throw new TlsStreamException("No common algorithm");
+
+            var extensions = new List<TlsExtension>()
+            {
+                new TlsExtension
+                {
+                    Type = ExtensionType.RenegotiationInfo,
+                    Data = new byte[] { 0 }
+                }
+            };
+            if (_clientExtensions.OfType<ExtendedMasterSecret>().Count() > 1 && Settings.SupportExtendedMasterSecret)
+                extensions.Add(new ExtendedMasterSecret());
+
             return new HandshakeMessage(new ServerHello
             {
                 ServerVersion = ProtocolVersion.Tls12,
                 Random = _secParams.ServerRandom.Array,
                 CipherSuite = commonCiphers.First(),
-                Extensions = new List<TlsExtension>
-                {
-                    new TlsExtension
-                    {
-                        Type = ExtensionType.RenegotiationInfo,
-                        Data = new byte[] { 0 }
-                    }
-                },
+                Extensions = extensions,
                 SessionID = new byte[0]
             });
         }
@@ -321,6 +328,13 @@ namespace Zergatul.Network.Tls
             serverKeyExchange.Signature = SelectedCipher.CreateSignature(algo, hash);
 
             return new HandshakeMessage(serverKeyExchange);
+        }
+
+        private void AnalyzeExtensions()
+        {
+            bool clientExtMasterSecret = _clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
+            bool serverExtMasterSecret = _serverExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
+            _secParams.ExtendedMasterSecret = clientExtMasterSecret && serverExtMasterSecret;
         }
 
         #endregion
@@ -382,6 +396,8 @@ namespace Zergatul.Network.Tls
             _secParams.ClientRandom = new ByteArray(message.Random.ToArray());
             _clientCipherSuites = message.CipherSuites;
 
+            this._clientExtensions = message.Extensions;
+
             State = ConnectionState.ClientHello;
         }
 
@@ -392,6 +408,10 @@ namespace Zergatul.Network.Tls
 
             SelectedCipher = AbstractCipherSuite.Resolve(message.CipherSuite, _secParams, Role, _random);
             _secParams.ServerRandom = new ByteArray(message.Random.ToArray());
+
+            this._serverExtensions = message.Extensions.ToArray();
+
+            AnalyzeExtensions();
 
             State = ConnectionState.ServerHello;
         }

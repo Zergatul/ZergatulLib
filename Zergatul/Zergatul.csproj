@@ -243,6 +243,7 @@
     <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
     <Compile Include="Network\Tls\AbstractKeyExchange.cs" />
     <Compile Include="Network\Tls\ECDSASignature.cs" />
+    <Compile Include="Network\Tls\Extensions\ExtendedMasterSecret.cs" />
     <Compile Include="Network\Tls\GenericCipherSuite.cs" />
     <Compile Include="Network\Tls\CipherSuite.cs" />
     <Compile Include="Network\Tls\DHEKeyExchange.cs" />

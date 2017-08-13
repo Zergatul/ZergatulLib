@@ -30,11 +30,9 @@ namespace Zergatul.Network.Tls
             var counter = reader.StartCounter(reader.ReadShort());
             while (counter.CanRead)
             {
-                Extensions.Add(new TlsExtension
-                {
-                    Type = (ExtensionType)reader.ReadShort(),
-                    Data = reader.ReadBytes(reader.ReadShort())
-                });
+                var ext = TlsExtension.Resolve((ExtensionType)reader.ReadShort());
+                ext.Data = reader.ReadBytes(reader.ReadShort());
+                Extensions.Add(ext);
             }
         }
 
