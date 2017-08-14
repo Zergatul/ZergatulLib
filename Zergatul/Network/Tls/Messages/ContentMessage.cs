@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Network.Tls.Messages
 {
     internal abstract class ContentMessage
     {
         public abstract void Read(BinaryReader reader);
-
         public abstract void Write(BinaryWriter writer);
     }
 }

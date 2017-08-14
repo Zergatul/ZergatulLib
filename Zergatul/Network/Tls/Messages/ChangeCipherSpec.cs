@@ -4,20 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Network.Tls.Messages
 {
-    internal class ApplicationData : ContentMessage
+    internal class ChangeCipherSpec : ContentMessage
     {
-        public byte[] Data;
-
         public override void Read(BinaryReader reader)
         {
-            Data = reader.ReadToEnd();
+            if (reader.ReadByte() != 1)
+                throw new TlsStreamException("Invalid ChangeCipherSpec message");
         }
 
         public override void Write(BinaryWriter writer)
         {
-            writer.WriteBytes(Data);
+            writer.WriteByte(1);
         }
     }
 }

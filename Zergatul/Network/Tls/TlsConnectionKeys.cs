@@ -8,6 +8,6 @@ namespace Zergatul.Network.Tls
 {
     internal class TlsConnectionKeys
     {
-        public ByteArray ClientMACkey, ServerMACkey, ClientEncKey, ServerEncKey, ClientIV, ServerIV;
+        public byte[] ClientMACkey, ServerMACkey, ClientEncKey, ServerEncKey, ClientIV, ServerIV;
     }
 }

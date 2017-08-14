@@ -4,18 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Network.Tls.Messages
 {
     internal class HandshakeMessage : ContentMessage
     {
-        private AbstractCipherSuite _cipher;
-
         public HandshakeBody Body;
 
-        public HandshakeMessage(HandshakeBody body, AbstractCipherSuite cipher = null)
+        private CipherSuiteBuilder _cipherSuite;
+
+        public HandshakeMessage()
+        {
+
+        }
+
+        public HandshakeMessage(CipherSuiteBuilder cipherSuite)
+        {
+            this._cipherSuite = cipherSuite;
+        }
+
+        public HandshakeMessage(HandshakeBody body)
         {
             this.Body = body;
-            this._cipher = cipher;
         }
 
         public override void Read(BinaryReader reader)
@@ -24,10 +33,7 @@ namespace Zergatul.Network.Tls
             var length = reader.ReadUInt24();
 
             using (reader.SetReadLimit(length))
-            {
-                ResolveHandshakeBody(type);
-                Body.Read(reader);
-            }
+                ReadHandshakeBody(type, reader);
         }
 
         public override void Write(BinaryWriter writer)
@@ -42,7 +48,7 @@ namespace Zergatul.Network.Tls
             writer.WriteBytes(content.ToArray());
         }
 
-        private void ResolveHandshakeBody(HandshakeType type)
+        private void ReadHandshakeBody(HandshakeType type, BinaryReader reader)
         {
             switch (type)
             {
@@ -56,20 +62,22 @@ namespace Zergatul.Network.Tls
                     Body = new Certificate();
                     break;
                 case HandshakeType.ServerKeyExchange:
-                    Body = new ServerKeyExchange(_cipher);
-                    break;
+                    Body = _cipherSuite.KeyExchange.ReadServerKeyExchange(reader);
+                    return;
                 case HandshakeType.ServerHelloDone:
                     Body = new ServerHelloDone();
                     break;
                 case HandshakeType.ClientKeyExchange:
-                    Body = new ClientKeyExchange(_cipher);
-                    break;
+                    Body = _cipherSuite.KeyExchange.ReadClientKeyExchange(reader);
+                    return;
                 case HandshakeType.Finished:
                     Body = new Finished();
                     break;
                 default:
                     throw new NotImplementedException();
             }
+
+            Body.Read(reader);
         }
     }
 }

@@ -11,7 +11,7 @@ using Zergatul.Cryptography.Hash;
 namespace Zergatul.Network.Tls
 {
     internal class HMACCipherSuite<KeyExchange, Signature, BlockCipher, CipherMode, HashFunction, PRFHashFunction> : GenericCipherSuite<KeyExchange, Signature, BlockCipher, PRFHashFunction>
-        where KeyExchange : AbstractKeyExchange, new()
+        where KeyExchange : AbstractTlsKeyExchange, new()
         where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
         where CipherMode : AbstractBlockCipherMode, new()
@@ -185,7 +185,7 @@ namespace Zergatul.Network.Tls
     }
 
     internal class HMACCipherSuiteDefaultPRF<KeyExchange, Signature, BlockCipher, CipherMode, HashFunction> : HMACCipherSuite<KeyExchange, Signature, BlockCipher, CipherMode, HashFunction, SHA256>
-        where KeyExchange : AbstractKeyExchange, new()
+        where KeyExchange : AbstractTlsKeyExchange, new()
         where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
         where CipherMode : AbstractBlockCipherMode, new()

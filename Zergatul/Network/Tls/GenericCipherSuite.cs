@@ -5,11 +5,12 @@ using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.BlockCipher;
 using Zergatul.Cryptography.BlockCipher.CipherMode;
 using Zergatul.Cryptography.Hash;
+using Zergatul.Network.Tls.Extensions;
 
 namespace Zergatul.Network.Tls
 {
     internal abstract class GenericCipherSuite<KeyExchange, Signature, BlockCipher, PRFHashFunction> : AbstractCipherSuite
-        where KeyExchange : AbstractKeyExchange, new()
+        where KeyExchange : AbstractTlsKeyExchange, new()
         where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
         where PRFHashFunction : AbstractHash, new()
@@ -61,7 +62,7 @@ namespace Zergatul.Network.Tls
         public override ClientKeyExchange GetClientKeyExchange()
         {
             var message = new ClientKeyExchange(this);
-            _keyExchange.GetClientKeyExchange(message);
+            _keyExchange.GenerateClientKeyExchange(message);
             _preMasterSecret = _keyExchange.PreMasterSecret;
             return message;
         }
@@ -75,6 +76,16 @@ namespace Zergatul.Network.Tls
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
             _keyExchange.WriteClientKeyExchange(message, writer);
+        }
+
+        public override SignatureAlgorithm GetSignatureAlgorithm()
+        {
+            // TODO !
+            if (_signature is RSASignature)
+                return SignatureAlgorithm.RSA;
+            if (_signature is ECDSASignature)
+                return SignatureAlgorithm.ECDSA;
+            throw new NotImplementedException();
         }
 
         public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)

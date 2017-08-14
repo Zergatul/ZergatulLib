@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.BlockCipher.CipherMode;
 
 namespace Zergatul.Cryptography.Tests.BlockCipher
 {

@@ -11,7 +11,7 @@ using Zergatul.Cryptography.Hash;
 namespace Zergatul.Network.Tls
 {
     internal class CCMCipherSuite<KeyExchange, Signature, BlockCipher> : AEADCipherSuite<KeyExchange, Signature, BlockCipher, CCM, SHA256>
-        where KeyExchange : AbstractKeyExchange, new()
+        where KeyExchange : AbstractTlsKeyExchange, new()
         where Signature : AbstractSignature, new()
         where BlockCipher : AbstractBlockCipher, new()
     {

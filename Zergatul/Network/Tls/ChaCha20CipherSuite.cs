@@ -12,7 +12,7 @@ namespace Zergatul.Network.Tls
 {
     // TODO: AES-CCM??? WTF! refactor
     internal class ChaCha20CipherSuite<KeyExchange, Signature, PRFHashFunction> : AEADCipherSuite<KeyExchange, Signature, AES128, CCM, PRFHashFunction>
-        where KeyExchange : AbstractKeyExchange, new()
+        where KeyExchange : AbstractTlsKeyExchange, new()
         where Signature : AbstractSignature, new()
         where PRFHashFunction : AbstractHash, new()
     {

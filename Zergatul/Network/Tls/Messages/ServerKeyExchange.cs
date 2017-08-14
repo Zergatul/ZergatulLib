@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network.Tls.Extensions;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Network.Tls.Messages
 {
     internal class ServerKeyExchange : HandshakeBody
     {
@@ -15,22 +15,19 @@ namespace Zergatul.Network.Tls
         public SignatureAndHashAlgorithm SignAndHashAlgo;
         public byte[] Signature;
 
-        private AbstractCipherSuite _cipher;
-
-        public ServerKeyExchange(AbstractCipherSuite cipher)
+        public ServerKeyExchange()
             : base(HandshakeType.ServerKeyExchange)
         {
-            this._cipher = cipher;
         }
 
         public override void Read(BinaryReader reader)
         {
-            _cipher.ReadServerKeyExchange(this, reader);
+            
         }
 
         public override void WriteTo(BinaryWriter writer)
         {
-            _cipher.WriteServerKeyExchange(this, writer);
+            
         }
     }
 }

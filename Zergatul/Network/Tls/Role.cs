@@ -8,6 +8,7 @@ namespace Zergatul.Network.Tls
 {
     internal enum Role
     {
-        Client, Server
+        Client = 0,
+        Server = 1
     }
 }

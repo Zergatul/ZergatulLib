@@ -4,29 +4,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Network.Tls.Messages
 {
     internal class ClientKeyExchange : HandshakeBody
     {
         public byte[] DH_Yc;
         public byte[] ECDH_Yc;
 
-        private AbstractCipherSuite _cipher;
-
-        public ClientKeyExchange(AbstractCipherSuite cipher)
+        public ClientKeyExchange()
             : base(HandshakeType.ClientKeyExchange)
         {
-            this._cipher = cipher;
         }
 
         public override void Read(BinaryReader reader)
         {
-            _cipher.ReadClientKeyExchange(this, reader);
+            
         }
 
         public override void WriteTo(BinaryWriter writer)
         {
-            _cipher.WriteClientKeyExchange(this, writer);
+            
         }
     }
 }

@@ -117,6 +117,8 @@ namespace Zergatul.Network.ASN1
                     return new IA5String();
                 case ASN1TagNumber.UTCTime:
                     return new UTCTime();
+                case ASN1TagNumber.VisibleString:
+                    return new VisibleString();
                 default:
                     throw new NotImplementedException();
             }

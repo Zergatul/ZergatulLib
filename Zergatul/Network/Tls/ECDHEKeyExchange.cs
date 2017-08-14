@@ -10,7 +10,7 @@ using Zergatul.Network.Tls.Extensions;
 namespace Zergatul.Network.Tls
 {
     // https://tools.ietf.org/html/rfc4492
-    internal class ECDHEKeyExchange : AbstractKeyExchange
+    internal class ECDHEKeyExchange : AbstractTlsKeyExchange
     {
         ECDiffieHellman _ecdh;
 
@@ -63,7 +63,7 @@ namespace Zergatul.Network.Tls
             return message.ECParams.ToBytes();
         }
 
-        public override void GetClientKeyExchange(ClientKeyExchange message)
+        public override void GenerateClientKeyExchange(ClientKeyExchange message)
         {
             message.ECDH_Yc = _ecdh.PublicKey.ToBytes();
 

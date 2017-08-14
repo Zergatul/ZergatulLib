@@ -9,11 +9,15 @@ using Zergatul.Cryptography.Certificate;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
 using Zergatul.Network.Tls.Extensions;
+using Zergatul.Network.Tls.Messages;
 
 namespace Zergatul.Network.Tls
 {
     // The Transport Layer Security (TLS) Protocol Version 1.2
     // https://tools.ietf.org/html/rfc5246
+
+    // Pre-Shared Key Ciphersuites for Transport Layer Security (TLS)
+    // https://tools.ietf.org/html/rfc4279
 
     // AES Galois Counter Mode (GCM) Cipher Suites for TLS
     // https://tools.ietf.org/html/rfc5288
@@ -24,13 +28,18 @@ namespace Zergatul.Network.Tls
     // ChaCha20-Poly1305 Cipher Suites for Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc7905
 
+    // IANA Registry TLS Parameters
+    // https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml
+
     // https://tools.ietf.org/search/rfc4492#section-5.1
     // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
 
     // TODO
     // * Check message length, allow splitting messages on record layer
     // * work as proxy stream for another tls stream implementation, for debugging purposes
-    public class TlsStream : Stream
+    // * on finished - send tls alert!
+    // * check for tls version!
+    public partial class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }
 
@@ -40,7 +49,7 @@ namespace Zergatul.Network.Tls
         private ISecureRandom _random;
 
         internal ConnectionState State;
-        internal AbstractCipherSuite SelectedCipher;
+        internal CipherSuiteBuilder SelectedCipher;
         internal Role Role;
         internal bool WriteEncrypted;
         internal bool ReadEncrypted;
@@ -66,7 +75,6 @@ namespace Zergatul.Network.Tls
         public TlsStream(Stream innerStream, ISecureRandom random = null)
         {
             this._innerStream = innerStream;
-            this.HandshakeData = new List<byte>();
             this._reader = new BinaryReader(innerStream);
 
             this._random = random ?? new DefaultSecureRandom();
@@ -74,7 +82,7 @@ namespace Zergatul.Network.Tls
             this._utils = new TlsUtils(this._random);
 
             this._secParams = new SecurityParameters();
-            this._secParams.HandshakeData = this.HandshakeData;
+            this._secParams.HandshakeData = new List<byte>();
 
             this.Settings = TlsStreamSettings.Default;
         }
@@ -91,14 +99,14 @@ namespace Zergatul.Network.Tls
 
             ReadRecordMessage(ConnectionState.ServerHelloDone);
 
-            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetClientKeyExchange()));
+            WriteHandshakeMessage(GenerateClientKeyExchange());
 
             WriteChangeCipherSpec();
 
             ClientSequenceNum = 0;
             ServerSequenceNum = 0;
 
-            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished(new ByteArray(_clientFinishedHandshakeData))));
+            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished()));
 
             ReadRecordMessage(ConnectionState.ServerFinished);
         }
@@ -129,7 +137,7 @@ namespace Zergatul.Network.Tls
 
             WriteChangeCipherSpec();
 
-            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished(new ByteArray(_serverFinishedHandshakeData))));
+            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished()));
         }
 
         #region Private methods
@@ -214,9 +222,9 @@ namespace Zergatul.Network.Tls
                 RandomBytes = _utils.GetRandomBytes(28)
             };
             if (Role == Role.Client)
-                _secParams.ClientRandom = new ByteArray(random.ToArray());
+                _secParams.ClientRandom = random.ToArray();
             if (Role == Role.Server)
-                _secParams.ServerRandom = new ByteArray(random.ToArray());
+                _secParams.ServerRandom = random.ToArray();
         }
 
         private HandshakeMessage GenerateClientHello()
@@ -264,7 +272,7 @@ namespace Zergatul.Network.Tls
             return new HandshakeMessage(new ClientHello
             {
                 ClientVersion = ProtocolVersion.Tls12,
-                Random = _secParams.ClientRandom.Array,
+                Random = _secParams.ClientRandom,
                 CipherSuites = Settings.CipherSuites,
                 Extensions = extensions.ToArray()
             });
@@ -290,7 +298,7 @@ namespace Zergatul.Network.Tls
             return new HandshakeMessage(new ServerHello
             {
                 ServerVersion = ProtocolVersion.Tls12,
-                Random = _secParams.ServerRandom.Array,
+                Random = _secParams.ServerRandom,
                 CipherSuite = commonCiphers.First(),
                 Extensions = extensions,
                 SessionID = new byte[0]
@@ -308,25 +316,14 @@ namespace Zergatul.Network.Tls
             });
         }
 
+        private HandshakeMessage GenerateClientKeyExchange()
+        {
+            return new HandshakeMessage(SelectedCipher.KeyExchange.ReadClientKeyExchange(_reader));
+        }
+
         private HandshakeMessage GenerateServerKeyExchange(X509Certificate certificate)
         {
-            var serverKeyExchange = SelectedCipher.GetServerKeyExchange();
-
-            serverKeyExchange.SignAndHashAlgo = new SignatureAndHashAlgorithm
-            {
-                Hash = HashAlgorithm.SHA1,
-                Signature = SignatureAlgorithm.RSA
-            };
-
-            var algo = certificate.PrivateKey.ResolveAlgorithm();
-
-            var hash = serverKeyExchange.SignAndHashAlgo.Hash.Resolve();
-            hash.Update(_secParams.ClientRandom.Array);
-            hash.Update(_secParams.ServerRandom.Array);
-            hash.Update(SelectedCipher.GetKeyExchangeDataToSign(serverKeyExchange));
-
-            serverKeyExchange.Signature = SelectedCipher.CreateSignature(algo, hash);
-
+            var serverKeyExchange = SelectedCipher.KeyExchange.GenerateServerKeyExchange();
             return new HandshakeMessage(serverKeyExchange);
         }
 
@@ -393,7 +390,7 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.Start)
                 throw new TlsStreamException("Unexpected ClientHello message");
 
-            _secParams.ClientRandom = new ByteArray(message.Random.ToArray());
+            _secParams.ClientRandom = message.Random;
             _clientCipherSuites = message.CipherSuites;
 
             this._clientExtensions = message.Extensions;
@@ -406,8 +403,9 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.ClientHello)
                 throw new TlsStreamException("Unexpected ServerHello message");
 
-            SelectedCipher = AbstractCipherSuite.Resolve(message.CipherSuite, _secParams, Role, _random);
-            _secParams.ServerRandom = new ByteArray(message.Random.ToArray());
+            SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
+            SelectedCipher.Init(_secParams, Role, _random);
+            _secParams.ServerRandom = message.Random.ToArray();
 
             this._serverExtensions = message.Extensions.ToArray();
 
@@ -434,16 +432,6 @@ namespace Zergatul.Network.Tls
         {
             if (State != ConnectionState.ServerCertificate)
                 throw new TlsStreamException("Unexpected ServerKeyExchange message");
-
-            var algo = _serverCertificate.PublicKey.ResolveAlgorithm();
-
-            AbstractHash hash = message.SignAndHashAlgo.Hash.Resolve();
-            hash.Update(_secParams.ClientRandom.Array);
-            hash.Update(_secParams.ServerRandom.Array);
-            hash.Update(SelectedCipher.GetKeyExchangeDataToSign(message));
-
-            if (!SelectedCipher.VerifySignature(algo, hash, message.Signature))
-                throw new TlsStreamException("Invalid signature");
 
             State = ConnectionState.ServerKeyExchange;
         }
@@ -497,13 +485,8 @@ namespace Zergatul.Network.Tls
 
             if (validate)
             {
-                var verifyData1 = SelectedCipher.GetFinishedVerifyData(new ByteArray(_clientFinishedHandshakeData), Role.Client).Array;
-                var verifyData2 = message.Data.Array;
-                if (verifyData1.Length != verifyData2.Length)
+                if (!SelectedCipher.VerifyFinished(message))
                     throw new TlsStreamException("Invalid verify_data in Finished message");
-                for (int i = 0; i < verifyData1.Length; i++)
-                    if (verifyData1[i] != verifyData2[i])
-                        throw new TlsStreamException("Invalid verify_data in Finished message");
             }
 
             State = ConnectionState.ClientFinished;
@@ -531,13 +514,8 @@ namespace Zergatul.Network.Tls
 
             if (validate)
             {
-                var verifyData1 = SelectedCipher.GetFinishedVerifyData(new ByteArray(_serverFinishedHandshakeData), Role.Server).Array;
-                var verifyData2 = message.Data.Array;
-                if (verifyData1.Length != verifyData2.Length)
+                if (!SelectedCipher.VerifyFinished(message))
                     throw new TlsStreamException("Invalid verify_data in Finished message");
-                for (int i = 0; i < verifyData1.Length; i++)
-                    if (verifyData1[i] != verifyData2[i])
-                        throw new TlsStreamException("Invalid verify_data in Finished message");
             }
 
             State = ConnectionState.ServerFinished;

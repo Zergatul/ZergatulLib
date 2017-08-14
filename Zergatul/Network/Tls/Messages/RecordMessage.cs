@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Stream = System.IO.Stream;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Network.Tls.Messages
 {
     internal class RecordMessage
     {
@@ -71,7 +71,7 @@ namespace Zergatul.Network.Tls
                 switch (RecordType)
                 {
                     case ContentType.Handshake:
-                        message = new HandshakeMessage(null, _tlsStream.SelectedCipher);
+                        message = new HandshakeMessage(_tlsStream.SelectedCipher);
                         break;
                     case ContentType.ChangeCipherSpec:
                         message = new ChangeCipherSpec();
@@ -99,10 +99,10 @@ namespace Zergatul.Network.Tls
 
             var data = reader.ReadBytes(reader.ReadShort());
 
-            var plaintext = _tlsStream.SelectedCipher.Decode(new ByteArray(data), RecordType, Version, _tlsStream.DecodingSequenceNum);
+            var plaintext = _tlsStream.SelectedCipher.SymmetricCipher.Decrypt(RecordType, Version, _tlsStream.DecodingSequenceNum, data);
             _tlsStream.IncDecodingSequenceNum();
 
-            var decodedReader = new BinaryReader(plaintext.Array);
+            var decodedReader = new BinaryReader(plaintext);
             var counter = decodedReader.StartCounter(plaintext.Length);
             decodedReader.SetReadLimit(plaintext.Length);
 
@@ -115,7 +115,7 @@ namespace Zergatul.Network.Tls
                 switch (RecordType)
                 {
                     case ContentType.Handshake:
-                        message = new HandshakeMessage(null, _tlsStream.SelectedCipher);
+                        message = new HandshakeMessage();
                         break;
                     case ContentType.ChangeCipherSpec:
                         message = new ChangeCipherSpec();
@@ -201,13 +201,13 @@ namespace Zergatul.Network.Tls
 
             rawWriter.StopTracking();
 
-            var ciphertext = _tlsStream.SelectedCipher.Encode(new ByteArray(rawList.ToArray()), RecordType, Version, _tlsStream.EncodingSequenceNum);
+            var ciphertext = _tlsStream.SelectedCipher.SymmetricCipher.Encrypt(RecordType, Version, _tlsStream.EncodingSequenceNum, rawList.ToArray());
             _tlsStream.IncEncodingSequenceNum();
 
             writer.WriteByte((byte)RecordType);
             writer.WriteShort((ushort)Version);
             writer.WriteShort((ushort)ciphertext.Length);
-            list.AddRange(ciphertext.Array);
+            list.AddRange(ciphertext);
 
             var buffer = list.ToArray();
             stream.Write(buffer, 0, buffer.Length);

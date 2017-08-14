@@ -4,22 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.Tls
+namespace Zergatul.Network.Tls.Messages
 {
-    internal class Finished : HandshakeBody
+    internal class ServerHelloDone : HandshakeBody
     {
-        public ByteArray Data;
-
-        public Finished() : base(HandshakeType.Finished) { }
+        public ServerHelloDone() : base(HandshakeType.ServerHelloDone) { }
 
         public override void Read(BinaryReader reader)
         {
-            Data = new ByteArray(reader.ReadToEnd());
+
         }
 
         public override void WriteTo(BinaryWriter writer)
         {
-            writer.WriteBytes(Data);
+
         }
     }
 }
