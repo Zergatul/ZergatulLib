@@ -8,35 +8,32 @@ using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
 using Zergatul.Network.ASN1;
 using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Tls.Extensions;
 
 namespace Zergatul.Network.Tls
 {
-    internal class RSASignature : AbstractSignature
+    internal class RSASignature : AbstractTlsSignature
     {
-        private RSA _rsa;
+        public override SignatureAlgorithm Algorithm => SignatureAlgorithm.RSA;
 
-        public override void SetAlgorithm(object algorithm)
+        public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)
         {
-            _rsa = algorithm as RSA;
-            if (_rsa == null)
-                throw new ArgumentException(nameof(algorithm));
-        }
+            var rsa = (RSA)algo;
 
-        public override byte[] Sign(AbstractHash hash)
-        {
             var ai = new AlgorithmIdentifier(hash.OID, new Null());
-            var pkcs = new EMSA_PKCS1_v1_5(ai, hash.ComputeHash(), (_rsa.KeySize + 7) / 8);
+            var pkcs = new EMSA_PKCS1_v1_5(ai, hash.ComputeHash(), (rsa.KeySize + 7) / 8);
 
-            var signature = _rsa.Signature.SignHash(pkcs.ToBytes());
+            var signature = rsa.Signature.SignHash(pkcs.ToBytes());
             return signature.ToBytes(ByteOrder.BigEndian);
         }
 
-        public override bool Verify(AbstractHash hash, byte[] signature)
+        public override bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature)
         {
+            var rsa = (RSA)algo;
             // TODO: REFACTOR!!!
             // why rsa computations here???
-            BigInteger m = BigInteger.ModularExponentiation(new BigInteger(signature, ByteOrder.BigEndian), _rsa.PublicKey.e, _rsa.PublicKey.n);
-            var pkcs = EMSA_PKCS1_v1_5.Parse(m.ToBytes(ByteOrder.BigEndian, (_rsa.KeySize + 7) / 8));
+            BigInteger m = BigInteger.ModularExponentiation(new BigInteger(signature, ByteOrder.BigEndian), rsa.PublicKey.e, rsa.PublicKey.n);
+            var pkcs = EMSA_PKCS1_v1_5.Parse(m.ToBytes(ByteOrder.BigEndian, (rsa.KeySize + 7) / 8));
 
             return pkcs.DigestAlgorithm.Algorithm == hash.OID && pkcs.Digest.SequenceEqual(hash.ComputeHash());
         }

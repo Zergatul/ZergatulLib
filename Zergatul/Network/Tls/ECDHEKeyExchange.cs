@@ -6,16 +6,27 @@ using System.Threading.Tasks;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math.EllipticCurves;
 using Zergatul.Network.Tls.Extensions;
+using Zergatul.Network.Tls.Messages;
 
 namespace Zergatul.Network.Tls
 {
     // https://tools.ietf.org/html/rfc4492
     internal class ECDHEKeyExchange : AbstractTlsKeyExchange
     {
-        ECDiffieHellman _ecdh;
+        private ECDiffieHellman _ecdh;
+        private AbstractTlsSignature _signature;
 
-        public override void GetServerKeyExchange(ServerKeyExchange message)
+        public ECDHEKeyExchange(AbstractTlsSignature signature)
         {
+            this._signature = signature;
+        }
+
+        #region ServerKeyExchange
+
+        public override ServerKeyExchange GenerateServerKeyExchange()
+        {
+            var message = new ServerKeyExchange();
+
             var namedCurve = NamedCurve.secp256r1;
 
             _ecdh = new ECDiffieHellman();
@@ -31,10 +42,30 @@ namespace Zergatul.Network.Tls
                 },
                 Point = _ecdh.PublicKey.ToBytes()
             };
+
+            // TODO, get sign and hash from clienthello
+            message.SignAndHashAlgo = new SignatureAndHashAlgorithm
+            {
+                Hash = HashAlgorithm.SHA256,
+                Signature = _signature.Algorithm
+            };
+
+            var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
+
+            var hash = message.SignAndHashAlgo.Hash.Resolve();
+            hash.Update(SecurityParameters.ClientRandom);
+            hash.Update(SecurityParameters.ServerRandom);
+            hash.Update(message.ECParams.ToBytes());
+
+            message.Signature = _signature.CreateSignature(algo, hash);
+
+            return message;
         }
 
-        public override void ReadServerKeyExchange(ServerKeyExchange message, BinaryReader reader)
+        public override ServerKeyExchange ReadServerKeyExchange(BinaryReader reader)
         {
+            var message = new ServerKeyExchange();
+
             message.ECParams = new ServerECDHParams();
             message.ECParams.Read(reader);
 
@@ -43,10 +74,22 @@ namespace Zergatul.Network.Tls
 
             message.Signature = reader.ReadBytes(reader.ReadShort());
 
+            var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
+
+            var hash = message.SignAndHashAlgo.Hash.Resolve();
+            hash.Update(SecurityParameters.ClientRandom);
+            hash.Update(SecurityParameters.ServerRandom);
+            hash.Update(message.ECParams.ToBytes());
+
+            if (!_signature.VerifySignature(algo, hash, message.Signature))
+                throw new TlsStreamException("Invalid signature");
+
             _ecdh = new ECDiffieHellman();
             _ecdh.Parameters = ResolveCurve(message.ECParams.CurveParams.NamedCurve);
             _ecdh.GenerateKeys(Random);
             _ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECParams.Point, _ecdh.Parameters));
+
+            return message;
         }
 
         public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
@@ -58,20 +101,23 @@ namespace Zergatul.Network.Tls
             writer.WriteBytes(message.Signature);
         }
 
-        public override byte[] GetDataToSign(ServerKeyExchange message)
-        {
-            return message.ECParams.ToBytes();
-        }
+        #endregion
 
-        public override void GenerateClientKeyExchange(ClientKeyExchange message)
+        #region ClientKeyExchange
+
+        public override ClientKeyExchange GenerateClientKeyExchange()
         {
+            var message = new ClientKeyExchange();
             message.ECDH_Yc = _ecdh.PublicKey.ToBytes();
 
-            PreMasterSecret = new ByteArray(_ecdh.KeyExchange.SharedSecret.XToBytes());
+            PreMasterSecret = _ecdh.KeyExchange.SharedSecret.XToBytes();
+
+            return message;
         }
 
-        public override void ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader)
+        public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
         {
+            var message = new ClientKeyExchange();
             message.ECDH_Yc = reader.ReadBytes(reader.ReadByte());
 
             _ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECDH_Yc, _ecdh.Parameters));
@@ -87,7 +133,9 @@ namespace Zergatul.Network.Tls
                 Primitive, has constant length for any given field; leading zeros
                 found in this octet string MUST NOT be truncated.
             */
-            PreMasterSecret = new ByteArray(_ecdh.KeyExchange.SharedSecret.XToBytes());
+            PreMasterSecret = _ecdh.KeyExchange.SharedSecret.XToBytes();
+
+            return message;
         }
 
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
@@ -95,6 +143,8 @@ namespace Zergatul.Network.Tls
             writer.WriteByte((byte)message.ECDH_Yc.Length);
             writer.WriteBytes(message.ECDH_Yc);
         }
+
+        #endregion
 
         private static IEllipticCurve ResolveCurve(NamedCurve curve)
         {

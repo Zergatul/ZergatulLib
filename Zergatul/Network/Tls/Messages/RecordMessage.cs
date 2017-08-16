@@ -63,7 +63,7 @@ namespace Zergatul.Network.Tls.Messages
             var counter = reader.StartCounter(reader.ReadShort());
 
             if (RecordType == ContentType.Handshake)
-                reader.StartTracking(_tlsStream.HandshakeData);
+                reader.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
 
             while (counter.CanRead)
             {
@@ -71,7 +71,7 @@ namespace Zergatul.Network.Tls.Messages
                 switch (RecordType)
                 {
                     case ContentType.Handshake:
-                        message = new HandshakeMessage(_tlsStream.SelectedCipher);
+                        message = new HandshakeMessage(_tlsStream);
                         break;
                     case ContentType.ChangeCipherSpec:
                         message = new ChangeCipherSpec();
@@ -107,7 +107,7 @@ namespace Zergatul.Network.Tls.Messages
             decodedReader.SetReadLimit(plaintext.Length);
 
             if (RecordType == ContentType.Handshake)
-                decodedReader.StartTracking(_tlsStream.HandshakeData);
+                decodedReader.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
 
             while (counter.CanRead)
             {
@@ -115,7 +115,7 @@ namespace Zergatul.Network.Tls.Messages
                 switch (RecordType)
                 {
                     case ContentType.Handshake:
-                        message = new HandshakeMessage();
+                        message = new HandshakeMessage(_tlsStream);
                         break;
                     case ContentType.ChangeCipherSpec:
                         message = new ChangeCipherSpec();
@@ -169,7 +169,7 @@ namespace Zergatul.Network.Tls.Messages
                 computations.
             */
             if (RecordType == ContentType.Handshake)
-                contentWriter.StartTracking(_tlsStream.HandshakeData);
+                contentWriter.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
 
             for (int i = 0; i < ContentMessages.Count; i++)
                 ContentMessages[i].Write(contentWriter);
@@ -194,7 +194,7 @@ namespace Zergatul.Network.Tls.Messages
             var rawWriter = new BinaryWriter(rawList);
 
             if (RecordType == ContentType.Handshake)
-                rawWriter.StartTracking(_tlsStream.HandshakeData);
+                rawWriter.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
 
             for (int i = 0; i < ContentMessages.Count; i++)
                 ContentMessages[i].Write(rawWriter);

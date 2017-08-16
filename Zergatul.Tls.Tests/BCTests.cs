@@ -15,16 +15,21 @@ namespace Zergatul.Tls.Tests
     [TestClass]
     public class BCTests
     {
+        private static CipherSuite[] NotSupportedByBC = new CipherSuite[]
+        {
+            CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA
+        };
+
         [TestMethod]
         public void TestAll()
         {
-            //TestServer(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA);
+            TestCipherSuites(TlsStream.SupportedCipherSuites.Except(NotSupportedByBC).ToList());
         }
 
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM);
+            TestServer(CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA);
         }
 
         [TestMethod]
@@ -59,7 +64,7 @@ namespace Zergatul.Tls.Tests
 
         private static void TestCipherSuites(IReadOnlyList<CipherSuite> ciphers)
         {
-            ThreadPool.SetMaxThreads(16, 16);
+            ThreadPool.SetMaxThreads(6, 6);
 
             using (var evt = new CountdownEvent(ciphers.Count))
             {

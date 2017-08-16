@@ -18,7 +18,7 @@ namespace Zergatul.Tls.Tests
             {
                 try
                 {
-                    var obj = AbstractCipherSuite.Resolve(cs, new SecurityParameters(), Role.Client, new DefaultSecureRandom());
+                    var obj = CipherSuiteBuilder.Resolve(cs);
                 }
                 catch (NotImplementedException)
                 {

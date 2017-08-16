@@ -25,6 +25,16 @@ namespace Zergatul.Tls.Tests
             return new X509Certificate(Settings.ECDSACertName, Settings.ECDSACertPassword);
         }
 
+        #region DHE_RSA_DES
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_DES_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA);
+        }
+
+        #endregion
+
         #region DHE_RSA_AES
 
         [TestMethod]

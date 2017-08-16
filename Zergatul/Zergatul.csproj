@@ -233,6 +233,7 @@
     <Compile Include="Network\Tls\AbstractTlsSignature.cs" />
     <Compile Include="Network\Tls\AbstractTlsSymmetricCipher.cs" />
     <Compile Include="Network\Tls\AEADCipherSuite.cs" />
+    <Compile Include="Network\Tls\CipherSuiteResolver.cs" />
     <Compile Include="Network\Tls\HMACCBCCipher.cs" />
     <Compile Include="Network\Tls\Messages\Alert.cs" />
     <Compile Include="Network\Tls\Messages\AlertDescription.cs" />

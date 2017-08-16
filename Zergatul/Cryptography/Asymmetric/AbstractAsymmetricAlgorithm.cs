@@ -12,11 +12,6 @@ namespace Zergatul.Cryptography.Asymmetric
         public abstract PrivateKeyClass PrivateKey { get; set; }
         public abstract AlgorithmParameters Parameters { get; set; }
 
-        /// <summary>
-        /// Key size in bits
-        /// </summary>
-        public abstract int KeySize { get; }
-
         public abstract void GenerateKeys(ISecureRandom random);
         public abstract AbstractKeyExchangeAlgorithm<PublicKeyClass, SharedSecretClass> KeyExchange { get; }
         public abstract AbstractSignatureAlgorithm<SignatureClass> Signature { get; }
@@ -24,6 +19,11 @@ namespace Zergatul.Cryptography.Asymmetric
 
     public abstract class AbstractAsymmetricAlgorithm
     {
+        /// <summary>
+        /// Key size in bits
+        /// </summary>
+        public abstract int KeySize { get; }
+
         public abstract AbstractAsymmetricEncryption Encryption { get; }
     }
 }

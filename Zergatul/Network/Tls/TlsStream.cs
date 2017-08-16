@@ -53,9 +53,6 @@ namespace Zergatul.Network.Tls
         internal Role Role;
         internal bool WriteEncrypted;
         internal bool ReadEncrypted;
-        private X509Certificate _serverCertificate;
-        private byte[] _clientFinishedHandshakeData;
-        private byte[] _serverFinishedHandshakeData;
 
         private CipherSuite[] _clientCipherSuites;
 
@@ -63,9 +60,7 @@ namespace Zergatul.Network.Tls
 
         private string _clientHost;
 
-        internal List<byte> HandshakeData;
-
-        private SecurityParameters _secParams;
+        internal SecurityParameters SecurityParameters;
         internal ulong ClientSequenceNum;
         internal ulong ServerSequenceNum;
 
@@ -81,8 +76,8 @@ namespace Zergatul.Network.Tls
 
             this._utils = new TlsUtils(this._random);
 
-            this._secParams = new SecurityParameters();
-            this._secParams.HandshakeData = new List<byte>();
+            this.SecurityParameters = new SecurityParameters();
+            this.SecurityParameters.HandshakeData = new List<byte>();
 
             this.Settings = TlsStreamSettings.Default;
         }
@@ -106,7 +101,7 @@ namespace Zergatul.Network.Tls
             ClientSequenceNum = 0;
             ServerSequenceNum = 0;
 
-            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished()));
+            WriteHandshakeMessage(GenerateFinished());
 
             ReadRecordMessage(ConnectionState.ServerFinished);
         }
@@ -127,7 +122,7 @@ namespace Zergatul.Network.Tls
             WriteHandshakeMessageBuffered(GenerateServerHello());
             WriteHandshakeMessageBuffered(GenerateCertificate(certificate));
             WriteHandshakeMessageBuffered(GenerateServerKeyExchange(certificate));
-            WriteHandshakeMessageBuffered(new HandshakeMessage(new ServerHelloDone()));
+            WriteHandshakeMessageBuffered(GenerateServerHelloDone());
             ReleaseMessageBuffer();
 
             ClientSequenceNum = 0;
@@ -137,7 +132,7 @@ namespace Zergatul.Network.Tls
 
             WriteChangeCipherSpec();
 
-            WriteHandshakeMessage(new HandshakeMessage(SelectedCipher.GetFinished()));
+            WriteHandshakeMessage(GenerateFinished());
         }
 
         #region Private methods
@@ -222,9 +217,9 @@ namespace Zergatul.Network.Tls
                 RandomBytes = _utils.GetRandomBytes(28)
             };
             if (Role == Role.Client)
-                _secParams.ClientRandom = random.ToArray();
+                SecurityParameters.ClientRandom = random.ToArray();
             if (Role == Role.Server)
-                _secParams.ServerRandom = random.ToArray();
+                SecurityParameters.ServerRandom = random.ToArray();
         }
 
         private HandshakeMessage GenerateClientHello()
@@ -269,13 +264,16 @@ namespace Zergatul.Network.Tls
                 extensions.Add(new SupportedEllipticCurves(Settings.SupportedCurves));
             extensions.Add(new SupportedPointFormats(ECPointFormat.Uncompressed));
 
-            return new HandshakeMessage(new ClientHello
+            return new HandshakeMessage(this)
             {
-                ClientVersion = ProtocolVersion.Tls12,
-                Random = _secParams.ClientRandom,
-                CipherSuites = Settings.CipherSuites,
-                Extensions = extensions.ToArray()
-            });
+                Body = new ClientHello
+                {
+                    ClientVersion = ProtocolVersion.Tls12,
+                    Random = SecurityParameters.ClientRandom,
+                    CipherSuites = Settings.CipherSuites,
+                    Extensions = extensions.ToArray()
+                }
+            };
         }
 
         private HandshakeMessage GenerateServerHello()
@@ -295,43 +293,64 @@ namespace Zergatul.Network.Tls
             if (_clientExtensions.OfType<ExtendedMasterSecret>().Count() > 1 && Settings.SupportExtendedMasterSecret)
                 extensions.Add(new ExtendedMasterSecret());
 
-            return new HandshakeMessage(new ServerHello
+            return new HandshakeMessage(this)
             {
-                ServerVersion = ProtocolVersion.Tls12,
-                Random = _secParams.ServerRandom,
-                CipherSuite = commonCiphers.First(),
-                Extensions = extensions,
-                SessionID = new byte[0]
-            });
+                Body = new ServerHello
+                {
+                    ServerVersion = ProtocolVersion.Tls12,
+                    Random = SecurityParameters.ServerRandom,
+                    CipherSuite = commonCiphers.First(),
+                    Extensions = extensions,
+                    SessionID = new byte[0]
+                }
+            };
         }
 
         private HandshakeMessage GenerateCertificate(X509Certificate certificate)
         {
-            return new HandshakeMessage(new Certificate
+            return new HandshakeMessage(this)
             {
-                Certificates = new List<X509Certificate>
+                Body = new Certificate
                 {
-                    certificate
+                    Certificates = new List<X509Certificate>
+                    {
+                        certificate
+                    }
                 }
-            });
+            };
         }
 
         private HandshakeMessage GenerateClientKeyExchange()
         {
-            return new HandshakeMessage(SelectedCipher.KeyExchange.ReadClientKeyExchange(_reader));
+            return new HandshakeMessage(this)
+            {
+                Body = SelectedCipher.KeyExchange.GenerateClientKeyExchange()
+            };
         }
 
         private HandshakeMessage GenerateServerKeyExchange(X509Certificate certificate)
         {
-            var serverKeyExchange = SelectedCipher.KeyExchange.GenerateServerKeyExchange();
-            return new HandshakeMessage(serverKeyExchange);
+            return new HandshakeMessage(this)
+            {
+                Body = SelectedCipher.KeyExchange.GenerateServerKeyExchange()
+            };
+        }
+
+        private HandshakeMessage GenerateServerHelloDone()
+        {
+            return new HandshakeMessage(this) { Body = new ServerHelloDone() };
+        }
+
+        private HandshakeMessage GenerateFinished()
+        {
+            return new HandshakeMessage(this) { Body = SelectedCipher.GetFinished() };
         }
 
         private void AnalyzeExtensions()
         {
             bool clientExtMasterSecret = _clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             bool serverExtMasterSecret = _serverExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
-            _secParams.ExtendedMasterSecret = clientExtMasterSecret && serverExtMasterSecret;
+            SecurityParameters.ExtendedMasterSecret = clientExtMasterSecret && serverExtMasterSecret;
         }
 
         #endregion
@@ -390,7 +409,7 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.Start)
                 throw new TlsStreamException("Unexpected ClientHello message");
 
-            _secParams.ClientRandom = message.Random;
+            SecurityParameters.ClientRandom = message.Random;
             _clientCipherSuites = message.CipherSuites;
 
             this._clientExtensions = message.Extensions;
@@ -404,8 +423,8 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Unexpected ServerHello message");
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
-            SelectedCipher.Init(_secParams, Role, _random);
-            _secParams.ServerRandom = message.Random.ToArray();
+            SelectedCipher.Init(SecurityParameters, Role, _random);
+            SecurityParameters.ServerRandom = message.Random.ToArray();
 
             this._serverExtensions = message.Extensions.ToArray();
 
@@ -423,7 +442,7 @@ namespace Zergatul.Network.Tls
             if (!chain.Validate())
                 throw new TlsStreamException("Certificate chain is not trusted");
 
-            _serverCertificate = chain.List.Last();
+            SecurityParameters.ServerCertificate = chain.List.Last();
 
             State = ConnectionState.ServerCertificate;
         }
@@ -473,7 +492,7 @@ namespace Zergatul.Network.Tls
             if (Role == Role.Server)
                 ReadEncrypted = true;
 
-            _clientFinishedHandshakeData = HandshakeData.ToArray();
+            SecurityParameters.ClientFinishedHandshakeData = SecurityParameters.HandshakeData.ToArray();
 
             State = ConnectionState.ClientChangeCipherSpec;
         }
@@ -502,7 +521,7 @@ namespace Zergatul.Network.Tls
             if (Role == Role.Server)
                 WriteEncrypted = true;
 
-            _serverFinishedHandshakeData = HandshakeData.ToArray();
+            SecurityParameters.ServerFinishedHandshakeData = SecurityParameters.HandshakeData.ToArray();
 
             State = ConnectionState.ServerChangeCipherSpec;
         }

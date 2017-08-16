@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
-using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Network.Tls.Extensions;
 using Zergatul.Network.Tls.Messages;
 
 namespace Zergatul.Network.Tls
 {
-    internal class CipherSuiteBuilder
+    internal partial class CipherSuiteBuilder
     {
         public SecurityParameters SecurityParameters { get; private set; }
         public Role Role { get; private set; }
@@ -28,18 +27,9 @@ namespace Zergatul.Network.Tls
 
         public CipherSuiteBuilder(AbstractTlsKeyExchange keyExchange, AbstractTlsSymmetricCipher symmetricCipher, AbstractHash prfHash)
         {
-            this.KeyExchange = KeyExchange;
+            this.KeyExchange = keyExchange;
             this.SymmetricCipher = symmetricCipher;
             this.PRFHash = prfHash;
-        }
-
-        public static CipherSuiteBuilder Resolve(CipherSuite cipherSuite)
-        {
-            switch (cipherSuite)
-            {
-                default:
-                    throw new NotImplementedException();
-            }
         }
 
         #endregion
@@ -66,7 +56,10 @@ namespace Zergatul.Network.Tls
             this._random = random;
 
             this.KeyExchange.SecurityParameters = securityParameters;
+            this.KeyExchange.Random = random;
+
             this.SymmetricCipher.SecurityParameters = securityParameters;
+            this.SymmetricCipher.Random = random;
             this.SymmetricCipher.ApplySecurityParameters();
         }
 
@@ -144,6 +137,8 @@ namespace Zergatul.Network.Tls
             position += SecurityParameters.FixedIVLength;
             Keys.ServerIV = ByteArray.SubArray(keyBlock, position, SecurityParameters.FixedIVLength);
             position += SecurityParameters.FixedIVLength;
+
+            SymmetricCipher.Init(Keys, Role);
         }
 
         #region Private/Protected methods

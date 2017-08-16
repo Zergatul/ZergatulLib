@@ -10,21 +10,11 @@ namespace Zergatul.Network.Tls.Messages
     {
         public HandshakeBody Body;
 
-        private CipherSuiteBuilder _cipherSuite;
+        private TlsStream _tlsStream;
 
-        public HandshakeMessage()
+        public HandshakeMessage(TlsStream stream)
         {
-
-        }
-
-        public HandshakeMessage(CipherSuiteBuilder cipherSuite)
-        {
-            this._cipherSuite = cipherSuite;
-        }
-
-        public HandshakeMessage(HandshakeBody body)
-        {
-            this.Body = body;
+            this._tlsStream = stream;
         }
 
         public override void Read(BinaryReader reader)
@@ -42,7 +32,16 @@ namespace Zergatul.Network.Tls.Messages
 
             var content = new List<byte>();
             var contentWriter = new BinaryWriter(content);
-            Body.WriteTo(contentWriter);
+            if (Body.Type == HandshakeType.ServerKeyExchange)
+            {
+                _tlsStream.SelectedCipher.KeyExchange.WriteServerKeyExchange((ServerKeyExchange)Body, contentWriter);
+            }
+            else if (Body.Type == HandshakeType.ClientKeyExchange)
+            {
+                _tlsStream.SelectedCipher.KeyExchange.WriteClientKeyExchange((ClientKeyExchange)Body, contentWriter);
+            }
+            else
+                Body.WriteTo(contentWriter);
 
             writer.WriteUInt24(content.Count);
             writer.WriteBytes(content.ToArray());
@@ -62,13 +61,13 @@ namespace Zergatul.Network.Tls.Messages
                     Body = new Certificate();
                     break;
                 case HandshakeType.ServerKeyExchange:
-                    Body = _cipherSuite.KeyExchange.ReadServerKeyExchange(reader);
+                    Body = _tlsStream.SelectedCipher.KeyExchange.ReadServerKeyExchange(reader);
                     return;
                 case HandshakeType.ServerHelloDone:
                     Body = new ServerHelloDone();
                     break;
                 case HandshakeType.ClientKeyExchange:
-                    Body = _cipherSuite.KeyExchange.ReadClientKeyExchange(reader);
+                    Body = _tlsStream.SelectedCipher.KeyExchange.ReadClientKeyExchange(reader);
                     return;
                 case HandshakeType.Finished:
                     Body = new Finished();
