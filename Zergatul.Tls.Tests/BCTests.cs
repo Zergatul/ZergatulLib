@@ -17,7 +17,10 @@ namespace Zergatul.Tls.Tests
     {
         private static CipherSuite[] NotSupportedByBC = new CipherSuite[]
         {
-            CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA
+            CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA,
+            CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+            CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+            CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
         };
 
         [TestMethod]
@@ -29,7 +32,16 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA);
+            TestServer(CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void Test_ECDSA()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Except(NotSupportedByBC)
+                .Where(cs => cs.ToString().Contains("ECDSA"))
+                .ToList());
         }
 
         [TestMethod]
@@ -43,12 +55,29 @@ namespace Zergatul.Tls.Tests
         }
 
         [TestMethod]
-        public void Test_RSA_GCM()
+        public void Test_GCM()
         {
             TestCipherSuites(TlsStream.SupportedCipherSuites
-                .Where(cs => cs.ToString().Contains("RSA"))
-                .Where(cs => !cs.ToString().Contains("ARIA"))
+                .Except(NotSupportedByBC)
                 .Where(cs => cs.ToString().Contains("GCM"))
+                .ToList());
+        }
+
+        [TestMethod]
+        public void Test_CHACHA20()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Except(NotSupportedByBC)
+                .Where(cs => cs.ToString().Contains("CHACHA20"))
+                .ToList());
+        }
+
+        [TestMethod]
+        public void Test_Camellia()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Except(NotSupportedByBC)
+                .Where(cs => cs.ToString().Contains("CAMELLIA"))
                 .ToList());
         }
 
@@ -64,7 +93,7 @@ namespace Zergatul.Tls.Tests
 
         private static void TestCipherSuites(IReadOnlyList<CipherSuite> ciphers)
         {
-            ThreadPool.SetMaxThreads(6, 6);
+            ThreadPool.SetMaxThreads(4, 4);
 
             using (var evt = new CountdownEvent(ciphers.Count))
             {
@@ -131,11 +160,11 @@ namespace Zergatul.Tls.Tests
                         {
                             SupportExtendedMasterSecret = true,
                             CipherSuites = new CipherSuite[] { cs },
-                            SupportedCurves = new NamedCurve[] { NamedCurve.secp256r1 }
+                            SupportedCurves = new NamedCurve[] { NamedCurve.secp256r1, NamedCurve.secp521r1 }
                         };
 
                         var cert = ECcert ?
-                            new X509Certificate("ecdsa-cert.pfx", @"\7FoIK*f1{\q") :
+                            new X509Certificate("ecdsa-secp256r1.pfx", @"l(*qqqJ;q30[]e") :
                             new X509Certificate("rsa-cert.pfx", "hh87$-Jqo");
                         tlsStream.AuthenticateAsServer("localhost", cert);
                         tlsStream.Write(Encoding.ASCII.GetBytes(msg));

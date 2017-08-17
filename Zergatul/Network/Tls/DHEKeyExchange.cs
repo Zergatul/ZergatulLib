@@ -28,7 +28,11 @@ namespace Zergatul.Network.Tls
             var message = new ServerKeyExchange();
 
             _dh = new DiffieHellman();
-            _dh.Parameters = DiffieHellmanParameters.Group14; // 2048 bit key
+            if (Settings.DHParameters != null)
+                _dh.Parameters = Settings.DHParameters;
+            else
+                _dh.Parameters = TlsStreamSettings.Default.DHParameters;
+
             _dh.GenerateKeys(Random);
 
             message.Params = new ServerDHParams

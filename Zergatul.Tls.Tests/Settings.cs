@@ -11,7 +11,7 @@ namespace Zergatul.Tls.Tests
         public static string RSACertName = "rsa-cert.pfx";
         public static string RSACertPassword = "hh87$-Jqo";
 
-        public static string ECDSACertName = "ecdsa-cert.pfx";
+        public static string ECDSACertName = "ecdsa-secp521r1.pfx";
         public static string ECDSACertPassword = @"\7FoIK*f1{\q";
 
         public static int Port = 32032;

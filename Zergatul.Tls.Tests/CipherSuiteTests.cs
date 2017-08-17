@@ -140,12 +140,6 @@ namespace Zergatul.Tls.Tests
         }
 
         [TestMethod]
-        public void TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256()
-        {
-            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256);
-        }
-
-        [TestMethod]
         public void TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256()
         {
             TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256);
@@ -181,6 +175,34 @@ namespace Zergatul.Tls.Tests
 
         #endregion
 
+        #region ECDHE_RSA_CAMELLIA
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_256_CBC_SHA384);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384);
+        }
+
+        #endregion
+
         #region ECDHE_ECDSA_AES
 
         [TestMethod]
@@ -193,6 +215,64 @@ namespace Zergatul.Tls.Tests
         public void TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256()
         {
             TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256);
+        }
+
+        #endregion
+
+        #region ECDHE_ECDSA_CAMELLIA
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_CBC_SHA384);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384);
         }
 
         #endregion

@@ -49,13 +49,14 @@ namespace Zergatul.Network.Tls
 
         #endregion
 
-        public void Init(SecurityParameters securityParameters, Role role, ISecureRandom random)
+        public void Init(SecurityParameters securityParameters, TlsStreamSettings settings, Role role, ISecureRandom random)
         {
             this.SecurityParameters = securityParameters;
             this.Role = role;
             this._random = random;
 
             this.KeyExchange.SecurityParameters = securityParameters;
+            this.KeyExchange.Settings = settings;
             this.KeyExchange.Random = random;
 
             this.SymmetricCipher.SecurityParameters = securityParameters;

@@ -229,11 +229,12 @@
     <Compile Include="Network\Proxy\Socks4Exception.cs" />
     <Compile Include="Network\Proxy\Socks5.cs" />
     <Compile Include="Network\Proxy\Socks5Exception.cs" />
-    <Compile Include="Network\Tls\AbstractSignature.cs" />
     <Compile Include="Network\Tls\AbstractTlsSignature.cs" />
     <Compile Include="Network\Tls\AbstractTlsSymmetricCipher.cs" />
-    <Compile Include="Network\Tls\AEADCipherSuite.cs" />
+    <Compile Include="Network\Tls\AEADCipher.cs" />
+    <Compile Include="Network\Tls\ChaCha20Poly1305Cipher.cs" />
     <Compile Include="Network\Tls\CipherSuiteResolver.cs" />
+    <Compile Include="Network\Tls\GCMCipher.cs" />
     <Compile Include="Network\Tls\HMACCBCCipher.cs" />
     <Compile Include="Network\Tls\Messages\Alert.cs" />
     <Compile Include="Network\Tls\Messages\AlertDescription.cs" />
@@ -243,7 +244,6 @@
     <Compile Include="Network\Tls\BinaryWriter.cs" />
     <Compile Include="Network\Tls\CCMCipherSuite.cs" />
     <Compile Include="Network\Tls\Messages\Certificate.cs" />
-    <Compile Include="Network\Tls\ChaCha20CipherSuite.cs" />
     <Compile Include="Network\Tls\Messages\ChangeCipherSpec.cs" />
     <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
     <Compile Include="Network\Tls\AbstractTlsKeyExchange.cs" />
@@ -285,7 +285,6 @@
     <Compile Include="Network\Tls\Messages\HandshakeMessage.cs" />
     <Compile Include="Network\Tls\Messages\HandshakeType.cs" />
     <Compile Include="IO\InterceptionStream.cs" />
-    <Compile Include="Network\Tls\HMACCipherSuite.cs" />
     <Compile Include="Network\Tls\KeyExchangeAlgorithm.cs" />
     <Compile Include="Network\Tls\NamedCurve.cs" />
     <Compile Include="Network\Tls\ProtocolVersion.cs" />

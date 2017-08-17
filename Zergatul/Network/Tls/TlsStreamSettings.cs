@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Asymmetric;
 
 namespace Zergatul.Network.Tls
 {
@@ -11,10 +12,12 @@ namespace Zergatul.Network.Tls
         public CipherSuite[] CipherSuites;
         public NamedCurve[] SupportedCurves;
         public bool SupportExtendedMasterSecret;
+        public DiffieHellmanParameters DHParameters;
 
         public static TlsStreamSettings Default = new TlsStreamSettings
         {
             SupportExtendedMasterSecret = true,
+            DHParameters = DiffieHellmanParameters.Group14,
             CipherSuites = new CipherSuite[]
             {
                 CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,

@@ -22,6 +22,15 @@ namespace Zergatul.Network.Tls
     // AES Galois Counter Mode (GCM) Cipher Suites for TLS
     // https://tools.ietf.org/html/rfc5288
 
+    // TLS Elliptic Curve Cipher Suites with SHA-256/384 and AES Galois Counter Mode (GCM)
+    // https://tools.ietf.org/html/rfc5289
+
+    // Camellia Cipher Suites for TLS
+    // https://tools.ietf.org/html/rfc5932
+
+    // Addition of the Camellia Cipher Suites to Transport Layer Security (TLS)
+    // https://tools.ietf.org/html/rfc6367
+
     // AES-CCM Cipher Suites for Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc6655
 
@@ -423,7 +432,7 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Unexpected ServerHello message");
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
-            SelectedCipher.Init(SecurityParameters, Role, _random);
+            SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
             SecurityParameters.ServerRandom = message.Random.ToArray();
 
             this._serverExtensions = message.Extensions.ToArray();

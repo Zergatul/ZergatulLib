@@ -65,9 +65,10 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="ecdsa-cert.pfx">
+    <None Include="ecdsa-secp521r1.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="ecdsa-secp256r1.pfx" />
     <None Include="packages.config" />
     <None Include="rsa-cert.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

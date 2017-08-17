@@ -51,6 +51,8 @@ namespace Test
             //DownloadOIDs.Go("1.2.840.10045.3.1", "1.txt");
             return;
 
+            // l(*qqqJ;q30[]e
+
             /*Org.BouncyCastle.Pkcs.Pkcs12Store store = new Org.BouncyCastle.Pkcs.Pkcs12Store();
             store.Load(new FileStream("../../../ConsoleTest2/test.p12", FileMode.Open), "hh87$-Jqo".ToCharArray());
             return;*/
@@ -198,7 +200,7 @@ namespace Test
                     //"ru.4game.com"
                     //"www.tera-online.ru"
                     //"www.facebook.com"
-                    //"security.stackexchange.com"
+                    "security.stackexchange.com"
                     //"www.avito.ru"
                     //"ria.ru"
                     //"kp.ru"
@@ -210,7 +212,7 @@ namespace Test
                     //"iz.ru"
                     //"rg.ru"
                     //"fishki.net"
-                    "yahoo.com"
+                    //"yahoo.com"
                     //"google.com"
                     ;
 
@@ -221,29 +223,29 @@ namespace Test
                 SupportExtendedMasterSecret = true,
                 CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
                 {
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
-                    Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8,
 
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,
 
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
 
                     //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,

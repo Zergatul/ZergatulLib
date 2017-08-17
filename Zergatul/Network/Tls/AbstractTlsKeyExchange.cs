@@ -13,6 +13,7 @@ namespace Zergatul.Network.Tls
         public ISecureRandom Random;
         public byte[] PreMasterSecret;
         public SecurityParameters SecurityParameters;
+        public TlsStreamSettings Settings;
 
         public abstract ServerKeyExchange GenerateServerKeyExchange();
         public abstract ServerKeyExchange ReadServerKeyExchange(BinaryReader reader);
