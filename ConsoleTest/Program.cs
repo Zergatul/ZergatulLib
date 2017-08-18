@@ -42,11 +42,17 @@ namespace Test
 
         static void Main(string[] args)
         {
+            // dsa-1024: kK0-;;*1[eH
+            // dsa-3072: ;qIU8*1m,q3
+            //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-1024.pfx", "kK0-;;*1[eH");
+            //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-3072.pfx", ";qIU8*1m,q3");
+            var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"d:\test\2.cer");
+
             //TestMyServerAndBCClient();
             //TestMyClientAndBCServer();
             //TestMyServerAndNETClient();
             //TestMyClientAndNETServer();
-            ConnectToExternal();
+            //ConnectToExternal();
             //TestBlockCipher();
             //DownloadOIDs.Go("1.2.840.10045.3.1", "1.txt");
             return;

@@ -65,6 +65,8 @@
     <Compile Include="BlockCipher\Poly1305FunctionTests.cs" />
     <Compile Include="BlockCipher\Poly1305KeyGeneratorTests.cs" />
     <Compile Include="BlockCipher\Poly1305Tests.cs" />
+    <Compile Include="BlockCipher\RC4Tests.cs" />
+    <Compile Include="BlockCipher\SEEDTests.cs" />
     <Compile Include="Generator\PKCS12v11Tests.cs" />
     <Compile Include="Hash\Helper.cs" />
     <Compile Include="Hash\SHA1Tests.cs" />

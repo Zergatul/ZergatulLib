@@ -117,7 +117,7 @@ namespace Zergatul.Network.Tls
             //CipherSuite.TLS_DH_DSS_WITH_SEED_CBC_SHA,
             //CipherSuite.TLS_DH_RSA_WITH_SEED_CBC_SHA,
             //CipherSuite.TLS_DHE_DSS_WITH_SEED_CBC_SHA,
-            //CipherSuite.TLS_DHE_RSA_WITH_SEED_CBC_SHA,
+            CipherSuite.TLS_DHE_RSA_WITH_SEED_CBC_SHA,
             //CipherSuite.TLS_DH_Anon_WITH_SEED_CBC_SHA,
             //CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
             //CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,

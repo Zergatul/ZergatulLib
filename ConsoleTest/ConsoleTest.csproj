@@ -65,12 +65,18 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="dsa-1024.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="dsa-3072.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="ecdsa-secp521r1.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="ecdsa-secp256r1.pfx" />
     <None Include="packages.config" />
-    <None Include="rsa-cert.pfx">
+    <None Include="rsa-4096.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

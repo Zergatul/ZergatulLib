@@ -256,6 +256,11 @@ namespace Zergatul
             return (value >> bits) | (value << (64 - bits));
         }
 
+        public static byte RotateLeft(byte value, int bits)
+        {
+            return (byte)((value << bits) | (value >> (8 - bits)));
+        }
+
         public static ushort RotateLeft(ushort value, int bits)
         {
             return (ushort)((value << bits) | (value >> (16 - bits)));

@@ -97,8 +97,12 @@
     <Compile Include="Cryptography\BlockCipher\CipherMode\Poly1305Function.cs" />
     <Compile Include="Cryptography\BlockCipher\CipherMode\Poly1305KeyGenerator.cs" />
     <Compile Include="Cryptography\BlockCipher\RC2.cs" />
+    <Compile Include="Cryptography\BlockCipher\RC4.cs" />
+    <Compile Include="Cryptography\BlockCipher\SEED.cs" />
     <Compile Include="Cryptography\BlockCipher\TripleDESEDE.cs" />
     <Compile Include="Cryptography\Certificate\AccessDescription.cs" />
+    <Compile Include="Cryptography\Hash\Keccak.cs" />
+    <Compile Include="Network\ASN1\Structures\DSAPrivateKey.cs" />
     <Compile Include="Network\ASN1\Structures\ECDSASignatureValue.cs" />
     <Compile Include="Cryptography\Generator\PKCS12v11.cs" />
     <Compile Include="Network\ASN1\Structures\AlgorithmIdentifier.cs" />
