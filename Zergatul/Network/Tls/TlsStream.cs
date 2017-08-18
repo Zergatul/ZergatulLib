@@ -28,6 +28,9 @@ namespace Zergatul.Network.Tls
     // Camellia Cipher Suites for TLS
     // https://tools.ietf.org/html/rfc5932
 
+    // Addition of the ARIA Cipher Suites to Transport Layer Security (TLS)
+    // https://tools.ietf.org/html/rfc6209
+
     // Addition of the Camellia Cipher Suites to Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc6367
 
@@ -130,7 +133,8 @@ namespace Zergatul.Network.Tls
             ClearMessageBuffer();
             WriteHandshakeMessageBuffered(GenerateServerHello());
             WriteHandshakeMessageBuffered(GenerateCertificate(certificate));
-            WriteHandshakeMessageBuffered(GenerateServerKeyExchange(certificate));
+            if (SelectedCipher.KeyExchange.ServerKeyExchangeRequired)
+                WriteHandshakeMessageBuffered(GenerateServerKeyExchange(certificate));
             WriteHandshakeMessageBuffered(GenerateServerHelloDone());
             ReleaseMessageBuffer();
 
@@ -466,8 +470,16 @@ namespace Zergatul.Network.Tls
 
         private void OnServerHelloDone(ServerHelloDone message)
         {
-            if (State != ConnectionState.ServerKeyExchange)
-                throw new TlsStreamException("Unexpected ServerHelloDone message");
+            if (SelectedCipher.KeyExchange.ServerKeyExchangeRequired)
+            {
+                if (State != ConnectionState.ServerKeyExchange)
+                    throw new TlsStreamException("Unexpected ServerHelloDone message");
+            }
+            else
+            {
+                if (State != ConnectionState.ServerCertificate)
+                    throw new TlsStreamException("Unexpected ServerHelloDone message");
+            }
 
             State = ConnectionState.ServerHelloDone;
         }

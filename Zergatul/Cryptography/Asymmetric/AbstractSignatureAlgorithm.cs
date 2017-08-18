@@ -7,34 +7,27 @@ using Zergatul.Cryptography.Hash;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public abstract class AbstractSignatureAlgorithm<SignatureClass>
+    public abstract class AbstractSignatureAlgorithm<InputClass, SignatureClass>
     {
-        public abstract SignatureClass SignHash(byte[] hash);
+        public abstract SignatureClass Sign(InputClass data);
 
-        public SignatureClass SignHash(AbstractHash hashAlgorithm)
+        public byte[] SignHash(AbstractHash hashAlgorithm, SignatureScheme<InputClass, SignatureClass> scheme)
         {
-            return SignHash(hashAlgorithm.ComputeHash());
+            byte[] hash = hashAlgorithm.ComputeHash();
+            InputClass value = scheme.EncodeData(hash);
+            SignatureClass signature = Sign(value);
+            return scheme.SignatureToBytes(signature);
         }
 
-        public SignatureClass SignData(AbstractHash hashAlgorithm, byte[] data)
-        {
-            hashAlgorithm.Reset();
-            hashAlgorithm.Update(data);
-            return SignHash(hashAlgorithm.ComputeHash());
-        }
+        public abstract InputClass Verify(SignatureClass signature, ref InputClass data);
 
-        public abstract bool VerifyHash(byte[] hash, SignatureClass signature);
-
-        public bool VerifyHash(AbstractHash hashAlgorithm, SignatureClass signature)
+        public bool VerifyHash(AbstractHash hashAlgorithm, byte[] signature, SignatureScheme<InputClass, SignatureClass> scheme)
         {
-            return VerifyHash(hashAlgorithm.ComputeHash(), signature);
-        }
-
-        public bool VerifyData(AbstractHash hashAlgorithm, byte[] data, SignatureClass signature)
-        {
-            hashAlgorithm.Reset();
-            hashAlgorithm.Update(data);
-            return VerifyHash(hashAlgorithm.ComputeHash(), signature);
+            byte[] hash = hashAlgorithm.ComputeHash();
+            SignatureClass signatureClass = scheme.BytesToSignature(signature);
+            InputClass value = Verify(signatureClass, ref hash);
+            byte[] data = scheme.DecodeData(value);
+            return ByteArray.Equals(hash, data);
         }
     }
 }

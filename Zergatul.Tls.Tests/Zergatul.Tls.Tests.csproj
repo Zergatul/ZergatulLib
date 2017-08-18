@@ -59,7 +59,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BCrypt.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="BCTests.cs" />
+    <Compile Include="BouncyCastleTests.cs" />
     <Compile Include="SupportedCipherSuiteTests.cs" />
     <Compile Include="SChannelTests.cs" />
   </ItemGroup>

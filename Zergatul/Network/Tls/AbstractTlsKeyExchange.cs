@@ -15,6 +15,8 @@ namespace Zergatul.Network.Tls
         public SecurityParameters SecurityParameters;
         public TlsStreamSettings Settings;
 
+        public abstract bool ServerKeyExchangeRequired { get; }
+
         public abstract ServerKeyExchange GenerateServerKeyExchange();
         public abstract ServerKeyExchange ReadServerKeyExchange(BinaryReader reader);
         public abstract void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer);

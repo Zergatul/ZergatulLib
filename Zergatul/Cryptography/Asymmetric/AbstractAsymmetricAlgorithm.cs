@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public abstract class AbstractAsymmetricAlgorithm<AlgorithmParameters, PublicKeyClass, PrivateKeyClass, SharedSecretClass, SignatureClass> : AbstractAsymmetricAlgorithm
+    public abstract class AbstractAsymmetricAlgorithm<AlgorithmParameters, PublicKeyClass, PrivateKeyClass, SharedSecretClass, SignatureInputClass, SignatureClass> : AbstractAsymmetricAlgorithm
     {
         public abstract PublicKeyClass PublicKey { get; set; }
         public abstract PrivateKeyClass PrivateKey { get; set; }
@@ -14,7 +14,7 @@ namespace Zergatul.Cryptography.Asymmetric
 
         public abstract void GenerateKeys(ISecureRandom random);
         public abstract AbstractKeyExchangeAlgorithm<PublicKeyClass, SharedSecretClass> KeyExchange { get; }
-        public abstract AbstractSignatureAlgorithm<SignatureClass> Signature { get; }
+        public abstract AbstractSignatureAlgorithm<SignatureInputClass, SignatureClass> Signature { get; }
     }
 
     public abstract class AbstractAsymmetricAlgorithm

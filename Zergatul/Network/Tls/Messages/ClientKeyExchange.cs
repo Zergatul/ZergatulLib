@@ -10,6 +10,7 @@ namespace Zergatul.Network.Tls.Messages
     {
         public byte[] DH_Yc;
         public byte[] ECDH_Yc;
+        public byte[] EncryptedPreMasterSecret;
 
         public ClientKeyExchange()
             : base(HandshakeType.ClientKeyExchange)

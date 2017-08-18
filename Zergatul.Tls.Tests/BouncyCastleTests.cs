@@ -13,7 +13,7 @@ using System.Diagnostics;
 namespace Zergatul.Tls.Tests
 {
     [TestClass]
-    public class BCTests
+    public class BouncyCastleTests
     {
         private static CipherSuite[] NotSupportedByBC = new CipherSuite[]
         {
@@ -32,7 +32,7 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256);
+            TestServer(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA);
         }
 
         [TestMethod]

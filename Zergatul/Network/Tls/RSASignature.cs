@@ -20,22 +20,22 @@ namespace Zergatul.Network.Tls
         {
             var rsa = (RSA)algo;
 
-            var ai = new AlgorithmIdentifier(hash.OID, new Null());
-            var pkcs = new EMSA_PKCS1_v1_5(ai, hash.ComputeHash(), (rsa.KeySize + 7) / 8);
+            var scheme = new EMSAPKCS1v15Scheme();
+            scheme.KeySize = rsa.KeySize;
+            scheme.HashAlgorithmOID = hash.OID;
 
-            var signature = rsa.Signature.SignHash(pkcs.ToBytes());
-            return signature.ToBytes(ByteOrder.BigEndian);
+            return rsa.Signature.SignHash(hash, scheme);
         }
 
         public override bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature)
         {
             var rsa = (RSA)algo;
-            // TODO: REFACTOR!!!
-            // why rsa computations here???
-            BigInteger m = BigInteger.ModularExponentiation(new BigInteger(signature, ByteOrder.BigEndian), rsa.PublicKey.e, rsa.PublicKey.n);
-            var pkcs = EMSA_PKCS1_v1_5.Parse(m.ToBytes(ByteOrder.BigEndian, (rsa.KeySize + 7) / 8));
 
-            return pkcs.DigestAlgorithm.Algorithm == hash.OID && pkcs.Digest.SequenceEqual(hash.ComputeHash());
+            var scheme = new EMSAPKCS1v15Scheme();
+            scheme.KeySize = rsa.KeySize;
+            scheme.HashAlgorithmOID = hash.OID;
+
+            return rsa.Signature.VerifyHash(hash, signature, scheme);
         }
     }
 }

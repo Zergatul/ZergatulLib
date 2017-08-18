@@ -13,6 +13,8 @@ namespace Zergatul.Network.Tls
 {
     internal class DHEKeyExchange : AbstractTlsKeyExchange
     {
+        public override bool ServerKeyExchangeRequired => true;
+
         private DiffieHellman _dh;
         private AbstractTlsSignature _signature;
 

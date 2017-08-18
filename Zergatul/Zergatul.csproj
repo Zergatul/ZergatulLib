@@ -58,11 +58,13 @@
     <Compile Include="Cryptography\Asymmetric\ECDSASignature.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
+    <Compile Include="Cryptography\Asymmetric\EMSAPKCS1v15Scheme.cs" />
     <Compile Include="Cryptography\Asymmetric\NullParam.cs" />
     <Compile Include="Cryptography\Asymmetric\RSA.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPublicKey.cs" />
+    <Compile Include="Cryptography\Asymmetric\SignatureScheme.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractBlockCipher.cs" />
     <Compile Include="Cryptography\BlockCipher\AbstractStreamCipher.cs" />
     <Compile Include="Cryptography\BlockCipher\BlockBasedStreamCipher.cs" />
@@ -250,7 +252,6 @@
     <Compile Include="Network\Tls\CipherSuiteBuilder.cs" />
     <Compile Include="Network\Tls\ECDSASignature.cs" />
     <Compile Include="Network\Tls\Extensions\ExtendedMasterSecret.cs" />
-    <Compile Include="Network\Tls\GenericCipherSuite.cs" />
     <Compile Include="Network\Tls\CipherSuite.cs" />
     <Compile Include="Network\Tls\DHEKeyExchange.cs" />
     <Compile Include="Network\Tls\ECDHEKeyExchange.cs" />
@@ -293,6 +294,7 @@
     <Compile Include="Network\Tls\ReadDataEventArgs.cs" />
     <Compile Include="Network\Tls\Messages\RecordMessage.cs" />
     <Compile Include="Network\Tls\Role.cs" />
+    <Compile Include="Network\Tls\RSAKeyExchange.cs" />
     <Compile Include="Network\Tls\RSASignature.cs" />
     <Compile Include="Network\Tls\SecurityParameters.cs" />
     <Compile Include="Network\Tls\ServerDHParams.cs" />

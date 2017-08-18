@@ -11,7 +11,7 @@ using Zergatul.Network.ASN1.Structures;
 namespace Zergatul.Cryptography.Asymmetric
 {
     // https://tools.ietf.org/html/rfc8017
-    public class RSA : AbstractAsymmetricAlgorithm<RSAParameters, RSAPublicKey, RSAPrivateKey, NullParam, BigInteger>
+    public class RSA : AbstractAsymmetricAlgorithm<RSAParameters, RSAPublicKey, RSAPrivateKey, NullParam, BigInteger, BigInteger>
     {
         public override RSAPrivateKey PrivateKey { get; set; }
         public override RSAPublicKey PublicKey { get; set; }
@@ -45,7 +45,7 @@ namespace Zergatul.Cryptography.Asymmetric
             }
         }
 
-        public override AbstractSignatureAlgorithm<BigInteger> Signature
+        public override AbstractSignatureAlgorithm<BigInteger, BigInteger> Signature
         {
             get
             {
@@ -59,7 +59,7 @@ namespace Zergatul.Cryptography.Asymmetric
             }
         }
 
-        private class RSASignature : AbstractSignatureAlgorithm<BigInteger>
+        private class RSASignature : AbstractSignatureAlgorithm<BigInteger, BigInteger>
         {
             private RSA _rsa;
 
@@ -68,26 +68,24 @@ namespace Zergatul.Cryptography.Asymmetric
                 this._rsa = rsa;
             }
 
-            public override BigInteger SignHash(byte[] hash)
+            public override BigInteger Sign(BigInteger data)
             {
                 if (_rsa.PrivateKey == null)
                     throw new InvalidOperationException("PrivateKey is required for signing");
 
-                BigInteger m = new BigInteger(hash, ByteOrder.BigEndian);
-                if (m >= _rsa.PrivateKey.n)
+                if (data >= _rsa.PrivateKey.n)
                     throw new InvalidOperationException("Data too large for signing");
 
-                return BigInteger.ModularExponentiation(m, _rsa.PrivateKey.d, _rsa.PrivateKey.n);
+                return BigInteger.ModularExponentiation(data, _rsa.PrivateKey.d, _rsa.PrivateKey.n);
             }
 
-            public override bool VerifyHash(byte[] hash, BigInteger signature)
+            public override BigInteger Verify(BigInteger signature)
             {
-                BigInteger m1 = BigInteger.ModularExponentiation(signature, _rsa.PublicKey.e, _rsa.PublicKey.n);
-                BigInteger m2 = new BigInteger(hash, ByteOrder.BigEndian);
-                return m1 == m2;
+                return BigInteger.ModularExponentiation(signature, _rsa.PublicKey.e, _rsa.PublicKey.n);
             }
         }
 
+        // TODO: https://tools.ietf.org/html/rfc2313
         private class RSAEncryption : AbstractAsymmetricEncryption
         {
             private RSA _rsa;

@@ -25,16 +25,6 @@ namespace Zergatul.Tls.Tests
             return new X509Certificate(Settings.ECDSACertName, Settings.ECDSACertPassword);
         }
 
-        #region DHE_RSA_DES
-
-        [TestMethod]
-        public void TLS_DHE_RSA_WITH_DES_CBC_SHA()
-        {
-            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA);
-        }
-
-        #endregion
-
         #region DHE_RSA_AES
 
         [TestMethod]
@@ -113,6 +103,18 @@ namespace Zergatul.Tls.Tests
             TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384);
         }
 
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384);
+        }
+
         #endregion
 
         #region DHE_RSA_CAMELLIA
@@ -129,6 +131,18 @@ namespace Zergatul.Tls.Tests
             TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_CBC_SHA);
         }
 
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384);
+        }
+
         #endregion
 
         #region DHE_RSA_CHACHA20
@@ -143,6 +157,16 @@ namespace Zergatul.Tls.Tests
         public void TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256()
         {
             TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256);
+        }
+
+        #endregion
+
+        #region DHE_RSA_DES
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_DES_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_DES_CBC_SHA);
         }
 
         #endregion
@@ -171,6 +195,35 @@ namespace Zergatul.Tls.Tests
         public void TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384()
         {
             TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384);
+        }
+
+        #endregion
+
+        #region ECDHE_RSA_ARIA
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384);
+        }
+
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384);
         }
 
         #endregion
@@ -245,6 +298,34 @@ namespace Zergatul.Tls.Tests
         public void TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256()
         {
             TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256);
+        }
+
+        #endregion
+
+        #region ECDHE_ECDSA_ARIA
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384);
         }
 
         #endregion

@@ -200,7 +200,7 @@ namespace Test
                     //"ru.4game.com"
                     //"www.tera-online.ru"
                     //"www.facebook.com"
-                    "security.stackexchange.com"
+                    //"security.stackexchange.com"
                     //"www.avito.ru"
                     //"ria.ru"
                     //"kp.ru"
@@ -210,10 +210,11 @@ namespace Test
                     //"smi2.ru"
                     //"rt.com"
                     //"iz.ru"
-                    //"rg.ru"
+                    "rg.ru"
                     //"fishki.net"
                     //"yahoo.com"
                     //"google.com"
+                    //"jve.linuxwall.info"
                     ;
 
             var client = new TcpClient(host, 443);
@@ -221,6 +222,10 @@ namespace Test
             tls.Settings = new TlsStreamSettings
             {
                 SupportExtendedMasterSecret = true,
+                //CipherSuites = TlsStream.SupportedCipherSuites
+                //    .Where(cs => cs.ToString().Contains("CAMELLIA"))
+                //    .Where(cs => cs.ToString().Contains("GCM"))
+                //    .ToArray(),
                 CipherSuites = new Zergatul.Network.Tls.CipherSuite[]
                 {
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
@@ -243,13 +248,13 @@ namespace Test
 
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
-                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
 
                     //Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
-                    Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+                    //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
                 },
                 SupportedCurves = Enumerable.Range(1, 25).Select(i => (Zergatul.Network.Tls.NamedCurve)i).ToArray()
             };

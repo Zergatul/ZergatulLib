@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Certificate
 {
+    // TODO: handle case when there are 2 certificates with the same subj and auth
     public class X509Chain
     {
         public IReadOnlyCollection<X509Certificate> List => _list.AsReadOnly();

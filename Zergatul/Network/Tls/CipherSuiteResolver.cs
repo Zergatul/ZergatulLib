@@ -3,6 +3,7 @@ using Zergatul.Cryptography.BlockCipher;
 using Zergatul.Cryptography.Hash;
 
 using Cipher = Zergatul.Network.Tls.CipherSuiteBuilder;
+using RSAKE = Zergatul.Network.Tls.RSAKeyExchange;
 using DHE = Zergatul.Network.Tls.DHEKeyExchange;
 using ECDHE = Zergatul.Network.Tls.ECDHEKeyExchange;
 using RSA = Zergatul.Network.Tls.RSASignature;
@@ -68,7 +69,8 @@ namespace Zergatul.Network.Tls
                 //case CipherSuite.TLS_PSK_WITH_NULL_SHA:
                 //case CipherSuite.TLS_DHE_PSK_WITH_NULL_SHA:
                 //case CipherSuite.TLS_RSA_PSK_WITH_NULL_SHA:
-                //case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
+                case CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA:
+                    return new Cipher(new RSAKE(), new CBC(new AES128(), new SHA1()), new SHA256());
                 //case CipherSuite.TLS_DH_DSS_WITH_AES_128_CBC_SHA:
                 //case CipherSuite.TLS_DH_RSA_WITH_AES_128_CBC_SHA:
                 //case CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
@@ -245,22 +247,30 @@ namespace Zergatul.Network.Tls
                 //case CipherSuite.TLS_DH_RSA_WITH_ARIA_256_CBC_SHA384:
                 //case CipherSuite.TLS_DHE_DSS_WITH_ARIA_128_CBC_SHA256:
                 //case CipherSuite.TLS_DHE_DSS_WITH_ARIA_256_CBC_SHA384:
-                //case CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256:
-                //case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384:
+                case CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_CBC_SHA256:
+                    return new Cipher(new DHE(new RSA()), new CBC(new ARIA128(), new SHA256()), new SHA256());
+                case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_CBC_SHA384:
+                    return new Cipher(new DHE(new RSA()), new CBC(new ARIA256(), new SHA384()), new SHA384());
                 //case CipherSuite.TLS_DH_anon_WITH_ARIA_128_CBC_SHA256:
                 //case CipherSuite.TLS_DH_anon_WITH_ARIA_256_CBC_SHA384:
-                //case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256:
-                //case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384:
+                case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_128_CBC_SHA256:
+                    return new Cipher(new ECDHE(new ECDSA()), new CBC(new ARIA128(), new SHA256()), new SHA256());
+                case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_256_CBC_SHA384:
+                    return new Cipher(new ECDHE(new ECDSA()), new CBC(new ARIA256(), new SHA384()), new SHA384());
                 //case CipherSuite.TLS_ECDH_ECDSA_WITH_ARIA_128_CBC_SHA256:
                 //case CipherSuite.TLS_ECDH_ECDSA_WITH_ARIA_256_CBC_SHA384:
-                //case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256:
-                //case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384:
+                case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_128_CBC_SHA256:
+                    return new Cipher(new ECDHE(new RSA()), new CBC(new ARIA128(), new SHA256()), new SHA256());
+                case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_256_CBC_SHA384:
+                    return new Cipher(new ECDHE(new RSA()), new CBC(new ARIA256(), new SHA384()), new SHA384());
                 //case CipherSuite.TLS_ECDH_RSA_WITH_ARIA_128_CBC_SHA256:
                 //case CipherSuite.TLS_ECDH_RSA_WITH_ARIA_256_CBC_SHA384:
                 //case CipherSuite.TLS_RSA_WITH_ARIA_128_GCM_SHA256:
                 //case CipherSuite.TLS_RSA_WITH_ARIA_256_GCM_SHA384:
-                //case CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256:
-                //case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384:
+                case CipherSuite.TLS_DHE_RSA_WITH_ARIA_128_GCM_SHA256:
+                    return new Cipher(new DHE(new RSA()), new GCM(new ARIA128()), new SHA256());
+                case CipherSuite.TLS_DHE_RSA_WITH_ARIA_256_GCM_SHA384:
+                    return new Cipher(new DHE(new RSA()), new GCM(new ARIA256()), new SHA384());
                 //case CipherSuite.TLS_DH_RSA_WITH_ARIA_128_GCM_SHA256:
                 //case CipherSuite.TLS_DH_RSA_WITH_ARIA_256_GCM_SHA384:
                 //case CipherSuite.TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256:
@@ -269,12 +279,16 @@ namespace Zergatul.Network.Tls
                 //case CipherSuite.TLS_DH_DSS_WITH_ARIA_256_GCM_SHA384:
                 //case CipherSuite.TLS_DH_anon_WITH_ARIA_128_GCM_SHA256:
                 //case CipherSuite.TLS_DH_anon_WITH_ARIA_256_GCM_SHA384:
-                //case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256:
-                //case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384:
+                case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256:
+                    return new Cipher(new ECDHE(new ECDSA()), new GCM(new ARIA128()), new SHA256());
+                case CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384:
+                    return new Cipher(new ECDHE(new ECDSA()), new GCM(new ARIA256()), new SHA384());
                 //case CipherSuite.TLS_ECDH_ECDSA_WITH_ARIA_128_GCM_SHA256:
                 //case CipherSuite.TLS_ECDH_ECDSA_WITH_ARIA_256_GCM_SHA384:
-                //case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256:
-                //case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384:
+                case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_128_GCM_SHA256:
+                    return new Cipher(new ECDHE(new RSA()), new GCM(new ARIA128()), new SHA256());
+                case CipherSuite.TLS_ECDHE_RSA_WITH_ARIA_256_GCM_SHA384:
+                    return new Cipher(new ECDHE(new RSA()), new GCM(new ARIA256()), new SHA384());
                 //case CipherSuite.TLS_ECDH_RSA_WITH_ARIA_128_GCM_SHA256:
                 //case CipherSuite.TLS_ECDH_RSA_WITH_ARIA_256_GCM_SHA384:
                 //case CipherSuite.TLS_PSK_WITH_ARIA_128_CBC_SHA256:
@@ -305,8 +319,10 @@ namespace Zergatul.Network.Tls
                 //case CipherSuite.TLS_ECDH_RSA_WITH_CAMELLIA_256_CBC_SHA384:
                 //case CipherSuite.TLS_RSA_WITH_CAMELLIA_128_GCM_SHA256:
                 //case CipherSuite.TLS_RSA_WITH_CAMELLIA_256_GCM_SHA384:
-                //case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256:
-                //case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384:
+                case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256:
+                    return new Cipher(new DHE(new RSA()), new GCM(new Camellia128()), new SHA256());
+                case CipherSuite.TLS_DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384:
+                    return new Cipher(new DHE(new RSA()), new GCM(new Camellia256()), new SHA384());
                 //case CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_128_GCM_SHA256:
                 //case CipherSuite.TLS_DH_RSA_WITH_CAMELLIA_256_GCM_SHA384:
                 //case CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256:
