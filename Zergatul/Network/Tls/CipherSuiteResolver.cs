@@ -133,7 +133,8 @@ namespace Zergatul.Network.Tls
                 //case CipherSuite.TLS_DH_DSS_WITH_SEED_CBC_SHA:
                 //case CipherSuite.TLS_DH_RSA_WITH_SEED_CBC_SHA:
                 //case CipherSuite.TLS_DHE_DSS_WITH_SEED_CBC_SHA:
-                //case CipherSuite.TLS_DHE_RSA_WITH_SEED_CBC_SHA:
+                case CipherSuite.TLS_DHE_RSA_WITH_SEED_CBC_SHA:
+                    return new Cipher(new DHE(new RSA()), new CBC(new SEED(), new SHA1()), new SHA256());
                 //case CipherSuite.TLS_DH_Anon_WITH_SEED_CBC_SHA:
                 //case CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256:
                 //case CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384:

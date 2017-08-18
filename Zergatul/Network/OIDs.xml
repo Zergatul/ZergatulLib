@@ -3,6 +3,11 @@
   <oid value="1" id="iso" class="ISO" desc="International Organization for Standardization (ISO)">
     <oid value="2" id="member-body" class="MemberBody" desc="ISO Member Bodies">
       <oid value="840" id="us" class="US" desc="United States of America">
+        <oid value="10040" id="x9-57" class="X957" desc="ANSI standard X9.57 (1997): 'Public Key Cryptography for the Financial Services Industry: Certificate Management'">
+          <oid value="4" id="x9algorithm" class="X9Algorithm" desc="ANSI X9.57 algorithms">
+            <oid value="1" id="dsa" class="DSA" desc="Digital Signature Algorithm (DSA) subject public key" />
+          </oid>
+        </oid>
         <oid value="10045" id="ansi-x962" class="ANSI_X962" desc="ANSI X9.62 standard (1998) 'Public Key Cryptography for the Financial Services Industry: The Elliptic Curve Digital Signature Algorithm (ECDSA)'">
           <oid value="2" id="keyType" class="KeyType" desc="Public key type">
             <oid value="1" id="ecPublicKey" class="ECPublicKey" desc="Elliptic curve public key cryptography" />

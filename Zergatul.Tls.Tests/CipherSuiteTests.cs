@@ -171,6 +171,16 @@ namespace Zergatul.Tls.Tests
 
         #endregion
 
+        #region DHE_RSA others
+
+        [TestMethod]
+        public void TLS_DHE_RSA_WITH_SEED_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_SEED_CBC_SHA);
+        }
+
+        #endregion
+
         #region ECDHE_RSA_AES
 
         [TestMethod]

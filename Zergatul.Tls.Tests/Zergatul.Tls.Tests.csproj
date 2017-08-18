@@ -78,8 +78,8 @@
       <Link>ecdsa-secp521r1.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\ConsoleTest\rsa-cert.pfx">
-      <Link>rsa-cert.pfx</Link>
+    <None Include="..\ConsoleTest\rsa-4096.pfx">
+      <Link>rsa-4096.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

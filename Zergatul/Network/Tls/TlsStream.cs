@@ -16,6 +16,9 @@ namespace Zergatul.Network.Tls
     // The Transport Layer Security (TLS) Protocol Version 1.2
     // https://tools.ietf.org/html/rfc5246
 
+    // Addition of SEED Cipher Suites to Transport Layer Security (TLS)
+    // https://tools.ietf.org/html/rfc4162
+
     // Pre-Shared Key Ciphersuites for Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc4279
 
