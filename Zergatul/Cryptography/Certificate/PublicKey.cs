@@ -67,7 +67,7 @@ namespace Zergatul.Cryptography.Certificate
                     throw new InvalidOperationException();
 
                 var ecdsa = new ECDSA();
-                ecdsa.Parameters = new ECDSAParameters { Curve = curve };
+                ecdsa.Parameters = curve;
 
                 if (curve is Math.EllipticCurves.PrimeField.EllipticCurve)
                 {
@@ -76,6 +76,33 @@ namespace Zergatul.Cryptography.Certificate
                 }
                 else
                     throw new NotImplementedException();
+            }
+            else if (Algorithm == OID.ISO.MemberBody.US.X957.X9Algorithm.DSA)
+            {
+                var element = ASN1Element.ReadFrom(Key);
+                var integer = element as Integer;
+                if (integer == null)
+                    throw new InvalidOperationException();
+
+                var dsa = new DSA();
+                dsa.PublicKey = integer.Value;
+
+                var seq = Parameters as Sequence;
+                if (seq == null)
+                    throw new InvalidOperationException();
+                if (seq.Elements.Count != 3)
+                    throw new InvalidOperationException();
+                if (seq.Elements.Any(e => !(e is Integer)))
+                    throw new InvalidOperationException();
+
+                dsa.Parameters = new DSAParameters
+                {
+                    p = ((Integer)seq.Elements[0]).Value,
+                    q = ((Integer)seq.Elements[1]).Value,
+                    g = ((Integer)seq.Elements[2]).Value,
+                };
+
+                return dsa;
             }
             else if (Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS3.DHKeyAgreement)
             {

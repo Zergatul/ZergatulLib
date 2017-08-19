@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math.EllipticCurves;
 using Zergatul.Network.Tls.Extensions;
@@ -21,6 +22,12 @@ namespace Zergatul.Network.Tls
         public ECDHEKeyExchange(AbstractTlsSignature signature)
         {
             this._signature = signature;
+        }
+
+        public override void SetRandom(ISecureRandom random)
+        {
+            base.SetRandom(random);
+            _signature.Random = random;
         }
 
         #region ServerKeyExchange

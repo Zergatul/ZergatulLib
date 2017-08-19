@@ -12,6 +12,7 @@ namespace Zergatul.Network.Tls
         public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)
         {
             var ecdsa = (ECDSA)algo;
+            ecdsa.Random = Random;
             return ecdsa.Signature.GetScheme("Default").Sign(hash.ComputeHash());
         }
 

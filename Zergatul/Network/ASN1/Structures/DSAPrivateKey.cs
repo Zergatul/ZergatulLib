@@ -20,7 +20,7 @@ namespace Zergatul.Network.ASN1.Structures
         {
             return new DSAPrivateKey
             {
-                y = (element as Integer).Value
+                x = (element as Integer).Value
             };
 
             /*var seq = element as Sequence;

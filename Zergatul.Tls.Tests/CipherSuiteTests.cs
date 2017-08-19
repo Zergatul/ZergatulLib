@@ -20,6 +20,11 @@ namespace Zergatul.Tls.Tests
             return new X509Certificate(Settings.RSA4096CertName, Settings.RSA4096CertPwd);
         }
 
+        private static X509Certificate GetDSSCert()
+        {
+            return new X509Certificate(Settings.DSA3072CertName, Settings.DSA3072CertPwd);
+        }
+
         private static X509Certificate GetECDSACert()
         {
             return new X509Certificate(Settings.ECDSAp521r1CertName, Settings.ECDSAp521r1CertPwd);
@@ -362,6 +367,112 @@ namespace Zergatul.Tls.Tests
         public void TLS_DHE_RSA_WITH_SEED_CBC_SHA()
         {
             TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_SEED_CBC_SHA);
+        }
+
+        #endregion
+
+        #region DHE_DSS_AES
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_AES_128_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_AES_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_AES_256_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_AES_256_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_AES_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_AES_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_AES_256_GCM_SHA384);
+        }
+
+        #endregion
+
+        #region DHE_DSS_ARIA
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_ARIA_128_CBC_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_ARIA_128_CBC_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_ARIA_256_CBC_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_ARIA_256_CBC_SHA384);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_ARIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_ARIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_ARIA_256_GCM_SHA384);
+        }
+
+        #endregion
+
+        #region DHE_DSS_ARIA
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_256_CBC_SHA);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_128_GCM_SHA256);
+        }
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_CAMELLIA_256_GCM_SHA384()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_CAMELLIA_256_GCM_SHA384);
+        }
+
+        #endregion
+
+        #region DHE_DSS others
+
+        [TestMethod]
+        public void TLS_DHE_DSS_WITH_SEED_CBC_SHA()
+        {
+            TestCipherSuite(CipherSuite.TLS_DHE_DSS_WITH_SEED_CBC_SHA);
         }
 
         #endregion
@@ -721,6 +832,8 @@ namespace Zergatul.Tls.Tests
                     cert = GetECDSACert();
                 else if (cipher.ToString().Contains("RSA"))
                     cert = GetRSACert();
+                else if (cipher.ToString().Contains("DSS"))
+                    cert = GetDSSCert();
                 else
                     throw new NotImplementedException();
 

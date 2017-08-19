@@ -74,6 +74,14 @@
       <Link>dh-2048.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\ConsoleTest\dsa-1024.pfx">
+      <Link>dsa-1024.pfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\ConsoleTest\dsa-3072.pfx">
+      <Link>dsa-3072.pfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\ConsoleTest\ecdsa-secp256r1.pfx">
       <Link>ecdsa-secp256r1.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -11,6 +11,9 @@ namespace Zergatul.Tls.Tests
         public static string RSA4096CertName = "rsa-4096.pfx";
         public static string RSA4096CertPwd = "hh87$-Jqo";
 
+        public static string DSA3072CertName = "dsa-3072.pfx";
+        public static string DSA3072CertPwd = ";qIU8*1m,q3";
+
         public static string ECDSAp256r1CertName = "ecdsa-secp256r1.pfx";
         public static string ECDSAp256r1CertPwd = @"l(*qqqJ;q30[]e";
 

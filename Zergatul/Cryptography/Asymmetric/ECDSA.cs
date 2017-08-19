@@ -11,21 +11,21 @@ using Zergatul.Network.ASN1.Structures;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class ECDSA : AbstractAsymmetricAlgorithm<ECDSAParameters, ECPointGeneric, ECPrivateKey, NullParam, BigInteger, ECDSASignature>
+    public class ECDSA : AbstractAsymmetricAlgorithm<IEllipticCurve, ECPointGeneric, ECPrivateKey, NullParam, BigInteger, ECDSASignature>
     {
         public override ECPrivateKey PrivateKey { get; set; }
         public override ECPointGeneric PublicKey { get; set; }
-        public override ECDSAParameters Parameters { get; set; }
+        public override IEllipticCurve Parameters { get; set; }
 
-        public override int KeySize => Parameters.Curve.BitSize;
+        public override int KeySize => Parameters.BitSize;
 
         private ECDSASignatureImpl _signature;
 
         public override void GenerateKeys()
         {
-            if (Parameters.Curve is Math.EllipticCurves.PrimeField.EllipticCurve)
+            if (Parameters is Math.EllipticCurves.PrimeField.EllipticCurve)
             {
-                var curve = (Math.EllipticCurves.PrimeField.EllipticCurve)Parameters.Curve;
+                var curve = (Math.EllipticCurves.PrimeField.EllipticCurve)Parameters;
                 PrivateKey = new ECPrivateKey
                 {
                     BigInteger = BigInteger.Random(BigInteger.One, curve.n, Random)
@@ -83,12 +83,12 @@ namespace Zergatul.Cryptography.Asymmetric
             {
                 if (_ecdsa.PublicKey.PFECPoint != null)
                 {
-                    var curve = _ecdsa.Parameters.Curve as Math.EllipticCurves.PrimeField.EllipticCurve;
+                    var curve = _ecdsa.Parameters as Math.EllipticCurves.PrimeField.EllipticCurve;
                     var q = curve.n;
 
                     CalculateK:
                     // k from [1..q - 1]
-                    var k = BigInteger.Random(BigInteger.One, q, _ecdsa.Parameters.Random);
+                    var k = BigInteger.Random(BigInteger.One, q, _ecdsa.Random);
 
                     var point = k * curve.g;
                     var r = point.x % q;
@@ -114,7 +114,7 @@ namespace Zergatul.Cryptography.Asymmetric
             {
                 if (_ecdsa.PublicKey.PFECPoint != null)
                 {
-                    var curve = _ecdsa.Parameters.Curve as Math.EllipticCurves.PrimeField.EllipticCurve;
+                    var curve = _ecdsa.Parameters as Math.EllipticCurves.PrimeField.EllipticCurve;
                     var r = signature.r;
                     var s = signature.s;
                     var q = curve.n;

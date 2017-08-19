@@ -50,9 +50,7 @@ namespace Zergatul.Cryptography.Certificate
                     throw new InvalidOperationException();
 
                 var ecdsa = new ECDSA();
-                ecdsa.Parameters = new ECDSAParameters { Curve = curve };
-                // TODO: move random to AbstractAsymmetricAlgorithm
-                ecdsa.Parameters.Random = new DefaultSecureRandom();
+                ecdsa.Parameters = curve;
 
                 if (curve is Math.EllipticCurves.PrimeField.EllipticCurve)
                 {
@@ -69,6 +67,12 @@ namespace Zergatul.Cryptography.Certificate
                     throw new NotImplementedException();
 
                 return ecdsa;
+            }
+            else if (_keyInfo.DSA != null)
+            {
+                var dsa = (DSA)_cert.PublicKey.ResolveAlgorithm();
+                dsa.PrivateKey = _keyInfo.DSA.x;
+                return dsa;
             }
             else if (_keyInfo.DH != null)
             {

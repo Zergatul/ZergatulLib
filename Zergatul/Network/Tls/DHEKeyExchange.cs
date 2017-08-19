@@ -23,6 +23,12 @@ namespace Zergatul.Network.Tls
             this._signature = signature;
         }
 
+        public override void SetRandom(ISecureRandom random)
+        {
+            base.SetRandom(random);
+            _signature.Random = random;
+        }
+
         #region ServerKeyExchange
 
         public override ServerKeyExchange GenerateServerKeyExchange()

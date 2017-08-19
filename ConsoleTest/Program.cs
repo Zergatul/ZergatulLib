@@ -45,9 +45,10 @@ namespace Test
             // dsa-1024: kK0-;;*1[eH
             // dsa-3072: ;qIU8*1m,q3
             //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-1024.pfx", "kK0-;;*1[eH");
-            //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-3072.pfx", ";qIU8*1m,q3");
-            var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"dh-2048.pfx", @"kJ==+`!j8qzm&");
+            var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-3072.pfx", ";qIU8*1m,q3");
+            //var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"dh-2048.pfx", @"kJ==+`!j8qzm&");
             cert.PublicKey.ResolveAlgorithm();
+            cert.PrivateKey.ResolveAlgorithm();
 
             //TestMyServerAndBCClient();
             //TestMyClientAndBCServer();

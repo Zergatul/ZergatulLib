@@ -6,6 +6,25 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
+    public abstract class SignatureOnlyAssymetricAlgorithm<AlgorithmParameters, PublicKeyClass, PrivateKeyClass, SignatureInputClass, SignatureClass> : AbstractAsymmetricAlgorithm<AlgorithmParameters, PublicKeyClass, PrivateKeyClass, NullParam, SignatureInputClass, SignatureClass>
+    {
+        public override AbstractAsymmetricEncryption Encryption
+        {
+            get
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public override AbstractKeyExchangeAlgorithm<PublicKeyClass, NullParam> KeyExchange
+        {
+            get
+            {
+                throw new NotSupportedException();
+            }
+        }
+    }
+
     public abstract class AbstractAsymmetricAlgorithm<AlgorithmParameters, PublicKeyClass, PrivateKeyClass, SharedSecretClass, SignatureInputClass, SignatureClass> : AbstractAsymmetricAlgorithm
     {
         public abstract PublicKeyClass PublicKey { get; set; }

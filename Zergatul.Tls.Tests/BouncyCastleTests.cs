@@ -39,7 +39,7 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_RSA_WITH_AES_256_CCM_8);
+            TestServer(CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256);
         }
 
         [TestMethod]
@@ -171,6 +171,18 @@ namespace Zergatul.Tls.Tests
 
             serverThread = new Thread(() =>
             {
+                X509Certificate cert;
+                if (cs.ToString().StartsWith("TLS_DH_"))
+                    cert = GetDHCert();
+                else if (cs.ToString().Contains("ECDSA"))
+                    cert = GetECDSACert();
+                else if (cs.ToString().Contains("RSA"))
+                    cert = GetRSACert();
+                else if (cs.ToString().Contains("DSS"))
+                    cert = GetDSSCert();
+                else
+                    throw new NotImplementedException();
+
                 var listener = new TcpListener(IPAddress.Any, port);
                 try
                 {
@@ -188,9 +200,6 @@ namespace Zergatul.Tls.Tests
                             SupportedCurves = new NamedCurve[] { NamedCurve.secp256r1, NamedCurve.secp521r1 }
                         };
 
-                        var cert = ECcert ?
-                            new X509Certificate(Settings.ECDSAp256r1CertName, Settings.ECDSAp256r1CertPwd) :
-                            new X509Certificate(Settings.RSA4096CertName, Settings.RSA4096CertPwd);
                         tlsStream.AuthenticateAsServer("localhost", cert);
                         tlsStream.Write(Encoding.ASCII.GetBytes(msg));
 
@@ -248,6 +257,26 @@ namespace Zergatul.Tls.Tests
             Assert.IsTrue(msg == readMsg, cs.ToString() + " failed");
 
             Debug.WriteLine(cs.ToString() + " OK");
+        }
+
+        private static X509Certificate GetRSACert()
+        {
+            return new X509Certificate(Settings.RSA4096CertName, Settings.RSA4096CertPwd);
+        }
+
+        private static X509Certificate GetDSSCert()
+        {
+            return new X509Certificate(Settings.DSA3072CertName, Settings.DSA3072CertPwd);
+        }
+
+        private static X509Certificate GetECDSACert()
+        {
+            return new X509Certificate(Settings.ECDSAp256r1CertName, Settings.ECDSAp256r1CertPwd);
+        }
+
+        private static X509Certificate GetDHCert()
+        {
+            return new X509Certificate(Settings.DHCertName, Settings.DHCertPwd);
         }
 
         class MyBCTlsClient : Org.BouncyCastle.Crypto.Tls.DefaultTlsClient

@@ -57,6 +57,7 @@
     <Compile Include="Asymmetric\RSATests.cs" />
     <Compile Include="Asymmetric\ECDiffieHellmanTests.cs" />
     <Compile Include="Asymmetric\ECDSATests.cs" />
+    <Compile Include="Asymmetric\DSATests.cs" />
     <Compile Include="BlockCipher\RC2Tests.cs" />
     <Compile Include="BlockCipher\DESTests.cs" />
     <Compile Include="BlockCipher\GCMTests.cs" />

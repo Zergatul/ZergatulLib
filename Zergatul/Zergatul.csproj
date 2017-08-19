@@ -52,9 +52,11 @@
     <Compile Include="Cryptography\Asymmetric\AbstractSignatureAlgorithm.cs" />
     <Compile Include="Cryptography\Asymmetric\DiffieHellman.cs" />
     <Compile Include="Cryptography\Asymmetric\DiffieHellmanParameters.cs" />
+    <Compile Include="Cryptography\Asymmetric\DSA.cs" />
+    <Compile Include="Cryptography\Asymmetric\DSAParameters.cs" />
+    <Compile Include="Cryptography\Asymmetric\DSASignature.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDiffieHellman.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDSA.cs" />
-    <Compile Include="Cryptography\Asymmetric\ECDSAParameters.cs" />
     <Compile Include="Cryptography\Asymmetric\ECDSASignature.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
@@ -242,6 +244,7 @@
     <Compile Include="Network\Tls\ChaCha20Poly1305Cipher.cs" />
     <Compile Include="Network\Tls\CipherSuiteResolver.cs" />
     <Compile Include="Network\Tls\DHKeyExchange.cs" />
+    <Compile Include="Network\Tls\DSSSignature.cs" />
     <Compile Include="Network\Tls\GCMCipher.cs" />
     <Compile Include="Network\Tls\HMACCBCCipher.cs" />
     <Compile Include="Network\Tls\Messages\Alert.cs" />

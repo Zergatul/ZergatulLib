@@ -10,12 +10,17 @@ namespace Zergatul.Network.Tls
 {
     internal abstract class AbstractTlsKeyExchange
     {
-        public ISecureRandom Random;
+        public ISecureRandom Random { get; private set; }
         public byte[] PreMasterSecret;
         public SecurityParameters SecurityParameters;
         public TlsStreamSettings Settings;
 
         public abstract bool ServerKeyExchangeRequired { get; }
+
+        public virtual void SetRandom(ISecureRandom random)
+        {
+            this.Random = random;
+        }
 
         public abstract ServerKeyExchange GenerateServerKeyExchange();
         public abstract ServerKeyExchange ReadServerKeyExchange(BinaryReader reader);

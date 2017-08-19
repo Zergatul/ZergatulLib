@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Math.EllipticCurves;
+using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class ECDSAParameters
+    public class DSASignature
     {
-        public ISecureRandom Random;
-        public IEllipticCurve Curve;
+        public BigInteger r;
+        public BigInteger s;
     }
 }

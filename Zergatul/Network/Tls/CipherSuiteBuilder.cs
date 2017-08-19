@@ -57,7 +57,7 @@ namespace Zergatul.Network.Tls
 
             this.KeyExchange.SecurityParameters = securityParameters;
             this.KeyExchange.Settings = settings;
-            this.KeyExchange.Random = random;
+            this.KeyExchange.SetRandom(random);
 
             this.SymmetricCipher.SecurityParameters = securityParameters;
             this.SymmetricCipher.Random = random;
