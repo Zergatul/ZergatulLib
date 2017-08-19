@@ -75,6 +75,9 @@
               <oid value="15" id="sha512-224WithRSAEncryption" class="SHA512_224WithRSA" desc="Secure Hash Algorithm SHA-512/224 with Rivest, Shamir and Adleman (RSA) encryption" />
               <oid value="16" id="sha512-256WithRSAEncryption" class="SHA512_256WithRSA" desc="SHA-512/256 hash algorithm with Rivest, Shamir and Adleman (RSA) encryption" />
             </oid>
+            <oid value="3" id="pkcs-3" class="PKCS3" desc="Public-Key Cryptography Standards (PKCS) #3: Diffie-Hellman Key-Agreement Standard">
+              <oid value="1" id="dhKeyAgreement" class="DHKeyAgreement" desc="Diffie-Hellman (DH) key agreement" />
+            </oid>
             <oid value="7" id="pkcs-7" class="PKCS7" desc="Public-Key Cryptography Standards (PKCS) #7">
               <oid value="1" id="data" class="Data" desc="PKCS#7 ASN.1 Data type" />
               <oid value="2" id="signedData" class="SignedData" desc="PKCS#7 ASN.1 SignedData type" />

@@ -19,23 +19,17 @@ namespace Zergatul.Network.Tls
         public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)
         {
             var rsa = (RSA)algo;
-
-            var scheme = new EMSAPKCS1v15Scheme();
-            scheme.KeySize = rsa.KeySize;
-            scheme.HashAlgorithmOID = hash.OID;
-
-            return rsa.Signature.SignHash(hash, scheme);
+            var scheme = rsa.Signature.GetScheme("EMSA-PKCS1-v1.5");
+            scheme.SetParameter(hash.OID);
+            return scheme.Sign(hash.ComputeHash());
         }
 
         public override bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature)
         {
             var rsa = (RSA)algo;
-
-            var scheme = new EMSAPKCS1v15Scheme();
-            scheme.KeySize = rsa.KeySize;
-            scheme.HashAlgorithmOID = hash.OID;
-
-            return rsa.Signature.VerifyHash(hash, signature, scheme);
+            var scheme = rsa.Signature.GetScheme("EMSA-PKCS1-v1.5");
+            scheme.SetParameter(hash.OID);
+            return scheme.Verify(signature, hash.ComputeHash());
         }
     }
 }

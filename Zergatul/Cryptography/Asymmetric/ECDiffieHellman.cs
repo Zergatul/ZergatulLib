@@ -4,7 +4,7 @@ using Zergatul.Math.EllipticCurves;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class ECDiffieHellman : AbstractAsymmetricAlgorithm<IEllipticCurve, ECPointGeneric, ECPrivateKey, ECPointGeneric, NullParam>
+    public class ECDiffieHellman : AbstractAsymmetricAlgorithm<IEllipticCurve, ECPointGeneric, ECPrivateKey, ECPointGeneric, NullParam, NullParam>
     {
         public override ECPrivateKey PrivateKey { get; set; }
         public override ECPointGeneric PublicKey { get; set; }
@@ -14,14 +14,14 @@ namespace Zergatul.Cryptography.Asymmetric
 
         private ECDHKeyExchange _keyExchange;
 
-        public override void GenerateKeys(ISecureRandom random)
+        public override void GenerateKeys()
         {
             if (Parameters is Math.EllipticCurves.PrimeField.EllipticCurve)
             {
                 var curve = (Math.EllipticCurves.PrimeField.EllipticCurve)Parameters;
                 PrivateKey = new ECPrivateKey
                 {
-                    BigInteger = BigInteger.Random(curve.p, random)
+                    BigInteger = BigInteger.Random(curve.p, Random)
                 };
                 PublicKey = new ECPointGeneric
                 {
@@ -34,7 +34,7 @@ namespace Zergatul.Cryptography.Asymmetric
                 var curve = (Math.EllipticCurves.BinaryField.EllipticCurve)Parameters;
                 PrivateKey = new ECPrivateKey
                 {
-                    BinaryPolynomial = BinaryPolynomial.Random(curve.m - 1, random)
+                    BinaryPolynomial = BinaryPolynomial.Random(curve.m - 1, Random)
                 };
                 PublicKey = new ECPointGeneric
                 {
@@ -46,7 +46,7 @@ namespace Zergatul.Cryptography.Asymmetric
             throw new InvalidOperationException();
         }
 
-        public override AbstractSignatureAlgorithm<NullParam> Signature
+        public override AbstractSignatureAlgorithm<NullParam, NullParam> Signature
         {
             get
             {

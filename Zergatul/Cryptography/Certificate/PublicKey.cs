@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Asymmetric;
+using Zergatul.Math;
 using Zergatul.Math.EllipticCurves;
 using Zergatul.Network;
 using Zergatul.Network.ASN1;
@@ -75,6 +76,30 @@ namespace Zergatul.Cryptography.Certificate
                 }
                 else
                     throw new NotImplementedException();
+            }
+            else if (Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS3.DHKeyAgreement)
+            {
+                var element = ASN1Element.ReadFrom(Key);
+                var integer = element as Integer;
+                if (integer == null)
+                    throw new InvalidOperationException();
+
+                var dh = new DiffieHellman();
+                dh.PublicKey = integer.Value;
+
+                var seq = Parameters as Sequence;
+                if (seq == null)
+                    throw new InvalidOperationException();
+                if (seq.Elements.Count != 2)
+                    throw new InvalidOperationException();
+                if (seq.Elements.Any(e => !(e is Integer)))
+                    throw new InvalidOperationException();
+
+                BigInteger g = ((Integer)seq.Elements[1]).Value;
+                BigInteger p = ((Integer)seq.Elements[0]).Value;
+                dh.Parameters = new DiffieHellmanParameters(g, p);
+
+                return dh;
             }
 
             throw new NotImplementedException();

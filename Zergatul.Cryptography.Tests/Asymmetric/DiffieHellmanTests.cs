@@ -17,12 +17,14 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             var random2 = new TestRandom(new byte[] { 0x02, 0xF3 }); // 755
 
             var dh1 = new DiffieHellman();
+            dh1.Random = random1;
             dh1.Parameters = new DiffieHellmanParameters(new BigInteger(2), new BigInteger(997));
-            dh1.GenerateKeys(random1);
+            dh1.GenerateKeys();
 
             var dh2 = new DiffieHellman();
+            dh2.Random = random2;
             dh2.Parameters = new DiffieHellmanParameters(new BigInteger(2), new BigInteger(997));
-            dh2.GenerateKeys(random2);
+            dh2.GenerateKeys();
 
             // 2 ^ 892 mod 997
             Assert.IsTrue(dh1.PublicKey == 9);
@@ -45,12 +47,14 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             var random = new DefaultSecureRandom();
 
             var dh1 = new DiffieHellman();
+            dh1.Random = random;
             dh1.Parameters = DiffieHellmanParameters.Group14;
-            dh1.GenerateKeys(random);
+            dh1.GenerateKeys();
 
             var dh2 = new DiffieHellman();
+            dh2.Random = random;
             dh2.Parameters = DiffieHellmanParameters.Group14;
-            dh2.GenerateKeys(random);
+            dh2.GenerateKeys();
 
             dh1.KeyExchange.CalculateSharedSecret(dh2.PublicKey);
             dh2.KeyExchange.CalculateSharedSecret(dh1.PublicKey);

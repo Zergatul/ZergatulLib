@@ -32,8 +32,9 @@ namespace Zergatul.Network.Tls
             var namedCurve = NamedCurve.secp256r1;
 
             _ecdh = new ECDiffieHellman();
+            _ecdh.Random = Random;
             _ecdh.Parameters = ResolveCurve(namedCurve);
-            _ecdh.GenerateKeys(Random);
+            _ecdh.GenerateKeys();
 
             message.ECParams = new ServerECDHParams
             {
@@ -87,8 +88,9 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Invalid signature");
 
             _ecdh = new ECDiffieHellman();
+            _ecdh.Random = Random;
             _ecdh.Parameters = ResolveCurve(message.ECParams.CurveParams.NamedCurve);
-            _ecdh.GenerateKeys(Random);
+            _ecdh.GenerateKeys();
             _ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECParams.Point, _ecdh.Parameters));
 
             return message;

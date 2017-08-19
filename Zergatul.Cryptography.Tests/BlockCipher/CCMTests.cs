@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Cryptography.BlockCipher;
 using Zergatul.Cryptography.BlockCipher.CipherMode;
+using System.Linq;
 
 namespace Zergatul.Cryptography.Tests.BlockCipher
 {
@@ -110,6 +111,70 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
                 hex_cipher: "82 53 1A 60  CC 24 94 5A  4B 82 79 18  1A B5 C8 4D  F2 1C E7 F9  B7 3F 42 E1  97 EA 9C 07  E5 6B 5E B1  7E 5F 4E");
         }
 
+        [TestMethod]
+        public void Vector10()
+        {
+            TestEncryptDecrypt(
+                tagLen: 4,
+                hex_key: "40414243 44454647 48494a4b 4c4d4e4f",
+                hex_plain: "20212223",
+                hex_a: "00010203 04050607",
+                hex_iv: "10111213 141516",
+                hex_cipher: "7162015b 4dac255d");
+        }
+
+        [TestMethod]
+        public void Vector11()
+        {
+            TestEncryptDecrypt(
+                tagLen: 6,
+                hex_key: "40414243 44454647 48494a4b 4c4d4e4f",
+                hex_plain: "20212223 24252627 28292a2b 2c2d2e2f",
+                hex_a: "00010203 04050607 08090a0b 0c0d0e0f",
+                hex_iv: "10111213 14151617",
+                hex_cipher: "d2a1f0e0 51ea5f62 081a7792 073d593d 1fc64fbf accd");
+        }
+
+        [TestMethod]
+        public void Vector12()
+        {
+            TestEncryptDecrypt(
+                tagLen: 8,
+                hex_key: "40414243 44454647 48494a4b 4c4d4e4f",
+                hex_plain: "20212223 24252627 28292a2b 2c2d2e2f 30313233 34353637",
+                hex_a: "00010203 04050607 08090a0b 0c0d0e0f 10111213",
+                hex_iv: "10111213 14151617 18191a1b",
+                hex_cipher: "e3b201a9 f5b71a7a 9b1ceaec cd97e70b 6176aad9 a4428aa5 484392fb c1b09951");
+        }
+
+        [TestMethod]
+        public void Vector13()
+        {
+            TestEncryptDecrypt(
+                tagLen: 14,
+                hex_key: "40414243 44454647 48494a4b 4c4d4e4f",
+                hex_plain: "20212223 24252627 28292a2b 2c2d2e2f 30313233 34353637 38393a3b 3c3d3e3f",
+                hex_a: string.Concat(Enumerable.Repeat(
+                    "00010203 04050607 08090a0b 0c0d0e0f" +
+                    "10111213 14151617 18191a1b 1c1d1e1f" +
+                    "20212223 24252627 28292a2b 2c2d2e2f" +
+                    "30313233 34353637 38393a3b 3c3d3e3f" +
+                    "40414243 44454647 48494a4b 4c4d4e4f" +
+                    "50515253 54555657 58595a5b 5c5d5e5f" +
+                    "60616263 64656667 68696a6b 6c6d6e6f" +
+                    "70717273 74757677 78797a7b 7c7d7e7f" +
+                    "80818283 84858687 88898a8b 8c8d8e8f" +
+                    "90919293 94959697 98999a9b 9c9d9e9f" +
+                    "a0a1a2a3 a4a5a6a7 a8a9aaab acadaeaf" +
+                    "b0b1b2b3 b4b5b6b7 b8b9babb bcbdbebf" +
+                    "c0c1c2c3 c4c5c6c7 c8c9cacb cccdcecf" +
+                    "d0d1d2d3 d4d5d6d7 d8d9dadb dcdddedf" +
+                    "e0e1e2e3 e4e5e6e7 e8e9eaeb ecedeeef" +
+                    "f0f1f2f3 f4f5f6f7 f8f9fafb fcfdfeff", 256)),
+                hex_iv: "10111213 14151617 18191a1b 1c",
+                hex_cipher: "69915dad 1e84c637 6a68c296 7e4dab61 5ae0fd1f aec44cc4 84828529 463ccf72 b4ac6bec 93e8598e 7f0dadbc ea5b");
+        }
+
         private static void TestEncryptDecrypt(string hex_key, string hex_plain, string hex_iv, string hex_a, string hex_cipher, int tagLen = 8)
         {
             hex_key = hex_key.Replace(" ", "");
@@ -133,11 +198,11 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
                     throw new InvalidOperationException();
             }
 
-            var gcm = new CCM();
-            gcm.TagLength = tagLen;
-            gcm.OctetLength = 2;
-            var enc = gcm.CreateEncryptor(aes, key);
-            var dec = gcm.CreateDecryptor(aes, key);
+            var ccm = new CCM();
+            ccm.TagLength = tagLen;
+            ccm.OctetLength = 15 - iv.Length;
+            var enc = ccm.CreateEncryptor(aes, key);
+            var dec = ccm.CreateDecryptor(aes, key);
 
             var data = enc.Encrypt(iv, plain, a);
 

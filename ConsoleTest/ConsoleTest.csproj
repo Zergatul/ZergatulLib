@@ -65,6 +65,9 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="dh-2048.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="dsa-1024.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -23,24 +23,40 @@ namespace Zergatul.Tls.Tests
             CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
         };
 
+        private bool FilterUnsupportedByBC(CipherSuite cs)
+        {
+            if (cs.ToString().Contains("ARIA"))
+                return false;
+            return !NotSupportedByBC.Contains(cs);
+        }
+
         [TestMethod]
         public void TestAll()
         {
-            TestCipherSuites(TlsStream.SupportedCipherSuites.Except(NotSupportedByBC).ToList());
+            TestCipherSuites(TlsStream.SupportedCipherSuites.Where(FilterUnsupportedByBC).ToList());
         }
 
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA);
+            TestServer(CipherSuite.TLS_RSA_WITH_AES_256_CCM_8);
         }
 
         [TestMethod]
         public void Test_ECDSA()
         {
             TestCipherSuites(TlsStream.SupportedCipherSuites
-                .Except(NotSupportedByBC)
+                .Where(FilterUnsupportedByBC)
                 .Where(cs => cs.ToString().Contains("ECDSA"))
+                .ToList());
+        }
+
+        [TestMethod]
+        public void Test_RSA_KeyExchange()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Where(FilterUnsupportedByBC)
+                .Where(cs => cs.ToString().StartsWith("TLS_RSA_"))
                 .ToList());
         }
 
@@ -48,8 +64,8 @@ namespace Zergatul.Tls.Tests
         public void Test_RSA_CBC()
         {
             TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Where(FilterUnsupportedByBC)
                 .Where(cs => cs.ToString().Contains("RSA"))
-                .Where(cs => !cs.ToString().Contains("ARIA"))
                 .Where(cs => cs.ToString().Contains("CBC"))
                 .ToList());
         }
@@ -58,8 +74,17 @@ namespace Zergatul.Tls.Tests
         public void Test_GCM()
         {
             TestCipherSuites(TlsStream.SupportedCipherSuites
-                .Except(NotSupportedByBC)
+                .Where(FilterUnsupportedByBC)
                 .Where(cs => cs.ToString().Contains("GCM"))
+                .ToList());
+        }
+
+        [TestMethod]
+        public void Test_CCM()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Where(FilterUnsupportedByBC)
+                .Where(cs => cs.ToString().Contains("CCM"))
                 .ToList());
         }
 
@@ -67,7 +92,7 @@ namespace Zergatul.Tls.Tests
         public void Test_CHACHA20()
         {
             TestCipherSuites(TlsStream.SupportedCipherSuites
-                .Except(NotSupportedByBC)
+                .Where(FilterUnsupportedByBC)
                 .Where(cs => cs.ToString().Contains("CHACHA20"))
                 .ToList());
         }
@@ -76,7 +101,7 @@ namespace Zergatul.Tls.Tests
         public void Test_Camellia()
         {
             TestCipherSuites(TlsStream.SupportedCipherSuites
-                .Except(NotSupportedByBC)
+                .Where(FilterUnsupportedByBC)
                 .Where(cs => cs.ToString().Contains("CAMELLIA"))
                 .ToList());
         }
@@ -85,15 +110,15 @@ namespace Zergatul.Tls.Tests
         public void Test_RSA_CCM()
         {
             TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Where(FilterUnsupportedByBC)
                 .Where(cs => cs.ToString().Contains("RSA"))
-                .Where(cs => !cs.ToString().Contains("ARIA"))
                 .Where(cs => cs.ToString().Contains("CCM"))
                 .ToList());
         }
 
         private static void TestCipherSuites(IReadOnlyList<CipherSuite> ciphers)
         {
-            ThreadPool.SetMaxThreads(4, 4);
+            ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
             using (var evt = new CountdownEvent(ciphers.Count))
             {
@@ -164,8 +189,8 @@ namespace Zergatul.Tls.Tests
                         };
 
                         var cert = ECcert ?
-                            new X509Certificate("ecdsa-secp256r1.pfx", @"l(*qqqJ;q30[]e") :
-                            new X509Certificate("rsa-cert.pfx", "hh87$-Jqo");
+                            new X509Certificate(Settings.ECDSAp256r1CertName, Settings.ECDSAp256r1CertPwd) :
+                            new X509Certificate(Settings.RSA4096CertName, Settings.RSA4096CertPwd);
                         tlsStream.AuthenticateAsServer("localhost", cert);
                         tlsStream.Write(Encoding.ASCII.GetBytes(msg));
 

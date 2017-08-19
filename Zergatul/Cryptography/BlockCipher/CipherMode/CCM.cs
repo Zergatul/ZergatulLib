@@ -73,9 +73,35 @@ namespace Zergatul.Cryptography.BlockCipher.CipherMode
             // The blocks encoding a are formed by concatenating this string that
             // encodes l(a) with a itself, and splitting the result into 16 - octet
             // blocks, and then padding the last block with zeroes if necessary.
-            byte[] aLenBytes = BitHelper.GetBytes(A.LongLength, ByteOrder.BigEndian);
-            Array.Copy(aLenBytes, 8 - L, B, 0, L);
-            Array.Copy(A, 0, B, L, A.Length);
+            if (A.Length > 0)
+            {
+                int index;
+                if (A.LongLength < 0xFF00)
+                {
+                    /*
+                        If 0 < l(a) < (2^16 - 2^8), then the length field is encoded as two
+                        octets which contain the value l(a) in most-significant-byte first
+                        order.
+                     */
+                    BitHelper.GetBytes((ushort)A.Length, ByteOrder.BigEndian, B, 0);
+                    index = 2;
+                }
+                else if (A.LongLength < uint.MaxValue)
+                {
+                    /*
+                        If (2^16 - 2^8) <= l(a) < 2^32, then the length field is encoded as
+                        six octets consisting of the octets 0xff, 0xfe, and four octets
+                        encoding l(a) in most-significant-byte-first order.
+                    */
+                    B[0] = 0xFF;
+                    B[1] = 0xFE;
+                    BitHelper.GetBytes((uint)A.LongLength, ByteOrder.BigEndian, B, 2);
+                    index = 6;
+                }
+                else
+                    throw new NotImplementedException();
+                Array.Copy(A, 0, B, index, A.Length);
+            }
             Array.Copy(P, 0, B, aceil, P.Length);
 
             byte[] xored = new byte[16];

@@ -70,6 +70,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\ConsoleTest\dh-2048.pfx">
+      <Link>dh-2048.pfx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\ConsoleTest\ecdsa-secp256r1.pfx">
       <Link>ecdsa-secp256r1.pfx</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

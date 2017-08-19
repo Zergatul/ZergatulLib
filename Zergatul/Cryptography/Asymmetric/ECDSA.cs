@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
 using Zergatul.Math.EllipticCurves;
+using Zergatul.Network.ASN1;
+using Zergatul.Network.ASN1.Structures;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
@@ -19,14 +21,14 @@ namespace Zergatul.Cryptography.Asymmetric
 
         private ECDSASignatureImpl _signature;
 
-        public override void GenerateKeys(ISecureRandom random)
+        public override void GenerateKeys()
         {
             if (Parameters.Curve is Math.EllipticCurves.PrimeField.EllipticCurve)
             {
                 var curve = (Math.EllipticCurves.PrimeField.EllipticCurve)Parameters.Curve;
                 PrivateKey = new ECPrivateKey
                 {
-                    BigInteger = BigInteger.Random(BigInteger.One, curve.n, random)
+                    BigInteger = BigInteger.Random(BigInteger.One, curve.n, Random)
                 };
                 PublicKey = new ECPointGeneric
                 {
@@ -108,7 +110,7 @@ namespace Zergatul.Cryptography.Asymmetric
                 throw new InvalidOperationException();
             }
 
-            public override BigInteger Verify(ECDSASignature signature)
+            public override bool Verify(ECDSASignature signature, BigInteger data)
             {
                 if (_ecdsa.PublicKey.PFECPoint != null)
                 {
@@ -116,7 +118,7 @@ namespace Zergatul.Cryptography.Asymmetric
                     var r = signature.r;
                     var s = signature.s;
                     var q = curve.n;
-                    var h = new BigInteger(hash.Take((curve.BitSize + 7) / 8).ToArray(), ByteOrder.BigEndian);
+                    var h = data;
 
                     var u1 = BigInteger.ModularInverse(s, q) * h % q;
                     var u2 = BigInteger.ModularInverse(s, q) * r % q;
@@ -134,63 +136,46 @@ namespace Zergatul.Cryptography.Asymmetric
                 throw new InvalidOperationException();
             }
 
-            //public override ECDSASignature SignHash(byte[] hash)
-            //{
-            //    if (_ecdsa.PublicKey.PFECPoint != null)
-            //    {
-            //        var curve = _ecdsa.Parameters.Curve as Math.EllipticCurves.PrimeField.EllipticCurve;
-            //        var q = curve.n;
-            //        var h = new BigInteger(hash, ByteOrder.BigEndian);
 
-            //        CalculateK:
-            //        // k from [1..q - 1]
-            //        var k = BigInteger.Random(BigInteger.One, q, _ecdsa.Parameters.Random);
+            public override SignatureScheme GetScheme(string name)
+            {
+                switch (name)
+                {
+                    case "Default":
+                        return new ECDSADefaultScheme(this);
+                    default:
+                        throw new InvalidOperationException("Unknown scheme");
+                }
+            }
+        }
 
-            //        var point = k * curve.g;
-            //        var r = point.x % q;
-            //        if (r.IsZero)
-            //            goto CalculateK;
+        private class ECDSADefaultScheme : SignatureScheme
+        {
+            private ECDSASignatureImpl _ecdsa;
 
-            //        var kInv = BigInteger.ModularInverse(k, q);
-            //        var s = kInv * (h + _ecdsa.PrivateKey.BigInteger * r) % q;
-            //        if (s.IsZero)
-            //            goto CalculateK;
+            public ECDSADefaultScheme(ECDSASignatureImpl ecdsa)
+            {
+                this._ecdsa = ecdsa;
+            }
 
-            //        return new ECDSASignature { r = r, s = s };
-            //    }
-            //    if (_ecdsa.PublicKey.BFECPoint != null)
-            //    {
+            public override void SetParameter(object parameter)
+            {
+                
+            }
 
-            //    }
+            public override byte[] Sign(byte[] data)
+            {
+                var value = new BigInteger(data, ByteOrder.BigEndian);
+                var signature = _ecdsa.Sign(value);
+                return new ECDSASignatureValue(signature.r, signature.s).ToBytes();
+            }
 
-            //    throw new InvalidOperationException();
-            //}
-
-            //public override bool VerifyHash(byte[] hash, ECDSASignature signature)
-            //{
-            //    if (_ecdsa.PublicKey.PFECPoint != null)
-            //    {
-            //        var curve = _ecdsa.Parameters.Curve as Math.EllipticCurves.PrimeField.EllipticCurve;
-            //        var r = signature.r;
-            //        var s = signature.s;
-            //        var q = curve.n;
-            //        var h = new BigInteger(hash.Take((curve.BitSize + 7) / 8).ToArray(), ByteOrder.BigEndian);
-
-            //        var u1 = BigInteger.ModularInverse(s, q) * h % q;
-            //        var u2 = BigInteger.ModularInverse(s, q) * r % q;
-
-            //        var point = u1 * curve.g + u2 * _ecdsa.PublicKey.PFECPoint;
-            //        var v = point.x % q;
-
-            //        return v == r;
-            //    }
-            //    if (_ecdsa.PublicKey.BFECPoint != null)
-            //    {
-
-            //    }
-
-            //    throw new InvalidOperationException();
-            //}
+            public override bool Verify(byte[] signature, byte[] data)
+            {
+                var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+                var value = new BigInteger(data, ByteOrder.BigEndian);
+                return _ecdsa.Verify(new ECDSASignature { r = ed.r, s = ed.s }, value);
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Zergatul.Network.Tls
 
         public override ServerKeyExchange GenerateServerKeyExchange()
         {
-            return null;
+            throw new InvalidOperationException();
         }
 
         public override ServerKeyExchange ReadServerKeyExchange(BinaryReader reader)
@@ -45,11 +45,16 @@ namespace Zergatul.Network.Tls
                 } PreMasterSecret;
             */
             PreMasterSecret = new byte[48];
-            // TODO: why constant here???
             BitHelper.GetBytes((ushort)ProtocolVersion.Tls12, ByteOrder.BigEndian, PreMasterSecret, 0);
             Random.GetBytes(PreMasterSecret, 2, 46);
 
-            throw new NotImplementedException();
+            var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
+            var rsa = algo as RSA;
+            if (rsa == null)
+                new TlsStreamException("For RSA key exchange certificate must also use RSA");
+
+            rsa.Random = Random;
+            message.EncryptedPreMasterSecret = rsa.Encryption.GetScheme("RSAES-PKCS1-v1.5").Encrypt(PreMasterSecret);
 
             return message;
         }
@@ -64,14 +69,18 @@ namespace Zergatul.Network.Tls
             if (rsa == null)
                 throw new TlsStreamException("For RSA key exchange certificate must also use RSA");
 
-            byte[] data = rsa.Encryption.Decrypt(message.EncryptedPreMasterSecret);
+            PreMasterSecret = rsa.Encryption.GetScheme("RSAES-PKCS1-v1.5").Decrypt(message.EncryptedPreMasterSecret);
+            var version = (ProtocolVersion)BitHelper.ToUInt16(PreMasterSecret, 0, ByteOrder.BigEndian);
+            if (version != ProtocolVersion.Tls12)
+                throw new TlsStreamException("Invalid PreMasterSecret");
 
             return message;
         }
 
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteShort((ushort)message.EncryptedPreMasterSecret.Length);
+            writer.WriteBytes(message.EncryptedPreMasterSecret);
         }
 
         #endregion

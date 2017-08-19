@@ -70,6 +70,12 @@ namespace Zergatul.Cryptography.Certificate
 
                 return ecdsa;
             }
+            else if (_keyInfo.DH != null)
+            {
+                var dh = (DiffieHellman)_cert.PublicKey.ResolveAlgorithm();
+                dh.PrivateKey = _keyInfo.DH;
+                return dh;
+            }
             else
                 throw new NotImplementedException();
         }

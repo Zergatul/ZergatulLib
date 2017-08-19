@@ -30,12 +30,14 @@ namespace Zergatul.Network.Tls
             var message = new ServerKeyExchange();
 
             _dh = new DiffieHellman();
+            _dh.Random = Random;
+
             if (Settings.DHParameters != null)
                 _dh.Parameters = Settings.DHParameters;
             else
                 _dh.Parameters = TlsStreamSettings.Default.DHParameters;
 
-            _dh.GenerateKeys(Random);
+            _dh.GenerateKeys();
 
             message.Params = new ServerDHParams
             {
@@ -86,8 +88,9 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Invalid signature");
 
             _dh = new DiffieHellman();
+            _dh.Random = Random;
             _dh.Parameters = new DiffieHellmanParameters(new BigInteger(message.Params.DH_g, ByteOrder.BigEndian), new BigInteger(message.Params.DH_p, ByteOrder.BigEndian));
-            _dh.GenerateKeys(Random);
+            _dh.GenerateKeys();
             _dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.Params.DH_Ys, ByteOrder.BigEndian));
 
             return message;

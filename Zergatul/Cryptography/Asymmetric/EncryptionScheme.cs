@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public abstract class AbstractAsymmetricEncryption
+    public abstract class EncryptionScheme
     {
         public abstract byte[] Encrypt(byte[] data);
         public abstract byte[] Decrypt(byte[] data);
-
-
-        public abstract EncryptionScheme GetScheme(string name);
     }
 }

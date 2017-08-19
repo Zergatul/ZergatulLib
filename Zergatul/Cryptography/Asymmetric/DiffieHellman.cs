@@ -7,7 +7,7 @@ using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class DiffieHellman : AbstractAsymmetricAlgorithm<DiffieHellmanParameters, BigInteger, BigInteger, BigInteger, NullParam>
+    public class DiffieHellman : AbstractAsymmetricAlgorithm<DiffieHellmanParameters, BigInteger, BigInteger, BigInteger, NullParam, NullParam>
     {
         public override BigInteger PrivateKey { get; set; }
         public override BigInteger PublicKey { get; set; }
@@ -17,13 +17,13 @@ namespace Zergatul.Cryptography.Asymmetric
 
         private DHKeyExchange _keyExchange;
 
-        public override void GenerateKeys(ISecureRandom random)
+        public override void GenerateKeys()
         {
-            PrivateKey = BigInteger.Random(Parameters.p, random);
+            PrivateKey = BigInteger.Random(Parameters.p, Random);
             PublicKey = BigInteger.ModularExponentiation(Parameters.g, PrivateKey, Parameters.p);
         }
 
-        public override AbstractSignatureAlgorithm<NullParam> Signature
+        public override AbstractSignatureAlgorithm<NullParam, NullParam> Signature
         {
             get
             {

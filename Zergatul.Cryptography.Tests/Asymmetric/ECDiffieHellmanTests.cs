@@ -82,12 +82,14 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             var random = new DefaultSecureRandom();
 
             var ecdh1 = new ECDiffieHellman();
+            ecdh1.Random = random;
             ecdh1.Parameters = curve;
-            ecdh1.GenerateKeys(random);
+            ecdh1.GenerateKeys();
 
             var ecdh2 = new ECDiffieHellman();
+            ecdh2.Random = random;
             ecdh2.Parameters = curve;
-            ecdh2.GenerateKeys(random);
+            ecdh2.GenerateKeys();
 
             ecdh1.KeyExchange.CalculateSharedSecret(ecdh2.PublicKey);
             ecdh2.KeyExchange.CalculateSharedSecret(ecdh1.PublicKey);

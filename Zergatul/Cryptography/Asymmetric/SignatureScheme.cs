@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public abstract class SignatureScheme<InputClass, SignatureClass>
+    public abstract class SignatureScheme
     {
-        public abstract InputClass EncodeData(byte[] data);
-        public abstract byte[] DecodeData(InputClass data);
-        public abstract byte[] SignatureToBytes(SignatureClass signature);
-        public abstract SignatureClass BytesToSignature(byte[] signature);
+        public abstract void SetParameter(object parameter);
+        public abstract byte[] Sign(byte[] data);
+        public abstract bool Verify(byte[] signature, byte[] data);
     }
 }

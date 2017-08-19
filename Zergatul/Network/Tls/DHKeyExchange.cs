@@ -1,0 +1,85 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Zergatul.Cryptography.Asymmetric;
+using Zergatul.Math;
+using Zergatul.Network.Tls.Messages;
+
+namespace Zergatul.Network.Tls
+{
+    internal class DHKeyExchange : AbstractTlsKeyExchange
+    {
+        public override bool ServerKeyExchangeRequired => false;
+
+        #region ServerKeyExchange
+
+        public override ServerKeyExchange GenerateServerKeyExchange()
+        {
+            throw new InvalidOperationException();
+        }
+
+        public override ServerKeyExchange ReadServerKeyExchange(BinaryReader reader)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
+        {
+            throw new InvalidOperationException();
+        }
+
+        #endregion
+
+        #region ClientKeyExchange
+
+        public override ClientKeyExchange GenerateClientKeyExchange()
+        {
+            var message = new ClientKeyExchange();
+
+            var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
+            var dhServer = algo as DiffieHellman;
+            if (dhServer == null)
+                new TlsStreamException("For DH key exchange certificate must also use DH");
+
+            var dhClient = new DiffieHellman();
+            dhClient.Random = Random;
+            dhClient.Parameters = dhServer.Parameters;
+            dhClient.GenerateKeys();
+
+            message.DH_Yc = dhClient.PublicKey.ToBytes(ByteOrder.BigEndian);
+
+            dhClient.KeyExchange.CalculateSharedSecret(dhServer.PublicKey);
+
+            PreMasterSecret = dhClient.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+
+            return message;
+        }
+
+        public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
+        {
+            var message = new ClientKeyExchange();
+            message.DH_Yc = reader.ReadBytes(reader.ReadShort());
+
+            var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
+            var dh = algo as DiffieHellman;
+            if (dh == null)
+                new TlsStreamException("For DH key exchange certificate must also use DH");
+
+            dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.DH_Yc, ByteOrder.BigEndian));
+
+            PreMasterSecret = dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+
+            return message;
+        }
+
+        public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
+        {
+            writer.WriteShort((ushort)message.DH_Yc.Length);
+            writer.WriteBytes(message.DH_Yc);
+        }
+
+        #endregion
+    }
+}

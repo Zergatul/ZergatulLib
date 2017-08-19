@@ -58,7 +58,7 @@
     <Compile Include="Cryptography\Asymmetric\ECDSASignature.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
-    <Compile Include="Cryptography\Asymmetric\EMSAPKCS1v15Scheme.cs" />
+    <Compile Include="Cryptography\Asymmetric\EncryptionScheme.cs" />
     <Compile Include="Cryptography\Asymmetric\NullParam.cs" />
     <Compile Include="Cryptography\Asymmetric\RSA.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAParameters.cs" />
@@ -238,8 +238,10 @@
     <Compile Include="Network\Tls\AbstractTlsSignature.cs" />
     <Compile Include="Network\Tls\AbstractTlsSymmetricCipher.cs" />
     <Compile Include="Network\Tls\AEADCipher.cs" />
+    <Compile Include="Network\Tls\CCMCipher.cs" />
     <Compile Include="Network\Tls\ChaCha20Poly1305Cipher.cs" />
     <Compile Include="Network\Tls\CipherSuiteResolver.cs" />
+    <Compile Include="Network\Tls\DHKeyExchange.cs" />
     <Compile Include="Network\Tls\GCMCipher.cs" />
     <Compile Include="Network\Tls\HMACCBCCipher.cs" />
     <Compile Include="Network\Tls\Messages\Alert.cs" />
@@ -248,10 +250,8 @@
     <Compile Include="Network\Tls\Messages\ApplicationData.cs" />
     <Compile Include="Network\Tls\BinaryReader.cs" />
     <Compile Include="Network\Tls\BinaryWriter.cs" />
-    <Compile Include="Network\Tls\CCMCipherSuite.cs" />
     <Compile Include="Network\Tls\Messages\Certificate.cs" />
     <Compile Include="Network\Tls\Messages\ChangeCipherSpec.cs" />
-    <Compile Include="Network\Tls\AbstractCipherSuite.cs" />
     <Compile Include="Network\Tls\AbstractTlsKeyExchange.cs" />
     <Compile Include="Network\Tls\CipherSuiteBuilder.cs" />
     <Compile Include="Network\Tls\ECDSASignature.cs" />
