@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Hash
     public class MD5 : AbstractHash
     {
         public override int BlockSize => 64;
-        public override int HashSize => 20;
+        public override int HashSize => 16;
         public override OID OID => OID.ISO.MemberBody.US.RSADSI.DigestAlgorithm.MD5;
 
         private static int[] s = new int[]

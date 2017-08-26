@@ -14,7 +14,29 @@ namespace Zergatul.Network.Tls
     // https://tools.ietf.org/html/rfc4492
     internal class ECDHEKeyExchange : AbstractTlsKeyExchange
     {
-        public override bool ServerKeyExchangeRequired => true;
+        public override MessageInfo ServerCertificateMessage => MessageInfo.Required;
+        public override MessageInfo ServerKeyExchangeMessage => MessageInfo.Required;
+        public override MessageInfo CertificateRequestMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public override MessageInfo ClientCertificateMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public override MessageInfo CertificateverifyMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         private ECDiffieHellman _ecdh;
         private AbstractTlsSignature _signature;

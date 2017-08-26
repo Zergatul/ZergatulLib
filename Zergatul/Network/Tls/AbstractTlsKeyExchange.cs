@@ -15,11 +15,24 @@ namespace Zergatul.Network.Tls
         public SecurityParameters SecurityParameters;
         public TlsStreamSettings Settings;
 
-        public abstract bool ServerKeyExchangeRequired { get; }
+        public abstract MessageInfo ServerCertificateMessage { get; }
+        public abstract MessageInfo ServerKeyExchangeMessage { get; }
+        public abstract MessageInfo CertificateRequestMessage { get; }
+        public abstract MessageInfo ClientCertificateMessage { get; }
+        public abstract MessageInfo CertificateverifyMessage { get; }
 
         public virtual void SetRandom(ISecureRandom random)
         {
             this.Random = random;
+        }
+
+        public virtual bool ShouldSendServerKeyExchange()
+        {
+            if (ServerKeyExchangeMessage == MessageInfo.Forbidden)
+                return false;
+            if (ServerKeyExchangeMessage == MessageInfo.Required)
+                return true;
+            throw new InvalidOperationException();
         }
 
         public abstract ServerKeyExchange GenerateServerKeyExchange();

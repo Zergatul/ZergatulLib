@@ -13,8 +13,10 @@ using Zergatul.Network.Tls.Messages;
 
 namespace Zergatul.Network.Tls
 {
+    // ***********************************
     // The Transport Layer Security (TLS) Protocol Version 1.2
     // https://tools.ietf.org/html/rfc5246
+    // ***********************************
 
     // Addition of SEED Cipher Suites to Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc4162
@@ -22,11 +24,17 @@ namespace Zergatul.Network.Tls
     // Pre-Shared Key Ciphersuites for Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc4279
 
+    // Elliptic Curve Cryptography (ECC) Cipher Suites for Transport Layer Security (TLS)
+    // https://tools.ietf.org/html/rfc4492
+
     // AES Galois Counter Mode (GCM) Cipher Suites for TLS
     // https://tools.ietf.org/html/rfc5288
 
     // TLS Elliptic Curve Cipher Suites with SHA-256/384 and AES Galois Counter Mode (GCM)
     // https://tools.ietf.org/html/rfc5289
+
+    // Pre-Shared Key Cipher Suites for TLS with SHA-256/384 and AES Galois Counter Mode
+    // https://tools.ietf.org/html/rfc5487
 
     // Camellia Cipher Suites for TLS
     // https://tools.ietf.org/html/rfc5932
@@ -54,6 +62,7 @@ namespace Zergatul.Network.Tls
     // * work as proxy stream for another tls stream implementation, for debugging purposes
     // * on finished - send tls alert!
     // * check for tls version!
+    // * refactor dhe_psk, and ecdhe_psk to use single code
     public partial class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }
@@ -121,12 +130,12 @@ namespace Zergatul.Network.Tls
             ReadRecordMessage(ConnectionState.ServerFinished);
         }
 
-        public void AuthenticateAsServer(string host, X509Certificate certificate)
+        public void AuthenticateAsServer(string host, X509Certificate certificate = null)
         {
             Role = Role.Server;
             State = ConnectionState.Start;
 
-            if (!certificate.HasPrivateKey)
+            if (certificate != null && !certificate.HasPrivateKey)
                 throw new TlsStreamException("Certificate with private key is required for server authentification");
 
             GenerateRandom();
@@ -135,8 +144,9 @@ namespace Zergatul.Network.Tls
 
             ClearMessageBuffer();
             WriteHandshakeMessageBuffered(GenerateServerHello());
-            WriteHandshakeMessageBuffered(GenerateCertificate(certificate));
-            if (SelectedCipher.KeyExchange.ServerKeyExchangeRequired)
+            if (ShouldSendServerCertificate())
+                WriteHandshakeMessageBuffered(GenerateCertificate(certificate));
+            if (ShouldSendServerKeyExchange())
                 WriteHandshakeMessageBuffered(GenerateServerKeyExchange(certificate));
             WriteHandshakeMessageBuffered(GenerateServerHelloDone());
             ReleaseMessageBuffer();
@@ -237,6 +247,8 @@ namespace Zergatul.Network.Tls
             if (Role == Role.Server)
                 SecurityParameters.ServerRandom = random.ToArray();
         }
+
+        #region Message generation methods
 
         private HandshakeMessage GenerateClientHello()
         {
@@ -362,12 +374,37 @@ namespace Zergatul.Network.Tls
             return new HandshakeMessage(this) { Body = SelectedCipher.GetFinished() };
         }
 
+        #endregion
+
         private void AnalyzeExtensions()
         {
             bool clientExtMasterSecret = _clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             bool serverExtMasterSecret = _serverExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             SecurityParameters.ExtendedMasterSecret = clientExtMasterSecret && serverExtMasterSecret;
         }
+
+        private bool CanBeSkipped(MessageInfo info)
+        {
+            return info == MessageInfo.Forbidden || info == MessageInfo.CanBeOmitted;
+        }
+
+        #region Message decider methods
+
+        private bool ShouldSendServerCertificate()
+        {
+            if (SelectedCipher.KeyExchange.ServerCertificateMessage == MessageInfo.Forbidden)
+                return false;
+            if (SelectedCipher.KeyExchange.ServerCertificateMessage == MessageInfo.Required)
+                return true;
+            throw new InvalidOperationException();
+        }
+
+        private bool ShouldSendServerKeyExchange()
+        {
+            return SelectedCipher.KeyExchange.ShouldSendServerKeyExchange();
+        }
+
+        #endregion
 
         #endregion
 
@@ -465,6 +502,9 @@ namespace Zergatul.Network.Tls
 
         private void OnServerKeyExchange(ServerKeyExchange message)
         {
+            if (State == ConnectionState.ServerHello && CanBeSkipped(SelectedCipher.KeyExchange.ServerCertificateMessage))
+                State = ConnectionState.ServerCertificate;
+
             if (State != ConnectionState.ServerCertificate)
                 throw new TlsStreamException("Unexpected ServerKeyExchange message");
 
@@ -473,16 +513,13 @@ namespace Zergatul.Network.Tls
 
         private void OnServerHelloDone(ServerHelloDone message)
         {
-            if (SelectedCipher.KeyExchange.ServerKeyExchangeRequired)
-            {
-                if (State != ConnectionState.ServerKeyExchange)
-                    throw new TlsStreamException("Unexpected ServerHelloDone message");
-            }
-            else
-            {
-                if (State != ConnectionState.ServerCertificate)
-                    throw new TlsStreamException("Unexpected ServerHelloDone message");
-            }
+            if (State == ConnectionState.ServerHello && CanBeSkipped(SelectedCipher.KeyExchange.ServerCertificateMessage))
+                State = ConnectionState.ServerCertificate;
+            if (State == ConnectionState.ServerCertificate && CanBeSkipped(SelectedCipher.KeyExchange.ServerKeyExchangeMessage))
+                State = ConnectionState.ServerKeyExchange;
+
+            if (State != ConnectionState.ServerKeyExchange)
+                throw new TlsStreamException("Unexpected ServerHelloDone message");
 
             State = ConnectionState.ServerHelloDone;
         }

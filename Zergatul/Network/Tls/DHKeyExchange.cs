@@ -11,7 +11,29 @@ namespace Zergatul.Network.Tls
 {
     internal class DHKeyExchange : AbstractTlsKeyExchange
     {
-        public override bool ServerKeyExchangeRequired => false;
+        public override MessageInfo ServerCertificateMessage => MessageInfo.Required;
+        public override MessageInfo ServerKeyExchangeMessage => MessageInfo.Forbidden;
+        public override MessageInfo CertificateRequestMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public override MessageInfo ClientCertificateMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public override MessageInfo CertificateverifyMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         #region ServerKeyExchange
 

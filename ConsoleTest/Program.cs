@@ -20,6 +20,7 @@ using Zergatul.Cryptography.Certificate;
 using Zergatul.Ftp;
 using Zergatul.Math;
 using Zergatul.Network;
+using Zergatul.Network.ASN1;
 using Zergatul.Network.Proxy;
 using Zergatul.Network.Tls;
 using Zergatul.Network.Tls.Extensions;
@@ -45,10 +46,13 @@ namespace Test
             // dsa-1024: kK0-;;*1[eH
             // dsa-3072: ;qIU8*1m,q3
             //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-1024.pfx", "kK0-;;*1[eH");
-            var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-3072.pfx", ";qIU8*1m,q3");
+            //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-3072.pfx", ";qIU8*1m,q3");
             //var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"dh-2048.pfx", @"kJ==+`!j8qzm&");
+            var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"ecdsa-secp521r1.pfx", @"\7FoIK*f1{\q");
             cert.PublicKey.ResolveAlgorithm();
             cert.PrivateKey.ResolveAlgorithm();
+
+            //var element = ASN1Element.ReadFrom(BitHelper.HexToBytes("3059301306072A8648CE3D020106082A8648CE3D03010703420004405134B8399A666F12ADA32F19F646F85FB7D1FC3D9AA0688BF8984A35B86AD49FBB96CFAD78B994013D06D7B98C09B0104323DD0A2473CDCA79342277027D3F"));
 
             //TestMyServerAndBCClient();
             //TestMyClientAndBCServer();

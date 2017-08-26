@@ -15,6 +15,8 @@ namespace Zergatul.Network.Tls.Messages
         public SignatureAndHashAlgorithm SignAndHashAlgo;
         public byte[] Signature;
 
+        public byte[] PSKIdentityHint;
+
         public ServerKeyExchange()
             : base(HandshakeType.ServerKeyExchange)
         {

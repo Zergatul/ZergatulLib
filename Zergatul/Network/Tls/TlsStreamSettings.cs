@@ -14,6 +14,10 @@ namespace Zergatul.Network.Tls
         public bool SupportExtendedMasterSecret;
         public DiffieHellmanParameters DHParameters;
 
+        public byte[] PSKIdentityHint;
+        public Func<byte[], PreSharedKey> GetPSKByHint;
+        public Func<byte[], PreSharedKey> GetPSKByIdentity;
+
         public static TlsStreamSettings Default = new TlsStreamSettings
         {
             SupportExtendedMasterSecret = true,
@@ -58,5 +62,11 @@ namespace Zergatul.Network.Tls
                 NamedCurve.secp521r1,
             }
         };
+    }
+
+    public class PreSharedKey
+    {
+        public byte[] Identity;
+        public byte[] Secret;
     }
 }

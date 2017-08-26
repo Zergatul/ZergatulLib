@@ -112,7 +112,7 @@ namespace Zergatul.Network.Tls
             return plaindata;
         }
 
-        private byte[] ComputeMAC(HMAC hmac, ulong sequenceNum, ContentType type, ProtocolVersion version, byte[] data)
+        public static byte[] ComputeMAC(HMAC hmac, ulong sequenceNum, ContentType type, ProtocolVersion version, byte[] data)
         {
             // RFC 5246 // Page 21
             /*

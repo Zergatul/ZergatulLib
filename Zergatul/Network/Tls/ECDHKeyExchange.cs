@@ -8,7 +8,7 @@ using Zergatul.Network.Tls.Messages;
 
 namespace Zergatul.Network.Tls
 {
-    internal class RSAKeyExchange : AbstractTlsKeyExchange
+    internal class ECDHKeyExchange : AbstractTlsKeyExchange
     {
         public override MessageInfo ServerCertificateMessage => MessageInfo.Required;
         public override MessageInfo ServerKeyExchangeMessage => MessageInfo.Forbidden;
@@ -59,24 +59,22 @@ namespace Zergatul.Network.Tls
         {
             var message = new ClientKeyExchange();
 
-            // https://tools.ietf.org/html/rfc5246#section-7.4.7.1
-            /*
-                struct {
-                    ProtocolVersion client_version;
-                    opaque random[46];
-                } PreMasterSecret;
-            */
-            PreMasterSecret = new byte[48];
-            BitHelper.GetBytes((ushort)ProtocolVersion.Tls12, ByteOrder.BigEndian, PreMasterSecret, 0);
-            Random.GetBytes(PreMasterSecret, 2, 46);
-
             var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
-            var rsa = algo as RSA;
-            if (rsa == null)
-                new TlsStreamException("For RSA key exchange certificate must also use RSA");
+            var ecdsa = algo as ECDSA;
+            if (ecdsa == null)
+                throw new TlsStreamException("For ECDH key exchange certificate must use ECDSA");
+            var ecdhServer = ecdsa.ToECDH();
 
-            rsa.Random = Random;
-            message.EncryptedPreMasterSecret = rsa.Encryption.GetScheme("RSAES-PKCS1-v1.5").Encrypt(PreMasterSecret);
+            var ecdhClient = new ECDiffieHellman();
+            ecdhClient.Random = Random;
+            ecdhClient.Parameters = ecdhServer.Parameters;
+            ecdhClient.GenerateKeys();
+
+            message.ECDH_Yc = ecdhClient.PublicKey.ToBytes();
+
+            ecdhClient.KeyExchange.CalculateSharedSecret(ecdhServer.PublicKey);
+
+            PreMasterSecret = ecdhClient.KeyExchange.SharedSecret.XToBytes();
 
             return message;
         }
@@ -84,25 +82,25 @@ namespace Zergatul.Network.Tls
         public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
         {
             var message = new ClientKeyExchange();
-            message.EncryptedPreMasterSecret = reader.ReadBytes(reader.ReadShort());
+            message.ECDH_Yc = reader.ReadBytes(reader.ReadByte());
 
             var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
-            var rsa = algo as RSA;
-            if (rsa == null)
-                throw new TlsStreamException("For RSA key exchange certificate must also use RSA");
+            var ecdsa = algo as ECDSA;
+            if (ecdsa == null)
+                new TlsStreamException("For ECDH key exchange certificate must use ECDSA");
+            var ecdh = ecdsa.ToECDH();
 
-            PreMasterSecret = rsa.Encryption.GetScheme("RSAES-PKCS1-v1.5").Decrypt(message.EncryptedPreMasterSecret);
-            var version = (ProtocolVersion)BitHelper.ToUInt16(PreMasterSecret, 0, ByteOrder.BigEndian);
-            if (version != ProtocolVersion.Tls12)
-                throw new TlsStreamException("Invalid PreMasterSecret");
+            ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECDH_Yc, ecdh.Parameters));
+
+            PreMasterSecret = ecdh.KeyExchange.SharedSecret.XToBytes();
 
             return message;
         }
 
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteShort((ushort)message.EncryptedPreMasterSecret.Length);
-            writer.WriteBytes(message.EncryptedPreMasterSecret);
+            writer.WriteByte((byte)message.ECDH_Yc.Length);
+            writer.WriteBytes(message.ECDH_Yc);
         }
 
         #endregion

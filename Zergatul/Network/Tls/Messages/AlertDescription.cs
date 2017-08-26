@@ -33,5 +33,6 @@ namespace Zergatul.Network.Tls.Messages
         UserCanceled = 90,
         NoRenegotiation = 100,
         UnsupportedExtension = 110,
+        UnknownPSKIdentity = 115
     }
 }

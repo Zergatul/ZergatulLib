@@ -39,7 +39,7 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_DH_RSA_WITH_AES_128_GCM_SHA256);
+            TestServer(CipherSuite.TLS_RSA_WITH_DES_CBC_SHA);
         }
 
         [TestMethod]
@@ -48,6 +48,15 @@ namespace Zergatul.Tls.Tests
             TestCipherSuites(TlsStream.SupportedCipherSuites
                 .Where(FilterUnsupportedByBC)
                 .Where(cs => cs.ToString().Contains("ECDSA"))
+                .ToList());
+        }
+
+        [TestMethod]
+        public void Test_ECDH_ECDSA_AES()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Where(FilterUnsupportedByBC)
+                .Where(cs => cs.ToString().Contains("_ECDH_ECDSA_WITH_AES"))
                 .ToList());
         }
 
@@ -116,6 +125,24 @@ namespace Zergatul.Tls.Tests
                 .ToList());
         }
 
+        [TestMethod]
+        public void Test_PSK_KeyExchange_AES()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Where(FilterUnsupportedByBC)
+                .Where(cs => cs.ToString().Contains("TLS_PSK_WITH_AES"))
+                .ToList());
+        }
+
+        [TestMethod]
+        public void Test_DHE_PSK_AES()
+        {
+            TestCipherSuites(TlsStream.SupportedCipherSuites
+                .Where(FilterUnsupportedByBC)
+                .Where(cs => cs.ToString().Contains("TLS_DHE_PSK_WITH_AES"))
+                .ToList());
+        }
+
         private static void TestCipherSuites(IReadOnlyList<CipherSuite> ciphers)
         {
             ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
@@ -172,7 +199,9 @@ namespace Zergatul.Tls.Tests
             serverThread = new Thread(() =>
             {
                 X509Certificate cert;
-                if (cs.ToString().StartsWith("TLS_DH_"))
+                if (cs.ToString().Contains("TLS_PSK_") || cs.ToString().Contains("TLS_DHE_PSK"))
+                    cert = null;
+                else if (cs.ToString().StartsWith("TLS_DH_"))
                     cert = GetDHCert();
                 else if (cs.ToString().Contains("ECDSA"))
                     cert = GetECDSACert();
@@ -197,7 +226,30 @@ namespace Zergatul.Tls.Tests
                         {
                             SupportExtendedMasterSecret = true,
                             CipherSuites = new CipherSuite[] { cs },
-                            SupportedCurves = new NamedCurve[] { NamedCurve.secp256r1, NamedCurve.secp521r1 }
+                            SupportedCurves = new NamedCurve[] { NamedCurve.secp256r1, NamedCurve.secp521r1 },
+                            GetPSKByHint = (hint) =>
+                            {
+                                var sha512 = new Cryptography.Hash.SHA512();
+                                sha512.Update(Encoding.ASCII.GetBytes("Bouncy Castle PSK"));
+
+                                return new PreSharedKey
+                                {
+                                    Identity = Encoding.ASCII.GetBytes("super-secret-key"),
+                                    Secret = sha512.ComputeHash()
+                                };
+                            },
+                            PSKIdentityHint = Encoding.ASCII.GetBytes("PSK hint"),
+                            GetPSKByIdentity = (id) =>
+                            {
+                                var sha512 = new Cryptography.Hash.SHA512();
+                                sha512.Update(Encoding.ASCII.GetBytes("Bouncy Castle PSK"));
+
+                                return new PreSharedKey
+                                {
+                                    Identity = Encoding.ASCII.GetBytes("super-secret-key"),
+                                    Secret = sha512.ComputeHash()
+                                };
+                            }
                         };
 
                         tlsStream.AuthenticateAsServer("localhost", cert);
@@ -232,7 +284,10 @@ namespace Zergatul.Tls.Tests
                     var handler = new Org.BouncyCastle.Crypto.Tls.TlsClientProtocol(tcp.GetStream(), new Org.BouncyCastle.Security.SecureRandom());
                     try
                     {
-                        handler.Connect(new MyBCTlsClient(cs));
+                        var tlsclient = cs.ToString().Contains("_PSK_") ?
+                            (Org.BouncyCastle.Crypto.Tls.TlsClient)new MyBCPskClient(cs) :
+                            new MyBCTlsClient(cs);
+                        handler.Connect(tlsclient);
 
                         byte[] buffer = new byte[12];
                         handler.Stream.Read(buffer, 0, 12);
@@ -295,10 +350,48 @@ namespace Zergatul.Tls.Tests
 
             public override int[] GetCipherSuites()
             {
-                if (_suites.Length == 0)
-                    return base.GetCipherSuites();
-                else
-                    return _suites.Select(cs => (int)cs).ToArray();
+                return _suites.Select(cs => (int)cs).ToArray();
+            }
+        }
+
+        class MyBCPskClient : Org.BouncyCastle.Crypto.Tls.PskTlsClient
+        {
+            private CipherSuite[] _suites;
+
+            public MyBCPskClient(params CipherSuite[] suites)
+                : base(new MyTlsPskIdentity())
+            {
+                this._suites = suites;
+            }
+
+            public override int[] GetCipherSuites()
+            {
+                return _suites.Select(cs => (int)cs).ToArray();
+            }
+        }
+
+        class MyTlsPskIdentity : Org.BouncyCastle.Crypto.Tls.TlsPskIdentity
+        {
+            public byte[] GetPsk()
+            {
+                var sha512 = new Cryptography.Hash.SHA512();
+                sha512.Update(Encoding.ASCII.GetBytes("Bouncy Castle PSK"));
+                return sha512.ComputeHash();
+            }
+
+            public byte[] GetPskIdentity()
+            {
+                return Encoding.ASCII.GetBytes("super-secret-key");
+            }
+
+            public void NotifyIdentityHint(byte[] psk_identity_hint)
+            {
+                
+            }
+
+            public void SkipIdentityHint()
+            {
+                
             }
         }
 

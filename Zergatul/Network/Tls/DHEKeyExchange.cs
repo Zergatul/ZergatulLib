@@ -13,9 +13,32 @@ namespace Zergatul.Network.Tls
 {
     internal class DHEKeyExchange : AbstractTlsKeyExchange
     {
-        public override bool ServerKeyExchangeRequired => true;
+        public override MessageInfo ServerCertificateMessage => MessageInfo.Required;
+        public override MessageInfo ServerKeyExchangeMessage => MessageInfo.Required;
+        public override MessageInfo CertificateRequestMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public override MessageInfo ClientCertificateMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+        public override MessageInfo CertificateverifyMessage
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
 
-        private DiffieHellman _dh;
+        private DiffieHellman _dhServer;
+        private DiffieHellman _dhClient;
         private AbstractTlsSignature _signature;
 
         public DHEKeyExchange(AbstractTlsSignature signature)
@@ -35,22 +58,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            _dh = new DiffieHellman();
-            _dh.Random = Random;
-
-            if (Settings.DHParameters != null)
-                _dh.Parameters = Settings.DHParameters;
-            else
-                _dh.Parameters = TlsStreamSettings.Default.DHParameters;
-
-            _dh.GenerateKeys();
-
-            message.Params = new ServerDHParams
-            {
-                DH_p = _dh.Parameters.p.ToBytes(ByteOrder.BigEndian),
-                DH_g = _dh.Parameters.g.ToBytes(ByteOrder.BigEndian),
-                DH_Ys = _dh.PublicKey.ToBytes(ByteOrder.BigEndian)
-            };
+            _dhServer = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
 
             // TODO, get sign and hash from clienthello
             message.SignAndHashAlgo = new SignatureAndHashAlgorithm
@@ -75,8 +83,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            message.Params = new ServerDHParams();
-            message.Params.Read(reader);
+            DHERoutine.ReadServerKeyExchange(message, reader);
 
             message.SignAndHashAlgo = new SignatureAndHashAlgorithm();
             message.SignAndHashAlgo.Read(reader);
@@ -93,18 +100,15 @@ namespace Zergatul.Network.Tls
             if (!_signature.VerifySignature(algo, hash, message.Signature))
                 throw new TlsStreamException("Invalid signature");
 
-            _dh = new DiffieHellman();
-            _dh.Random = Random;
-            _dh.Parameters = new DiffieHellmanParameters(new BigInteger(message.Params.DH_g, ByteOrder.BigEndian), new BigInteger(message.Params.DH_p, ByteOrder.BigEndian));
-            _dh.GenerateKeys();
-            _dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.Params.DH_Ys, ByteOrder.BigEndian));
+            _dhClient = DHERoutine.GetSharedSecretAsClient(message, Random);
 
             return message;
         }
 
         public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteBytes(message.Params.ToBytes());
+            DHERoutine.WriteServerKeyExchange(message, writer);
+
             writer.WriteByte((byte)message.SignAndHashAlgo.Hash);
             writer.WriteByte((byte)message.SignAndHashAlgo.Signature);
             writer.WriteShort((ushort)message.Signature.Length);
@@ -118,9 +122,8 @@ namespace Zergatul.Network.Tls
         public override ClientKeyExchange GenerateClientKeyExchange()
         {
             var message = new ClientKeyExchange();
-            message.DH_Yc = _dh.PublicKey.ToBytes(ByteOrder.BigEndian);
 
-            PreMasterSecret = _dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+            PreMasterSecret = DHERoutine.GenerateClientKeyExchange(message, _dhClient);
 
             return message;
         }
@@ -128,19 +131,15 @@ namespace Zergatul.Network.Tls
         public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
         {
             var message = new ClientKeyExchange();
-            message.DH_Yc = reader.ReadBytes(reader.ReadShort());
 
-            _dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.DH_Yc, ByteOrder.BigEndian));
-
-            PreMasterSecret = _dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+            PreMasterSecret = DHERoutine.ReadClientKeyExchange(message, reader, _dhServer);
 
             return message;
         }
 
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteShort((ushort)message.DH_Yc.Length);
-            writer.WriteBytes(message.DH_Yc);
+            DHERoutine.WriteClientKeyExchange(message, writer);
         }
 
         #endregion

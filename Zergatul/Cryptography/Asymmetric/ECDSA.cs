@@ -70,6 +70,17 @@ namespace Zergatul.Cryptography.Asymmetric
             }
         }
 
+        public ECDiffieHellman ToECDH()
+        {
+            return new ECDiffieHellman
+            {
+                Parameters = this.Parameters,
+                PrivateKey = this.PrivateKey,
+                PublicKey = this.PublicKey,
+                Random = this.Random
+            };
+        }
+
         private class ECDSASignatureImpl : AbstractSignatureAlgorithm<BigInteger, ECDSASignature>
         {
             private ECDSA _ecdsa;
