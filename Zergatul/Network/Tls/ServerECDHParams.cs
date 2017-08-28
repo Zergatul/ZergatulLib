@@ -26,7 +26,7 @@ namespace Zergatul.Network.Tls
             switch (CurveParams.CurveType)
             {
                 case ECCurveType.NamedCurve:
-                    CurveParams.NamedCurve = (NamedCurve)reader.ReadShort();
+                    CurveParams.NamedCurve = (NamedGroup)reader.ReadShort();
                     break;
                 default:
                     throw new NotImplementedException();

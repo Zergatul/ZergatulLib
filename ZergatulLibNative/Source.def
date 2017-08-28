@@ -1,0 +1,6 @@
+LIBRARY ZergatulLibNative
+EXPORTS
+	AESEncRound
+	AESEncLastRound
+	AESDecRound
+	AESDecLastRound

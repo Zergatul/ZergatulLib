@@ -23,6 +23,6 @@ namespace Zergatul.Network.Tls
         public byte[] K2;
         public byte[] K3;
 
-        public NamedCurve NamedCurve;
+        public NamedGroup NamedCurve;
     }
 }

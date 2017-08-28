@@ -62,6 +62,8 @@
     <Compile Include="BouncyCastleTests.cs" />
     <Compile Include="SupportedCipherSuiteTests.cs" />
     <Compile Include="SChannelTests.cs" />
+    <Compile Include="FragmentationTests.cs" />
+    <Compile Include="CloseTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

@@ -15,7 +15,7 @@ namespace Zergatul.Network.Tls.Messages
             The length (in bytes) of the following TLSPlaintext.fragment.
             The length MUST NOT exceed 2^14.
         */
-        private const int PlaintextLimit = 16384;
+        public const int PlaintextLimit = 16384;
 
         // https://tools.ietf.org/html/rfc5246#section-6.2.2
         // Record Compression and Decompression
@@ -23,7 +23,7 @@ namespace Zergatul.Network.Tls.Messages
             The length (in bytes) of the following TLSCompressed.fragment.
             The length MUST NOT exceed 2^14 + 1024.
         */
-        private const int CompressedLimit = 16384 + 1024;
+        public const int CompressedLimit = 16384 + 1024;
 
         // https://tools.ietf.org/html/rfc5246#section-6.2.3
         // Record Payload Protection
@@ -31,7 +31,7 @@ namespace Zergatul.Network.Tls.Messages
             The length (in bytes) of the following TLSCiphertext.fragment.
             The length MUST NOT exceed 2^14 + 2048.
         */
-        private const int CiphertextLimit = 16384 + 2048;
+        public const int CiphertextLimit = 16384 + 2048;
 
         public ContentType RecordType;
         public ProtocolVersion Version;
@@ -60,7 +60,11 @@ namespace Zergatul.Network.Tls.Messages
             RecordType = (ContentType)reader.ReadByte();
             Version = (ProtocolVersion)reader.ReadShort();
 
-            var counter = reader.StartCounter(reader.ReadShort());
+            ushort length = reader.ReadShort();
+            if (length > PlaintextLimit)
+                throw new RecordOverflowException();
+
+            var counter = reader.StartCounter(length);
 
             if (RecordType == ContentType.Handshake)
                 reader.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
@@ -97,9 +101,16 @@ namespace Zergatul.Network.Tls.Messages
             RecordType = (ContentType)reader.ReadByte();
             Version = (ProtocolVersion)reader.ReadShort();
 
-            var data = reader.ReadBytes(reader.ReadShort());
+            ushort length = reader.ReadShort();
+            if (length > CiphertextLimit)
+                throw new RecordOverflowException();
+
+            var data = reader.ReadBytes(length);
 
             var plaintext = _tlsStream.SelectedCipher.SymmetricCipher.Decrypt(RecordType, Version, _tlsStream.DecodingSequenceNum, data);
+            if (plaintext.Length > PlaintextLimit)
+                throw new RecordOverflowException();
+
             _tlsStream.IncDecodingSequenceNum();
 
             var decodedReader = new BinaryReader(plaintext);

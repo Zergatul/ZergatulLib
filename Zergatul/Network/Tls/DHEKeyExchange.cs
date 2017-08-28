@@ -98,7 +98,7 @@ namespace Zergatul.Network.Tls
             hash.Update(message.Params.ToBytes());
 
             if (!_signature.VerifySignature(algo, hash, message.Signature))
-                throw new TlsStreamException("Invalid signature");
+                throw new InvalidSignatureException();
 
             _dhClient = DHERoutine.GetSharedSecretAsClient(message, Random);
 

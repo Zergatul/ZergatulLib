@@ -56,8 +56,8 @@ namespace Zergatul.Network.Tls.Extensions
             {
                 case ExtensionType.ExtendedMasterSecret:
                     return new ExtendedMasterSecret();
-                case ExtensionType.SupportedEllipticCurves:
-                    return new SupportedEllipticCurves();
+                case ExtensionType.SupportedGroups:
+                    return new SupportedGroups();
                 case ExtensionType.ECPointFormats:
                     return new SupportedPointFormats();
                 default:

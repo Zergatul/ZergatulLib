@@ -85,11 +85,11 @@ namespace Zergatul.Tls.Tests
                             SupportExtendedMasterSecret = true,
                             DHParameters = DiffieHellmanParameters.Group2, // 1024 bit
                             CipherSuites = new CipherSuite[] { cs },
-                            SupportedCurves = new NamedCurve[]
+                            SupportedCurves = new NamedGroup[]
                             {
-                                NamedCurve.secp256r1,
-                                NamedCurve.secp384r1,
-                                NamedCurve.secp521r1
+                                NamedGroup.secp256r1,
+                                NamedGroup.secp384r1,
+                                NamedGroup.secp521r1
                             }
                         };
 
@@ -192,11 +192,11 @@ namespace Zergatul.Tls.Tests
                 {
                     SupportExtendedMasterSecret = true,
                     CipherSuites = new CipherSuite[] { cs },
-                    SupportedCurves = new NamedCurve[]
+                    SupportedCurves = new NamedGroup[]
                     {
-                        NamedCurve.secp256r1,
-                        NamedCurve.secp384r1,
-                        NamedCurve.secp521r1
+                        NamedGroup.secp256r1,
+                        NamedGroup.secp384r1,
+                        NamedGroup.secp521r1
                     }
                 };
                 try

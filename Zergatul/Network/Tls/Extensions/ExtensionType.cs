@@ -61,7 +61,7 @@ namespace Zergatul.Network.Tls.Extensions
         /// <summary>
         /// RFC 4492, 7919
         /// </summary>
-        SupportedEllipticCurves = 10,
+        SupportedGroups = 10,
 
         /// <summary>
         /// RFC 4492

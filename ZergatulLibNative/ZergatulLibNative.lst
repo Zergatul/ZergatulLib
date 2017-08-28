@@ -1,0 +1,50 @@
+Microsoft (R) Macro Assembler (x64) Version 14.00.24210.0   08/28/17 02:58:52
+aes.asm							     Page 1 - 1
+
+
+ 00000000			.CODE
+
+ 00000000			AESEncRound PROC
+
+ 00000000  66| 67& 0F 7F 4C		movdqa [esp + 8], xmm1
+	   24 08
+ 00000007  66| 67& 0F 7F 54		movdqa [esp + 16], xmm2
+	   24 10
+ 0000000E  66| 0F 38 DC CA		aesenc xmm1, xmm2
+ 00000013  66| 67& 0F 6F 4C		movdqa xmm1, [esp + 8]
+	   24 08
+
+ 0000001A  C3				ret
+
+ 0000001B			AESEncRound ENDP
+
+ 0000001B			AESEncLastRound PROC
+
+ 0000001B			AESEncLastRound ENDP
+
+ 0000001B			AESDecRound PROC
+
+ 0000001B			AESDecRound ENDP
+
+ 0000001B			AESDecLastRound PROC
+
+ 0000001B			AESDecLastRound ENDP
+
+				END
+Microsoft (R) Macro Assembler (x64) Version 14.00.24210.0   08/28/17 02:58:52
+aes.asm							     Symbols 2 - 1
+
+
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+AESDecLastRound  . . . . . . . .	P 	 0000001B _TEXT	Length= 00000000 Public
+AESDecRound  . . . . . . . . . .	P 	 0000001B _TEXT	Length= 00000000 Public
+AESEncLastRound  . . . . . . . .	P 	 0000001B _TEXT	Length= 00000000 Public
+AESEncRound  . . . . . . . . . .	P 	 00000000 _TEXT	Length= 0000001B Public
+
+	   0 Warnings
+	   0 Errors

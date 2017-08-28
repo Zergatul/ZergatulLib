@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
@@ -16,6 +17,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Zergatul;
+using Zergatul.Cryptography;
+using Zergatul.Cryptography.BlockCipher;
 using Zergatul.Cryptography.Certificate;
 using Zergatul.Ftp;
 using Zergatul.Math;
@@ -43,14 +46,17 @@ namespace Test
 
         static void Main(string[] args)
         {
+            /*var tests = new Zergatul.Tls.Tests.FragmentationTests();
+            tests.Send100MB();*/
+
             // dsa-1024: kK0-;;*1[eH
             // dsa-3072: ;qIU8*1m,q3
             //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-1024.pfx", "kK0-;;*1[eH");
             //var cert = new Zergatul.Cryptography.Certificate.X509Certificate("dsa-3072.pfx", ";qIU8*1m,q3");
             //var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"dh-2048.pfx", @"kJ==+`!j8qzm&");
-            var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"ecdsa-secp521r1.pfx", @"\7FoIK*f1{\q");
+            /*var cert = new Zergatul.Cryptography.Certificate.X509Certificate(@"ecdsa-secp521r1.pfx", @"\7FoIK*f1{\q");
             cert.PublicKey.ResolveAlgorithm();
-            cert.PrivateKey.ResolveAlgorithm();
+            cert.PrivateKey.ResolveAlgorithm();*/
 
             //var element = ASN1Element.ReadFrom(BitHelper.HexToBytes("3059301306072A8648CE3D020106082A8648CE3D03010703420004405134B8399A666F12ADA32F19F646F85FB7D1FC3D9AA0688BF8984A35B86AD49FBB96CFAD78B994013D06D7B98C09B0104323DD0A2473CDCA79342277027D3F"));
 
@@ -61,6 +67,7 @@ namespace Test
             //ConnectToExternal();
             //TestBlockCipher();
             //DownloadOIDs.Go("1.2.840.10045.3.1", "1.txt");
+            TestSpeed();
             return;
 
             // l(*qqqJ;q30[]e
@@ -182,6 +189,80 @@ namespace Test
             Console.ReadLine();*/
         }
 
+        [DllImport("../../../x64/Release/ZergatulLibNative.dll")]
+        public static extern unsafe void AESEncRound(byte* state, byte* key);
+
+        private static unsafe void TestSpeed()
+        {
+            int cycles = 1000000;
+
+            var rnd = new DefaultSecureRandom();
+
+            var key = new byte[32];
+            rnd.GetBytes(key);
+
+            var plain = new byte[16];
+            rnd.GetBytes(plain);
+
+            /**/
+
+            fixed (byte* state = plain)
+            {
+                fixed (byte* rkey = key)
+                {
+                    AESEncRound(state, rkey);
+                }
+            }
+            return;
+
+            /**/
+
+            var encrypt = new AES256().CreateEncryptor(key);
+            var decrypt = new AES256().CreateDecryptor(key);
+
+            var sw = new Stopwatch();
+            sw.Start();
+            for (int i = 0; i < cycles; i++)
+            {
+                byte[] x = decrypt(encrypt(plain));
+            }
+            sw.Stop();
+
+            Console.WriteLine($"My: {sw.Elapsed}");
+
+            var rinj = new System.Security.Cryptography.RijndaelManaged();
+            rinj.Key = key;
+            rinj.Padding = System.Security.Cryptography.PaddingMode.None;
+            var encryptor = rinj.CreateEncryptor();
+            var decryptor = rinj.CreateDecryptor();
+
+            sw.Restart();
+            for (int i = 0; i < cycles; i++)
+            {
+                byte[] x = decryptor.TransformFinalBlock(encryptor.TransformFinalBlock(plain, 0, 16), 0, 16);
+            }
+            sw.Stop();
+
+            Console.WriteLine($".NET: {sw.Elapsed}");
+
+            var engEnc = new Org.BouncyCastle.Crypto.Engines.AesEngine();
+            engEnc.Init(true, new Org.BouncyCastle.Crypto.Parameters.KeyParameter(key));
+            var engDec = new Org.BouncyCastle.Crypto.Engines.AesEngine();
+            engDec.Init(false, new Org.BouncyCastle.Crypto.Parameters.KeyParameter(key));
+
+            sw.Restart();
+            for (int i = 0; i < cycles; i++)
+            {
+                byte[] c = new byte[16];
+                engEnc.ProcessBlock(plain, 0, c, 0);
+                byte[] p = new byte[16];
+                engDec.ProcessBlock(c, 0, p, 0);
+            }
+            sw.Stop();
+
+            Console.WriteLine($"BC: {sw.Elapsed}");
+        }
+
         private static void TestBlockCipher()
         {
             var cipher = new Org.BouncyCastle.Crypto.Modes.GcmBlockCipher(new Org.BouncyCastle.Crypto.Engines.AesEngine());
@@ -268,7 +349,7 @@ namespace Test
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
                     //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
                 },
-                SupportedCurves = Enumerable.Range(1, 25).Select(i => (Zergatul.Network.Tls.NamedCurve)i).ToArray()
+                SupportedCurves = Enumerable.Range(1, 25).Select(i => (Zergatul.Network.Tls.NamedGroup)i).ToArray()
             };
             tls.AuthenticateAsClient(host);
 
@@ -302,9 +383,9 @@ namespace Test
                         Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
                         Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
                     },
-                    SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
+                    SupportedCurves = new Zergatul.Network.Tls.NamedGroup[]
                     {
-                        Zergatul.Network.Tls.NamedCurve.secp256r1
+                        Zergatul.Network.Tls.NamedGroup.secp256r1
                     }
                 };
 
@@ -394,9 +475,9 @@ namespace Test
                         //Zergatul.Network.Tls.CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
                         Zergatul.Network.Tls.CipherSuite.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256
                     },
-                    SupportedCurves = new Zergatul.Network.Tls.NamedCurve[]
+                    SupportedCurves = new Zergatul.Network.Tls.NamedGroup[]
                     {
-                        Zergatul.Network.Tls.NamedCurve.secp256r1
+                        Zergatul.Network.Tls.NamedGroup.secp256r1
                     }
                 };
 

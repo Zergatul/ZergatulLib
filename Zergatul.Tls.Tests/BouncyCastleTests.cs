@@ -39,7 +39,7 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_RSA_WITH_DES_CBC_SHA);
+            TestServer(CipherSuite.TLS_DH_Anon_WITH_RC4_128_MD5);
         }
 
         [TestMethod]
@@ -199,7 +199,7 @@ namespace Zergatul.Tls.Tests
             serverThread = new Thread(() =>
             {
                 X509Certificate cert;
-                if (cs.ToString().Contains("TLS_PSK_") || cs.ToString().Contains("TLS_DHE_PSK"))
+                if (cs.ToString().Contains("TLS_PSK_") || cs.ToString().Contains("TLS_DHE_PSK") || cs.ToString().Contains("TLS_ECDHE_PSK"))
                     cert = null;
                 else if (cs.ToString().StartsWith("TLS_DH_"))
                     cert = GetDHCert();
@@ -226,7 +226,7 @@ namespace Zergatul.Tls.Tests
                         {
                             SupportExtendedMasterSecret = true,
                             CipherSuites = new CipherSuite[] { cs },
-                            SupportedCurves = new NamedCurve[] { NamedCurve.secp256r1, NamedCurve.secp521r1 },
+                            SupportedCurves = new NamedGroup[] { NamedGroup.secp256r1, NamedGroup.secp521r1 },
                             GetPSKByHint = (hint) =>
                             {
                                 var sha512 = new Cryptography.Hash.SHA512();

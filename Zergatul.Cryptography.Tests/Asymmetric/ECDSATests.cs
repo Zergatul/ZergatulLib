@@ -18,11 +18,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
             var ecdsa = new ECDSA();
             ecdsa.Random = new DefaultSecureRandom();
-            ecdsa.Parameters = new ECDSAParameters
-            {
-                Curve = curve,
-                Random = ecdsa.Random
-            };
+            ecdsa.Parameters = curve;
             ecdsa.GenerateKeys();
 
             var sha1 = new SHA1();
@@ -32,10 +28,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
             // *******************
             var ecdsa2 = new ECDSA();
-            ecdsa2.Parameters = new ECDSAParameters
-            {
-                Curve = curve
-            };
+            ecdsa2.Parameters = curve;
             ecdsa2.PublicKey = ecdsa.PublicKey;
 
             sha1 = new SHA1();
@@ -100,11 +93,12 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
             var ecdsa1 = new ECDSA();
             ecdsa1.Random = new StaticRandom(Dec(BitHelper.HexToBytes(private_key)));
-            ecdsa1.Parameters = new ECDSAParameters
+            ecdsa1.Parameters = curve;
+            /*new ECDSAParameters
             {
                 Curve = curve,
                 Random = new StaticRandom(Dec(BitHelper.HexToBytes(k)))
-            };
+            };*/
             ecdsa1.GenerateKeys();
 
             Assert.IsTrue(BitHelper.BytesToHex(ecdsa1.PublicKey.PFECPoint.x.ToBytes(ByteOrder.BigEndian, pubkey_x.Length / 2)) == pubkey_x);
@@ -119,10 +113,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
             // *******************
             var ecdsa2 = new ECDSA();
-            ecdsa2.Parameters = new ECDSAParameters
-            {
-                Curve = curve
-            };
+            ecdsa2.Parameters = curve;
             ecdsa2.PublicKey = ecdsa1.PublicKey;
 
             hash.Reset();

@@ -8,11 +8,12 @@ namespace Zergatul.Network.Tls.Extensions
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc4492#section-5.1.1
+    /// https://tools.ietf.org/html/rfc7919
     /// </summary>
-    public class SupportedEllipticCurves : TlsExtension
+    public class SupportedGroups : TlsExtension
     {
-        private NamedCurve[] _curves;
-        public NamedCurve[] Curves
+        private NamedGroup[] _curves;
+        public NamedGroup[] Curves
         {
             get
             {
@@ -25,8 +26,8 @@ namespace Zergatul.Network.Tls.Extensions
             }
         }
 
-        public SupportedEllipticCurves(params NamedCurve[] curves)
-            : base(ExtensionType.SupportedEllipticCurves)
+        public SupportedGroups(params NamedGroup[] curves)
+            : base(ExtensionType.SupportedGroups)
         {
             this.Curves = curves;
         }
@@ -35,9 +36,9 @@ namespace Zergatul.Network.Tls.Extensions
         {
             var reader = new BinaryReader(_data);
             var counter = reader.StartCounter(reader.ReadShort());
-            var list = new List<NamedCurve>();
+            var list = new List<NamedGroup>();
             while (counter.CanRead)
-                list.Add((NamedCurve)reader.ReadShort());
+                list.Add((NamedGroup)reader.ReadShort());
 
             _curves = list.ToArray();
         }

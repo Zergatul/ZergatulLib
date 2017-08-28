@@ -8,6 +8,7 @@ namespace Zergatul.Network.Tls
 {
     internal enum ConnectionState
     {
+        NoConnection,
         Start,
         ClientHello,
         ServerHello,
@@ -20,5 +21,7 @@ namespace Zergatul.Network.Tls
         ClientFinished,
         ServerChangeCipherSpec,
         ServerFinished,
+        ApplicationData,
+        Closed
     }
 }

@@ -38,7 +38,8 @@ namespace Zergatul.Network.Tls
             }
         }
 
-        private ECDiffieHellman _ecdh;
+        private ECDiffieHellman _ecdhServer;
+        private ECDiffieHellman _ecdhClient;
         private AbstractTlsSignature _signature;
 
         public ECDHEKeyExchange(AbstractTlsSignature signature)
@@ -58,22 +59,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            var namedCurve = NamedCurve.secp256r1;
-
-            _ecdh = new ECDiffieHellman();
-            _ecdh.Random = Random;
-            _ecdh.Parameters = ResolveCurve(namedCurve);
-            _ecdh.GenerateKeys();
-
-            message.ECParams = new ServerECDHParams
-            {
-                CurveParams = new ECParameters
-                {
-                    CurveType = ECCurveType.NamedCurve,
-                    NamedCurve = namedCurve
-                },
-                Point = _ecdh.PublicKey.ToBytes()
-            };
+            _ecdhServer = ECDHERoutine.GenerateServerKeyExchange(message, Random, Settings);
 
             // TODO, get sign and hash from clienthello
             message.SignAndHashAlgo = new SignatureAndHashAlgorithm
@@ -98,8 +84,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            message.ECParams = new ServerECDHParams();
-            message.ECParams.Read(reader);
+            ECDHERoutine.ReadServerKeyExchange(message, reader);
 
             message.SignAndHashAlgo = new SignatureAndHashAlgorithm();
             message.SignAndHashAlgo.Read(reader);
@@ -114,20 +99,17 @@ namespace Zergatul.Network.Tls
             hash.Update(message.ECParams.ToBytes());
 
             if (!_signature.VerifySignature(algo, hash, message.Signature))
-                throw new TlsStreamException("Invalid signature");
+                throw new InvalidSignatureException();
 
-            _ecdh = new ECDiffieHellman();
-            _ecdh.Random = Random;
-            _ecdh.Parameters = ResolveCurve(message.ECParams.CurveParams.NamedCurve);
-            _ecdh.GenerateKeys();
-            _ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECParams.Point, _ecdh.Parameters));
+            _ecdhClient = ECDHERoutine.GetSharedSecretAsClient(message, Random);
 
             return message;
         }
 
         public override void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteBytes(message.ECParams.ToBytes());
+            ECDHERoutine.WriteServerKeyExchange(message, writer);
+
             writer.WriteByte((byte)message.SignAndHashAlgo.Hash);
             writer.WriteByte((byte)message.SignAndHashAlgo.Signature);
             writer.WriteShort((ushort)message.Signature.Length);
@@ -141,9 +123,8 @@ namespace Zergatul.Network.Tls
         public override ClientKeyExchange GenerateClientKeyExchange()
         {
             var message = new ClientKeyExchange();
-            message.ECDH_Yc = _ecdh.PublicKey.ToBytes();
 
-            PreMasterSecret = _ecdh.KeyExchange.SharedSecret.XToBytes();
+            PreMasterSecret = ECDHERoutine.GenerateClientKeyExchange(message, _ecdhClient);
 
             return message;
         }
@@ -151,68 +132,17 @@ namespace Zergatul.Network.Tls
         public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
         {
             var message = new ClientKeyExchange();
-            message.ECDH_Yc = reader.ReadBytes(reader.ReadByte());
 
-            _ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECDH_Yc, _ecdh.Parameters));
-
-            /*
-                All ECDH calculations (including parameter and key generation as well
-                as the shared secret calculation) are performed according to [6]
-                using the ECKAS-DH1 scheme with the identity map as key derivation
-                function (KDF), so that the premaster secret is the x-coordinate of
-                the ECDH shared secret elliptic curve point represented as an octet
-                string.  Note that this octet string (Z in IEEE 1363 terminology) as
-                output by FE2OSP, the Field Element to Octet String Conversion
-                Primitive, has constant length for any given field; leading zeros
-                found in this octet string MUST NOT be truncated.
-            */
-            PreMasterSecret = _ecdh.KeyExchange.SharedSecret.XToBytes();
+            PreMasterSecret = ECDHERoutine.ReadClientKeyExchange(message, reader, _ecdhServer);
 
             return message;
         }
 
         public override void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)
         {
-            writer.WriteByte((byte)message.ECDH_Yc.Length);
-            writer.WriteBytes(message.ECDH_Yc);
+            ECDHERoutine.WriteClientKeyExchange(message, writer);
         }
 
         #endregion
-
-        private static IEllipticCurve ResolveCurve(NamedCurve curve)
-        {
-            switch (curve)
-            {
-                case NamedCurve.secp160k1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp160k1;
-                case NamedCurve.secp160r1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp160r1;
-                case NamedCurve.secp160r2: return Math.EllipticCurves.PrimeField.EllipticCurve.secp160r2;
-                case NamedCurve.secp192k1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp192k1;
-                case NamedCurve.secp192r1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp192r1;
-                case NamedCurve.secp224k1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp224k1;
-                case NamedCurve.secp224r1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp224r1;
-                case NamedCurve.secp256k1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp256k1;
-                case NamedCurve.secp256r1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp256r1;
-                case NamedCurve.secp384r1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp384r1;
-                case NamedCurve.secp521r1: return Math.EllipticCurves.PrimeField.EllipticCurve.secp521r1;
-
-                case NamedCurve.sect163k1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect163k1;
-                case NamedCurve.sect163r1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect163r1;
-                case NamedCurve.sect163r2: return Math.EllipticCurves.BinaryField.EllipticCurve.sect163r2;
-                case NamedCurve.sect193r1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect193r1;
-                case NamedCurve.sect193r2: return Math.EllipticCurves.BinaryField.EllipticCurve.sect193r2;
-                case NamedCurve.sect233k1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect233k1;
-                case NamedCurve.sect233r1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect233r1;
-                case NamedCurve.sect239k1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect239k1;
-                case NamedCurve.sect283k1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect283k1;
-                case NamedCurve.sect283r1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect283r1;
-                case NamedCurve.sect409k1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect409k1;
-                case NamedCurve.sect409r1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect409r1;
-                case NamedCurve.sect571k1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect571k1;
-                case NamedCurve.sect571r1: return Math.EllipticCurves.BinaryField.EllipticCurve.sect571r1;
-
-                default:
-                    throw new NotImplementedException();
-            }
-        }
     }
 }

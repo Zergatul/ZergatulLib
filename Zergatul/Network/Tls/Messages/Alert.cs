@@ -19,7 +19,8 @@ namespace Zergatul.Network.Tls.Messages
 
         public override void Write(BinaryWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteByte((byte)Level);
+            writer.WriteByte((byte)Description);
         }
     }
 }
