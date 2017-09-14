@@ -18,7 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Zergatul;
 using Zergatul.Cryptography;
-using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.Symmetric;
 using Zergatul.Cryptography.Certificate;
 using Zergatul.Ftp;
 using Zergatul.Math;

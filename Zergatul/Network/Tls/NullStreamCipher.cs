@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.Symmetric;
 
 namespace Zergatul.Network.Tls
 {

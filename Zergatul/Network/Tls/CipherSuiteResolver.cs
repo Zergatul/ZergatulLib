@@ -1,5 +1,5 @@
 ﻿using System;
-using Zergatul.Cryptography.BlockCipher;
+using Zergatul.Cryptography.Symmetric;
 using Zergatul.Cryptography.Hash;
 
 using Cipher = Zergatul.Network.Tls.CipherSuiteBuilder;
