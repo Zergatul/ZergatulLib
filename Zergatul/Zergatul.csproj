@@ -104,6 +104,7 @@
     <Compile Include="Cryptography\Symmetric\RC2.cs" />
     <Compile Include="Cryptography\Symmetric\RC4.cs" />
     <Compile Include="Cryptography\Symmetric\SEED.cs" />
+    <Compile Include="Cryptography\Symmetric\Serpent.cs" />
     <Compile Include="Cryptography\Symmetric\TripleDESEDE.cs" />
     <Compile Include="Cryptography\Certificate\AccessDescription.cs" />
     <Compile Include="Cryptography\Hash\Keccak.cs" />

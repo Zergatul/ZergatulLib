@@ -46,6 +46,13 @@ namespace Test
 
         static void Main(string[] args)
         {
+            var serpent = new Org.BouncyCastle.Crypto.Engines.SerpentEngine();
+            serpent.Init(true, new Org.BouncyCastle.Crypto.Parameters.KeyParameter(BitHelper.HexToBytes("8000000000000000000000000000000000000000000000000000000000000000")));
+            byte[] res = new byte[16];
+            serpent.ProcessBlock(BitHelper.HexToBytes("00000000000000000000000000000000"), 0, res, 0);
+            Console.WriteLine(BitHelper.BytesToHex(res));
+            return;
+
             /*var tests = new Zergatul.Tls.Tests.FragmentationTests();
             tests.Send100MB();*/
 

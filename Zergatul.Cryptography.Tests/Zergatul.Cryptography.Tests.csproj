@@ -80,6 +80,7 @@
     <Compile Include="Symmetric\ARIATests.cs" />
     <Compile Include="Symmetric\CamelliaTests.cs" />
     <Compile Include="StaticRandom.cs" />
+    <Compile Include="Symmetric\SerpentTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">
