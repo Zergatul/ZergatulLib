@@ -110,6 +110,7 @@
     <Compile Include="Cryptography\Symmetric\TripleDESEDE.cs" />
     <Compile Include="Cryptography\Certificate\AccessDescription.cs" />
     <Compile Include="Cryptography\Hash\Keccak.cs" />
+    <Compile Include="Cryptography\Symmetric\Twofish.cs" />
     <Compile Include="Network\ASN1\Structures\DSAPrivateKey.cs" />
     <Compile Include="Network\ASN1\Structures\ECDSASignatureValue.cs" />
     <Compile Include="Cryptography\Generator\PKCS12v11.cs" />
