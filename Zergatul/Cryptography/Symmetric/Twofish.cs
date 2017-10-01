@@ -46,7 +46,7 @@ namespace Zergatul.Cryptography.Symmetric
             this._keySize = keySize;
         }
 
-        private static void KeySchedule(byte[] key)
+        private static uint[] KeySchedule(byte[] key)
         {
             int k = key.Length / 8;
             uint[] M = new uint[2 * k];
@@ -79,6 +79,7 @@ namespace Zergatul.Cryptography.Symmetric
             uint[] S = new uint[k];
             for (int i = 0; i < k; i++)
                 BitHelper.ToUInt32(s, (k - 1 - i) * 4, ByteOrder.LittleEndian);
+            return S;
         }
 
         delegate void FFunction(uint r0, uint r1, int r, out uint f0, out uint f1);
