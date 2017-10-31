@@ -186,19 +186,19 @@ namespace Zergatul.Math
             uint[] words = new uint[(bitsCount + 31) / 32];
 
             int cursor = 0;
-            int firstGroupLen = value.Length % _digitsPerUInt32[radix];
+            int firstGroupLen = value.Length % DigitsPerUInt32[radix];
             if (firstGroupLen == 0)
-                firstGroupLen = _digitsPerUInt32[radix];
+                firstGroupLen = DigitsPerUInt32[radix];
             string group = value.Substring(cursor, firstGroupLen);
             cursor += firstGroupLen;
             words[0] = Convert.ToUInt32(group, radix);
 
-            uint superRadix = _radixUInt32[radix];
+            uint superRadix = RadixUInt32[radix];
             int wordsLength = 1;
             while (cursor < value.Length)
             {
-                group = value.Substring(cursor, _digitsPerUInt32[radix]);
-                cursor += _digitsPerUInt32[radix];
+                group = value.Substring(cursor, DigitsPerUInt32[radix]);
+                cursor += DigitsPerUInt32[radix];
                 uint groupValue = Convert.ToUInt32(group, radix);
                 DestructiveMulAdd(words, wordsLength, superRadix, groupValue);
 
@@ -690,46 +690,73 @@ namespace Zergatul.Math
 
         public string ToString(int radix)
         {
+            return ToString(radix, DefaultSymbols);
+        }
+
+        public string ToString(int radix, char[] symbols)
+        {
             if (IsZero)
-                return "0";
+                return symbols[0].ToString();
 
             if (radix == 2 || radix == 4 || radix == 16)
             {
-                var result = "";
-                for (int i = _wordsLength - 1; i >= 0; i--)
+                int radixLength;
+                switch (radix)
                 {
-                    string part = Convert.ToString(_words[i], radix);
-                    if (result != "")
-                    {
-                        if (radix == 2)
-                            part = part.PadLeft(32, '0');
-                        if (radix == 4)
-                            part = part.PadLeft(16, '0');
-                        if (radix == 16)
-                            part = part.PadLeft(8, '0');
-                    }
-                    result = result + part;
+                    case 2: radixLength = 32; break;
+                    case 4: radixLength = 16; break;
+                    case 16: radixLength = 8; break;
+                    default:
+                        throw new InvalidOperationException();
                 }
-                return (_sign < 0 ? "-" : "") + result;
+                char[] result = new char[radixLength * _wordsLength];
+                char[] buffer = new char[radixLength];
+                int index = 0;
+
+                for (int i = 0; i < _wordsLength; i++)
+                {
+                    switch (radix)
+                    {
+                        case 2: UIntToString2(_words[i], symbols, buffer); break;
+                        case 4: UIntToString4(_words[i], symbols, buffer); break;
+                        case 16: UIntToString16(_words[i], symbols, buffer); break;
+                        default:
+                            throw new InvalidOperationException();
+                    }
+                    Array.Copy(buffer, 0, result, index, radixLength);
+                    index += radixLength;
+                }
+
+                Array.Reverse(result);
+                index = 0;
+                while (result[index] == symbols[0])
+                    index++;
+
+                return (_sign < 0 ? "-" : "") + new string(result, index, result.Length - index);
             }
             else
             {
-                int radixLength = _digitsPerUInt32[radix];
-                uint radixUIn32 = _radixUInt32[radix];
+                int radixLength = DigitsPerUInt32[radix];
+                uint radixUIn32 = RadixUInt32[radix];
                 var remainder = this;
-                var result = "";
+                char[] result = new char[radixLength * (_wordsLength + 1)];
+                char[] buffer = new char[radixLength];
+                int index = 0;
+
                 while (!remainder.IsZero)
                 {
                     var division = remainder.DivideByUInt32(radixUIn32);
                     remainder = division.Item1;
-                    string part = Convert.ToString(division.Item2, radix);
-                    if (!remainder.IsZero)
-                        part = part.PadLeft(radixLength, '0');
-
-                    result = part + result;
+                    UIntToString(division.Item2, (uint)radix, symbols, buffer);
+                    Array.Copy(buffer, 0, result, index, radixLength);
+                    index += radixLength;
                 }
 
-                return (_sign < 0 ? "-" : "") + result;
+                Array.Reverse(result);
+                index = 0;
+                while (result[index] == symbols[0])
+                    index++;
+                return (_sign < 0 ? "-" : "") + new string(result, index, result.Length - index);
             }
         }
 
@@ -1703,22 +1730,64 @@ namespace Zergatul.Math
         #region Private static members
 
         private const long UInt32Overflow = 1L << 32;
-        private static readonly int[] _digitsPerUInt32 = new int[37];
-        private static readonly uint[] _radixUInt32 = new uint[37];
+        private const int MaxRadixSupported = 64;
+        private static readonly int[] DigitsPerUInt32 = new int[MaxRadixSupported];
+        private static readonly uint[] RadixUInt32 = new uint[MaxRadixSupported];
+        private static char[] DefaultSymbols = "0123456789abcdefghijklmnopqrstuvwxyz".ToCharArray();
 
         private const int KaratsubaBitsLength = 30;
 
         static BigInteger()
         {
-            for (int i = 2; i <= 36; i++)
+            for (int i = 2; i < MaxRadixSupported; i++)
             {
-                _digitsPerUInt32[i] = 1;
-                _radixUInt32[i] = (uint)i;
-                while (_radixUInt32[i] * i < uint.MaxValue)
+                DigitsPerUInt32[i] = 1;
+                RadixUInt32[i] = (uint)i;
+                while (RadixUInt32[i] * i < uint.MaxValue)
                 {
-                    _radixUInt32[i] *= (uint)i;
-                    _digitsPerUInt32[i]++;
+                    RadixUInt32[i] *= (uint)i;
+                    DigitsPerUInt32[i]++;
                 }
+            }
+        }
+
+        static void UIntToString(uint value, uint radix, char[] symbols, char[] result)
+        {
+            int index = 0;
+            while (value > 0)
+            {
+                uint rem = value % radix;
+                result[index++] = symbols[rem];
+                value /= radix;
+            }
+            while (index < result.Length)
+                result[index++] = symbols[0];
+        }
+
+        static void UIntToString2(uint value, char[] symbols, char[] result)
+        {
+            for (int i = 0; i < 32; i++)
+            {
+                result[i] = symbols[value & 0x01];
+                value >>= 1;
+            }
+        }
+
+        static void UIntToString4(uint value, char[] symbols, char[] result)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                result[i] = symbols[value & 0x03];
+                value >>= 2;
+            }
+        }
+
+        static void UIntToString16(uint value, char[] symbols, char[] result)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                result[i] = symbols[value & 0x0F];
+                value >>= 4;
             }
         }
 
