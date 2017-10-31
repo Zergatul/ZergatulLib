@@ -10,7 +10,7 @@ namespace Zergatul.Cryptocurrency.Bitcoin
     {
         protected string _value;
 
-        public string Value => Value;
+        public string Value => _value;
 
         public override string ToString()
         {

@@ -64,16 +64,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="BerkeleyDB\libdb62d.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="BerkeleyDB\libdb_csharp62d.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="BerkeleyDB\libdb_dotnet62.dll" />
-    <Content Include="BerkeleyDB\libdb_dotnet62.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="BerkeleyDB\libdb_dotnet62.XML">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -10,7 +10,7 @@ namespace Zergatul.Cryptocurrency.Bitcoin
     {
         public static Script FromBytes(byte[] data)
         {
-
+            return null;
         }
     }
 }
