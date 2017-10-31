@@ -149,19 +149,7 @@ namespace Zergatul.Math.Tests
 
         #region ToString
 
-        [TestMethod]
-        public void ToString10_1()
-        {
-            var bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, ByteOrder.BigEndian);
-            Assert.IsTrue(bi.ToString() == "18446744073709551616");
-        }
-
-        [TestMethod]
-        public void ToString10_2()
-        {
-            var bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0 }, ByteOrder.BigEndian);
-            Assert.IsTrue(bi.ToString() == "4294967296");
-        }
+        #region Base 2
 
         [TestMethod]
         public void ToString2_1()
@@ -177,12 +165,79 @@ namespace Zergatul.Math.Tests
             Assert.IsTrue(bi.ToString(2) == Convert.ToString(0xFF0000FF, 2));
         }
 
+        #endregion
+
+        #region Base 4
+
+        [TestMethod]
+        public void ToString4_1()
+        {
+            var bi = BigInteger.Parse("86780890812314");
+            Assert.IsTrue(bi.ToString(4) == "103232311000022320332122");
+        }
+
+        [TestMethod]
+        public void ToString4_2()
+        {
+            var bi = BigInteger.Parse("86780890812314037509314750918615613984561");
+            Assert.IsTrue(bi.ToString(4) == "33330012223321330201121330203303303102320320021331231210223210330301");
+        }
+
+        #endregion
+
+        #region Base 10
+
+        [TestMethod]
+        public void ToString10_1()
+        {
+            var bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, ByteOrder.BigEndian);
+            Assert.IsTrue(bi.ToString() == "18446744073709551616");
+        }
+
+        [TestMethod]
+        public void ToString10_2()
+        {
+            var bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0 }, ByteOrder.BigEndian);
+            Assert.IsTrue(bi.ToString() == "4294967296");
+        }
+
+        [TestMethod]
+        public void ToString10_3()
+        {
+            var bi = new BigInteger(new byte[] { 11 }, ByteOrder.BigEndian);
+            Assert.IsTrue(bi.ToString() == "11");
+        }
+
+        #endregion
+
+        #region Base 15
+
+        [TestMethod]
+        public void ToString15_1()
+        {
+            var bi = BigInteger.Parse("15");
+            Assert.IsTrue(bi.ToString(15).ToUpper() == "10");
+        }
+
+        [TestMethod]
+        public void ToString15_5()
+        {
+            var bi = BigInteger.Parse("86780890812314037509314750918615613984561");
+            Assert.IsTrue(bi.ToString(15).ToUpper() == "8E1658DA57EB9D352DDAD5C4ACC6D33B80B");
+        }
+
+        #endregion
+
+        #region Base 16
+
         [TestMethod]
         public void ToString16_1()
         {
             var bi = new BigInteger(new byte[] { 1, 0, 0, 0, 0 }, ByteOrder.BigEndian);
             Assert.IsTrue(bi.ToString(16) == "100000000");
         }
+
+        #endregion
 
         #endregion
 
