@@ -44,9 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bitcoin\Wallet.cs" />
+    <Compile Include="Bitcoin\Address.cs" />
+    <Compile Include="Bitcoin\P2PKHAddress.cs" />
+    <Compile Include="Bitcoin\Base58Encoding.cs" />
+    <Compile Include="Bitcoin\DoubleSHA256.cs" />
+    <Compile Include="Bitcoin\P2SHAddress.cs" />
+    <Compile Include="Bitcoin\RIPE160SHA256.cs" />
+    <Compile Include="Bitcoin\Script.cs" />
     <Compile Include="Bitcoin\Transaction.cs" />
     <Compile Include="Bitcoin\VarLengthInt.cs" />
-    <Compile Include="Bitcoin\Wallet.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

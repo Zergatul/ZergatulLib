@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="P2PKHAddressTests.cs" />
     <Compile Include="TransactionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -57,6 +58,10 @@
     <ProjectReference Include="..\Zergatul.Cryptocurrency\Zergatul.Cryptocurrency.csproj">
       <Project>{6cb93460-a3cd-4985-8cdd-7ff4ca26b7dd}</Project>
       <Name>Zergatul.Cryptocurrency</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul\Zergatul.csproj">
+      <Project>{70DCFA02-0D6B-4220-8E1C-F1B8BA158FAC}</Project>
+      <Name>Zergatul</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
