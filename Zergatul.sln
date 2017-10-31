@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Network.ASN1.Tests
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZergatulLibNative", "ZergatulLibNative\ZergatulLibNative.vcxproj", "{9F884E9E-81EE-439F-8F3B-2BB5879D57FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Cryptocurrency", "Zergatul.Cryptocurrency\Zergatul.Cryptocurrency.csproj", "{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Cryptocurrency.Tests", "Zergatul.Cryptocurrency.Tests\Zergatul.Cryptocurrency.Tests.csproj", "{710FB74D-151A-4576-B358-E1AB7C2C669D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -151,6 +155,30 @@ Global
 		{9F884E9E-81EE-439F-8F3B-2BB5879D57FB}.Release|x64.Build.0 = Release|x64
 		{9F884E9E-81EE-439F-8F3B-2BB5879D57FB}.Release|x86.ActiveCfg = Release|Win32
 		{9F884E9E-81EE-439F-8F3B-2BB5879D57FB}.Release|x86.Build.0 = Release|Win32
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Debug|x64.Build.0 = Debug|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Debug|x86.Build.0 = Debug|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Release|x64.ActiveCfg = Release|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Release|x64.Build.0 = Release|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{6CB93460-A3CD-4985-8CDD-7FF4CA26B7DD}.Release|x86.Build.0 = Release|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Debug|x64.Build.0 = Debug|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Debug|x86.Build.0 = Debug|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Release|x64.ActiveCfg = Release|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Release|x64.Build.0 = Release|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Release|x86.ActiveCfg = Release|Any CPU
+		{710FB74D-151A-4576-B358-E1AB7C2C669D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
