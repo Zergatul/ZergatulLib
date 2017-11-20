@@ -67,6 +67,7 @@
     <Compile Include="Cryptography\Asymmetric\RSAPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAPublicKey.cs" />
     <Compile Include="Cryptography\Asymmetric\SignatureScheme.cs" />
+    <Compile Include="Cryptography\Hash\Streebog.cs" />
     <Compile Include="Cryptography\Symmetric\AbstractBlockCipher.cs" />
     <Compile Include="Cryptography\Symmetric\AbstractStreamCipher.cs" />
     <Compile Include="Cryptography\Symmetric\BlockBasedStreamCipher.cs" />

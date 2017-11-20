@@ -58,6 +58,7 @@
     <Compile Include="Asymmetric\ECDiffieHellmanTests.cs" />
     <Compile Include="Asymmetric\ECDSATests.cs" />
     <Compile Include="Asymmetric\DSATests.cs" />
+    <Compile Include="Hash\StreebogTests.cs" />
     <Compile Include="Symmetric\RC2Tests.cs" />
     <Compile Include="Symmetric\DESTests.cs" />
     <Compile Include="Symmetric\GCMTests.cs" />
