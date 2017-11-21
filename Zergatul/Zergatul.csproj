@@ -102,6 +102,7 @@
     <Compile Include="Cryptography\Symmetric\KeyStream.cs" />
     <Compile Include="Cryptography\Symmetric\CipherMode\Poly1305Function.cs" />
     <Compile Include="Cryptography\Symmetric\CipherMode\Poly1305KeyGenerator.cs" />
+    <Compile Include="Cryptography\Symmetric\Kuznyechik.cs" />
     <Compile Include="Cryptography\Symmetric\RC2.cs" />
     <Compile Include="Cryptography\Symmetric\RC4.cs" />
     <Compile Include="Cryptography\Symmetric\RC6.cs" />

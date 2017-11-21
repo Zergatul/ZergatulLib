@@ -85,6 +85,7 @@
     <Compile Include="Symmetric\RC5Tests.cs" />
     <Compile Include="Symmetric\RC6Tests.cs" />
     <Compile Include="Symmetric\TwofishTests.cs" />
+    <Compile Include="Symmetric\KuznyechikTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">
