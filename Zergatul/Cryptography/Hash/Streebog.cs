@@ -98,6 +98,7 @@ namespace Zergatul.Cryptography.Hash
 
         byte[] h, N, Epsilon, pBuffer, K, gResult;
         int mLength;
+        bool finalBlock;
 
         protected override void Init()
         {
@@ -115,32 +116,24 @@ namespace Zergatul.Cryptography.Hash
 
         protected override void AddPadding()
         {
-            if (_buffer.Count < 64)
-            {
-                mLength = _buffer.Count * 8;
-                _buffer.Insert(0, 1);
-                while (_buffer.Count < 64)
-                    _buffer.Insert(0, 0);
-            }
-            else
-                throw new NotImplementedException();
+            mLength = _buffer.Count * 8;
+            _buffer.Add(1);
+            while (_buffer.Count < 64)
+                _buffer.Add(0);
+
+            finalBlock = true;
         }
 
         protected override void ProcessBlock()
         {
-            // K = h xor N
-            byte[] K = new byte[64];
-            for (int i = 0; i < 64; i++)
-                K[i] = (byte)(h[i] ^ N[i]);
-
-            // K = LPS(h xor N)
-            LPS(K);
-
             byte[] m = _block;
+            Array.Reverse(m);
             g(m, false);
 
             // N += |M|
             int index = 63;
+            if (!finalBlock)
+                mLength = 512;
             while (mLength > 0)
             {
                 if (index < 0)
@@ -161,11 +154,14 @@ namespace Zergatul.Cryptography.Hash
                 carry >>= 8;
             }
 
-            // h = g0(h, N)
-            g(N, true);
+            if (finalBlock)
+            {
+                // h = g0(h, N)
+                g(N, true);
 
-            // h = g0(h, Epsilon)
-            g(Epsilon, true);
+                // h = g0(h, Epsilon)
+                g(Epsilon, true);
+            }
         }
 
         private void LPS(byte[] vector)
@@ -184,9 +180,9 @@ namespace Zergatul.Cryptography.Hash
             {
                 ulong result = 0;
                 for (int j = 0; j < 64; j++)
-                    if ((vector[i * 8 + j / 8] & (1 << (7 - j % 8))) != 0)
+                    if ((vector[(i << 3) | (j >> 3)] & (128 >> (j & 7))) != 0)
                         result ^= A[j];
-                BitHelper.GetBytes(result, ByteOrder.BigEndian, vector, 8 * i);
+                BitHelper.GetBytes(result, ByteOrder.BigEndian, vector, i << 3);
             }
         }
 
@@ -229,6 +225,7 @@ namespace Zergatul.Cryptography.Hash
         {
             byte[] hash = new byte[HashSize];
             Array.Copy(h, 0, hash, 0, HashSize);
+            Array.Reverse(hash);
             return hash;
         }
     }
