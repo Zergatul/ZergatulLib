@@ -28,6 +28,7 @@ namespace Zergatul.Network.ASN1
         protected override void ReadBody(Stream stream)
         {
             byte[] buffer = ReadBuffer(stream, checked((int)Length));
+            _raw.AddRange(buffer);
             Value = Encoding.UTF8.GetString(buffer);
         }
     }

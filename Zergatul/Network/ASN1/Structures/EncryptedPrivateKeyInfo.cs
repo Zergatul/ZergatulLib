@@ -29,7 +29,7 @@ namespace Zergatul.Network.ASN1.Structures
 
             var os = seq.Elements[1] as OctetString;
             ParseException.ThrowIfNull(os);
-            result.EncryptedData = os.Raw;
+            result.EncryptedData = os.Data;
 
             return result;
         }

@@ -14,14 +14,14 @@ namespace Zergatul.Cryptography.Certificate
     {
         public byte[] KeyIdentifier { get; private set; }
 
-        protected override void Parse(OctetString data)
+        protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data.Raw);
+            var element = ASN1Element.ReadFrom(data);
 
             var os = element as OctetString;
             CertificateParseException.ThrowIfNull(os);
 
-            KeyIdentifier = os.Raw;
+            KeyIdentifier = os.Data;
         }
     }
 }

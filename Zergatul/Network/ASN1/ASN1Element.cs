@@ -15,6 +15,9 @@ namespace Zergatul.Network.ASN1
         public long Length { get; protected set; }
         public int HeaderLength { get; protected set; }
 
+        public byte[] Raw { get; protected set; }
+        protected List<byte> _raw;
+
         public ASN1Element(ASN1Tag tag)
         {
             this.Tag = tag;
@@ -23,6 +26,7 @@ namespace Zergatul.Network.ASN1
         protected virtual void ReadBody(Stream stream)
         {
             byte[] data = ReadBuffer(stream, checked((int)Length));
+            _raw.AddRange(data);
             ReadBody(data);
         }
 
@@ -51,10 +55,13 @@ namespace Zergatul.Network.ASN1
             if (result == -1)
                 throw new EndOfStreamException();
 
+            var raw = new List<byte>();
+            raw.Add((byte)result);
+
             int tagLength;
-            ASN1Tag tag = ASN1Tag.FromByte((byte)result, stream, out tagLength);
+            ASN1Tag tag = ASN1Tag.FromByte((byte)result, stream, raw, out tagLength);
             int lenLength;
-            long length = ReadLength(stream, out lenLength);
+            long length = ReadLength(stream, raw, out lenLength);
 
             if (length == long.MinValue)
                 throw new NotImplementedException("Indefinite length not implemented");
@@ -68,7 +75,9 @@ namespace Zergatul.Network.ASN1
                 cs.Tag = tag;
                 cs.HeaderLength = tagLength + lenLength;
                 cs.Length = length;
+                cs._raw = raw;
                 cs.ReadBody(stream);
+                cs.Raw = cs._raw.ToArray();
                 return cs;
             }
 
@@ -76,7 +85,9 @@ namespace Zergatul.Network.ASN1
             element.Tag = tag;
             element.HeaderLength = tagLength + lenLength;
             element.Length = length;
+            element._raw = raw;
             element.ReadBody(stream);
+            element.Raw = element._raw.ToArray();
 
             return element;
         }
@@ -129,13 +140,14 @@ namespace Zergatul.Network.ASN1
             element.ReadBody(data);
         }
 
-        private static long ReadLength(Stream stream, out int read)
+        private static long ReadLength(Stream stream, List<byte> raw, out int read)
         {
             read = 0;
 
             int readResult = stream.ReadByte();
             if (readResult == -1)
                 throw new EndOfStreamException();
+            raw.Add((byte)readResult);
             read++;
 
             byte b = (byte)readResult;
@@ -156,6 +168,7 @@ namespace Zergatul.Network.ASN1
                 readResult = stream.ReadByte();
                 if (readResult == -1)
                     throw new EndOfStreamException();
+                raw.Add((byte)readResult);
                 read++;
                 result = checked(result * 256 + readResult);
             }

@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -81,11 +82,18 @@
     </None>
     <None Include="ecdsa-secp256r1.pfx" />
     <None Include="packages.config" />
+    <None Include="rsa-4096.p7s">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="rsa-4096.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Zergatul.Cryptocurrency\Zergatul.Cryptocurrency.csproj">
+      <Project>{6cb93460-a3cd-4985-8cdd-7ff4ca26b7dd}</Project>
+      <Name>Zergatul.Cryptocurrency</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Zergatul.Tls.Tests\Zergatul.Tls.Tests.csproj">
       <Project>{7cbc9035-8a2d-4cee-855a-256b9d139077}</Project>
       <Name>Zergatul.Tls.Tests</Name>

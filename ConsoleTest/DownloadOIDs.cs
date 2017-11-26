@@ -14,6 +14,16 @@ namespace Test
         public static void Go(string parent, string filename)
         {
             WebClient wc = new WebClient();
+
+            Action addHeaders = () =>
+            {
+                wc.Headers.Add(HttpRequestHeader.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+                wc.Headers.Add(HttpRequestHeader.AcceptLanguage, "en-US,en;q=0.5");
+                wc.Headers.Add(HttpRequestHeader.CacheControl, "max-age=0");
+                wc.Headers.Add(HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0");
+            };
+            addHeaders();
+
             byte[] data = wc.DownloadData($"http://oid-info.com/get/{parent}");
             var enc = Encoding.GetEncoding("ISO-8859-1");
             var html = enc.GetString(data);
@@ -39,6 +49,7 @@ namespace Test
 
             foreach (var link in links)
             {
+                addHeaders();
                 data = wc.DownloadData(link);
                 var doc2 = new HtmlAgilityPack.HtmlDocument();
                 doc2.LoadHtml(enc.GetString(data));

@@ -13,9 +13,9 @@ namespace Zergatul.Cryptography.Certificate
 
         private List<PolicyInformation> _list;
 
-        protected override void Parse(OctetString data)
+        protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data.Raw);
+            var element = ASN1Element.ReadFrom(data);
 
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);

@@ -41,6 +41,7 @@ namespace Zergatul.Network.ASN1
             int readResult = stream.ReadByte();
             if (readResult == -1)
                 throw new EndOfStreamException();
+            _raw.Add((byte)readResult);
             Value = readResult != 0;
         }
     }

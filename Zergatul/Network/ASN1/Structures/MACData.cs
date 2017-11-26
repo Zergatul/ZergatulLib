@@ -33,7 +33,7 @@ namespace Zergatul.Network.ASN1.Structures
             return new MACData
             {
                 MAC = mac,
-                MACSalt = os.Raw,
+                MACSalt = os.Data,
                 Iterations = iters != null ? (int)iters.Value : 1
             };
         }

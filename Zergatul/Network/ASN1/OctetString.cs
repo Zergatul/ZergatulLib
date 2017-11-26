@@ -9,7 +9,7 @@ namespace Zergatul.Network.ASN1
 {
     public class OctetString : ASN1Element
     {
-        public byte[] Raw { get; private set; }
+        public byte[] Data { get; private set; }
 
         public OctetString()
             : base(new ASN1Tag
@@ -22,20 +22,20 @@ namespace Zergatul.Network.ASN1
 
         }
 
-        public OctetString(byte[] raw)
+        public OctetString(byte[] data)
             : this()
         {
-            this.Raw = raw;
+            this.Data = data;
         }
 
         protected override byte[] BodyToBytes()
         {
-            return Raw;
+            return Data;
         }
 
         protected override void ReadBody(byte[] data)
         {
-            Raw = data;
+            Data = data;
         }
     }
 }

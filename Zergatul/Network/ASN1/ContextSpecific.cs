@@ -34,13 +34,18 @@ namespace Zergatul.Network.ASN1
             if (Tag.ValueType == ASN1ValueType.Primitive)
             {
                 Implicit = ReadBuffer(stream, checked((int)Length));
+                _raw.AddRange(Implicit);
                 return;
             }
 
             if (Tag.ValueType == ASN1ValueType.Constructed)
             {
                 while (GetElementsLength(Elements) < Length)
-                    Elements.Add(ReadFrom(stream));
+                {
+                    var element = ReadFrom(stream);
+                    _raw.AddRange(element.Raw);
+                    Elements.Add(element);
+                }
             }
         }
 

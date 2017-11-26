@@ -54,7 +54,7 @@ namespace Zergatul.Network.ASN1.Structures
             var result = new ECPrivateKey();
 
             result.Version = (int)ver.Value;
-            result.PrivateKey = privkey.Raw;
+            result.PrivateKey = privkey.Data;
             result.Parameters = parameters;
             result.PublicKey = pubkey?.Data;
 

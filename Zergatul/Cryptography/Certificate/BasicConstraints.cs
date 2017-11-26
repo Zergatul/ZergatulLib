@@ -10,9 +10,9 @@ namespace Zergatul.Cryptography.Certificate
         public bool CA { get; private set; }
         public int? PathLenConstraint { get; private set; }
 
-        protected override void Parse(OctetString data)
+        protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data.Raw);
+            var element = ASN1Element.ReadFrom(data);
 
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);

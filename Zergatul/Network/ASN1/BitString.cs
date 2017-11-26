@@ -32,11 +32,14 @@ namespace Zergatul.Network.ASN1
         {
             if (Length < 1)
                 throw new InvalidOperationException();
+
             int readResult = stream.ReadByte();
             if (readResult == -1)
                 throw new EndOfStreamException();
             PadBits = readResult;
+            _raw.Add((byte)readResult);
             Data = ReadBuffer(stream, checked((int)Length - 1));
+            _raw.AddRange(Data);
         }
     }
 }

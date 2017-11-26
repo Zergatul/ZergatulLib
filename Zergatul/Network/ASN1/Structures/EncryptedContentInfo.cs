@@ -35,7 +35,7 @@ namespace Zergatul.Network.ASN1.Structures
                 var cs = seq.Elements[2] as ContextSpecific;
                 ParseException.ThrowIfNull(cs);
                 ParseException.ThrowIfNotEqual(cs.Tag.TagNumberEx, 0);
-                result.Content = cs.As<OctetString>().Raw;
+                result.Content = cs.As<OctetString>().Data;
             }
 
             return result;

@@ -24,7 +24,7 @@ namespace Zergatul.Network.ASN1
             stream.WriteByte((byte)value);
         }
 
-        public static ASN1Tag FromByte(byte value, Stream stream, out int length)
+        public static ASN1Tag FromByte(byte value, Stream stream, List<byte> raw, out int length)
         {
             length = 1;
             ASN1Tag result = new ASN1Tag
@@ -42,6 +42,7 @@ namespace Zergatul.Network.ASN1
                     int readResult = stream.ReadByte();
                     if (readResult == -1)
                         throw new EndOfStreamException();
+                    raw.Add((byte)readResult);
                     length++;
                     result.TagNumberEx = checked(result.TagNumberEx * 128 + (readResult & 0x7F));
                     if ((readResult & 0x80) == 0)

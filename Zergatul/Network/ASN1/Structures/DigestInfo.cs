@@ -48,7 +48,7 @@ namespace Zergatul.Network.ASN1.Structures
             return new DigestInfo
             {
                 Algorithm = ai,
-                Digest = os.Raw
+                Digest = os.Data
             };
         }
     }

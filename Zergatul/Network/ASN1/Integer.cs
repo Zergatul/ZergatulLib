@@ -10,7 +10,7 @@ namespace Zergatul.Network.ASN1
 {
     public class Integer : ASN1Element
     {
-        public byte[] Raw { get; private set; }
+        public byte[] Data { get; private set; }
         public BigInteger Value => GetValue();
 
         public Integer()
@@ -27,26 +27,26 @@ namespace Zergatul.Network.ASN1
         public Integer(BigInteger value)
             : this()
         {
-            Raw = value.ToBytes(ByteOrder.BigEndian);
+            Data = value.ToBytes(ByteOrder.BigEndian);
             if (value < 0)
                 throw new NotImplementedException();
 
-            if ((Raw[0] & 0x80) != 0)
+            if ((Data[0] & 0x80) != 0)
             {
-                byte[] bytes = new byte[Raw.Length + 1];
-                Array.Copy(Raw, 0, bytes, 1, Raw.Length);
-                Raw = bytes;
+                byte[] bytes = new byte[Data.Length + 1];
+                Array.Copy(Data, 0, bytes, 1, Data.Length);
+                Data = bytes;
             }
         }
 
         private BigInteger GetValue()
         {
-            bool negative = (Raw[0] & 0x80) != 0;
-            byte[] bytes = new byte[Raw.Length];
-            Array.Copy(Raw, bytes, Raw.Length);
+            bool negative = (Data[0] & 0x80) != 0;
+            byte[] bytes = new byte[Data.Length];
+            Array.Copy(Data, bytes, Data.Length);
             if (negative)
-                Raw[0] &= 0x7F;
-            BigInteger result = new BigInteger(Raw, ByteOrder.BigEndian);
+                Data[0] &= 0x7F;
+            BigInteger result = new BigInteger(Data, ByteOrder.BigEndian);
             if (negative)
                 result = result.AdditiveInverse();
             return result;
@@ -54,12 +54,12 @@ namespace Zergatul.Network.ASN1
 
         protected override byte[] BodyToBytes()
         {
-            return Raw;
+            return Data;
         }
 
         protected override void ReadBody(byte[] data)
         {
-            Raw = data;
+            Data = data;
         }
     }
 }

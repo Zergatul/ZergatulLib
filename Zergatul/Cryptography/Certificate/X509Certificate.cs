@@ -39,6 +39,11 @@ namespace Zergatul.Cryptography.Certificate
             ReadFromStreamX509(stream);
         }
 
+        public X509Certificate(ASN1Element element)
+        {
+            ParseX509(element);
+        }
+
         public X509Certificate(string filename, string password = null)
         {
             using (var fs = File.OpenRead(filename))
@@ -73,31 +78,35 @@ namespace Zergatul.Cryptography.Certificate
             return false;
         }
 
+        private void ParseX509(ASN1Element element)
+        {
+            var syntax = Network.ASN1.Structures.X509.Certificate.Parse(element);
+
+            if (syntax.TBSCertificate.Version != 2)
+                throw new NotImplementedException("Only X509 v3 certificates are supported");
+
+            SerialNumber = syntax.TBSCertificate.SerialNumber;
+            NotBefore = syntax.TBSCertificate.Validity.NotBefore;
+            NotAfter = syntax.TBSCertificate.Validity.NotAfter;
+
+            Issuer = FormatName(syntax.TBSCertificate.Issuer);
+            Subject = FormatName(syntax.TBSCertificate.Subject);
+
+            SignatureAlgorithm = syntax.SignatureAlgorithm.Algorithm;
+
+            PublicKey = new PublicKey(syntax.TBSCertificate.SubjectPublicKeyInfo);
+
+            Extensions = syntax.TBSCertificate.Extensions?.Select(ext => X509Extension.Parse(ext)).DefaultIfEmpty().ToArray();
+        }
+
         private void ReadFromStreamX509(Stream stream)
         {
             var interception = new InterceptionStream(stream);
 
             var asn1 = ASN1Element.ReadFrom(interception);
-            var syntax = X509CertificateSyntax.TryParse(asn1);
+            ParseX509(asn1);
 
             this.RawData = interception.ReadBytes.ToArray();
-
-            if (syntax.TbsCertificate.Version != null && syntax.TbsCertificate.Version.Value != 2)
-                throw new NotImplementedException("Only X509 v3 certificates are supported");
-
-            SerialNumber = syntax.TbsCertificate.SerialNumber.Raw;
-
-            NotBefore = syntax.TbsCertificate.Validity.NotBefore.Date;
-            NotAfter = syntax.TbsCertificate.Validity.NotAfter.Date;
-
-            Issuer = FormatName(syntax.TbsCertificate.Issuer);
-            Subject = FormatName(syntax.TbsCertificate.Subject);
-
-            SignatureAlgorithm = syntax.SignatureAlgorithm.Algorithm;
-
-            PublicKey = new PublicKey(syntax.TbsCertificate.SubjectPublicKeyInfo);
-
-            Extensions = syntax.TbsCertificate.Extensions?.Select(ext => X509Extension.Parse(ext)).DefaultIfEmpty().ToArray();
         }
 
         private void ReadFromStreamPKCS12(Stream stream, string password)
@@ -121,11 +130,10 @@ namespace Zergatul.Cryptography.Certificate
                 PrivateKey = new PrivateKey(this, keys[0]);
         }
 
-        private static string FormatName(X509CertificateSyntax.Name name)
+        private static string FormatName(Network.ASN1.Structures.X509.Name name)
         {
-            var parts = name.RDN.SelectMany(ra => ra);
             return string.Join(", ",
-                parts.Reverse().Select(r => (r.Type.OID.ShortName ?? "OID." + r.Type.OID.DotNotation) + "=" + r.Value.Value));
+                name.RDN.SelectMany(rdn => rdn.Attributes).Reverse().Select(r => (r.Type.ShortName ?? "OID." + r.Type.DotNotation) + "=" + r.Value.Value));
         }
     }
 }

@@ -18,10 +18,10 @@ namespace Zergatul.Cryptography.Certificate
         public byte[] Key { get; private set; }
         public ASN1Element Parameters { get; private set; }
 
-        internal PublicKey(X509CertificateSyntax.SubjectPublicKeyInfo keyInfo)
+        internal PublicKey(Network.ASN1.Structures.X509.SubjectPublicKeyInfo keyInfo)
         {
             this.Algorithm = keyInfo.Algorithm.Algorithm;
-            this.Key = keyInfo.SubjectPublicKey.Data;
+            this.Key = keyInfo.SubjectPublicKey;
             this.Parameters = keyInfo.Algorithm.Parameters;
         }
 

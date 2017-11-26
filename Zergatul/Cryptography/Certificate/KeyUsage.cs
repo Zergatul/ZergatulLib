@@ -89,9 +89,9 @@ namespace Zergatul.Cryptography.Certificate
         /// </summary>
         public bool DecipherOnly { get; private set; }
 
-        protected override void Parse(OctetString data)
+        protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data.Raw);
+            var element = ASN1Element.ReadFrom(data);
 
             var bs = element as BitString;
             CertificateParseException.ThrowIfFalse(bs != null);

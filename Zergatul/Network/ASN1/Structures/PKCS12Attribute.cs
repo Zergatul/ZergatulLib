@@ -30,7 +30,7 @@ namespace Zergatul.Network.ASN1.Structures
                 ParseException.ThrowIfNotEqual(set.Elements.Count, 1);
                 var os = set.Elements[0] as OctetString;
                 ParseException.ThrowIfNull(os);
-                result.LocalKeyId = os.Raw;
+                result.LocalKeyId = os.Data;
             }
             else
                 throw new NotImplementedException();

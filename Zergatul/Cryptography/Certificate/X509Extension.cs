@@ -13,11 +13,11 @@ namespace Zergatul.Cryptography.Certificate
         public OID ExtensionOID { get; protected set; }
         public bool Critical { get; protected set; }
 
-        protected abstract void Parse(OctetString data);
+        protected abstract void Parse(byte[] data);
 
-        internal static X509Extension Parse(X509CertificateSyntax.Extension asn1raw)
+        internal static X509Extension Parse(Network.ASN1.Structures.X509.Extension asn1raw)
         {
-            OID oid = asn1raw.ExtnID.OID;
+            OID oid = asn1raw.ID;
 
             X509Extension ext;
             if (oid == OID.ISO.IdentifiedOrganization.DOD.Internet.Security.Mechanisms.PKIX.PE.AuthorityInfoAccess)
@@ -45,8 +45,8 @@ namespace Zergatul.Cryptography.Certificate
                 return null;
 
             ext.ExtensionOID = oid;
-            ext.Critical = asn1raw.Critical.Value;
-            ext.Parse(asn1raw.ExtnValue);
+            ext.Critical = asn1raw.Critical;
+            ext.Parse(asn1raw.Value);
 
             return ext;
         }

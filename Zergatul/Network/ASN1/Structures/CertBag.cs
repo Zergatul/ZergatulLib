@@ -35,7 +35,7 @@ namespace Zergatul.Network.ASN1.Structures
             {
                 var os = cs.Elements[0] as OctetString;
                 ParseException.ThrowIfNull(os);
-                result.X509Certificate = new X509Certificate(os.Raw);
+                result.X509Certificate = new X509Certificate(os.Data);
             }
             else
                 throw new NotImplementedException();

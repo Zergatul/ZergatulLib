@@ -11,7 +11,7 @@ namespace Zergatul.Network.ASN1
     {
         public List<ASN1Element> Elements { get; private set; }
 
-        public Set()
+        public Set(params ASN1Element[] elements)
             : base(new ASN1Tag
             {
                 Class = ASN1TagClass.Universal,
@@ -19,12 +19,17 @@ namespace Zergatul.Network.ASN1
                 Number = ASN1TagNumber.SET
             })
         {
-            Elements = new List<ASN1Element>();
+            this.Elements = new List<ASN1Element>();
+            if (elements != null)
+                this.Elements.AddRange(elements);
         }
 
         protected override byte[] BodyToBytes()
         {
-            throw new NotImplementedException();
+            var list = new List<byte>();
+            foreach (var element in Elements)
+                list.AddRange(element.Raw);
+            return list.ToArray();
         }
 
         protected override void ReadBody(Stream stream)
@@ -32,6 +37,7 @@ namespace Zergatul.Network.ASN1
             while (GetElementsLength(Elements) < Length)
             {
                 var element = ReadFrom(stream);
+                _raw.AddRange(element.Raw);
                 if (Elements.Count == 0 || element.GetType() == Elements[0].GetType())
                     Elements.Add(element);
                 else

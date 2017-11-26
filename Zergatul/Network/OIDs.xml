@@ -2,6 +2,42 @@
 <root>
   <oid value="1" id="iso" class="ISO" desc="International Organization for Standardization (ISO)">
     <oid value="2" id="member-body" class="MemberBody" desc="ISO Member Bodies">
+      <oid value="643" id="ru" class="RU" desc="Russian Federation">
+        <oid value="2" id="reg2" class="Reg2" desc="Software vendors">
+          <oid value="2" id="cryptopro" class="CryptoPro" desc="LLC 'Crypto'">
+            <oid value="1" id="other" class="Other" desc="Other" />
+            <oid value="3" id="gostR3411-94-with-gostR3410-2001" class="GostR3411_94_With_GostR3410_2001" desc="GOsudarstvennyy STandart (GOST) R 3411-94 with GOST R 3410-2001" />
+            <oid value="4" id="gostR3411-94-with-gostR3410-94" class="GostR3411_94_With_GostR3410_94" desc="GOsudarstvennyy STandart (GOST) R 3411-94 with GOST R 3410-94" />
+            <oid value="9" id="gostR3411-94" class="GostR3411_94" desc="GOsudarstvennyy STandart (GOST) R 34.11-94 (Russian hash algorithm)" />
+            <oid value="10" id="hmacgostr3411" class="HMACGostR3411" desc="GOsudarstvennyy STandart (GOST) R 3411-94 keyed-Hash Message Authentication Code (HMAC)" />
+            <oid value="13" id="keyWrap" class="KeyWrap" desc="Key wrap" />
+            <oid value="14" id="keyMeshing" class="KeyMeshing" desc="Key meshing" />
+            <oid value="19" id="gostR3410-2001" class="GostR3410_2001" desc="Russian standard &quot;GOST R 34.10-2001&quot; (in Russian, GOsudarstvennyy STandart (GOST) R 34.10-2001)" />
+            <oid value="20" id="gostR3410-94" class="GostR3410_94" desc="GOsudarstvennyy STandart (GOST) R 3410-94" />
+            <oid value="21" id="gost28147-89" class="Gost28147_89" desc="GOsudarstvennyy STandart (GOST) R 28147-89" />
+            <oid value="22" id="gost28147-89-MAC" class="Gost28147_89_MAC" desc="&quot;id-Gost28147-89-MAC&quot;" />
+            <oid value="30" id="hashes" class="Hashes" desc="Hashes" />
+            <oid value="31" id="encrypts" class="Encrypts" desc="Encrypts" />
+            <oid value="32" id="signs" class="Signs" desc="Signs" />
+            <oid value="33" id="exchanges" class="Exchanges" desc="Exchanges" />
+            <oid value="34" id="extensions" class="Extensions" desc="Extensions" />
+            <oid value="35" id="ecc-signs" class="ECCSigns" desc="Elliptic Curve Cryptography (ECC) signs" />
+            <oid value="36" id="ecc-exchanges" class="ECCExchanges" desc="Elliptic Curve Cryptography (ECC) exchanges" />
+            <oid value="37" id="private-keys" class="PrivateKeys" desc="Private keys" />
+            <oid value="38" id="policyIds" class="PolicyIds" desc="Policy identifiers" />
+            <oid value="39" id="policyQt" class="PolicyQt" desc="PolicyQt" />
+            <oid value="41" id="pkixcmp-infos" class="PKIXCMPInfos" desc="Public-Key Infrastructure using X.509 (PKIX) Certificate Management Protocol (CMP) infos" />
+            <oid value="42" id="audit-service-types" class="AuditServiceTypes" desc="Audit service types" />
+            <oid value="43" id="audit-record-types" class="AuditRecordTypes" desc="Audit record types" />
+            <oid value="44" id="attributes" class="Attributes" desc="Attributes" />
+            <oid value="45" id="name-service-types" class="NameServiceTypes" desc="Name service types" />
+            <oid value="96" id="gostR3410-2001-CryptoPro-ESDH" class="GostR3410_2001_CryptoPro_ESDH" desc="GOsudarstvennyy STandart (GOST) R 3410-2001 CryptoPro Ephemeral-Static Diffie-Hellman (ESDH)" />
+            <oid value="97" id="gostR3410-94-CryptoPro-ESDH" class="GostR3410_94_CryptoPro_ESDH" desc="GOsudarstvennyy STandart (GOST) R 3410-94 CryptoPro Ephemeral-Static Diffie-Hellman (ESDH)" />
+            <oid value="98" id="gostR3410-2001DH" class="GostR3410_2001DH" desc="GOsudarstvennyy STandart (GOST) R 3410-2001 CryptoPro Diffie-Hellman (DH)" />
+            <oid value="99" id="gostR3410-94DH" class="GostR3410_94DH" desc="GOsudarstvennyy STandart (GOST) R 3410-94 CryptoPro Diffie-Hellman (DH)" />
+          </oid>
+        </oid>
+      </oid>
       <oid value="840" id="us" class="US" desc="United States of America">
         <oid value="10040" id="x9-57" class="X957" desc="ANSI standard X9.57 (1997): 'Public Key Cryptography for the Financial Services Industry: Certificate Management'">
           <oid value="4" id="x9algorithm" class="X9Algorithm" desc="ANSI X9.57 algorithms">
@@ -531,6 +567,32 @@
           <oid value="101" id="gov" class="Gov" desc="US government">
             <oid value="3" id="csor" class="CSOR" desc="Computer Security Objects Register (CSOR)">
               <oid value="4" id="nistAlgorithm" class="NISTAlgorithm" desc="NIST Algorithm">
+                <oid value="1" id="aes" class="AES" desc=" Advanced Encryption Standard (AES)">
+                  <oid value="1" id="aes128-ECB" class="AES128ECB" desc="Electronic CodeBook (ECB) with 128-bit Advanced Encryption Standard (AES) information" />
+                  <oid value="2" id="aes128-CBC" class="AES128CBC" desc="Voice encryption 128-bit Advanced Encryption Standard (AES) algorithm with Cipher-Block Chaining (CBC) mode of operation" />
+                  <oid value="3" id="aes128-OFB" class="AES128OFB" desc="OFB (128 bit AES information)" />
+                  <oid value="4" id="aes128-CFB" class="AES128CFB" desc="Advanced Encryption Standard (AES) symmetric encryption algorithm &quot;Rijndael&quot; with 128 bit keys in Cipher FeedBack (CFB) modus" />
+                  <oid value="5" id="id-aes128-wrap" class="AES128Wrap" desc="128-bit Advanced Encryption Standard (AES) algorithm used for key wrapping" />
+                  <oid value="6" id="aes128-GCM" class="AES128GCM" desc="id-aes128-GCM" />
+                  <oid value="7" id="aes128-CCM" class="AES128CCM" desc="id-aes128-CCM" />
+                  <oid value="8" id="aes128-wrap-pad" class="AES128WrapPad" desc="AES Key Wrap with Padding algorithm with 128-bit KEK" />
+                  <oid value="21" id="aes192-ECB" class="AES192ECB" desc="ECB (192 bit AES information)" />
+                  <oid value="22" id="aes192-CBC" class="AES192CBC" desc="192 bit Advanced Encryption Standard (AES) algorithm with Cipher-Block Chaining (CBC) mode of operation" />
+                  <oid value="23" id="aes192-OFB" class="AES192OFB" desc="Output FeedBack (OFB) (192 bit Advanced Encryption Standard (AES) information)" />
+                  <oid value="24" id="aes192-CFB" class="AES192CFB" desc="Cipher FeedBack (CFB) (192 bit Advanced Encryption Standard (AES) information)" />
+                  <oid value="25" id="id-aes192-wrap" class="AES192Wrap" desc="192-bit Advanced Encryption Standard (AES) algorithm used for key wrapping" />
+                  <oid value="26" id="aes192-GCM" class="AES192GCM" desc="id-aes192-GCM" />
+                  <oid value="27" id="aes192-CCM" class="AES192CCM" desc="id-aes192-CCM" />
+                  <oid value="28" id="aes192-wrap-pad" class="AES192WrapPad" desc="AES Key Wrap with Padding algorithm with 192-bit KEK" />
+                  <oid value="41" id="aes256-ECB" class="AES256ECB" desc="ECB (256 bit AES information)" />
+                  <oid value="42" id="aes256-CBC" class="AES256CBC" desc="256-bit Advanced Encryption Standard (AES) algorithm with Cipher-Block Chaining (CBC) mode of operation" />
+                  <oid value="43" id="aes256-OFB" class="AES256OFB" desc="OFB (256 bit AES information)" />
+                  <oid value="44" id="aes256-CFB" class="AES256CFB" desc="CFB (256 bit AES information)" />
+                  <oid value="45" id="id-aes256-wrap" class="AES256Wrap" desc="256-bit Advanced Encryption Standard (AES) algorithm used for key wrapping" />
+                  <oid value="46" id="aes256-GCM" class="AES256GCM" desc="id-aes256-GCM" />
+                  <oid value="47" id="aes256-CCM" class="AES256CCM" desc="id-aes256-CCM" />
+                  <oid value="48" id="aes256-wrap-pad" class="AES256WrapPad" desc="AES Key Wrap with Padding algorithm with 256-bit KEK" />
+                </oid>
                 <oid value="2" id="hashAlgs" class="HashAlgs" desc="Secure Hash Algorithms">
                   <oid value="1" id="sha256" class="SHA256" desc="Secure Hash Algorithm that uses a 256 bit key (SHA256)" />
                   <oid value="2" id="sha384" class="SHA384" desc="Secure hashing algorithm that uses a 384 bit key (SHA384)" />

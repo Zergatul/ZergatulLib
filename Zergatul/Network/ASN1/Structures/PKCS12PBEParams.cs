@@ -28,7 +28,7 @@ namespace Zergatul.Network.ASN1.Structures
 
             return new PKCS12PBEParams
             {
-                Salt = os.Raw,
+                Salt = os.Data,
                 Iterations = (int)@int.Value
             };
         }

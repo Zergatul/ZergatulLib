@@ -16,9 +16,9 @@ namespace Zergatul.Cryptography.Certificate
         public GeneralNames AuthorityCertIssuer { get; private set; }
         public byte[] AuthorityCertSerialNumber { get; private set; }
 
-        protected override void Parse(OctetString data)
+        protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data.Raw);
+            var element = ASN1Element.ReadFrom(data);
 
             var seq = element as Sequence;
             CertificateParseException.ThrowIfFalse(seq != null);
@@ -28,13 +28,13 @@ namespace Zergatul.Cryptography.Certificate
                 switch (cs.Tag.TagNumberEx)
                 {
                     case 0:
-                        KeyIdentifier = cs.As<OctetString>().Raw;
+                        KeyIdentifier = cs.As<OctetString>().Data;
                         break;
                     case 1:
                         AuthorityCertIssuer = new GeneralNames(cs.Elements[0]);
                         break;
                     case 2:
-                        AuthorityCertSerialNumber = cs.As<Integer>().Raw;
+                        AuthorityCertSerialNumber = cs.As<Integer>().Data;
                         break;
                     default:
                         throw new CertificateParseException();

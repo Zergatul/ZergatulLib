@@ -38,7 +38,7 @@ namespace Zergatul.Network.ASN1.Structures
             {
                 Version = (int)@int.Value,
                 Algorithm = AlgorithmIdentifier.Parse(seq.Elements[1]),
-                PrivateKey = os.Raw
+                PrivateKey = os.Data
             };
 
             if (result.Algorithm.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.RSA)

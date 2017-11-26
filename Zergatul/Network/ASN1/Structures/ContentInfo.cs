@@ -39,7 +39,7 @@ namespace Zergatul.Network.ASN1.Structures
                 return new ContentInfo
                 {
                     ContentType = oi.OID,
-                    Data = os.Raw
+                    Data = os.Data
                 };
             }
             else if (oi.OID == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS7.EncryptedData)

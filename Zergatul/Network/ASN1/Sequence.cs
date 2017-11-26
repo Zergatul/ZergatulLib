@@ -41,7 +41,11 @@ namespace Zergatul.Network.ASN1
         protected override void ReadBody(Stream stream)
         {
             while (GetElementsLength(Elements) < Length)
-                Elements.Add(ReadFrom(stream));
+            {
+                var element = ReadFrom(stream);
+                _raw.AddRange(element.Raw);
+                Elements.Add(element);
+            }
         }
     }
 }
