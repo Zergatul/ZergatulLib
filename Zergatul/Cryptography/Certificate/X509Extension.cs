@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Certificate.Extensions;
 using Zergatul.Network;
 using Zergatul.Network.ASN1;
 
@@ -27,7 +28,7 @@ namespace Zergatul.Cryptography.Certificate
             else if (oid == OID.JointISOITUT.DS.CertificateExtension.KeyUsage)
                 ext = new KeyUsage();
             else if (oid == OID.JointISOITUT.DS.CertificateExtension.ExtKeyUsage)
-                ext = new ExtKeyUsage();
+                ext = new ExtendedKeyUsage();
             else if (oid == OID.JointISOITUT.DS.CertificateExtension.CRLDistributionPoints)
                 ext = new CRLDistributionPoints();
             else if (oid == OID.JointISOITUT.DS.CertificateExtension.AuthorityKeyIdentifier)

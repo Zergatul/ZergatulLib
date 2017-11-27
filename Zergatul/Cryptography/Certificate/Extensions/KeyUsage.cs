@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network.ASN1;
 
-namespace Zergatul.Cryptography.Certificate
+namespace Zergatul.Cryptography.Certificate.Extensions
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5280#section-4.2.1.3
@@ -97,14 +97,15 @@ namespace Zergatul.Cryptography.Certificate
             CertificateParseException.ThrowIfFalse(bs != null);
             CertificateParseException.ThrowIfFalse(bs.Data.Length == 1);
 
-            DigitalSignature = (bs.Data[0] & 0x01) != 0;
-            ContentCommitment = (bs.Data[0] & 0x02) != 0;
-            KeyEncipherment = (bs.Data[0] & 0x04) != 0;
-            DataEncipherment = (bs.Data[0] & 0x08) != 0;
-            KeyAgreement = (bs.Data[0] & 0x10) != 0;
-            KeyCertSign = (bs.Data[0] & 0x20) != 0;
-            EncipherOnly = (bs.Data[0] & 0x40) != 0;
-            DecipherOnly = (bs.Data[0] & 0x80) != 0;
+            DigitalSignature = (bs.Data[0] & 0x80) != 0;
+            ContentCommitment = (bs.Data[0] & 0x40) != 0;
+            KeyEncipherment = (bs.Data[0] & 0x20) != 0;
+            DataEncipherment = (bs.Data[0] & 0x10) != 0;
+            KeyAgreement = (bs.Data[0] & 0x08) != 0;
+            KeyCertSign = (bs.Data[0] & 0x04) != 0;
+            CRLSign = (bs.Data[0] & 0x02) != 0;
+            EncipherOnly = (bs.Data[0] & 0x01) != 0;
+            //DecipherOnly = (bs.Data[1] & 0x01) != 0;
         }
     }
 }

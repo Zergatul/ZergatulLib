@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network.ASN1;
 
-namespace Zergatul.Cryptography.Certificate
+namespace Zergatul.Cryptography.Certificate.Extensions
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5280#section-4.2.1.6

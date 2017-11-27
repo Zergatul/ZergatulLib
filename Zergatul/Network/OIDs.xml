@@ -399,7 +399,7 @@
         <oid value="5" id="serialNumber" class="SerialNumber" short="SERIALNUMBER" desc="Serial number attribute type" />
         <oid value="6" id="countryName" class="CountryName" short="C" desc="Country name" />
         <oid value="7" id="localityName" class="LocalityName" short="L" desc="Locality Name" />
-        <oid value="8" id="stateOrProvinceName" class="StateOrProvinceName" short="S" desc="State or Province name" />
+        <oid value="8" id="stateOrProvinceName" class="StateOrProvinceName" short="ST" desc="State or Province name" />
         <oid value="9" id="streetAddress" class="StreetAddress" short="STREET" desc="Street address" />
         <oid value="10" id="organizationName" class="OrganizationName" short="O" desc="Organization name" />
         <oid value="11" id="organizationalUnitName" class="OrganizationalUnitName" short="OU" desc="Organizational unit name" />

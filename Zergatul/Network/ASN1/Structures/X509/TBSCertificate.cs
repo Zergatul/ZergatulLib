@@ -58,34 +58,30 @@ namespace Zergatul.Network.ASN1.Structures.X509
             result.Subject = Name.Parse(seq.Elements[index++]);
             result.SubjectPublicKeyInfo = SubjectPublicKeyInfo.Parse(seq.Elements[index++]);
 
-            if (index < seq.Elements.Count && seq.Elements[index] is ContextSpecific)
+            while (index < seq.Elements.Count)
             {
                 cs = seq.Elements[index++] as ContextSpecific;
+                ParseException.ThrowIfNull(cs);
                 ParseException.ThrowIfTrue(cs.IsImplicit);
 
-                var bitstr = cs.Elements[0] as BitString;
-                ParseException.ThrowIfNull(bitstr);
-
-                result.IssuerUniqueID = bitstr.Data;
-
-                if (index < seq.Elements.Count && seq.Elements[index] is ContextSpecific)
+                switch (cs.Tag.TagNumberEx)
                 {
-                    cs = seq.Elements[index++] as ContextSpecific;
-                    ParseException.ThrowIfTrue(cs.IsImplicit);
-
-                    bitstr = cs.Elements[0] as BitString;
-                    ParseException.ThrowIfNull(bitstr);
-
-                    result.SubjectUniqueID = bitstr.Data;
+                    case 1:
+                        var bitstr = cs.Elements[0] as BitString;
+                        ParseException.ThrowIfNull(bitstr);
+                        result.IssuerUniqueID = bitstr.Data;
+                        break;
+                    case 2:
+                        bitstr = cs.Elements[0] as BitString;
+                        ParseException.ThrowIfNull(bitstr);
+                        result.SubjectUniqueID = bitstr.Data;
+                        break;
+                    case 3:
+                        var extensions = cs.Elements[0] as Sequence;
+                        ParseException.ThrowIfNull(extensions);
+                        result.Extensions = extensions.Elements.Select(e => Extension.Parse(e)).ToArray();
+                        break;
                 }
-            }
-
-            if (index < seq.Elements.Count)
-            {
-                var extensions = seq.Elements[index++] as Sequence;
-                ParseException.ThrowIfNull(extensions);
-
-                result.Extensions = extensions.Elements.Select(e => Extension.Parse(e)).ToArray();
             }
 
             return result;

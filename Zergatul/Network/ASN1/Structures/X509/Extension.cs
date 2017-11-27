@@ -24,14 +24,14 @@ namespace Zergatul.Network.ASN1.Structures.X509
             ParseException.ThrowIfNull(oid);
             result.ID = oid.OID;
 
-            int index = 2;
+            int index = 1;
             if (seq.Elements.Count == 3)
             {
                 var @bool = seq.Elements[1] as Boolean;
                 ParseException.ThrowIfNull(@bool);
                 result.Critical = @bool.Value;
 
-                index = 3;
+                index = 2;
             }
 
             var octetstr = seq.Elements[index] as OctetString;

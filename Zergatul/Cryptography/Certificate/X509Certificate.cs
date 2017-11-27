@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Certificate.Extensions;
 using Zergatul.IO;
 using Zergatul.Network;
 using Zergatul.Network.ASN1;
@@ -13,10 +14,17 @@ namespace Zergatul.Cryptography.Certificate
 {
     public class X509Certificate
     {
-        public X509Extension[] Extensions { get; private set; }
+        #region Private static fields
+
+        private const string BeginCertificate = "-----BEGIN CERTIFICATE-----";
+        private const string EndCertificate = "-----END CERTIFICATE-----";
+
+        #endregion
+
+        public X509ExtensionsCollection Extensions { get; private set; }
         public bool HasPrivateKey => PrivateKey != null;
-        public string Issuer { get; private set; }
-        public string Subject { get; private set; }
+        public AttributesCollection Issuer { get; private set; }
+        public AttributesCollection Subject { get; private set; }
         public DateTime NotBefore { get; private set; }
         public DateTime NotAfter { get; private set; }
         public PrivateKey PrivateKey { get; private set; }
@@ -46,28 +54,45 @@ namespace Zergatul.Cryptography.Certificate
 
         public X509Certificate(string filename, string password = null)
         {
-            using (var fs = File.OpenRead(filename))
-                switch (Path.GetExtension(filename))
-                {
-                    case ".cer":
-                        ReadFromStreamX509(fs);
-                        break;
-                    case ".pfx":
-                    case ".p12":
-                        ReadFromStreamPKCS12(fs, password);
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
+            byte[] bytes = File.ReadAllBytes(filename);
+            MemoryStream ms;
+
+            switch (Path.GetExtension(filename))
+            {
+                case ".cer":
+                case ".crt":
+                    byte[] base64Header = Encoding.ASCII.GetBytes(BeginCertificate);
+                    if (ByteArray.IsSubArray(bytes, base64Header, 0))
+                    {
+                        string base64String = Encoding.ASCII.GetString(bytes);
+                        base64String = base64String.Trim();
+                        base64String = base64String.Substring(BeginCertificate.Length);
+                        if (base64String.EndsWith(EndCertificate))
+                            base64String = base64String.Substring(0, base64String.Length - EndCertificate.Length);
+                        else
+                            throw new InvalidOperationException();
+                        bytes = Convert.FromBase64String(base64String);
+                    }
+                    ms = new MemoryStream(bytes);
+                    ReadFromStreamX509(ms);
+                    break;
+                case ".pfx":
+                case ".p12":
+                    ms = new MemoryStream(bytes);
+                    ReadFromStreamPKCS12(ms, password);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
         }
 
         public bool IsSelfSigned()
         {
-            if (Extensions == null || Extensions.Length == 0)
+            if (Extensions.Count == 0)
                 return true;
 
-            var authKeyId = Extensions.OfType<AuthorityKeyIdentifier>().SingleOrDefault();
-            var subjKeyId = Extensions.OfType<SubjectKeyIdentifier>().SingleOrDefault();
+            var authKeyId = Extensions.Get<AuthorityKeyIdentifier>();
+            var subjKeyId = Extensions.Get<SubjectKeyIdentifier>();
 
             if (authKeyId == null)
                 return true;
@@ -89,24 +114,22 @@ namespace Zergatul.Cryptography.Certificate
             NotBefore = syntax.TBSCertificate.Validity.NotBefore;
             NotAfter = syntax.TBSCertificate.Validity.NotAfter;
 
-            Issuer = FormatName(syntax.TBSCertificate.Issuer);
-            Subject = FormatName(syntax.TBSCertificate.Subject);
+            Issuer = new AttributesCollection(syntax.TBSCertificate.Issuer);
+            Subject = new AttributesCollection(syntax.TBSCertificate.Subject);
 
             SignatureAlgorithm = syntax.SignatureAlgorithm.Algorithm;
 
             PublicKey = new PublicKey(syntax.TBSCertificate.SubjectPublicKeyInfo);
 
-            Extensions = syntax.TBSCertificate.Extensions?.Select(ext => X509Extension.Parse(ext)).DefaultIfEmpty().ToArray();
+            Extensions = new X509ExtensionsCollection(syntax.TBSCertificate.Extensions);
         }
 
         private void ReadFromStreamX509(Stream stream)
         {
-            var interception = new InterceptionStream(stream);
-
-            var asn1 = ASN1Element.ReadFrom(interception);
+            var asn1 = ASN1Element.ReadFrom(stream);
             ParseX509(asn1);
 
-            this.RawData = interception.ReadBytes.ToArray();
+            this.RawData = asn1.Raw;
         }
 
         private void ReadFromStreamPKCS12(Stream stream, string password)
@@ -128,12 +151,6 @@ namespace Zergatul.Cryptography.Certificate
 
             if (keys.Length == 1)
                 PrivateKey = new PrivateKey(this, keys[0]);
-        }
-
-        private static string FormatName(Network.ASN1.Structures.X509.Name name)
-        {
-            return string.Join(", ",
-                name.RDN.SelectMany(rdn => rdn.Attributes).Reverse().Select(r => (r.Type.ShortName ?? "OID." + r.Type.DotNotation) + "=" + r.Value.Value));
         }
     }
 }

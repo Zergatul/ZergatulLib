@@ -33,7 +33,11 @@ namespace Zergatul.Network.ASN1
             string str = Encoding.ASCII.GetString(buffer);
 
             if (str.Length == 13 && str.ToLowerInvariant().EndsWith("z"))
+            {
                 Date = DateTime.ParseExact(str.Substring(0, 12), "yyMMddHHmmss", DateTimeFormatInfo.InvariantInfo).ToLocalTime();
+                if (Date.Year < 1950)
+                    Date = Date.AddYears(100);
+            }
             else
                 throw new NotImplementedException();
         }

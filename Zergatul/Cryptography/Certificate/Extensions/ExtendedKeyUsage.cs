@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Network;
 using Zergatul.Network.ASN1;
 
-namespace Zergatul.Cryptography.Certificate
+namespace Zergatul.Cryptography.Certificate.Extensions
 {
     /// <summary>
-    /// https://tools.ietf.org/html/rfc5280#section-4.2.1.13
+    /// https://tools.ietf.org/html/rfc5280#section-4.2.1.12
     /// </summary>
-    public class CRLDistributionPoints : X509Extension
+    public class ExtendedKeyUsage : X509Extension
     {
-        public DistributionPoint[] Points { get; private set; }
+        public OID[] KeyPurposes { get; private set; }
 
         protected override void Parse(byte[] data)
         {
@@ -20,8 +21,11 @@ namespace Zergatul.Cryptography.Certificate
             var seq = element as Sequence;
             if (seq != null)
             {
-                Points = seq.Elements.Select(e => new DistributionPoint(e)).ToArray();
+                KeyPurposes = seq.Elements.Cast<ObjectIdentifier>().Select(oi => oi.OID).ToArray();
+                return;
             }
+
+            throw new InvalidOperationException();
         }
     }
 }

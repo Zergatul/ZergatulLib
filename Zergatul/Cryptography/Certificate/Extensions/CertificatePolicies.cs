@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network.ASN1;
 
-namespace Zergatul.Cryptography.Certificate
+namespace Zergatul.Cryptography.Certificate.Extensions
 {
     public class CertificatePolicies : X509Extension
     {
-        public IReadOnlyCollection<PolicyInformation> List => _list.AsReadOnly();
+        public IReadOnlyList<PolicyInformation> List => _list.AsReadOnly();
 
         private List<PolicyInformation> _list;
 

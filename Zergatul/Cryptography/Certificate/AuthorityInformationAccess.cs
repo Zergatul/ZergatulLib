@@ -14,7 +14,7 @@ namespace Zergatul.Cryptography.Certificate
     /// </summary>
     public class AuthorityInformationAccess : X509Extension
     {
-        public IReadOnlyCollection<AccessDescription> Descriptions => _descriptions.AsReadOnly();
+        public IReadOnlyList<AccessDescription> Descriptions => _descriptions.AsReadOnly();
 
         private List<AccessDescription> _descriptions;
 

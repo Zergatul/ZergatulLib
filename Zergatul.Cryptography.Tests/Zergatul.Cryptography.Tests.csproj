@@ -58,6 +58,8 @@
     <Compile Include="Asymmetric\ECDiffieHellmanTests.cs" />
     <Compile Include="Asymmetric\ECDSATests.cs" />
     <Compile Include="Asymmetric\DSATests.cs" />
+    <Compile Include="Certificate\CertificateTests.cs" />
+    <Compile Include="Certificate\ChainTests.cs" />
     <Compile Include="Hash\StreebogTests.cs" />
     <Compile Include="Symmetric\RC2Tests.cs" />
     <Compile Include="Symmetric\DESTests.cs" />
@@ -92,6 +94,18 @@
       <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
       <Name>Zergatul</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Certificate\StarfieldRootCertificateAuthority.crt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Certificate\StarfieldSecureCertificateAuthority.crt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Certificate\tools.ietf.org.crt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

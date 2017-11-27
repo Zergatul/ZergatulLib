@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Certificate.Extensions;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -35,12 +36,12 @@ namespace Zergatul.Cryptography.Certificate
             if (store != null)
                 certificates = certificates.Where(c => !c.IsSelfSigned()).ToArray();
 
-            if (certificates.Any(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Single().KeyIdentifier == null))
+            if (certificates.Any(c => c.Extensions.Get<AuthorityKeyIdentifier>()?.KeyIdentifier == null))
                 throw new NotSupportedException();
 
             if (store != null)
             {
-                var rootLinked = certificates.Where(c => FindBySubjectKeyId(certificates, c.Extensions.OfType<AuthorityKeyIdentifier>().Single().KeyIdentifier).Count() == 0).ToArray();
+                var rootLinked = certificates.Where(c => FindBySubjectKeyId(certificates, c.Extensions.Get<AuthorityKeyIdentifier>().KeyIdentifier).Count() == 0).ToArray();
                 if (rootLinked.Length != 1)
                     throw new InvalidOperationException("1 certificate should point to root");
 
@@ -51,7 +52,7 @@ namespace Zergatul.Cryptography.Certificate
 
             while (list.Count < certificates.Count())
             {
-                var certs = FindByAuthorityKeyId(certificates, list.Last().Extensions.OfType<SubjectKeyIdentifier>().Single().KeyIdentifier).ToArray();
+                var certs = FindByAuthorityKeyId(certificates, list.Last().Extensions.Get<SubjectKeyIdentifier>().KeyIdentifier).ToArray();
                 if (certs.Length != 1)
                     throw new InvalidOperationException("Cannot form chain");
                 list.Add(certs[0]);
@@ -59,7 +60,7 @@ namespace Zergatul.Cryptography.Certificate
 
             if (store != null)
             {
-                var root = store.FindBySubjectKeyId(list.First().Extensions.OfType<AuthorityKeyIdentifier>().Single().KeyIdentifier);
+                var root = store.FindBySubjectKeyId(list.First().Extensions.Get<AuthorityKeyIdentifier>().KeyIdentifier);
                 if (root == null)
                     throw new InvalidOperationException("Cannot find root certificate in store");
                 list.Insert(0, root);
@@ -70,12 +71,12 @@ namespace Zergatul.Cryptography.Certificate
 
         private static IEnumerable<X509Certificate> FindBySubjectKeyId(IEnumerable<X509Certificate> certificates, byte[] subject)
         {
-            return certificates.Where(c => c.Extensions.OfType<SubjectKeyIdentifier>().SingleOrDefault()?.KeyIdentifier?.SequenceEqual(subject) ?? false);
+            return certificates.Where(c => c.Extensions.Get<SubjectKeyIdentifier>()?.KeyIdentifier?.SequenceEqual(subject) ?? false);
         }
 
         private static IEnumerable<X509Certificate> FindByAuthorityKeyId(IEnumerable<X509Certificate> certificates, byte[] subject)
         {
-            return certificates.Where(c => c.Extensions.OfType<AuthorityKeyIdentifier>().Single().KeyIdentifier.SequenceEqual(subject));
+            return certificates.Where(c => c.Extensions.Get<AuthorityKeyIdentifier>().KeyIdentifier.SequenceEqual(subject));
         }
 
         public bool Validate()

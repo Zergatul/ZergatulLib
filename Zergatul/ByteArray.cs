@@ -110,6 +110,16 @@ namespace Zergatul
             return true;
         }
 
+        public static bool IsSubArray(byte[] array1, byte[] array2, int index)
+        {
+            if (array1.Length - array2.Length < index)
+                return false;
+            for (int i = 0; i < array2.Length; i++)
+                if (array1[index + i] != array2[i])
+                    return false;
+            return true;
+        }
+
         /// <summary>
         /// b1 = b1 ^ b2
         /// </summary>
