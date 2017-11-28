@@ -15,6 +15,8 @@ namespace Zergatul.Network.ASN1.Structures.X509
         public AlgorithmIdentifier SignatureAlgorithm { get; private set; }
         public byte[] SignatureValue { get; private set; }
 
+        public byte[] TBSCertificateRaw { get; private set; }
+
         public static Certificate Parse(ASN1Element element)
         {
             var result = new Certificate();
@@ -24,6 +26,7 @@ namespace Zergatul.Network.ASN1.Structures.X509
             ParseException.ThrowIfNotEqual(seq.Elements.Count, 3);
 
             result.TBSCertificate = TBSCertificate.Parse(seq.Elements[0]);
+            result.TBSCertificateRaw = seq.Elements[0].Raw;
             result.SignatureAlgorithm = AlgorithmIdentifier.Parse(seq.Elements[1]);
 
             var bitstr = seq.Elements[2] as BitString;

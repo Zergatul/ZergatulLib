@@ -581,14 +581,13 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Unexpected Certificate message");
             }
 
-            var chain = X509Chain.Build(message.Certificates, new WindowsRootCertificateStore());
-            if (!chain.Validate())
+            var tree = X509Tree.Build(message.Certificates, new WindowsRootCertificateStore());
+            SecurityParameters.ServerCertificate = tree.Leaves.First();
+            if (!tree.Validate(SecurityParameters.ServerCertificate))
             {
                 WriteAlertBadCertificate();
                 throw new TlsStreamException("Certificate chain is not trusted");
             }
-
-            SecurityParameters.ServerCertificate = chain.List.Last();
 
             State = ConnectionState.ServerCertificate;
         }

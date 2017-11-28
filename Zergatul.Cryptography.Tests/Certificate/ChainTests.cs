@@ -8,7 +8,7 @@ namespace Zergatul.Cryptography.Tests.Certificate
     public class ChainTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void ToolsIetfOrg()
         {
             var certs = new[]
             {
@@ -16,7 +16,9 @@ namespace Zergatul.Cryptography.Tests.Certificate
                 new X509Certificate("Certificate/StarfieldSecureCertificateAuthority.crt"),
                 new X509Certificate("Certificate/StarfieldRootCertificateAuthority.crt")
             };
-            var chain = X509Chain.Build(certs);
+            var store = new SimpleRootCertificateStore(certs[2]);
+            var chain = X509Tree.Build(certs, store);
+            Assert.IsTrue(chain.Validate(certs[0]));
         }
     }
 }

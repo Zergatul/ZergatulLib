@@ -63,6 +63,7 @@
     <Compile Include="Cryptography\Asymmetric\RSAPublicKey.cs" />
     <Compile Include="Cryptography\Asymmetric\SignatureScheme.cs" />
     <Compile Include="Cryptography\Certificate\AttributesCollection.cs" />
+    <Compile Include="Cryptography\Certificate\SimpleRootCertificateStore.cs" />
     <Compile Include="Cryptography\Certificate\X509ExtensionsCollection.cs" />
     <Compile Include="Network\ASN1\Structures\CryptographicMessageSyntax.cs" />
     <Compile Include="Cryptography\Hash\Streebog.cs" />
@@ -142,7 +143,7 @@
     <Compile Include="Cryptography\Certificate\Extensions\SubjectKeyIdentifier.cs" />
     <Compile Include="Cryptography\Certificate\UserNotice.cs" />
     <Compile Include="Cryptography\Certificate\WindowsRootCertificateStore.cs" />
-    <Compile Include="Cryptography\Certificate\X509Chain.cs" />
+    <Compile Include="Cryptography\Certificate\X509Tree.cs" />
     <Compile Include="Cryptography\Certificate\X509Extension.cs" />
     <Compile Include="Cryptography\Certificate\AuthorityInformationAccess.cs" />
     <Compile Include="Cryptography\Certificate\X509Certificate.cs" />

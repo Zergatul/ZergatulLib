@@ -31,7 +31,11 @@ namespace Zergatul.Cryptography.Certificate
         public PublicKey PublicKey { get; private set; }
         public byte[] SerialNumber { get; private set; }
         public string SerialNumberString => BitHelper.BytesToHex(SerialNumber).ToUpper();
+
         public OID SignatureAlgorithm { get; private set; }
+        public byte[] Signature { get; private set; }
+        public byte[] SignedData { get; private set; }
+
         public string Thumbprint { get; private set; }
 
         public byte[] RawData { get; private set; }
@@ -97,7 +101,7 @@ namespace Zergatul.Cryptography.Certificate
             if (authKeyId == null)
                 return true;
 
-            if (subjKeyId != null && subjKeyId.KeyIdentifier.SequenceEqual(authKeyId.KeyIdentifier))
+            if (subjKeyId != null && ByteArray.Equals(subjKeyId.KeyIdentifier, authKeyId.KeyIdentifier))
                 return true;
 
             return false;
@@ -118,6 +122,8 @@ namespace Zergatul.Cryptography.Certificate
             Subject = new AttributesCollection(syntax.TBSCertificate.Subject);
 
             SignatureAlgorithm = syntax.SignatureAlgorithm.Algorithm;
+            Signature = syntax.SignatureValue;
+            SignedData = syntax.TBSCertificateRaw;
 
             PublicKey = new PublicKey(syntax.TBSCertificate.SubjectPublicKeyInfo);
 
