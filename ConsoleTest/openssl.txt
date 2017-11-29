@@ -1,0 +1,8 @@
+﻿c:\Program Files\OpenSSL\bin>openssl cms
+-in "c:\users\Zergatul\Desktop\sign.txt"
+-sign
+-signer "mycert.crt"
+-inkey "rsa-4096.key"
+-nodetach
+outform
+der

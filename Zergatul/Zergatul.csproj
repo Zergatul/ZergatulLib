@@ -56,6 +56,8 @@
     <Compile Include="Cryptography\Asymmetric\ECPointGeneric.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\EncryptionScheme.cs" />
+    <Compile Include="Cryptography\Asymmetric\GOSTRSignature.cs" />
+    <Compile Include="Cryptography\Asymmetric\GOSTR_34_10_2012.cs" />
     <Compile Include="Cryptography\Asymmetric\NullParam.cs" />
     <Compile Include="Cryptography\Asymmetric\RSA.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAParameters.cs" />
