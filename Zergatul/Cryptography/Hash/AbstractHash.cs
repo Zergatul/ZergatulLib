@@ -50,6 +50,18 @@ namespace Zergatul.Cryptography.Hash
             ProcessBuffer();
         }
 
+        public void Update(byte[] data, int index, int length)
+        {
+            if (index + length > data.Length)
+                throw new InvalidOperationException();
+
+            for (int i = 0; i < length; i++)
+                _buffer.Add(data[i]);
+            _totalBytes += (ulong)length;
+
+            ProcessBuffer();
+        }
+
         public byte[] ComputeHash()
         {
             AddPadding();

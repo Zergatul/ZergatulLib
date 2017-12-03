@@ -18,7 +18,7 @@ namespace Zergatul.Network.Tls
 
         public uint GetGMTUnixTime()
         {
-            return (uint)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+            return (uint)(DateTime.UtcNow - Constants.UnixTimeStart).TotalSeconds;
         }
 
         public byte[] GetRandomBytes(int count)

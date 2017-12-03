@@ -7,21 +7,16 @@ using System.Threading.Tasks;
 namespace Zergatul.Cryptocurrency.Bitcoin
 {
     /// <summary>
-    /// Pay-to-pubkey-hash
+    /// Pay-to-pubkey
     /// </summary>
-    public class P2PKHAddress : Address
+    public class P2PKAddress : Address
     {
-        public static P2PKHAddress FromPublicKey(byte[] pubkeyData)
+        public static P2PKAddress FromPublicKey(byte[] pubkeyData)
         {
             var ripesha = new RIPE160SHA256();
             ripesha.Update(pubkeyData);
             byte[] hash = ripesha.ComputeHash();
-            return FromPublicKeyHash(hash);
-        }
-
-        public static P2PKHAddress FromPublicKeyHash(byte[] hash)
-        {
-            return new P2PKHAddress
+            return new P2PKAddress
             {
                 _value = "1" + Base58Encoding.Encode(0, hash)
             };

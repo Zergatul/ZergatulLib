@@ -16,9 +16,14 @@ namespace Zergatul.Cryptocurrency.Bitcoin
             var ripesha = new RIPE160SHA256();
             ripesha.Update(scriptData);
             byte[] hash = ripesha.ComputeHash();
+            return FromScriptHash(hash);
+        }
+
+        public static P2SHAddress FromScriptHash(byte[] hash)
+        {
             return new P2SHAddress
             {
-                _value = "3" + Base58Encoding.Encode(hash)
+                _value = Base58Encoding.Encode(5, hash)
             };
         }
     }

@@ -120,6 +120,14 @@ namespace Zergatul
             return true;
         }
 
+        public static bool IsZero(byte[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+                if (array[i] != 0)
+                    return false;
+            return true;
+        }
+
         /// <summary>
         /// b1 = b1 ^ b2
         /// </summary>
