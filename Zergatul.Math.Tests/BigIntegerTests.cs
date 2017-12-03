@@ -208,6 +208,13 @@ namespace Zergatul.Math.Tests
             Assert.IsTrue(bi.ToString() == "11");
         }
 
+        [TestMethod]
+        public void ToString10_4()
+        {
+            var bi = new BigInteger(BitHelper.HexToBytes("05e9c3dd0c07aac76179ebc76a6c78d4d67c6c160a7f297f31"), ByteOrder.BigEndian);
+            Assert.IsTrue(bi.ToString() == "37117412046184165215328310413872196888161402012543360794417");
+        }
+
         #endregion
 
         #region Base 15

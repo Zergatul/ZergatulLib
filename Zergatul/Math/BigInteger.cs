@@ -739,7 +739,7 @@ namespace Zergatul.Math
                 int radixLength = DigitsPerUInt32[radix];
                 uint radixUIn32 = RadixUInt32[radix];
                 var remainder = this;
-                char[] result = new char[radixLength * (_wordsLength + 1)];
+                char[] result = new char[(radixLength + 1) * (_wordsLength + 1)];
                 char[] buffer = new char[radixLength];
                 int index = 0;
 
@@ -754,7 +754,7 @@ namespace Zergatul.Math
 
                 Array.Reverse(result);
                 index = 0;
-                while (result[index] == symbols[0])
+                while (result[index] == symbols[0] || result[index] == '\0')
                     index++;
                 return (_sign < 0 ? "-" : "") + new string(result, index, result.Length - index);
             }
