@@ -179,5 +179,29 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             else
                 y = Curve.p - sqrt;
         }
+
+        public byte[] ToUncompressed()
+        {
+            int len = (Curve.BitSize + 7) / 8;
+            byte[] data = new byte[2 * len + 1];
+            data[0] = 0x04;
+            Array.Copy(x.ToBytes(ByteOrder.BigEndian, len), 0, data, 1, len);
+            Array.Copy(y.ToBytes(ByteOrder.BigEndian, len), 0, data, 1 + len, len);
+
+            return data;
+        }
+
+        public byte[] ToCompressed()
+        {
+            int len = (Curve.BitSize + 7) / 8;
+            byte[] data = new byte[len + 1];
+            if (y.IsOdd)
+                data[0] = 0x03;
+            else
+                data[0] = 0x02;
+            Array.Copy(x.ToBytes(ByteOrder.BigEndian, len), 0, data, 1, len);
+
+            return data;
+        }
     }
 }

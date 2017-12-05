@@ -26,5 +26,21 @@ namespace Zergatul.Cryptocurrency.Bitcoin
             var bigint = new BigInteger(bytes, ByteOrder.BigEndian);
             return bigint.ToString(58, Symbols);
         }
+
+        public static byte[] Decode(string value)
+        {
+            var bi = BigInteger.Parse(value, 58, Symbols);
+            byte[] bytes = bi.ToBytes(ByteOrder.BigEndian);
+
+            var dsha256 = new DoubleSHA256();
+            dsha256.Update(bytes, 0, bytes.Length - 4);
+            byte[] hash = dsha256.ComputeHash();
+
+            for (int i = 0; i < 4; i++)
+                if (bytes[bytes.Length - 4 + i] != hash[i])
+                    throw new InvalidOperationException("Invalid check sum");
+
+            return ByteArray.SubArray(bytes, 0, bytes.Length - 4);
+        }
     }
 }

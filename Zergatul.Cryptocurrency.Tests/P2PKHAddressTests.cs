@@ -38,5 +38,13 @@ namespace Zergatul.Cryptocurrency.Tests
                 Assert.IsTrue(addr.Value == kv.Value);
             }
         }
+
+        [TestMethod]
+        public void WIFImportTest()
+        {
+            var addr = P2PKHAddress.FromWIF("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ");
+            Assert.IsTrue(addr.Value == "1GAehh7TsJAHuUAeKZcXf5CnwuGuGgyX2S");
+            Assert.IsTrue(addr.Another.Value == "1LoVGDgRs9hTfTNJNuXKSpywcbdvwRXpmK");
+        }
     }
 }

@@ -160,9 +160,11 @@ namespace Zergatul.Math
 
         public static BigInteger Parse(string value, int radix = 10)
         {
-            if (radix < 2 || radix > 36)
-                throw new ArgumentOutOfRangeException(nameof(radix));
+            return Parse(value, radix, DefaultSymbols);
+        }
 
+        public static BigInteger Parse(string value, int radix, char[] symbols)
+        {
             int sign = 1;
             if (value.StartsWith("-"))
             {
@@ -170,7 +172,7 @@ namespace Zergatul.Math
                 value = value.Substring(1);
             }
 
-            value = value.TrimStart('0');
+            value = value.TrimStart(symbols[0]);
             if (value.Length == 0)
                 return Zero;
 
@@ -191,7 +193,7 @@ namespace Zergatul.Math
                 firstGroupLen = DigitsPerUInt32[radix];
             string group = value.Substring(cursor, firstGroupLen);
             cursor += firstGroupLen;
-            words[0] = Convert.ToUInt32(group, radix);
+            words[0] = StringToUInt32(group, radix, symbols); //Convert.ToUInt32(group, radix);
 
             uint superRadix = RadixUInt32[radix];
             int wordsLength = 1;
@@ -199,7 +201,7 @@ namespace Zergatul.Math
             {
                 group = value.Substring(cursor, DigitsPerUInt32[radix]);
                 cursor += DigitsPerUInt32[radix];
-                uint groupValue = Convert.ToUInt32(group, radix);
+                uint groupValue = StringToUInt32(group, radix, symbols); //Convert.ToUInt32(group, radix);
                 DestructiveMulAdd(words, wordsLength, superRadix, groupValue);
 
                 if (wordsLength < words.Length && words[wordsLength] != 0)
@@ -1789,6 +1791,25 @@ namespace Zergatul.Math
                 result[i] = symbols[value & 0x0F];
                 value >>= 4;
             }
+        }
+
+        static uint StringToUInt32(string value, int radix, char[] symbols)
+        {
+            uint result = 0;
+            for (int i = 0; i < value.Length; i++)
+            {
+                int index = -1;
+                for (int j = 0; j < symbols.Length; j++)
+                    if (symbols[j] == value[i])
+                    {
+                        index = j;
+                        break;
+                    }
+                if (index == -1)
+                    throw new InvalidOperationException();
+                result = result * (uint)radix + (uint)index;
+            }
+            return result;
         }
 
         private static byte SafeGetByte(byte[] data, int dataLen, int index)

@@ -47,6 +47,7 @@
     <Compile Include="Bitcoin\Block.cs" />
     <Compile Include="Bitcoin\BlockParseException.cs" />
     <Compile Include="Bitcoin\P2PKAddress.cs" />
+    <Compile Include="Bitcoin\PrivateKey.cs" />
     <Compile Include="Bitcoin\ScriptOpcodes\Opcode.cs" />
     <Compile Include="Bitcoin\ScriptOpcodes\Operator.cs" />
     <Compile Include="Bitcoin\ScriptParseException.cs" />
