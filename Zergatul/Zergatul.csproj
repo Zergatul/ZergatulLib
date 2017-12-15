@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -67,6 +68,9 @@
     <Compile Include="Cryptography\Certificate\AttributesCollection.cs" />
     <Compile Include="Cryptography\Certificate\SimpleRootCertificateStore.cs" />
     <Compile Include="Cryptography\Certificate\X509ExtensionsCollection.cs" />
+    <Compile Include="Cryptography\KDF\PBKDF2.cs" />
+    <Compile Include="Cryptography\KDF\Scrypt.cs" />
+    <Compile Include="Cryptography\KDF\HKDF.cs" />
     <Compile Include="Network\ASN1\Structures\CryptographicMessageSyntax.cs" />
     <Compile Include="Cryptography\Hash\Streebog.cs" />
     <Compile Include="Cryptography\Symmetric\AbstractBlockCipher.cs" />

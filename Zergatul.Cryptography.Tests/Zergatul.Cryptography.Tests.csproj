@@ -26,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -62,6 +63,9 @@
     <Compile Include="Certificate\CertificateTests.cs" />
     <Compile Include="Certificate\ChainTests.cs" />
     <Compile Include="Hash\StreebogTests.cs" />
+    <Compile Include="KDF\HKDFTests.cs" />
+    <Compile Include="KDF\ScryptTests.cs" />
+    <Compile Include="KDF\PBKDF2Tests.cs" />
     <Compile Include="Symmetric\RC2Tests.cs" />
     <Compile Include="Symmetric\DESTests.cs" />
     <Compile Include="Symmetric\GCMTests.cs" />
@@ -98,6 +102,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="Certificate\stackexchangecom.crt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Certificate\StarfieldRootCertificateAuthority.crt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

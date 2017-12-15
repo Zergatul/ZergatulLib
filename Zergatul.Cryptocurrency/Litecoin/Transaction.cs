@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Cryptocurrency
+namespace Zergatul.Cryptocurrency.Litecoin
 {
-    public class Class1
+    public class Transaction : TransactionBase
     {
     }
 }

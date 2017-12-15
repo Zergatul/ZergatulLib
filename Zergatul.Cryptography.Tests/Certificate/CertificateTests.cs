@@ -179,5 +179,107 @@ namespace Zergatul.Cryptography.Tests.Certificate
             Assert.IsTrue(cert.Extensions.Get<SubjectKeyIdentifier>().KeyIdentifier.SequenceEqual(
                 BitHelper.HexToBytes("7c0c321fa7d9307fc47d68a362a8a1ceab075b27")));
         }
+
+        [TestMethod]
+        public void StackExchange()
+        {
+            var cert = new X509Certificate("Certificate/stackexchangecom.crt");
+
+            Assert.IsTrue(cert.SerialNumberString == "0E11BBD70D54B710D0C6F540B6B52CA4");
+            Assert.IsTrue(cert.SignatureAlgorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.SHA256WithRSA);
+
+            Assert.IsTrue(cert.NotBefore.ToUniversalTime() == new DateTime(2016, 5, 21, 0, 0, 0, DateTimeKind.Utc));
+            Assert.IsTrue(cert.NotAfter.ToUniversalTime() == new DateTime(2019, 8, 14, 12, 0, 0, DateTimeKind.Utc));
+
+            Assert.IsTrue(cert.Issuer["CN"] == "DigiCert SHA2 High Assurance Server CA");
+            Assert.IsTrue(cert.Issuer["OU"] == "www.digicert.com");
+            Assert.IsTrue(cert.Issuer["O"] == "DigiCert Inc");
+            Assert.IsTrue(cert.Issuer["C"] == "US");
+
+            Assert.IsTrue(cert.Subject["CN"] == "*.stackexchange.com");
+            Assert.IsTrue(cert.Subject["O"] == "Stack Exchange, Inc.");
+            Assert.IsTrue(cert.Subject["L"] == "New York");
+            Assert.IsTrue(cert.Subject["ST"] == "NY");
+            Assert.IsTrue(cert.Subject["C"] == "US");
+
+            Assert.IsTrue(cert.PublicKey.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.RSA);
+            Assert.IsTrue(cert.PublicKey.Key.Length == 270);
+
+            Assert.IsFalse(cert.Extensions.Get<AuthorityKeyIdentifier>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<AuthorityKeyIdentifier>().KeyIdentifier.SequenceEqual(
+                BitHelper.HexToBytes("5168ff90af0207753cccd9656462a212b859723b")));
+
+            Assert.IsFalse(cert.Extensions.Get<SubjectKeyIdentifier>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<SubjectKeyIdentifier>().KeyIdentifier.SequenceEqual(
+                BitHelper.HexToBytes("5ac14263c26213b39d9484aa321e17cb6da3867b")));
+
+            Assert.IsFalse(cert.Extensions.Get<SubjectAlternativeName>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<SubjectAlternativeName>().Names.List.Select(n => n.DNSName).SequenceEqual(new[]
+            {
+                "*.stackexchange.com",
+                "stackoverflow.com",
+                "*.stackoverflow.com",
+                "stackauth.com",
+                "sstatic.net",
+                "*.sstatic.net",
+                "serverfault.com",
+                "*.serverfault.com",
+                "superuser.com",
+                "*.superuser.com",
+                "stackapps.com",
+                "openid.stackauth.com",
+                "stackexchange.com",
+                "*.meta.stackexchange.com",
+                "meta.stackexchange.com",
+                "mathoverflow.net",
+                "*.mathoverflow.net",
+                "askubuntu.com",
+                "*.askubuntu.com",
+                "stacksnippets.net",
+                "*.blogoverflow.com",
+                "blogoverflow.com",
+                "*.meta.stackoverflow.com",
+                "*.stackoverflow.email",
+                "stackoverflow.email"
+            }));
+
+            Assert.IsTrue(cert.Extensions.Get<KeyUsage>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<KeyUsage>().DigitalSignature);
+            Assert.IsTrue(cert.Extensions.Get<KeyUsage>().KeyEncipherment);
+
+            Assert.IsFalse(cert.Extensions.Get<ExtendedKeyUsage>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<ExtendedKeyUsage>().KeyPurposes.SequenceEqual(new OID[]
+            {
+                OID.ISO.IdentifiedOrganization.DOD.Internet.Security.Mechanisms.PKIX.KP.ServerAuth,
+                OID.ISO.IdentifiedOrganization.DOD.Internet.Security.Mechanisms.PKIX.KP.ClientAuth
+            }));
+
+            Assert.IsFalse(cert.Extensions.Get<CRLDistributionPoints>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<CRLDistributionPoints>()
+                .Points
+                .SelectMany(p => p.Name.FullName.List.Select(n => n.UniformResourceIdentifier))
+                .SequenceEqual(new[]
+                {
+                    "http://crl3.digicert.com/sha2-ha-server-g5.crl",
+                    "http://crl4.digicert.com/sha2-ha-server-g5.crl"
+                }));
+
+            Assert.IsFalse(cert.Extensions.Get<CertificatePolicies>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<CertificatePolicies>().List[0].PolicyIdentifier.DotNotation == "2.16.840.1.114412.1.1");
+            Assert.IsTrue(cert.Extensions.Get<CertificatePolicies>().List[1].PolicyIdentifier.DotNotation == "2.23.140.1.2.2");
+
+            Assert.IsFalse(cert.Extensions.Get<AuthorityInformationAccess>().Critical);
+            Assert.IsTrue(cert.Extensions.Get<AuthorityInformationAccess>().Descriptions[0].AccessMethod ==
+                OID.ISO.IdentifiedOrganization.DOD.Internet.Security.Mechanisms.PKIX.AD.OCSP);
+            Assert.IsTrue(cert.Extensions.Get<AuthorityInformationAccess>().Descriptions[0].AccessLocation.UniformResourceIdentifier ==
+                "http://ocsp.digicert.com");
+            Assert.IsTrue(cert.Extensions.Get<AuthorityInformationAccess>().Descriptions[1].AccessMethod ==
+                OID.ISO.IdentifiedOrganization.DOD.Internet.Security.Mechanisms.PKIX.AD.CAIssuers);
+            Assert.IsTrue(cert.Extensions.Get<AuthorityInformationAccess>().Descriptions[1].AccessLocation.UniformResourceIdentifier ==
+                "http://cacerts.digicert.com/DigiCertSHA2HighAssuranceServerCA.crt");
+
+            Assert.IsTrue(cert.Extensions.Get<BasicConstraints>().Critical);
+            Assert.IsFalse(cert.Extensions.Get<BasicConstraints>().CA);
+        }
     }
 }

@@ -62,8 +62,11 @@
     <Compile Include="Bitcoin\Script.cs" />
     <Compile Include="Bitcoin\Transaction.cs" />
     <Compile Include="Bitcoin\VarLengthInt.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="BlockBase.cs" />
+    <Compile Include="Litecoin\Block.cs" />
+    <Compile Include="Litecoin\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransactionBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

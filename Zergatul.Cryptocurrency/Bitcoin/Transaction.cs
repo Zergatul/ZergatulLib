@@ -3,32 +3,13 @@ using System.Collections.Generic;
 
 namespace Zergatul.Cryptocurrency.Bitcoin
 {
-    public class Transaction
+    public class Transaction : TransactionBase
     {
         public uint Version { get; set; }
         public List<Input> Inputs { get; set; }
         public List<Output> Outputs { get; set; }
         public uint LockTime { get; set; }
         public byte[][] SegWit { get; set; }
-
-        public byte[] Raw { get; private set; }
-
-        private byte[] _id;
-        public byte[] ID
-        {
-            get
-            {
-                if (_id == null)
-                {
-                    var hash = new DoubleSHA256();
-                    hash.Update(Raw);
-                    _id = hash.ComputeHash();
-                    Array.Reverse(_id);
-                }
-                return _id;
-            }
-        }
-        public string IDString => BitHelper.BytesToHex(ID);
 
         public static Transaction FromBytes(byte[] data, ref int index)
         {

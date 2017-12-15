@@ -48,6 +48,20 @@ namespace Zergatul.Cryptography.Hash
             return _hash.ComputeHash();
         }
 
+        public byte[] ComputeHash(byte[] data, int index, int length)
+        {
+            // RFC 2104 // Page 2
+            _hash.Reset();
+            _hash.Update(_ipad);
+            _hash.Update(data, index, length);
+            byte[] h = _hash.ComputeHash();
+
+            _hash.Reset();
+            _hash.Update(_opad);
+            _hash.Update(h);
+            return _hash.ComputeHash();
+        }
+
         private void Init(byte[] secretKey)
         {
             if (secretKey.Length > BlockSize)

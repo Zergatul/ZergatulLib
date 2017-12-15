@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network;
+using Zergatul.Cryptography.KDF;
 
-namespace Zergatul.Cryptocurrency.Bitcoin
+namespace Zergatul.Cryptocurrency.Litecoin
 {
     public class Block : BlockBase
     {
@@ -28,7 +28,12 @@ namespace Zergatul.Cryptocurrency.Bitcoin
             var block = new Block();
             block.Parse(data);
             block._transactions = block._txs.Cast<Transaction>().ToArray();
-            block.MiningWork = block.BlockID;
+
+            byte[] header = ByteArray.SubArray(data, 0, 80);
+            var scrypt = new Scrypt();
+            block.MiningWork = scrypt.DeriveKeyBytes(header, header, 1, 1024, 1, 32);
+            Array.Reverse(block.MiningWork);
+
             return block;
         }
 
@@ -36,7 +41,7 @@ namespace Zergatul.Cryptocurrency.Bitcoin
 
         protected override TransactionBase ParseTransaction(byte[] data, ref int index)
         {
-            return Transaction.FromBytes(data, ref index);
+            return null;
         }
     }
 }

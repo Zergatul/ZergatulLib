@@ -406,5 +406,28 @@ namespace Zergatul
             else
                 throw new NotImplementedException();
         }
+
+        public static byte[] ToByteArray(uint[] array, ByteOrder order)
+        {
+            byte[] result = new byte[array.Length * 4];
+            for (int i = 0; i < array.Length; i++)
+                GetBytes(array[i], order, result, i * 4);
+
+            return result;
+        }
+
+        public static uint[] ToUInt32Array(byte[] array, ByteOrder order)
+        {
+            if ((array.Length & 0x03) != 0)
+                throw new InvalidOperationException();
+
+            uint[] result = new uint[array.Length >> 2];
+            for (int i = 0; i < result.Length; i++)
+                result[i] = ToUInt32(array, i << 2, order);
+
+            return result;
+        }
+
+
     }
 }
