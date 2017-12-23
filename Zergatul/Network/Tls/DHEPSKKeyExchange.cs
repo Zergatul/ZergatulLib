@@ -17,8 +17,8 @@ namespace Zergatul.Network.Tls
         public override MessageInfo ClientCertificateMessage => MessageInfo.Forbidden;
         public override MessageInfo CertificateverifyMessage => MessageInfo.Forbidden;
 
-        private DiffieHellman _dhServer;
-        private DiffieHellman _dhClient;
+        private DiffieHellman _dh;
+        private byte[] _otherSecret;
         private byte[] _identityHint;
 
         #region ServerKeyExchange
@@ -28,7 +28,7 @@ namespace Zergatul.Network.Tls
             var message = new ServerKeyExchange();
             message.PSKIdentityHint = Settings.PSKIdentityHint ?? new byte[0];
 
-            _dhServer = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
+            _dh = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
 
             return message;
         }
@@ -41,7 +41,7 @@ namespace Zergatul.Network.Tls
             this._identityHint = message.PSKIdentityHint;
 
             DHERoutine.ReadServerKeyExchange(message, reader);
-            _dhClient = DHERoutine.GetSharedSecretAsClient(message, Random);
+            _otherSecret = DHERoutine.GetSharedSecretAsClient(message, Random, out _dh);
 
             return message;
         }
@@ -68,8 +68,8 @@ namespace Zergatul.Network.Tls
             var message = new ClientKeyExchange();
             message.PSKIdentity = psk.Identity;
 
-            byte[] otherSecret = DHERoutine.GenerateClientKeyExchange(message, _dhClient);
-            PreMasterSecret = PSKKeyExchange.CreateSharedSecret(otherSecret, psk.Secret);
+            DHERoutine.GenerateClientKeyExchange(message, _dh);
+            PreMasterSecret = PSKKeyExchange.CreateSharedSecret(_otherSecret, psk.Secret);
 
             return message;
         }
@@ -83,7 +83,7 @@ namespace Zergatul.Network.Tls
             message.PSKIdentity = reader.ReadBytes(reader.ReadShort());
 
             var psk = Settings.GetPSKByIdentity(message.PSKIdentity);
-            byte[] otherSecret = DHERoutine.ReadClientKeyExchange(message, reader, _dhServer);
+            byte[] otherSecret = DHERoutine.ReadClientKeyExchange(message, reader, _dh);
             PreMasterSecret = PSKKeyExchange.CreateSharedSecret(otherSecret, psk.Secret);
 
             return message;

@@ -1,71 +1,62 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class DiffieHellman : AbstractAsymmetricAlgorithm<DiffieHellmanParameters, BigInteger, BigInteger, BigInteger, NullParam, NullParam>
+    public class DiffieHellman : AbstractKeyExchange<DiffieHellmanPrivateKey, DiffieHellmanPublicKey, DiffieHellmanParameters>
     {
-        public override BigInteger PrivateKey { get; set; }
-        public override BigInteger PublicKey { get; set; }
-        public override DiffieHellmanParameters Parameters { get; set; }
-
-        public override int KeySize => Parameters.p.BitSize;
-
-        private DHKeyExchange _keyExchange;
-
-        public override void GenerateKeys()
-        {
-            PrivateKey = BigInteger.Random(Parameters.p, Random);
-            PublicKey = BigInteger.ModularExponentiation(Parameters.g, PrivateKey, Parameters.p);
-        }
-
-        public override AbstractSignatureAlgorithm<NullParam, NullParam> Signature
+        public override DiffieHellmanPrivateKey PrivateKey
         {
             get
             {
-                throw new NotSupportedException("Diffie Hellman doesn't support signing");
+                return base.PrivateKey;
+            }
+            set
+            {
+                base.PrivateKey = value;
+                value.DH = this;
             }
         }
 
-        public override AbstractAsymmetricEncryption Encryption
+        public override DiffieHellmanPublicKey PublicKey
         {
             get
             {
-                throw new NotSupportedException("Diffie Hellman doesn't support ecryption");
+                return base.PublicKey;
+            }
+            set
+            {
+                base.PublicKey = value;
+                value.DH = this;
             }
         }
 
-        public override AbstractKeyExchangeAlgorithm<BigInteger, BigInteger> KeyExchange
+        public override void GenerateKeyPair(int keySize)
         {
-            get
-            {
-                if (_keyExchange == null)
-                {
-                    if (PrivateKey == null || PublicKey == null)
-                        throw new InvalidOperationException("You should fill PrivateKey/PublicKey before using KeyExchange");
-                    _keyExchange = new DHKeyExchange(this);
-                }
-                return _keyExchange;
-            }
+            PrivateKey = new DiffieHellmanPrivateKey(BigInteger.Random(Parameters.p, Random));
+            PublicKey = new DiffieHellmanPublicKey(BigInteger.ModularExponentiation(Parameters.g, PrivateKey.Value, Parameters.p));
         }
 
-        private class DHKeyExchange : AbstractKeyExchangeAlgorithm<BigInteger, BigInteger>
+        public override byte[] CalculateSharedSecret(DiffieHellmanPublicKey key)
         {
-            private DiffieHellman dh;
+            if (PrivateKey == null)
+                throw new InvalidOperationException("Private key is required");
 
-            public DHKeyExchange(DiffieHellman dh)
-            {
-                this.dh = dh;
-            }
-
-            public override void CalculateSharedSecret(BigInteger publicKey)
-            {
-                SharedSecret = BigInteger.ModularExponentiation(publicKey, dh.PrivateKey, dh.Parameters.p);
-            }
+            return BigInteger.ModularExponentiation(key.Value, PrivateKey.Value, Parameters.p).ToBytes(ByteOrder.BigEndian);
         }
+
+        #region Converters
+
+        public override AbstractSignature ToSignature()
+        {
+            throw new NotSupportedException();
+        }
+
+        public override AbstractKeyExchange ToKeyExchange()
+        {
+            return this;
+        }
+
+        #endregion
     }
 }

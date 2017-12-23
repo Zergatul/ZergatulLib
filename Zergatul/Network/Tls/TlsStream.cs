@@ -582,11 +582,23 @@ namespace Zergatul.Network.Tls
             }
 
             var tree = X509Tree.Build(message.Certificates, new WindowsRootCertificateStore());
+
             SecurityParameters.ServerCertificate = tree.Leaves.First();
-            if (!tree.Validate(SecurityParameters.ServerCertificate))
+
+            bool trusted;
+
+            if (Role == Role.Client)
             {
-                WriteAlertBadCertificate();
-                throw new TlsStreamException("Certificate chain is not trusted");
+                if (Settings.CertificateValidationOverride != null)
+                    trusted = Settings.CertificateValidationOverride(tree.Root.Certificate);
+                else
+                    trusted = tree.Validate(SecurityParameters.ServerCertificate);
+
+                if (!trusted)
+                {
+                    WriteAlertBadCertificate();
+                    throw new TlsStreamException("Certificate chain is not trusted");
+                }
             }
 
             State = ConnectionState.ServerCertificate;

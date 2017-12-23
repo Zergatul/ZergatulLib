@@ -9,17 +9,19 @@ namespace Zergatul.Network.Tls
     {
         public override SignatureAlgorithm Algorithm => SignatureAlgorithm.ECDSA;
 
-        public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)
+        public override byte[] CreateSignature(AbstractSignature algo, AbstractHash hash, byte[] data)
         {
-            var ecdsa = (ECDSA)algo;
+            var ecdsa = (ECPDSA)algo;
             ecdsa.Random = Random;
-            return ecdsa.Signature.GetScheme("Default").Sign(hash.ComputeHash());
+            ecdsa.Parameters.Hash = hash;
+            return ecdsa.Sign(data);
         }
 
-        public override bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature)
+        public override bool VerifySignature(AbstractSignature algo, AbstractHash hash, byte[] data, byte[] signature)
         {
-            var ecdsa = (ECDSA)algo;
-            return ecdsa.Signature.GetScheme("Default").Verify(signature, hash.ComputeHash());
+            var ecdsa = (ECPDSA)algo;
+            ecdsa.Parameters.Hash = hash;
+            return ecdsa.Verify(data, signature);
         }
     }
 }

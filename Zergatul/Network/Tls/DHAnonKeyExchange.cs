@@ -16,8 +16,8 @@ namespace Zergatul.Network.Tls
         public override MessageInfo ClientCertificateMessage => MessageInfo.Forbidden;
         public override MessageInfo CertificateverifyMessage => MessageInfo.Forbidden;
 
-        private DiffieHellman _dhServer;
-        private DiffieHellman _dhClient;
+        private DiffieHellman _dh;
+        private byte[] _sharedSecret;
 
         #region ServerKeyExchange
 
@@ -25,7 +25,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            _dhServer = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
+            _dh = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
 
             return message;
         }
@@ -35,7 +35,7 @@ namespace Zergatul.Network.Tls
             var message = new ServerKeyExchange();
 
             DHERoutine.ReadServerKeyExchange(message, reader);
-            _dhClient = DHERoutine.GetSharedSecretAsClient(message, Random);
+            PreMasterSecret = DHERoutine.GetSharedSecretAsClient(message, Random, out _dh);
 
             return message;
         }
@@ -52,8 +52,7 @@ namespace Zergatul.Network.Tls
         public override ClientKeyExchange GenerateClientKeyExchange()
         {
             var message = new ClientKeyExchange();
-
-            PreMasterSecret = DHERoutine.GenerateClientKeyExchange(message, _dhClient);
+            DHERoutine.GenerateClientKeyExchange(message, _dh);
 
             return message;
         }
@@ -62,7 +61,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ClientKeyExchange();
 
-            PreMasterSecret = DHERoutine.ReadClientKeyExchange(message, reader, _dhServer);
+            PreMasterSecret = DHERoutine.ReadClientKeyExchange(message, reader, _dh);
 
             return message;
         }

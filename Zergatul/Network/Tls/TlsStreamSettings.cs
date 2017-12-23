@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Asymmetric;
+using Zergatul.Cryptography.Certificate;
 
 namespace Zergatul.Network.Tls
 {
@@ -17,6 +18,7 @@ namespace Zergatul.Network.Tls
         public byte[] PSKIdentityHint;
         public Func<byte[], PreSharedKey> GetPSKByHint;
         public Func<byte[], PreSharedKey> GetPSKByIdentity;
+        public Func<X509Certificate, bool> CertificateValidationOverride;
 
         public static TlsStreamSettings Default = new TlsStreamSettings
         {

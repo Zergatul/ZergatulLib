@@ -38,8 +38,7 @@ namespace Zergatul.Network.Tls
             }
         }
 
-        private ECDiffieHellman _ecdhServer;
-        private ECDiffieHellman _ecdhClient;
+        private ECPDiffieHellman _ecdh;
         private AbstractTlsSignature _signature;
 
         public ECDHEKeyExchange(AbstractTlsSignature signature)
@@ -59,7 +58,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            _ecdhServer = ECDHERoutine.GenerateServerKeyExchange(message, Random, Settings);
+            _ecdh = ECDHERoutine.GenerateServerKeyExchange(message, Random, Settings);
 
             // TODO, get sign and hash from clienthello
             message.SignAndHashAlgo = new SignatureAndHashAlgorithm
@@ -71,11 +70,9 @@ namespace Zergatul.Network.Tls
             var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
 
             var hash = message.SignAndHashAlgo.Hash.Resolve();
-            hash.Update(SecurityParameters.ClientRandom);
-            hash.Update(SecurityParameters.ServerRandom);
-            hash.Update(message.ECParams.ToBytes());
+            var data = ByteArray.Concat(SecurityParameters.ClientRandom, SecurityParameters.ServerRandom, message.ECParams.ToBytes());
 
-            message.Signature = _signature.CreateSignature(algo, hash);
+            message.Signature = _signature.CreateSignature(algo.ToSignature(), hash, data);
 
             return message;
         }
@@ -94,14 +91,12 @@ namespace Zergatul.Network.Tls
             var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
 
             var hash = message.SignAndHashAlgo.Hash.Resolve();
-            hash.Update(SecurityParameters.ClientRandom);
-            hash.Update(SecurityParameters.ServerRandom);
-            hash.Update(message.ECParams.ToBytes());
+            var data = ByteArray.Concat(SecurityParameters.ClientRandom, SecurityParameters.ServerRandom, message.ECParams.ToBytes());
 
-            if (!_signature.VerifySignature(algo, hash, message.Signature))
+            if (!_signature.VerifySignature(algo.ToSignature(), hash, data, message.Signature))
                 throw new InvalidSignatureException();
 
-            _ecdhClient = ECDHERoutine.GetSharedSecretAsClient(message, Random);
+            PreMasterSecret = ECDHERoutine.GetSharedSecretAsClient(message, Random, out _ecdh);
 
             return message;
         }
@@ -124,7 +119,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ClientKeyExchange();
 
-            PreMasterSecret = ECDHERoutine.GenerateClientKeyExchange(message, _ecdhClient);
+            ECDHERoutine.GenerateClientKeyExchange(message, _ecdh);
 
             return message;
         }
@@ -133,7 +128,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ClientKeyExchange();
 
-            PreMasterSecret = ECDHERoutine.ReadClientKeyExchange(message, reader, _ecdhServer);
+            PreMasterSecret = ECDHERoutine.ReadClientKeyExchange(message, reader, _ecdh);
 
             return message;
         }

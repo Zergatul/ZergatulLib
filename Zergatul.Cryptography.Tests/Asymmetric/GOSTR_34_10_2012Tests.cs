@@ -25,36 +25,27 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
                 h: 1);
 
             var gost = new GOSTR_34_10_2012();
-            gost.Parameters = curve;
-            gost.PrivateKey = BigInteger.Parse("7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28", 16);
+            gost.Parameters = new ECPDSAParameters(curve);
+            gost.PrivateKey = new ECPPrivateKey(BitHelper.HexToBytes("7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28"));
             gost.GeneratePublicKey();
 
-            Assert.IsTrue(gost.PublicKey.x.ToString(16) == "7f2b49e270db6d90d8595bec458b50c58585ba1d4e9b788f6689dbd8e56fd80b");
-            Assert.IsTrue(gost.PublicKey.y.ToString(16) == "26f1b489d6701dd185c8413a977b3cbbaf64d1c593d26627dffb101a87ff77da");
+            Assert.IsTrue(gost.PublicKey.Point.x.ToString(16) == "7f2b49e270db6d90d8595bec458b50c58585ba1d4e9b788f6689dbd8e56fd80b");
+            Assert.IsTrue(gost.PublicKey.Point.y.ToString(16) == "26f1b489d6701dd185c8413a977b3cbbaf64d1c593d26627dffb101a87ff77da");
 
-            var e = BigInteger.Parse("2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5", 16);
             gost.Random = new StaticRandom(BitHelper.HexToBytes("77105C9B20BCD3122823C8CF6FCC7B956DE33814E95B7FE64FED924594DCEAB2"));
-            var signature = gost.Signature.Sign(e);
+            byte[] hash = BitHelper.HexToBytes("2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5");
+            var signature = gost.SignHash(hash);
 
-            Assert.IsTrue(signature.r.ToString(16) == "41aa28d2f1ab148280cd9ed56feda41974053554a42767b83ad043fd39dc0493");
-            Assert.IsTrue(signature.s.ToString(16) == "1456c64ba4642a1653c235a98a60249bcd6d3f746b631df928014f6c5bf9c40");
+            Assert.IsTrue(ByteArray.Equals(signature, BitHelper.HexToBytes(
+                "41aa28d2f1ab148280cd9ed56feda41974053554a42767b83ad043fd39dc0493"+
+                "01456c64ba4642a1653c235a98a60249bcd6d3f746b631df928014f6c5bf9c40")));
 
-            Assert.IsTrue(gost.Signature.Verify(signature, e));
+            Assert.IsTrue(gost.VerifyHash(hash, signature));
 
-            Assert.IsFalse(gost.Signature.Verify(signature, e - 1));
-            Assert.IsFalse(gost.Signature.Verify(signature, e + 1));
-
-            for (int i = -1; i <= 1; i++)
-                for (int j = -1; j <= 1; j++)
-                {
-                    if (i == 0 && j == 0)
-                        continue;
-                    Assert.IsFalse(gost.Signature.Verify(new GOSTRSignature
-                    {
-                        r = signature.r + i,
-                        s = signature.s + j
-                    }, e));
-                }
+            signature[signature.Length - 1] ^= 1;
+            Assert.IsFalse(gost.VerifyHash(hash, signature));
+            signature[signature.Length - 1] ^= 3;
+            Assert.IsFalse(gost.VerifyHash(hash, signature));
         }
 
         [TestMethod]
@@ -72,37 +63,30 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
                 },
                 h: 1);
 
+            Assert.IsTrue(curve.g.Validate());
+
             var gost = new GOSTR_34_10_2012();
-            gost.Parameters = curve;
-            gost.PrivateKey = BigInteger.Parse("BA6048AADAE241BA40936D47756D7C93091A0E8514669700EE7508E508B102072E8123B2200A0563322DAD2827E2714A2636B7BFD18AADFC62967821FA18DD4", 16);
+            gost.Parameters = new ECPDSAParameters(curve);
+            gost.PrivateKey = new ECPPrivateKey(BitHelper.HexToBytes("0ba6048aadae241ba40936d47756d7c93091a0e8514669700ee7508e508b102072e8123b2200a0563322dad2827e2714a2636b7bfd18aadfc62967821fa18dd4"));
             gost.GeneratePublicKey();
 
-            Assert.IsTrue(gost.PublicKey.x.ToString(16) == "115dc5bc96760c7b48598d8ab9e740d4c4a85a65be33c1815b5c320c854621dd5a515856d13314af69bc5b924c8b4ddff75c45415c1d9dd9dd33612cd530efe1");
-            Assert.IsTrue(gost.PublicKey.y.ToString(16) == "37c7c90cd40b0f5621dc3ac1b751cfa0e2634fa0503b3d52639f5d7fb72afd61ea199441d943ffe7f0c70a2759a3cdb84c114e1f9339fdf27f35eca93677beec");
+            Assert.IsTrue(gost.PublicKey.Point.x.ToString(16) == "115dc5bc96760c7b48598d8ab9e740d4c4a85a65be33c1815b5c320c854621dd5a515856d13314af69bc5b924c8b4ddff75c45415c1d9dd9dd33612cd530efe1");
+            Assert.IsTrue(gost.PublicKey.Point.y.ToString(16) == "37c7c90cd40b0f5621dc3ac1b751cfa0e2634fa0503b3d52639f5d7fb72afd61ea199441d943ffe7f0c70a2759a3cdb84c114e1f9339fdf27f35eca93677beec");
 
-            var e = BigInteger.Parse("3754F3CFACC9E0615C4F4A7C4D8DAB531B09B6F9C170C533A71D147035B0C5917184EE536593F4414339976C647C5D5A407ADEDB1D560C4FC6777D2972075B8C", 16);
             gost.Random = new StaticRandom(BitHelper.HexToBytes("0359E7F4B1410FEACC570456C6801496946312120B39D019D455986E364F365886748ED7A44B3E794434006011842286212273A6D14CF70EA3AF71BB1AE679F0"));
-            var signature = gost.Signature.Sign(e);
+            byte[] hash = BitHelper.HexToBytes("3754F3CFACC9E0615C4F4A7C4D8DAB531B09B6F9C170C533A71D147035B0C5917184EE536593F4414339976C647C5D5A407ADEDB1D560C4FC6777D2972075B8C");
+            var signature = gost.SignHash(hash);
 
-            Assert.IsTrue(signature.r.ToString(16) == "2f86fa60a081091a23dd795e1e3c689ee512a3c82ee0dcc2643c78eea8fcacd35492558486b20f1c9ec197c90699850260c93bcbcd9c5c3317e19344e173ae36");
-            Assert.IsTrue(signature.s.ToString(16) == "1081b394696ffe8e6585e7a9362d26b6325f56778aadbc081c0bfbe933d52ff5823ce288e8c4f362526080df7f70ce406a6eeb1f56919cb92a9853bde73e5b4a");
+            Assert.IsTrue(ByteArray.Equals(signature, BitHelper.HexToBytes(
+                "2f86fa60a081091a23dd795e1e3c689ee512a3c82ee0dcc2643c78eea8fcacd35492558486b20f1c9ec197c90699850260c93bcbcd9c5c3317e19344e173ae36" +
+                "1081b394696ffe8e6585e7a9362d26b6325f56778aadbc081c0bfbe933d52ff5823ce288e8c4f362526080df7f70ce406a6eeb1f56919cb92a9853bde73e5b4a")));
 
-            Assert.IsTrue(gost.Signature.Verify(signature, e));
+            Assert.IsTrue(gost.VerifyHash(hash, signature));
 
-            Assert.IsFalse(gost.Signature.Verify(signature, e - 1));
-            Assert.IsFalse(gost.Signature.Verify(signature, e + 1));
-
-            for (int i = -1; i <= 1; i++)
-                for (int j = -1; j <= 1; j++)
-                {
-                    if (i == 0 && j == 0)
-                        continue;
-                    Assert.IsFalse(gost.Signature.Verify(new GOSTRSignature
-                    {
-                        r = signature.r + i,
-                        s = signature.s + j
-                    }, e));
-                }
+            signature[signature.Length - 1] ^= 1;
+            Assert.IsFalse(gost.VerifyHash(hash, signature));
+            signature[signature.Length - 1] ^= 3;
+            Assert.IsFalse(gost.VerifyHash(hash, signature));
         }
     }
 }

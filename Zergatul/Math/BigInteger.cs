@@ -1073,6 +1073,32 @@ namespace Zergatul.Math
 
         #endregion
 
+        #region Internal helper methods
+
+        internal static int BitSizeOfArray(byte[] data, ByteOrder order)
+        {
+            if (order == ByteOrder.BigEndian)
+            {
+                int index = 0;
+                while (index < data.Length && data[index] == 0)
+                    index++;
+                if (index == data.Length)
+                    return 0;
+                int result = 8 * (data.Length - 1 - index);
+                int high = data[index];
+                int power2 = 1;
+                while (high >= power2)
+                {
+                    result++;
+                    power2 <<= 1;
+                }
+                return result;
+            }
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         #region Private instance methods
 
         private void CopyFrom(BigInteger value)

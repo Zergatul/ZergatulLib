@@ -2034,7 +2034,8 @@ namespace Zergatul.Tls.Tests
                         return psk;
                     else
                         throw new InvalidOperationException();
-                }
+                },
+                CertificateValidationOverride = c => true
             };
 
             var evt = new ManualResetEvent(false);

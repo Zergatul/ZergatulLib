@@ -22,13 +22,13 @@ namespace Zergatul.Network.Tls
             else
                 dh.Parameters = TlsStreamSettings.Default.DHParameters;
 
-            dh.GenerateKeys();
+            dh.GenerateKeyPair(0);
 
             message.Params = new ServerDHParams
             {
                 DH_p = dh.Parameters.p.ToBytes(ByteOrder.BigEndian),
                 DH_g = dh.Parameters.g.ToBytes(ByteOrder.BigEndian),
-                DH_Ys = dh.PublicKey.ToBytes(ByteOrder.BigEndian)
+                DH_Ys = dh.PublicKey.Value_Raw
             };
 
             return dh;
@@ -40,14 +40,13 @@ namespace Zergatul.Network.Tls
             message.Params.Read(reader);
         }
 
-        public static DiffieHellman GetSharedSecretAsClient(ServerKeyExchange message, ISecureRandom random)
+        public static byte[] GetSharedSecretAsClient(ServerKeyExchange message, ISecureRandom random, out DiffieHellman dh)
         {
-            var dh = new DiffieHellman();
+            dh = new DiffieHellman();
             dh.Random = random;
-            dh.Parameters = new DiffieHellmanParameters(new BigInteger(message.Params.DH_g, ByteOrder.BigEndian), new BigInteger(message.Params.DH_p, ByteOrder.BigEndian));
-            dh.GenerateKeys();
-            dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.Params.DH_Ys, ByteOrder.BigEndian));
-            return dh;
+            dh.Parameters = new DiffieHellmanParameters(message.Params.DH_g, message.Params.DH_p);
+            dh.GenerateKeyPair(0);
+            return dh.CalculateSharedSecret(new DiffieHellmanPublicKey(message.Params.DH_Ys));
         }
 
         public static void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
@@ -55,19 +54,16 @@ namespace Zergatul.Network.Tls
             writer.WriteBytes(message.Params.ToBytes());
         }
 
-        public static byte[] GenerateClientKeyExchange(ClientKeyExchange message, DiffieHellman dh)
+        public static void GenerateClientKeyExchange(ClientKeyExchange message, DiffieHellman dh)
         {
-            message.DH_Yc = dh.PublicKey.ToBytes(ByteOrder.BigEndian);
-            return dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+            message.DH_Yc = dh.PublicKey.Value_Raw;
         }
 
         public static byte[] ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader, DiffieHellman dh)
         {
             message.DH_Yc = reader.ReadBytes(reader.ReadShort());
 
-            dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.DH_Yc, ByteOrder.BigEndian));
-
-            return dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+            return dh.CalculateSharedSecret(new DiffieHellmanPublicKey(message.DH_Yc));
         }
 
         public static void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)

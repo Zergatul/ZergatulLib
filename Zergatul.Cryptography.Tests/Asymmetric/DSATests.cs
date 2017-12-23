@@ -1,63 +1,40 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math;
+using System.Collections.Generic;
 using Zergatul.Cryptography.Hash;
 using System.Text;
-using System.Collections.Generic;
+using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.ASN1;
 
 namespace Zergatul.Cryptography.Tests.Asymmetric
 {
     [TestClass]
     public class DSATests
     {
-        [TestMethod]
-        public void SimpleTest()
-        {
-            var dsa = new DSA();
-            dsa.Parameters = new DSAParameters
-            {
-                q = new BigInteger(11),
-                p = new BigInteger(23),
-                g = new BigInteger(4)
-            };
-
-            dsa.Random = new StaticRandom(new byte[] { 6 });
-            dsa.GenerateKeys();
-
-            dsa.Random = new StaticRandom(new byte[] { 2 });
-            var data = new BigInteger(9);
-            var signature = dsa.Signature.Sign(data);
-
-            Assert.IsTrue(signature.r == 7 && signature.s == 1);
-            Assert.IsTrue(dsa.Signature.Verify(signature, data));
-        }
-
         // https://tools.ietf.org/html/rfc6979#appendix-A.2.1
         [TestMethod]
         public void DSA_1024()
         {
             var dsa = new DSA();
-            dsa.Parameters = new DSAParameters
-            {
-                p = BigInteger.Parse(
+            dsa.Parameters = new DSAParameters(
+                BigInteger.Parse(
                     "86F5CA03DCFEB225063FF830A0C769B9DD9D6153AD91D7CE27F787C43278B447" +
                     "E6533B86B18BED6E8A48B784A14C252C5BE0DBF60B86D6385BD2F12FB763ED88" +
                     "73ABFD3F5BA2E0A8C0A59082EAC056935E529DAF7C610467899C77ADEDFC846C" +
                     "881870B7B19B2B58F9BE0521A17002E3BDD6B86685EE90B3D9A1B02B782B1779", 16),
-                q = BigInteger.Parse("996F967F6C8E388D9E28D01E205FBA957A5698B1", 16),
-                g = BigInteger.Parse(
+                BigInteger.Parse("996F967F6C8E388D9E28D01E205FBA957A5698B1", 16),
+                BigInteger.Parse(
                     "07B0F92546150B62514BB771E2A0C0CE387F03BDA6C56B505209FF25FD3C133D" +
                     "89BBCD97E904E09114D9A7DEFDEADFC9078EA544D2E401AEECC40BB9FBBF78FD" +
                     "87995A10A1C27CB7789B594BA7EFB5C4326A9FE59A070E136DB77175464ADCA4" +
-                    "17BE5DCE2F40D10A46A3A3943F26AB7FD9C0398FF8C76EE0A56826A8A88F1DBD", 16)
-            };
+                    "17BE5DCE2F40D10A46A3A3943F26AB7FD9C0398FF8C76EE0A56826A8A88F1DBD", 16));
 
             dsa.Random = new StaticRandom(BitHelper.HexToBytes("411602CB19A6CCC34494D79D98EF1E7ED5AF25F6"));
-            dsa.GenerateKeys();
+            dsa.GenerateKeyPair(0);
 
-            Assert.IsTrue(dsa.PublicKey.ToString(16).ToUpper() ==
+            Assert.IsTrue(dsa.PublicKey.Value.ToString(16).ToUpper() ==
                 "5DF5E01DED31D0297E274E1691C192FE5868FEF9E19A84776454B100CF16F653" +
                 "92195A38B90523E2542EE61871C0440CB87C322FC4B4D2EC5E1E7EC766E1BE8D" +
                 "4CE935437DC11C3C8FD426338933EBFE739CB3465F4D3668C5E473508253B1E6" +
@@ -137,14 +114,18 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
                 dsa.Random = new StaticRandom(BitHelper.HexToBytes(k));
                 AbstractHash hash = (AbstractHash)Activator.CreateInstance("Zergatul", "Zergatul.Cryptography.Hash." + algo).Unwrap();
-                hash.Update(Encoding.ASCII.GetBytes(msg));
-                var data = new BigInteger(hash.ComputeHash().Take(20).ToArray(), ByteOrder.BigEndian);
-                var signature = dsa.Signature.Sign(data);
+                dsa.Parameters.Hash = hash;
 
-                Assert.IsTrue(signature.r.ToString(16).ToUpper() == r);
-                Assert.IsTrue(signature.s.ToString(16).ToUpper() == s);
+                byte[] signature = dsa.Sign(Encoding.ASCII.GetBytes(msg));
 
-                Assert.IsTrue(dsa.Signature.Verify(signature, data));
+                var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+                Assert.IsTrue(ed.r.ToString(16).ToUpper() == r);
+                Assert.IsTrue(ed.s.ToString(16).ToUpper() == s);
+
+                Assert.IsTrue(dsa.Verify(Encoding.ASCII.GetBytes(msg), signature));
+
+                signature[signature.Length - 1] ^= 1;
+                Assert.IsFalse(dsa.Verify(Encoding.ASCII.GetBytes(msg), signature));
             }
         }
 
@@ -153,9 +134,8 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
         public void DSA_2048()
         {
             var dsa = new DSA();
-            dsa.Parameters = new DSAParameters
-            {
-                p = BigInteger.Parse(
+            dsa.Parameters = new DSAParameters(
+                BigInteger.Parse(
                     "9DB6FB5951B66BB6FE1E140F1D2CE5502374161FD6538DF1648218642F0B5C48" +
                     "C8F7A41AADFA187324B87674FA1822B00F1ECF8136943D7C55757264E5A1A44F" +
                     "FE012E9936E00C1D3E9310B01C7D179805D3058B2A9F4BB6F9716BFE6117C6B5" +
@@ -164,8 +144,8 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
                     "F1BF14D4BB4563CA28371621CAD3324B6A2D392145BEBFAC748805236F5CA2FE" +
                     "92B871CD8F9C36D3292B5509CA8CAA77A2ADFC7BFD77DDA6F71125A7456FEA15" +
                     "3E433256A2261C6A06ED3693797E7995FAD5AABBCFBE3EDA2741E375404AE25B", 16),
-                q = BigInteger.Parse("F2C3119374CE76C9356990B465374A17F23F9ED35089BD969F61C6DDE9998C1F", 16),
-                g = BigInteger.Parse(
+                BigInteger.Parse("F2C3119374CE76C9356990B465374A17F23F9ED35089BD969F61C6DDE9998C1F", 16),
+                BigInteger.Parse(
                     "5C7FF6B06F8F143FE8288433493E4769C4D988ACE5BE25A0E24809670716C613" +
                     "D7B0CEE6932F8FAA7C44D2CB24523DA53FBE4F6EC3595892D1AA58C4328A06C4" +
                     "6A15662E7EAA703A1DECF8BBB2D05DBE2EB956C142A338661D10461C0D135472" +
@@ -173,13 +153,12 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
                     "AA61782F52ABEB8BD6432C4DD097BC5423B285DAFB60DC364E8161F4A2A35ACA" +
                     "3A10B1C4D203CC76A470A33AFDCBDD92959859ABD8B56E1725252D78EAC66E71" +
                     "BA9AE3F1DD2487199874393CD4D832186800654760E1E34C09E4D155179F9EC0" +
-                    "DC4473F996BDCE6EED1CABED8B6F116F7AD9CF505DF0F998E34AB27514B0FFE7", 16)
-            };
+                    "DC4473F996BDCE6EED1CABED8B6F116F7AD9CF505DF0F998E34AB27514B0FFE7", 16));
 
             dsa.Random = new StaticRandom(BitHelper.HexToBytes("69C7548C21D0DFEA6B9A51C9EAD4E27C33D3B3F180316E5BCAB92C933F0E4DBB"));
-            dsa.GenerateKeys();
+            dsa.GenerateKeyPair(0);
 
-            Assert.IsTrue(dsa.PublicKey.ToString(16).ToUpper() ==
+            Assert.IsTrue(dsa.PublicKey.Value.ToString(16).ToUpper() ==
                 "667098C654426C78D7F8201EAC6C203EF030D43605032C2F1FA937E5237DBD94" +
                 "9F34A0A2564FE126DC8B715C5141802CE0979C8246463C40E6B6BDAA2513FA61" +
                 "1728716C2E4FD53BC95B89E69949D96512E873B9C8F8DFD499CC312882561ADE" +
@@ -263,14 +242,18 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
                 dsa.Random = new StaticRandom(BitHelper.HexToBytes(k));
                 AbstractHash hash = (AbstractHash)Activator.CreateInstance("Zergatul", "Zergatul.Cryptography.Hash." + algo).Unwrap();
-                hash.Update(Encoding.ASCII.GetBytes(msg));
-                var data = new BigInteger(hash.ComputeHash().Take(32).ToArray(), ByteOrder.BigEndian);
-                var signature = dsa.Signature.Sign(data);
+                dsa.Parameters.Hash = hash;
 
-                Assert.IsTrue(signature.r.ToString(16).ToUpper() == r);
-                Assert.IsTrue(signature.s.ToString(16).ToUpper() == s);
+                byte[] signature = dsa.Sign(Encoding.ASCII.GetBytes(msg));
 
-                Assert.IsTrue(dsa.Signature.Verify(signature, data));
+                var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+                Assert.IsTrue(ed.r.ToString(16).ToUpper() == r);
+                Assert.IsTrue(ed.s.ToString(16).ToUpper() == s);
+
+                Assert.IsTrue(dsa.Verify(Encoding.ASCII.GetBytes(msg), signature));
+
+                signature[signature.Length - 1] ^= 1;
+                Assert.IsFalse(dsa.Verify(Encoding.ASCII.GetBytes(msg), signature));
             }
         }
     }

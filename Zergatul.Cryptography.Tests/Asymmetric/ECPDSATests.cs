@@ -1,42 +1,18 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Zergatul.Cryptography.Asymmetric;
-using Zergatul.Cryptography.Hash;
 using Zergatul.Math.EllipticCurves.PrimeField;
+using Zergatul.Cryptography.Hash;
+using Zergatul.Cryptography.Asymmetric;
+using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.ASN1;
 using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Tests.Asymmetric
 {
-    // https://www.ietf.org/rfc/rfc4754.txt
+    // https://tools.ietf.org/html/rfc4754#section-8
     [TestClass]
-    public class ECDSATests
+    public class ECPDSATests
     {
-        [TestMethod]
-        public void TestMethod1()
-        {
-            var curve = EllipticCurve.secp112r1;
-
-            var ecdsa = new ECDSA();
-            ecdsa.Random = new DefaultSecureRandom();
-            ecdsa.Parameters = curve;
-            ecdsa.GenerateKeys();
-
-            var sha1 = new SHA1();
-            sha1.Update(System.Text.Encoding.ASCII.GetBytes("abc"));
-
-            var signature = ecdsa.Signature.Sign(new BigInteger(sha1.ComputeHash(), ByteOrder.BigEndian));
-
-            // *******************
-            var ecdsa2 = new ECDSA();
-            ecdsa2.Parameters = curve;
-            ecdsa2.PublicKey = ecdsa.PublicKey;
-
-            sha1 = new SHA1();
-            sha1.Update(System.Text.Encoding.ASCII.GetBytes("abc"));
-
-            Assert.IsTrue(ecdsa2.Signature.Verify(signature, new BigInteger(sha1.ComputeHash(), ByteOrder.BigEndian)));
-        }
-
         [TestMethod]
         public void Vector1()
         {
@@ -91,43 +67,34 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             r = r.Replace(" ", "").ToLower();
             s = s.Replace(" ", "").ToLower();
 
-            var ecdsa1 = new ECDSA();
+            var ecdsa1 = new ECPDSA();
             ecdsa1.Random = new StaticRandom(Dec(BitHelper.HexToBytes(private_key)));
-            ecdsa1.Parameters = curve;
-            /*new ECDSAParameters
-            {
-                Curve = curve,
-                Random = new StaticRandom(Dec(BitHelper.HexToBytes(k)))
-            };*/
-            ecdsa1.GenerateKeys();
+            ecdsa1.Parameters = new ECPDSAParameters(curve);
+            ecdsa1.Parameters.Hash = hash;
+            ecdsa1.GenerateKeyPair(0);
 
-            Assert.IsTrue(BitHelper.BytesToHex(ecdsa1.PublicKey.PFECPoint.x.ToBytes(ByteOrder.BigEndian, pubkey_x.Length / 2)) == pubkey_x);
-            Assert.IsTrue(BitHelper.BytesToHex(ecdsa1.PublicKey.PFECPoint.y.ToBytes(ByteOrder.BigEndian, pubkey_x.Length / 2)) == pubkey_y);
+            int len = pubkey_x.Length / 2;
+            Assert.IsTrue(BitHelper.BytesToHex(ecdsa1.PublicKey.Point.x.ToBytes(ByteOrder.BigEndian, len)) == pubkey_x);
+            Assert.IsTrue(BitHelper.BytesToHex(ecdsa1.PublicKey.Point.y.ToBytes(ByteOrder.BigEndian, len)) == pubkey_y);
 
-            hash.Reset();
-            hash.Update(System.Text.Encoding.ASCII.GetBytes(plain));
-
-            var signature = ecdsa1.Signature.Sign(new BigInteger(hash.ComputeHash(), ByteOrder.BigEndian));
-            Assert.IsTrue(signature.r == new BigInteger(BitHelper.HexToBytes(r), ByteOrder.BigEndian));
-            Assert.IsTrue(signature.s == new BigInteger(BitHelper.HexToBytes(s), ByteOrder.BigEndian));
+            ecdsa1.Random = new StaticRandom(Dec(BitHelper.HexToBytes(k)));
+            byte[] signature = ecdsa1.Sign(System.Text.Encoding.ASCII.GetBytes(plain));
+            var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+            Assert.IsTrue(ed.r == new BigInteger(BitHelper.HexToBytes(r), ByteOrder.BigEndian));
+            Assert.IsTrue(ed.s == new BigInteger(BitHelper.HexToBytes(s), ByteOrder.BigEndian));
 
             // *******************
-            var ecdsa2 = new ECDSA();
-            ecdsa2.Parameters = curve;
+            var ecdsa2 = new ECPDSA();
+            ecdsa2.Parameters = new ECPDSAParameters(curve);
+            ecdsa2.Parameters.Hash = hash;
             ecdsa2.PublicKey = ecdsa1.PublicKey;
 
-            hash.Reset();
-            hash.Update(System.Text.Encoding.ASCII.GetBytes(plain));
-
-            Assert.IsTrue(ecdsa2.Signature.Verify(signature, new BigInteger(hash.ComputeHash(), ByteOrder.BigEndian)));
+            Assert.IsTrue(ecdsa2.Verify(System.Text.Encoding.ASCII.GetBytes(plain), signature));
 
             // change signature to assure verify hash return false
-            signature.s += 1;
+            signature[signature.Length - 1] ^= 1;
 
-            hash.Reset();
-            hash.Update(System.Text.Encoding.ASCII.GetBytes(plain));
-
-            Assert.IsFalse(ecdsa2.Signature.Verify(signature, new BigInteger(hash.ComputeHash(), ByteOrder.BigEndian)));
+            Assert.IsFalse(ecdsa2.Verify(System.Text.Encoding.ASCII.GetBytes(plain), signature));
         }
 
         private static byte[] Dec(byte[] data)

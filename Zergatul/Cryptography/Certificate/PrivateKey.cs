@@ -27,17 +27,9 @@ namespace Zergatul.Cryptography.Certificate
         {
             if (_keyInfo.RSA != null)
             {
-                var rsa = new RSA();
-                rsa.PrivateKey = new Asymmetric.RSAPrivateKey
-                {
-                    n = _keyInfo.RSA.Modulus,
-                    d = _keyInfo.RSA.PrivateExponent
-                };
-                rsa.PublicKey = new RSAPublicKey
-                {
-                    n = _keyInfo.RSA.Modulus,
-                    e = _keyInfo.RSA.PublicExponent
-                };
+                var rsa = new RSAEncryption();
+                rsa.PrivateKey = new Asymmetric.RSAPrivateKey(_keyInfo.RSA.Modulus, _keyInfo.RSA.PrivateExponent);
+                rsa.PublicKey = new Asymmetric.RSAPublicKey(_keyInfo.RSA.Modulus, _keyInfo.RSA.PublicExponent);
                 return rsa;
             }
             else if (_keyInfo.EC != null)
@@ -49,19 +41,16 @@ namespace Zergatul.Cryptography.Certificate
                 if (curve == null)
                     throw new InvalidOperationException();
 
-                var ecdsa = new ECDSA();
-                ecdsa.Parameters = curve;
+                var ecdsa = new ECPDSA();
+                ecdsa.Parameters = new ECPDSAParameters((Math.EllipticCurves.PrimeField.EllipticCurve)curve);
 
                 if (curve is Math.EllipticCurves.PrimeField.EllipticCurve)
                 {
-                    ecdsa.PrivateKey = new Asymmetric.ECPrivateKey
-                    {
-                        BigInteger = new Math.BigInteger(_keyInfo.EC.PrivateKey, ByteOrder.BigEndian)
-                    };
+                    ecdsa.PrivateKey = new Asymmetric.ECPPrivateKey(_keyInfo.EC.PrivateKey);
                     if (_keyInfo.EC.PublicKey != null)
-                        ecdsa.PublicKey = ECPointGeneric.Parse(_keyInfo.EC.PublicKey, curve);
+                        ecdsa.PublicKey = new ECPPublicKey(ECPointGeneric.Parse(_keyInfo.EC.PublicKey, curve).PFECPoint);
                     else
-                        ecdsa.PublicKey = ECPointGeneric.Parse(_cert.PublicKey.Key, curve);
+                        ecdsa.PublicKey = new ECPPublicKey(ECPointGeneric.Parse(_cert.PublicKey.Key, curve).PFECPoint);
                 }
                 else
                     throw new NotImplementedException();
@@ -71,13 +60,13 @@ namespace Zergatul.Cryptography.Certificate
             else if (_keyInfo.DSA != null)
             {
                 var dsa = (DSA)_cert.PublicKey.ResolveAlgorithm();
-                dsa.PrivateKey = _keyInfo.DSA.x;
+                dsa.PrivateKey = new Asymmetric.DSAPrivateKey(_keyInfo.DSA.x);
                 return dsa;
             }
             else if (_keyInfo.DH != null)
             {
                 var dh = (DiffieHellman)_cert.PublicKey.ResolveAlgorithm();
-                dh.PrivateKey = _keyInfo.DH;
+                dh.PrivateKey = new DiffieHellmanPrivateKey(_keyInfo.DH);
                 return dh;
             }
             else

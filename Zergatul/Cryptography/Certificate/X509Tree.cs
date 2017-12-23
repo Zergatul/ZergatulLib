@@ -92,13 +92,10 @@ namespace Zergatul.Cryptography.Certificate
                 if (signed.SignatureAlgorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.SHA256WithRSA)
                 {
                     var hash = new SHA256();
-                    hash.Update(signed.SignedData);
-                    var data = hash.ComputeHash();
-
-                    var rsa = parent.PublicKey.ResolveAlgorithm() as RSA;
-                    var scheme = rsa.Signature.GetScheme("EMSA-PKCS1-v1.5");
-                    scheme.SetParameter(hash.OID);
-                    if (!scheme.Verify(signed.Signature, data))
+                    var rsa = (RSASignature)parent.PublicKey.ResolveAlgorithm().ToSignature();
+                    rsa.Parameters.Scheme = RSASignatureScheme.RSASSA_PKCS1_v1_5;
+                    rsa.Parameters.Hash = hash;
+                    if (!rsa.Verify(signed.SignedData, signed.Signature))
                         return false;
                 }
                 else

@@ -60,21 +60,17 @@ namespace Zergatul.Network.Tls
             var message = new ClientKeyExchange();
 
             var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
-            var ecdsa = algo as ECDSA;
-            if (ecdsa == null)
-                throw new TlsStreamException("For ECDH key exchange certificate must use ECDSA");
-            var ecdhServer = ecdsa.ToECDH();
+            var ecdhServer = (ECPDiffieHellman)algo.ToKeyExchange();
 
-            var ecdhClient = new ECDiffieHellman();
+            var ecdhClient = new ECPDiffieHellman();
             ecdhClient.Random = Random;
             ecdhClient.Parameters = ecdhServer.Parameters;
-            ecdhClient.GenerateKeys();
+            ecdhClient.GenerateKeyPair(0);
 
-            message.ECDH_Yc = ecdhClient.PublicKey.ToBytes();
+            message.ECDH_Yc = ecdhClient.PublicKey.Point.ToUncompressed();
 
-            ecdhClient.KeyExchange.CalculateSharedSecret(ecdhServer.PublicKey);
-
-            PreMasterSecret = ecdhClient.KeyExchange.SharedSecret.XToBytes();
+            var secret = ecdhClient.CalculateSharedSecret(ecdhServer.PublicKey);
+            PreMasterSecret = ByteArray.SubArray(secret, 1, secret.Length - 1);
 
             return message;
         }
@@ -85,14 +81,10 @@ namespace Zergatul.Network.Tls
             message.ECDH_Yc = reader.ReadBytes(reader.ReadByte());
 
             var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
-            var ecdsa = algo as ECDSA;
-            if (ecdsa == null)
-                new TlsStreamException("For ECDH key exchange certificate must use ECDSA");
-            var ecdh = ecdsa.ToECDH();
+            var ecdh = (ECPDiffieHellman)algo.ToKeyExchange();
 
-            ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECDH_Yc, ecdh.Parameters));
-
-            PreMasterSecret = ecdh.KeyExchange.SharedSecret.XToBytes();
+            var secret = ecdh.CalculateSharedSecret(new ECPPublicKey(ECPointGeneric.Parse(message.ECDH_Yc, ecdh.Parameters.Curve).PFECPoint));
+            PreMasterSecret = ByteArray.SubArray(secret, 1, secret.Length - 1);
 
             return message;
         }

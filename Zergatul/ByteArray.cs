@@ -93,6 +93,15 @@ namespace Zergatul
             return result;
         }
 
+        public static byte[] Concat(byte[] array1, byte[] array2, byte[] array3)
+        {
+            byte[] result = new byte[array1.Length + array2.Length + array3.Length];
+            System.Array.Copy(array1, 0, result, 0, array1.Length);
+            System.Array.Copy(array2, 0, result, array1.Length, array2.Length);
+            System.Array.Copy(array3, 0, result, array1.Length + array2.Length, array3.Length);
+            return result;
+        }
+
         public static byte[] SubArray(byte[] array, int startIndex, int length)
         {
             byte[] result = new byte[length];

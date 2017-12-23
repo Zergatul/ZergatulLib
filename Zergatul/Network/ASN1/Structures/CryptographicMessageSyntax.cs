@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Hash;
 using Zergatul.Network.ASN1;
 using Zergatul.Network.ASN1.Structures.PKCS7;
 
@@ -68,11 +69,10 @@ namespace Zergatul.Network.ASN1.Structures
             var algorithm = cert.PublicKey.ResolveAlgorithm();
             if (si.SignatureAlgorithm.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.RSA)
             {
-                var rsa = algorithm as Cryptography.Asymmetric.RSA;
-                var scheme = rsa.Signature.GetScheme("EMSA-PKCS1-v1.5");
-                scheme.SetParameter(si.DigestAlgorithm.Algorithm);
-                byte[] digest = Digest(si.DigestAlgorithm, si.SignedAttributesRaw);
-                return scheme.Verify(si.Signature, digest);
+                var rsa = (Cryptography.Asymmetric.RSASignature)algorithm.ToSignature();
+                rsa.Parameters.Scheme = Cryptography.Asymmetric.RSASignatureScheme.RSASSA_PKCS1_v1_5;
+                rsa.Parameters.Hash = ResolveHash(si.DigestAlgorithm);
+                return rsa.Verify(si.SignedAttributesRaw, si.Signature);
             }
             else
                 throw new NotImplementedException();
@@ -85,23 +85,19 @@ namespace Zergatul.Network.ASN1.Structures
             if (messageDigestAttribute == null)
                 return false;
 
-            byte[] digest1 = Digest(si.DigestAlgorithm, _signedData.EncapContentInfo.Content);
+            var hash = ResolveHash(si.DigestAlgorithm);
+            hash.Update(_signedData.EncapContentInfo.Content);
+            byte[] digest1 = hash.ComputeHash();
             byte[] digest2 = ((OctetString)messageDigestAttribute.Values[0]).Data;
             return ByteArray.Equals(digest1, digest2);
         }
 
-        private byte[] Digest(AlgorithmIdentifier ai, byte[] data)
+        private AbstractHash ResolveHash(AlgorithmIdentifier ai)
         {
-            Cryptography.Hash.AbstractHash hash;
             if (ai.Algorithm == OID.JointISOITUT.Country.US.Organization.Gov.CSOR.NISTAlgorithm.HashAlgs.SHA256)
-            {
-                hash = new Cryptography.Hash.SHA256();
-            }
+                return new SHA256();
             else
                 throw new NotImplementedException();
-
-            hash.Update(data);
-            return hash.ComputeHash();
         }
     }
 }

@@ -55,11 +55,14 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Asymmetric\DiffieHellmanTests.cs" />
-    <Compile Include="Asymmetric\RSATests.cs" />
-    <Compile Include="Asymmetric\ECDiffieHellmanTests.cs" />
-    <Compile Include="Asymmetric\ECDSATests.cs" />
-    <Compile Include="Asymmetric\DSATests.cs" />
+    <Compile Include="Asymmetric\ECDiffieHellmanTestsOld.cs" />
     <Compile Include="Asymmetric\GOSTR_34_10_2012Tests.cs" />
+    <Compile Include="Asymmetric\RSAEncryptionTests.cs" />
+    <Compile Include="Asymmetric\RSASignatureTests.cs" />
+    <Compile Include="Asymmetric\ECPDSATests.cs" />
+    <Compile Include="Asymmetric\ECPDiffieHellmanTests.cs" />
+    <Compile Include="Asymmetric\DSATests.cs" />
+    <Compile Include="Asymmetric\ECBDSATests.cs" />
     <Compile Include="Certificate\CertificateTests.cs" />
     <Compile Include="Certificate\ChainTests.cs" />
     <Compile Include="Hash\StreebogTests.cs" />

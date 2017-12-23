@@ -49,12 +49,8 @@ namespace Zergatul.Cryptography.Certificate
                 var seq = element as Sequence;
                 if (seq != null && seq.Elements.Count == 2 && seq.Elements[0] is Integer && seq.Elements[1] is Integer)
                 {
-                    var rsa = new RSA();
-                    rsa.PublicKey = new RSAPublicKey
-                    {
-                        n = ((Integer)seq.Elements[0]).Value,
-                        e = ((Integer)seq.Elements[1]).Value
-                    };
+                    var rsa = new RSAEncryption();
+                    rsa.PublicKey = new RSAPublicKey(((Integer)seq.Elements[0]).Value, ((Integer)seq.Elements[1]).Value);
                     return rsa;
                 }
                 else
@@ -66,12 +62,12 @@ namespace Zergatul.Cryptography.Certificate
                 if (curve == null)
                     throw new InvalidOperationException();
 
-                var ecdsa = new ECDSA();
-                ecdsa.Parameters = curve;
+                var ecdsa = new ECPDSA();
+                ecdsa.Parameters = new ECPDSAParameters((Math.EllipticCurves.PrimeField.EllipticCurve)curve);
 
                 if (curve is Math.EllipticCurves.PrimeField.EllipticCurve)
                 {
-                    ecdsa.PublicKey = ECPointGeneric.Parse(Key, curve);
+                    ecdsa.PublicKey = new ECPPublicKey(ECPointGeneric.Parse(Key, curve).PFECPoint);
                     return ecdsa;
                 }
                 else
@@ -85,7 +81,7 @@ namespace Zergatul.Cryptography.Certificate
                     throw new InvalidOperationException();
 
                 var dsa = new DSA();
-                dsa.PublicKey = integer.Value;
+                dsa.PublicKey = new DSAPublicKey(integer.Value);
 
                 var seq = Parameters as Sequence;
                 if (seq == null)
@@ -95,12 +91,11 @@ namespace Zergatul.Cryptography.Certificate
                 if (seq.Elements.Any(e => !(e is Integer)))
                     throw new InvalidOperationException();
 
-                dsa.Parameters = new DSAParameters
-                {
-                    p = ((Integer)seq.Elements[0]).Value,
-                    q = ((Integer)seq.Elements[1]).Value,
-                    g = ((Integer)seq.Elements[2]).Value,
-                };
+                dsa.Parameters = new DSAParameters(
+                    p: ((Integer)seq.Elements[0]).Value,
+                    q: ((Integer)seq.Elements[1]).Value,
+                    g: ((Integer)seq.Elements[2]).Value
+                );
 
                 return dsa;
             }
@@ -112,7 +107,7 @@ namespace Zergatul.Cryptography.Certificate
                     throw new InvalidOperationException();
 
                 var dh = new DiffieHellman();
-                dh.PublicKey = integer.Value;
+                dh.PublicKey = new DiffieHellmanPublicKey(integer.Value);
 
                 var seq = Parameters as Sequence;
                 if (seq == null)

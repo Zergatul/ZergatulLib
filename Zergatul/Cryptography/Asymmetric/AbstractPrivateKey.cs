@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class RSAParameters
+    public abstract class AbstractPrivateKey : AbstractKey
     {
+        
     }
 }

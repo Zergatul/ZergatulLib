@@ -18,8 +18,11 @@ namespace Zergatul.Math.EllipticCurves.BinaryField
 
         public bool Validate()
         {
-            var xSquare = BinaryPolynomial.Square(x);
-            return BinaryPolynomial.Square(y) + x * y == xSquare * x + Curve.a * xSquare + Curve.b;
+            var xSquare = BinaryPolynomial.ModularMultiplication(x, x, Curve.f);
+            var ySquare = BinaryPolynomial.ModularMultiplication(y, y, Curve.f);
+            return
+                ySquare + BinaryPolynomial.ModularMultiplication(x, y, Curve.f) ==
+                BinaryPolynomial.ModularMultiplication(xSquare, x, Curve.f) + BinaryPolynomial.ModularMultiplication(Curve.a, xSquare, Curve.f) + Curve.b;
         }
 
         #endregion
@@ -43,7 +46,7 @@ namespace Zergatul.Math.EllipticCurves.BinaryField
             else
                 λ = BinaryPolynomial.ModularDivision(p1.y + p2.y, p1.x + p2.x, curve.f);
 
-            BinaryPolynomial x3 = BinaryPolynomial.Square(λ) % curve.f + λ + p1.x + p2.x + curve.a;
+            BinaryPolynomial x3 = BinaryPolynomial.ModularMultiplication(λ, λ, curve.f) % curve.f + λ + p1.x + p2.x + curve.a;
             BinaryPolynomial y3 = BinaryPolynomial.ModularMultiplication(p1.x + x3, λ, curve.f) + x3 + p1.y;
 
             return new ECPoint

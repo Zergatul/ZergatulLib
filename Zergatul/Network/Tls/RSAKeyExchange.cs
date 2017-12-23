@@ -71,12 +71,13 @@ namespace Zergatul.Network.Tls
             Random.GetBytes(PreMasterSecret, 2, 46);
 
             var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
-            var rsa = algo as RSA;
+            var rsa = algo as RSAEncryption;
             if (rsa == null)
                 new TlsStreamException("For RSA key exchange certificate must also use RSA");
 
+            rsa.Parameters.Scheme = RSAEncryptionScheme.RSAES_PKCS1_v1_5;
             rsa.Random = Random;
-            message.EncryptedPreMasterSecret = rsa.Encryption.GetScheme("RSAES-PKCS1-v1.5").Encrypt(PreMasterSecret);
+            message.EncryptedPreMasterSecret = rsa.Encrypt(PreMasterSecret);
 
             return message;
         }
@@ -87,11 +88,12 @@ namespace Zergatul.Network.Tls
             message.EncryptedPreMasterSecret = reader.ReadBytes(reader.ReadShort());
 
             var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
-            var rsa = algo as RSA;
+            var rsa = algo as RSAEncryption;
             if (rsa == null)
                 throw new TlsStreamException("For RSA key exchange certificate must also use RSA");
 
-            PreMasterSecret = rsa.Encryption.GetScheme("RSAES-PKCS1-v1.5").Decrypt(message.EncryptedPreMasterSecret);
+            rsa.Parameters.Scheme = RSAEncryptionScheme.RSAES_PKCS1_v1_5;
+            PreMasterSecret = rsa.Decrypt(message.EncryptedPreMasterSecret);
             var version = (ProtocolVersion)BitHelper.ToUInt16(PreMasterSecret, 0, ByteOrder.BigEndian);
             if (version != ProtocolVersion.Tls12)
                 throw new TlsStreamException("Invalid PreMasterSecret");

@@ -295,6 +295,27 @@ namespace Zergatul.Math.Tests
 
         #endregion
 
+        #region BitSizeOfArray
+
+        [TestMethod]
+        public void BitSizeOfArray_1()
+        {
+            Assert.IsTrue(BigInteger.BitSizeOfArray(new byte[0], ByteOrder.BigEndian) == 0);
+            Assert.IsTrue(BigInteger.BitSizeOfArray(new byte[10], ByteOrder.BigEndian) == 0);
+        }
+
+        [TestMethod]
+        public void BitSizeOfArray_2()
+        {
+            Assert.IsTrue(BigInteger.BitSizeOfArray(BitHelper.HexToBytes("80"), ByteOrder.BigEndian) == 8);
+            Assert.IsTrue(BigInteger.BitSizeOfArray(BitHelper.HexToBytes("7f"), ByteOrder.BigEndian) == 7);
+
+            Assert.IsTrue(BigInteger.BitSizeOfArray(BitHelper.HexToBytes("00800000"), ByteOrder.BigEndian) == 24);
+            Assert.IsTrue(BigInteger.BitSizeOfArray(BitHelper.HexToBytes("00007f0000"), ByteOrder.BigEndian) == 23);
+        }
+
+        #endregion
+
         #region Equals
 
         [TestMethod]

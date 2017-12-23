@@ -61,20 +61,18 @@ namespace Zergatul.Network.Tls
             var message = new ClientKeyExchange();
 
             var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
-            var dhServer = algo as DiffieHellman;
+            var dhServer = algo.ToKeyExchange() as DiffieHellman;
             if (dhServer == null)
                 new TlsStreamException("For DH key exchange certificate must also use DH");
 
             var dhClient = new DiffieHellman();
             dhClient.Random = Random;
             dhClient.Parameters = dhServer.Parameters;
-            dhClient.GenerateKeys();
+            dhClient.GenerateKeyPair(0);
 
-            message.DH_Yc = dhClient.PublicKey.ToBytes(ByteOrder.BigEndian);
+            message.DH_Yc = dhClient.PublicKey.Value_Raw;
 
-            dhClient.KeyExchange.CalculateSharedSecret(dhServer.PublicKey);
-
-            PreMasterSecret = dhClient.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+            PreMasterSecret = dhClient.CalculateSharedSecret(dhServer.PublicKey);
 
             return message;
         }
@@ -85,13 +83,11 @@ namespace Zergatul.Network.Tls
             message.DH_Yc = reader.ReadBytes(reader.ReadShort());
 
             var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
-            var dh = algo as DiffieHellman;
+            var dh = algo.ToKeyExchange() as DiffieHellman;
             if (dh == null)
                 new TlsStreamException("For DH key exchange certificate must also use DH");
 
-            dh.KeyExchange.CalculateSharedSecret(new BigInteger(message.DH_Yc, ByteOrder.BigEndian));
-
-            PreMasterSecret = dh.KeyExchange.SharedSecret.ToBytes(ByteOrder.BigEndian);
+            PreMasterSecret = dh.CalculateSharedSecret(new DiffieHellmanPublicKey(message.DH_Yc));
 
             return message;
         }

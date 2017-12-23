@@ -15,7 +15,7 @@ namespace Zergatul.Tls.Tests
     [TestClass]
     public class SChannelTests
     {
-        [TestMethod]
+        /*[TestMethod]
         public void TLS_DHE_RSA_WITH_AES_128_CBC_SHA()
         {
             TestCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA);

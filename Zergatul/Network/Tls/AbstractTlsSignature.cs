@@ -15,7 +15,7 @@ namespace Zergatul.Network.Tls
         public ISecureRandom Random;
         public abstract SignatureAlgorithm Algorithm { get; }
 
-        public abstract byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash);
-        public abstract bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature);
+        public abstract byte[] CreateSignature(AbstractSignature algo, AbstractHash hash, byte[] data);
+        public abstract bool VerifySignature(AbstractSignature algo, AbstractHash hash, byte[] data, byte[] signature);
     }
 }

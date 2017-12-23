@@ -91,10 +91,15 @@ namespace Zergatul.Math
             CalculateRealDegree(words.Length * 32 - 1);
         }
 
+        public BinaryPolynomial(BigInteger value)
+            : this(value.ToBytes(ByteOrder.BigEndian), ByteOrder.BigEndian)
+        {
+        }
+
         public static BinaryPolynomial Random(int degree, IRandom random)
         {
             ulong[] words = new ulong[degree / 64 + 1];
-            for (int i = 0; i < words.Length; i++)
+            for (int i = words.Length - 1; i >= 0; i--)
                 words[i] = random.GetUInt64();
 
             if (degree % 64 != 63)
@@ -103,11 +108,30 @@ namespace Zergatul.Math
             return new BinaryPolynomial { _words = words, Degree = degree };
         }
 
+        public bool IsZero
+        {
+            get
+            {
+                for (int i = 0; i < _words.Length; i++)
+                    if (_words[i] != 0)
+                        return false;
+                return true;
+            }
+        }
+
         public bool IsBitSet(int bit)
         {
             if (bit > Degree)
                 return false;
             return BitHelper.CheckBit(_words[bit / 64], bit % 64);
+        }
+
+        public byte[] ToBytes(ByteOrder order)
+        {
+            int bit = _words.Length * 64;
+            while (!IsBitSet(bit))
+                bit--;
+            return ToBytes(order, (bit + 7) / 8);
         }
 
         public byte[] ToBytes(ByteOrder order, int length)
@@ -125,6 +149,11 @@ namespace Zergatul.Math
                 Array.Reverse(result);
 
             return result;
+        }
+
+        public BigInteger ToBigInteger()
+        {
+            return new BigInteger(ToBytes(ByteOrder.BigEndian), ByteOrder.BigEndian);
         }
 
         #region System.Object

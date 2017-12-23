@@ -12,14 +12,14 @@ namespace Zergatul.Network.Tls
 {
     internal static class ECDHERoutine
     {
-        public static ECDiffieHellman GenerateServerKeyExchange(ServerKeyExchange message, ISecureRandom random, TlsStreamSettings settings)
+        public static ECPDiffieHellman GenerateServerKeyExchange(ServerKeyExchange message, ISecureRandom random, TlsStreamSettings settings)
         {
             var namedCurve = NamedGroup.secp256r1;
 
-            var ecdh = new ECDiffieHellman();
+            var ecdh = new ECPDiffieHellman();
             ecdh.Random = random;
-            ecdh.Parameters = ResolveCurve(namedCurve);
-            ecdh.GenerateKeys();
+            ecdh.Parameters = new ECPParameters((Math.EllipticCurves.PrimeField.EllipticCurve)ResolveCurve(namedCurve));
+            ecdh.GenerateKeyPair(0);
 
             message.ECParams = new ServerECDHParams
             {
@@ -28,7 +28,7 @@ namespace Zergatul.Network.Tls
                     CurveType = ECCurveType.NamedCurve,
                     NamedCurve = namedCurve
                 },
-                Point = ecdh.PublicKey.ToBytes()
+                Point = ecdh.PublicKey.Point.ToUncompressed()
             };
 
             return ecdh;
@@ -40,14 +40,14 @@ namespace Zergatul.Network.Tls
             message.ECParams.Read(reader);
         }
 
-        public static ECDiffieHellman GetSharedSecretAsClient(ServerKeyExchange message, ISecureRandom random)
+        public static byte[] GetSharedSecretAsClient(ServerKeyExchange message, ISecureRandom random, out ECPDiffieHellman ecdh)
         {
-            var ecdh = new ECDiffieHellman();
+            ecdh = new ECPDiffieHellman();
             ecdh.Random = random;
-            ecdh.Parameters = ResolveCurve(message.ECParams.CurveParams.NamedCurve);
-            ecdh.GenerateKeys();
-            ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECParams.Point, ecdh.Parameters));
-            return ecdh;
+            ecdh.Parameters = new ECPParameters((Math.EllipticCurves.PrimeField.EllipticCurve)ResolveCurve(message.ECParams.CurveParams.NamedCurve));
+            ecdh.GenerateKeyPair(0);
+            var secret = ecdh.CalculateSharedSecret(new ECPPublicKey(ECPointGeneric.Parse(message.ECParams.Point, ecdh.Parameters.Curve).PFECPoint));
+            return ByteArray.SubArray(secret, 1, secret.Length - 1);
         }
 
         public static void WriteServerKeyExchange(ServerKeyExchange message, BinaryWriter writer)
@@ -55,17 +55,16 @@ namespace Zergatul.Network.Tls
             writer.WriteBytes(message.ECParams.ToBytes());
         }
 
-        public static byte[] GenerateClientKeyExchange(ClientKeyExchange message, ECDiffieHellman ecdh)
+        public static void GenerateClientKeyExchange(ClientKeyExchange message, ECPDiffieHellman ecdh)
         {
-            message.ECDH_Yc = ecdh.PublicKey.ToBytes();
-            return ecdh.KeyExchange.SharedSecret.XToBytes();
+            message.ECDH_Yc = ecdh.PublicKey.Point.ToUncompressed();
         }
 
-        public static byte[] ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader, ECDiffieHellman ecdh)
+        public static byte[] ReadClientKeyExchange(ClientKeyExchange message, BinaryReader reader, ECPDiffieHellman ecdh)
         {
             message.ECDH_Yc = reader.ReadBytes(reader.ReadByte());
 
-            ecdh.KeyExchange.CalculateSharedSecret(ECPointGeneric.Parse(message.ECDH_Yc, ecdh.Parameters));
+            var secret = ecdh.CalculateSharedSecret(new ECPPublicKey(ECPointGeneric.Parse(message.ECDH_Yc, ecdh.Parameters.Curve).PFECPoint));
 
             /*
                 All ECDH calculations (including parameter and key generation as well
@@ -78,7 +77,7 @@ namespace Zergatul.Network.Tls
                 Primitive, has constant length for any given field; leading zeros
                 found in this octet string MUST NOT be truncated.
             */
-            return ecdh.KeyExchange.SharedSecret.XToBytes();
+            return ByteArray.SubArray(secret, 1, secret.Length - 1);
         }
 
         public static void WriteClientKeyExchange(ClientKeyExchange message, BinaryWriter writer)

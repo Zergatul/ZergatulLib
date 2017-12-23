@@ -37,8 +37,7 @@ namespace Zergatul.Network.Tls
             }
         }
 
-        private DiffieHellman _dhServer;
-        private DiffieHellman _dhClient;
+        private DiffieHellman _dh;
         private AbstractTlsSignature _signature;
 
         public DHEKeyExchange(AbstractTlsSignature signature)
@@ -58,7 +57,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            _dhServer = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
+            _dh = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
 
             // TODO, get sign and hash from clienthello
             message.SignAndHashAlgo = new SignatureAndHashAlgorithm
@@ -70,11 +69,9 @@ namespace Zergatul.Network.Tls
             var algo = SecurityParameters.ServerCertificate.PrivateKey.ResolveAlgorithm();
 
             var hash = message.SignAndHashAlgo.Hash.Resolve();
-            hash.Update(SecurityParameters.ClientRandom);
-            hash.Update(SecurityParameters.ServerRandom);
-            hash.Update(message.Params.ToBytes());
+            var data = ByteArray.Concat(SecurityParameters.ClientRandom, SecurityParameters.ServerRandom, message.Params.ToBytes());
 
-            message.Signature = _signature.CreateSignature(algo, hash);
+            message.Signature = _signature.CreateSignature(algo.ToSignature(), hash, data);
 
             return message;
         }
@@ -93,14 +90,12 @@ namespace Zergatul.Network.Tls
             var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
 
             var hash = message.SignAndHashAlgo.Hash.Resolve();
-            hash.Update(SecurityParameters.ClientRandom);
-            hash.Update(SecurityParameters.ServerRandom);
-            hash.Update(message.Params.ToBytes());
+            var data = ByteArray.Concat(SecurityParameters.ClientRandom, SecurityParameters.ServerRandom, message.Params.ToBytes());
 
-            if (!_signature.VerifySignature(algo, hash, message.Signature))
+            if (!_signature.VerifySignature(algo.ToSignature(), hash, data, message.Signature))
                 throw new InvalidSignatureException();
 
-            _dhClient = DHERoutine.GetSharedSecretAsClient(message, Random);
+            PreMasterSecret = DHERoutine.GetSharedSecretAsClient(message, Random, out _dh);
 
             return message;
         }
@@ -123,7 +118,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ClientKeyExchange();
 
-            PreMasterSecret = DHERoutine.GenerateClientKeyExchange(message, _dhClient);
+            DHERoutine.GenerateClientKeyExchange(message, _dh);
 
             return message;
         }
@@ -132,7 +127,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ClientKeyExchange();
 
-            PreMasterSecret = DHERoutine.ReadClientKeyExchange(message, reader, _dhServer);
+            PreMasterSecret = DHERoutine.ReadClientKeyExchange(message, reader, _dh);
 
             return message;
         }

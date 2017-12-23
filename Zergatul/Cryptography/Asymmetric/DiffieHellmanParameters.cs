@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zergatul.Math;
+﻿using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
-    public class DiffieHellmanParameters
+    public class DiffieHellmanParameters : AbstractParameters
     {
+        public int KeySize => p.BitSize;
+
         /// <summary>
         /// Generator
         /// </summary>
@@ -19,16 +16,36 @@ namespace Zergatul.Cryptography.Asymmetric
         /// </summary>
         public BigInteger p { get; private set; }
 
+        public byte[] g_Raw { get; private set; }
+        public byte[] p_Raw { get; private set; }
+
         public DiffieHellmanParameters(BigInteger g, BigInteger p)
         {
             this.g = g;
             this.p = p;
+            CalcGRaw();
+            CalcPRaw();
         }
+
+        public DiffieHellmanParameters(byte[] g, byte[] p)
+        {
+            this.g_Raw = g;
+            this.p_Raw = p;
+            CalcG();
+            CalcP();
+        }
+
+        private void CalcG() => g = new BigInteger(g_Raw, ByteOrder.BigEndian);
+        private void CalcP() => p = new BigInteger(p_Raw, ByteOrder.BigEndian);
+        private void CalcGRaw() => g_Raw = g.ToBytes(ByteOrder.BigEndian);
+        private void CalcPRaw() => p_Raw = p.ToBytes(ByteOrder.BigEndian);
+
+        #region Groups
 
         /// <summary>
         /// RFC 2409, key size - 768 bits
         /// </summary>
-        public static DiffieHellmanParameters Group1 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group1 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -41,7 +58,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// RFC 2409, key size - 1024 bits
         /// </summary>
-        public static DiffieHellmanParameters Group2 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group2 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -56,7 +73,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// RFC 3526, key size - 1536 bits
         /// </summary>
-        public static DiffieHellmanParameters Group5 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group5 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -73,7 +90,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// RFC 3526, key size - 2048 bits
         /// </summary>
-        public static DiffieHellmanParameters Group14 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group14 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -93,7 +110,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// RFC 3526, key size - 3072 bits
         /// </summary>
-        public static DiffieHellmanParameters Group15 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group15 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -118,7 +135,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// RFC 3526, key size - 4096 bits
         /// </summary>
-        public static DiffieHellmanParameters Group16 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group16 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -149,7 +166,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// RFC 3526, key size - 6144 bits
         /// </summary>
-        public static DiffieHellmanParameters Group17 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group17 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -186,7 +203,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// RFC 3526, key size - 8192 bits
         /// </summary>
-        public static DiffieHellmanParameters Group18 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters Group18 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -238,7 +255,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// https://tools.ietf.org/html/rfc7919#appendix-A.1
         /// </summary>
-        public static DiffieHellmanParameters ffdhe2048 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters ffdhe2048 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -258,7 +275,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// https://tools.ietf.org/html/rfc7919#appendix-A.2
         /// </summary>
-        public static DiffieHellmanParameters ffdhe3072 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters ffdhe3072 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -283,7 +300,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// https://tools.ietf.org/html/rfc7919#appendix-A.3
         /// </summary>
-        public static DiffieHellmanParameters ffdhe4096 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters ffdhe4096 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -314,7 +331,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// https://tools.ietf.org/html/rfc7919#appendix-A.4
         /// </summary>
-        public static DiffieHellmanParameters ffdhe6144 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters ffdhe6144 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -355,7 +372,7 @@ namespace Zergatul.Cryptography.Asymmetric
         /// <summary>
         /// https://tools.ietf.org/html/rfc7919#appendix-A.5
         /// </summary>
-        public static DiffieHellmanParameters ffdhe8192 = new DiffieHellmanParameters(
+        public static readonly DiffieHellmanParameters ffdhe8192 = new DiffieHellmanParameters(
             new BigInteger(2),
             new BigInteger(new uint[]
             {
@@ -403,5 +420,7 @@ namespace Zergatul.Cryptography.Asymmetric
                 0x97D11D49, 0xF7A8443D, 0x0822E506, 0xA9F4614E, 0x011E2A94, 0x838FF88C,
                 0xD68C8BB7, 0xC5C6424C, 0xFFFFFFFF, 0xFFFFFFFF
             }, ByteOrder.BigEndian));
+
+        #endregion
     }
 }

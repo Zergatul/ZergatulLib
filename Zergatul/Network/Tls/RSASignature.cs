@@ -16,20 +16,20 @@ namespace Zergatul.Network.Tls
     {
         public override SignatureAlgorithm Algorithm => SignatureAlgorithm.RSA;
 
-        public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)
+        public override byte[] CreateSignature(AbstractSignature algo, AbstractHash hash, byte[] data)
         {
-            var rsa = (RSA)algo;
-            var scheme = rsa.Signature.GetScheme("EMSA-PKCS1-v1.5");
-            scheme.SetParameter(hash.OID);
-            return scheme.Sign(hash.ComputeHash());
+            var rsa = (Cryptography.Asymmetric.RSASignature)algo;
+            rsa.Parameters.Scheme = RSASignatureScheme.RSASSA_PKCS1_v1_5;
+            rsa.Parameters.Hash = hash;
+            return rsa.Sign(data);
         }
 
-        public override bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature)
+        public override bool VerifySignature(AbstractSignature algo, AbstractHash hash, byte[] data, byte[] signature)
         {
-            var rsa = (RSA)algo;
-            var scheme = rsa.Signature.GetScheme("EMSA-PKCS1-v1.5");
-            scheme.SetParameter(hash.OID);
-            return scheme.Verify(signature, hash.ComputeHash());
+            var rsa = (Cryptography.Asymmetric.RSASignature)algo;
+            rsa.Parameters.Scheme = RSASignatureScheme.RSASSA_PKCS1_v1_5;
+            rsa.Parameters.Hash = hash;
+            return rsa.Verify(data, signature);
         }
     }
 }

@@ -13,17 +13,19 @@ namespace Zergatul.Network.Tls
     {
         public override SignatureAlgorithm Algorithm => SignatureAlgorithm.DSA;
 
-        public override byte[] CreateSignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash)
+        public override byte[] CreateSignature(AbstractSignature algo, AbstractHash hash, byte[] data)
         {
             var dsa = (DSA)algo;
             dsa.Random = Random;
-            return dsa.Signature.GetScheme("Default").Sign(hash.ComputeHash());
+            dsa.Parameters.Hash = hash;
+            return dsa.Sign(data);
         }
 
-        public override bool VerifySignature(AbstractAsymmetricAlgorithm algo, AbstractHash hash, byte[] signature)
+        public override bool VerifySignature(AbstractSignature algo, AbstractHash hash, byte[] data, byte[] signature)
         {
             var dsa = (DSA)algo;
-            return dsa.Signature.GetScheme("Default").Verify(signature, hash.ComputeHash());
+            dsa.Parameters.Hash = hash;
+            return dsa.Verify(data, signature);
         }
     }
 }
