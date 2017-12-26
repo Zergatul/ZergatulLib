@@ -85,6 +85,7 @@
     <Content Include="BerkeleyDB\libdb_csharp62d.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Ripple\TextFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Ethereum\" />

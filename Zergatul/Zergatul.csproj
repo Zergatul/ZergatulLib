@@ -70,6 +70,7 @@
     <Compile Include="Cryptography\Asymmetric\ECPPrivateKey.cs" />
     <Compile Include="Cryptography\Asymmetric\ECBPublicKey.cs" />
     <Compile Include="Cryptography\Asymmetric\ECPPublicKey.cs" />
+    <Compile Include="Cryptography\Asymmetric\EdDSA.cs" />
     <Compile Include="Cryptography\Asymmetric\GOSTR_34_10_2012.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAEncryption.cs" />
     <Compile Include="Cryptography\Asymmetric\RSAEncryptionParameters.cs" />
@@ -80,9 +81,12 @@
     <Compile Include="Cryptography\Certificate\AttributesCollection.cs" />
     <Compile Include="Cryptography\Certificate\SimpleRootCertificateStore.cs" />
     <Compile Include="Cryptography\Certificate\X509ExtensionsCollection.cs" />
+    <Compile Include="Cryptography\Asymmetric\EdDSAParameters.cs" />
     <Compile Include="Cryptography\KDF\PBKDF2.cs" />
     <Compile Include="Cryptography\KDF\Scrypt.cs" />
     <Compile Include="Cryptography\KDF\HKDF.cs" />
+    <Compile Include="Math\EdwardsCurves\EdCurve.cs" />
+    <Compile Include="Math\EdwardsCurves\EdPoint.cs" />
     <Compile Include="Network\ASN1\Structures\CryptographicMessageSyntax.cs" />
     <Compile Include="Cryptography\Hash\Streebog.cs" />
     <Compile Include="Cryptography\Symmetric\AbstractBlockCipher.cs" />

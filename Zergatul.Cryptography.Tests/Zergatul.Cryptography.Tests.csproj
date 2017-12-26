@@ -63,6 +63,7 @@
     <Compile Include="Asymmetric\ECPDiffieHellmanTests.cs" />
     <Compile Include="Asymmetric\DSATests.cs" />
     <Compile Include="Asymmetric\ECBDSATests.cs" />
+    <Compile Include="Asymmetric\EdDSATests.cs" />
     <Compile Include="Certificate\CertificateTests.cs" />
     <Compile Include="Certificate\ChainTests.cs" />
     <Compile Include="Hash\StreebogTests.cs" />

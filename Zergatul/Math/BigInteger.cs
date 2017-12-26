@@ -475,7 +475,7 @@ namespace Zergatul.Math
                 words[factor1._wordsLength] = (uint)carry;
 
             var result = new BigInteger(words);
-            result._sign = factor2 < 0 ? -1 : 1;
+            result._sign = factor1._sign * factor2 < 0 ? -1 : 1;
             return result;
         }
 
@@ -871,8 +871,9 @@ namespace Zergatul.Math
             if (other == 0)
                 return IsZero;
             if (other < 0)
-                return false;
-            return _wordsLength == 1 && _words[0] == other;
+                return _wordsLength == 1 && _words[0] == -other && _sign == -1;
+            else
+                return _wordsLength == 1 && _words[0] == other && _sign == 1;
         }
 
         #endregion

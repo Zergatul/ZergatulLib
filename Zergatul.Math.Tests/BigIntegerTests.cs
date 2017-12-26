@@ -533,6 +533,15 @@ namespace Zergatul.Math.Tests
             Assert.IsTrue(BigInteger.Parse("08396905339595156620") * BigInteger.Parse("13568775824401428918") == BigInteger.Parse("113935726171686031717971661160007137160"));
         }
 
+        [TestMethod]
+        public void Multiply_6()
+        {
+            Assert.IsTrue(2 * BigInteger.Parse("100") == 200);
+            Assert.IsTrue(2 * BigInteger.Parse("-100") == -200);
+            Assert.IsTrue(-2 * BigInteger.Parse("100") == -200);
+            Assert.IsTrue(-2 * BigInteger.Parse("-100") == 200);
+        }
+
         #endregion
 
         #region Division
