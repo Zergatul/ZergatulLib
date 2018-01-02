@@ -1,4 +1,0 @@
-﻿https://ripple.com/build/
-https://ripple.com/build/accounts/
-https://ripple.com/build/accounts/#address-encoding
-https://tools.ietf.org/html/rfc8032

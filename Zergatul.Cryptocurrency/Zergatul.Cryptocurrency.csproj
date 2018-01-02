@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BitcoinGold\Address.cs" />
     <Compile Include="Bitcoin\Block.cs" />
     <Compile Include="Bitcoin\BlockParseException.cs" />
     <Compile Include="Bitcoin\P2PKAddress.cs" />
@@ -63,9 +64,12 @@
     <Compile Include="Bitcoin\Transaction.cs" />
     <Compile Include="Bitcoin\VarLengthInt.cs" />
     <Compile Include="BlockBase.cs" />
+    <Compile Include="ITransactionRepository.cs" />
     <Compile Include="Litecoin\Block.cs" />
     <Compile Include="Litecoin\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ripple\Account.cs" />
+    <Compile Include="Ripple\Constants.cs" />
     <Compile Include="TransactionBase.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -85,7 +89,6 @@
     <Content Include="BerkeleyDB\libdb_csharp62d.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Ripple\TextFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Ethereum\" />
