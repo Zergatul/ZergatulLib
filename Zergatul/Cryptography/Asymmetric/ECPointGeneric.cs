@@ -19,7 +19,7 @@ namespace Zergatul.Cryptography.Asymmetric
             if (data.Length == 0)
                 throw new ArgumentException(nameof(data));
 
-            if (data[0] != 3 && data[0] != 4)
+            if (data[0] != 2 && data[0] != 3 && data[0] != 4)
                 throw new Exception("Invalid EC point format");
 
             byte[] x;
@@ -47,7 +47,7 @@ namespace Zergatul.Cryptography.Asymmetric
                     x = new Math.BigInteger(x, ByteOrder.BigEndian)
                 };
                 if (y == null)
-                    point.CalculateY(true);
+                    point.CalculateY((data[0] & 1) == 1);
                 else
                 {
                     point.y = new Math.BigInteger(y, ByteOrder.BigEndian);
