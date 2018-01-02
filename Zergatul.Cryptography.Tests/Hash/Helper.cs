@@ -20,5 +20,18 @@ namespace Zergatul.Cryptography.Tests.Hash
         {
             return Hash<T>(System.Text.Encoding.ASCII.GetBytes(input));
         }
+
+        public static string Hash<T>(byte[] data, int iterations) where T :  AbstractHash, new()
+        {
+            var hash = new T();
+            for (int i = 0; i < iterations; i++)
+            {
+                hash.Reset();
+                hash.Update(data);
+                data = hash.ComputeHash();
+            }
+
+            return BitHelper.BytesToHex(data);
+        }
     }
 }

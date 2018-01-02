@@ -428,6 +428,16 @@ namespace Zergatul
             return result;
         }
 
+        public static ulong[] ToUInt64Array(byte[] array, ByteOrder order)
+        {
+            if ((array.Length & 0x07) != 0)
+                throw new InvalidOperationException();
 
+            ulong[] result = new ulong[array.Length >> 3];
+            for (int i = 0; i < result.Length; i++)
+                result[i] = ToUInt64(array, i << 3, order);
+
+            return result;
+        }
     }
 }

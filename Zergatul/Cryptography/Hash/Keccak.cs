@@ -8,14 +8,8 @@ namespace Zergatul.Cryptography.Hash
 {
     public abstract class Keccak : AbstractHash
     {
-        private static int[,] r = new int[5, 5]
-        {
-            {  0, 36,  3, 41, 18 },
-            {  1, 44, 10, 45,  2 },
-            { 62,  6, 43, 15, 61 },
-            { 28, 55, 25, 21, 56 },
-            { 27, 20, 39,  8, 14 }
-        };
+        public override int BlockSize => _blockSizeByte;
+        public override int HashSize => _hashSizeByte;
 
         private static ulong[] RC = new ulong[]
         {
@@ -45,90 +39,162 @@ namespace Zergatul.Cryptography.Hash
             0x8000000080008008
         };
 
-        private static byte[,] f(KeccakParams kp, byte[,] A)
+        private ulong[] S;
+        private ulong[] B;
+        private int _bits;
+        private int _blockSizeULong;
+        private int _blockSizeByte;
+        private int _hashSizeByte;
+        private byte _padding;
+
+        public Keccak(int bits, byte padding, int hashBits)
+            : base(true)
         {
-            int rounds = 12 + 2 * kp.l;
-            for (int i = 0; i < rounds; i++)
-                A = Round(kp, A, RC[i]);
-            return A;
+            this._bits = bits;
+            this._padding = padding;
+
+            _blockSizeULong = (1600 - _bits) >> 6;
+            _blockSizeByte = _blockSizeULong * 8;
+            _hashSizeByte = hashBits >> 3;
+
+            _block = new byte[_blockSizeByte];
+
+            B = new ulong[25];
+            S = new ulong[25];
         }
 
-        private static byte[,] Round(KeccakParams kp, byte[,] A, ulong RC)
+        protected override void Init()
         {
-            byte[,] B = new byte[5, 5];
-            byte[] C = new byte[5];
-            byte[] D = new byte[5];
-
-            // θ step
-
-            for (int x = 0; x < 5; x++)
-                C[x] = (byte)(A[x, 0] ^ A[x, 1] ^ A[x, 2] ^ A[x, 3] ^ A[x, 4]);
-
-            for (int x = 0; x < 5; x++)
-                D[x] = (byte)(C[(x + 4) % 5] ^ BitHelper.RotateLeft(C[(x + 1) % 5], 1));
-
-            for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 5; y++)
-                    A[x, y] ^= D[x];
-
-            // ρ and π steps
-
-            for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 5; y++)
-                    B[y, (2 * x + 3 * y) % 5] = BitHelper.RotateLeft(A[x, y], r[x, y]);
-
-            // χ step
-
-            for (int x = 0; x < 5; x++)
-                for (int y = 0; y < 5; y++)
-                    A[x, y] = (byte)(B[x, y] ^ (~B[(x + 1) % 5, y] & B[(x + 2) % 5, y]));
-
-            // ι step
-
-            A[0, 0] ^= (byte)RC;
-
-            return A;
+            for (int i = 0; i < S.Length; i++)
+                S[i] = 0;
         }
 
-        private byte[] Sponge(KeccakParams kp, int c, int r, byte[] M, byte d, int len)
+        protected override void ProcessBlock()
         {
-            // Initialization and padding
-            byte[,] S = new byte[5, 5];
-            byte[] P = new byte[(M.Length / 25 + 1) * 25];
-            Array.Copy(M, P, M.Length);
-            P[M.Length] = d;
-            P[P.Length - 1] ^= 0x80;
+            ulong[] blockULong = BitHelper.ToUInt64Array(_block, ByteOrder.LittleEndian);
+            for (int i = 0; i < _blockSizeULong; i++)
+                S[i] ^= blockULong[i];
 
-            // Absorbing phase
-            for (int b = 0; b < P.Length / 25; b++)
+            f(S);
+        }
+
+        protected override void AddPadding()
+        {
+            _buffer.Add(_padding);
+
+            while (_buffer.Count < _blockSizeByte)
+                _buffer.Add(0);
+
+            _buffer[_blockSizeByte - 1] |= 0x80;
+        }
+
+        protected override byte[] InternalStateToBytes()
+        {
+            byte[] digest = new byte[HashSize];
+
+            int di = 0;
+            int si = 0;
+            byte[] buffer = new byte[8];
+            while (di < HashSize)
             {
-                for (int x = 0; x < 5; x++)
-                    for (int y = 0; y < 5; y++)
-                        if (x + 5 * y < r / kp.w)
-                            S[x, y] ^= P[b * 25 + x + 5 * y];
-                S = f(new KeccakParams { b = r + c }, S);
+                if (si == _blockSizeULong)
+                {
+                    f(S);
+                    si = 0;
+                }
+
+                BitHelper.GetBytes(S[si++], ByteOrder.LittleEndian, buffer, 0);
+                for (int i = 0; i < 8 && di < HashSize; i++)
+                    digest[di++] = buffer[i];
             }
 
-            // Squeezing phase
-            List<byte> result = new List<byte>();
-            while (result.Count < len)
-            {
-                for (int x = 0; x < 5; x++)
-                    for (int y = 0; y < 5; y++)
-                        if (x + 5 * y < r / kp.w)
-                            result.Add(S[x, y]);
-
-                S = f(new KeccakParams { b = r + c }, S);
-            }
-
-            return result.ToArray();
+            return digest;
         }
 
-        private struct KeccakParams
+        private void f(ulong[] A)
         {
-            public int b;
-            public int w => b / 25;
-            public int l => (int)System.Math.Log(w, 2);
+            for (int i = 0; i < 24; i++)
+            {
+                // θ step
+
+                ulong C0 = A[0] ^ A[5] ^ A[10] ^ A[15] ^ A[20];
+                ulong C1 = A[1] ^ A[6] ^ A[11] ^ A[16] ^ A[21];
+                ulong C2 = A[2] ^ A[7] ^ A[12] ^ A[17] ^ A[22];
+                ulong C3 = A[3] ^ A[8] ^ A[13] ^ A[18] ^ A[23];
+                ulong C4 = A[4] ^ A[9] ^ A[14] ^ A[19] ^ A[24];
+
+                ulong D;
+                D = C4 ^ BitHelper.RotateLeft(C1, 1);
+                A[0] ^= D; A[5] ^= D; A[10] ^= D; A[15] ^= D; A[20] ^= D;
+                D = C0 ^ BitHelper.RotateLeft(C2, 1);
+                A[1] ^= D; A[6] ^= D; A[11] ^= D; A[16] ^= D; A[21] ^= D;
+                D = C1 ^ BitHelper.RotateLeft(C3, 1);
+                A[2] ^= D; A[7] ^= D; A[12] ^= D; A[17] ^= D; A[22] ^= D;
+                D = C2 ^ BitHelper.RotateLeft(C4, 1);
+                A[3] ^= D; A[8] ^= D; A[13] ^= D; A[18] ^= D; A[23] ^= D;
+                D = C3 ^ BitHelper.RotateLeft(C0, 1);
+                A[4] ^= D; A[9] ^= D; A[14] ^= D; A[19] ^= D; A[24] ^= D;
+
+                // ρ and π steps
+
+                B[00] = A[0];
+                B[01] = BitHelper.RotateLeft(A[06], 44);
+                B[02] = BitHelper.RotateLeft(A[12], 43);
+                B[03] = BitHelper.RotateLeft(A[18], 21);
+                B[04] = BitHelper.RotateLeft(A[24], 14);
+                B[05] = BitHelper.RotateLeft(A[03], 28);
+                B[06] = BitHelper.RotateLeft(A[09], 20);
+                B[07] = BitHelper.RotateLeft(A[10], 03);
+                B[08] = BitHelper.RotateLeft(A[16], 45);
+                B[09] = BitHelper.RotateLeft(A[22], 61);
+                B[10] = BitHelper.RotateLeft(A[01], 01);
+                B[11] = BitHelper.RotateLeft(A[07], 06);
+                B[12] = BitHelper.RotateLeft(A[13], 25);
+                B[13] = BitHelper.RotateLeft(A[19], 08);
+                B[14] = BitHelper.RotateLeft(A[20], 18);
+                B[15] = BitHelper.RotateLeft(A[04], 27);
+                B[16] = BitHelper.RotateLeft(A[05], 36);
+                B[17] = BitHelper.RotateLeft(A[11], 10);
+                B[18] = BitHelper.RotateLeft(A[17], 15);
+                B[19] = BitHelper.RotateLeft(A[23], 56);
+                B[20] = BitHelper.RotateLeft(A[02], 62);
+                B[21] = BitHelper.RotateLeft(A[08], 55);
+                B[22] = BitHelper.RotateLeft(A[14], 39);
+                B[23] = BitHelper.RotateLeft(A[15], 41);
+                B[24] = BitHelper.RotateLeft(A[21], 02);
+
+                // χ step
+
+                A[00] = B[00] ^ (~B[01] & B[02]);
+                A[01] = B[01] ^ (~B[02] & B[03]);
+                A[02] = B[02] ^ (~B[03] & B[04]);
+                A[03] = B[03] ^ (~B[04] & B[00]);
+                A[04] = B[04] ^ (~B[00] & B[01]);
+                A[05] = B[05] ^ (~B[06] & B[07]);
+                A[06] = B[06] ^ (~B[07] & B[08]);
+                A[07] = B[07] ^ (~B[08] & B[09]);
+                A[08] = B[08] ^ (~B[09] & B[05]);
+                A[09] = B[09] ^ (~B[05] & B[06]);
+                A[10] = B[10] ^ (~B[11] & B[12]);
+                A[11] = B[11] ^ (~B[12] & B[13]);
+                A[12] = B[12] ^ (~B[13] & B[14]);
+                A[13] = B[13] ^ (~B[14] & B[10]);
+                A[14] = B[14] ^ (~B[10] & B[11]);
+                A[15] = B[15] ^ (~B[16] & B[17]);
+                A[16] = B[16] ^ (~B[17] & B[18]);
+                A[17] = B[17] ^ (~B[18] & B[19]);
+                A[18] = B[18] ^ (~B[19] & B[15]);
+                A[19] = B[19] ^ (~B[15] & B[16]);
+                A[20] = B[20] ^ (~B[21] & B[22]);
+                A[21] = B[21] ^ (~B[22] & B[23]);
+                A[22] = B[22] ^ (~B[23] & B[24]);
+                A[23] = B[23] ^ (~B[24] & B[20]);
+                A[24] = B[24] ^ (~B[20] & B[21]);
+
+                // ι step
+
+                A[0] ^= RC[i];
+            }
         }
     }
 }
