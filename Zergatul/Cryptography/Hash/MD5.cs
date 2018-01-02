@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using Zergatul.Network;
 
 namespace Zergatul.Cryptography.Hash
 {
+#if !UseOpenSSL
+
     public class MD5 : AbstractHash
     {
         public override int BlockSize => 64;
@@ -120,4 +120,20 @@ namespace Zergatul.Cryptography.Hash
             return list.ToArray();
         }
     }
+
+#else
+
+    public class MD5 : AbstractOpenSSLHash
+    {
+        public override int BlockSize => 64;
+        public override int HashSize => 16;
+        public override OID OID => OID.ISO.MemberBody.US.RSADSI.DigestAlgorithm.MD5;
+
+        protected override int GetContextSize() => Marshal.SizeOf(typeof(OpenSSL.MD5_CTX));
+        protected override void ContextInit() => OpenSSL.MD5_Init(_context);
+        protected override void ContextUpdate(byte[] data) => OpenSSL.MD5_Update(_context, data, data.Length);
+        protected override void ContextFinal(byte[] digest) => OpenSSL.MD5_Final(digest, _context);
+    }
+
+#endif
 }

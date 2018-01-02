@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zergatul.Cryptography.Hash
+﻿namespace Zergatul.Cryptography.Hash
 {
+#if !UseOpenSSL
+
     public abstract class SHA2_32Bit : AbstractHash
     {
         public override int BlockSize => 64;
@@ -107,4 +103,6 @@ namespace Zergatul.Cryptography.Hash
             return hash;
         }
     }
+
+#endif
 }

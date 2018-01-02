@@ -8,19 +8,19 @@ namespace Zergatul.Cryptography.Tests.Hash
     public class MD5Tests
     {
         [TestMethod]
-        public void Test1()
+        public void MD5_Test1()
         {
             Assert.IsTrue(Hash("") == "d41d8cd98f00b204e9800998ecf8427e");
         }
 
         [TestMethod]
-        public void Test2()
+        public void MD5_Test2()
         {
             Assert.IsTrue(Hash("The quick brown fox jumps over the lazy dog") == "9e107d9d372bb6826bd81d3542a419d6");
         }
 
         [TestMethod]
-        public void Test3()
+        public void MD5_Test3()
         {
             Assert.IsTrue(Hash("The quick brown fox jumps over the lazy dog.") == "e4d909c290d0fb1ca068ffaddf22cbd0");
         }

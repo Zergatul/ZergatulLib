@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UseOpenSSL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -82,9 +82,12 @@
     <Compile Include="Cryptography\Certificate\SimpleRootCertificateStore.cs" />
     <Compile Include="Cryptography\Certificate\X509ExtensionsCollection.cs" />
     <Compile Include="Cryptography\Asymmetric\EdDSAParameters.cs" />
+    <Compile Include="Cryptography\Hash\SHA3.cs" />
+    <Compile Include="Cryptography\Hash\SHAKE.cs" />
     <Compile Include="Cryptography\KDF\PBKDF2.cs" />
     <Compile Include="Cryptography\KDF\Scrypt.cs" />
     <Compile Include="Cryptography\KDF\HKDF.cs" />
+    <Compile Include="Math\BigReal.cs" />
     <Compile Include="Math\EdwardsCurves\EdCurve.cs" />
     <Compile Include="Math\EdwardsCurves\EdPoint.cs" />
     <Compile Include="Network\ASN1\Structures\CryptographicMessageSyntax.cs" />
@@ -375,6 +378,7 @@
     <Compile Include="Network\Tls\TlsStreamSupportedCipherSuites.cs" />
     <Compile Include="Network\Tls\TlsUtils.cs" />
     <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
+    <Compile Include="OpenSSL.cs" />
     <Compile Include="ParseException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -383,8 +387,14 @@
     <None Include="Scripts\GenerateOIDs.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="libeay32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Network\OIDs.xml">
       <SubType>Designer</SubType>
+    </Content>
+    <Content Include="ssleay32.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup />

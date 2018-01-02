@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.Hash
     public class RIPEMDTests
     {
         [TestMethod]
-        public void Test128()
+        public void RIPEMD128_Test()
         {
             Assert.IsTrue(Hash128("") == "cdf26213a150dc3ecb610f18f6b38b46");
             Assert.IsTrue(Hash128("a") == "86be7afa339d0fc7cfc785e72f578d33");
@@ -24,7 +24,7 @@ namespace Zergatul.Cryptography.Tests.Hash
         }
 
         [TestMethod]
-        public void Test160()
+        public void RIPEMD160_Test()
         {
             Assert.IsTrue(Hash160("") == "9c1185a5c5e9fc54612808977ee8f548b2258d31");
             Assert.IsTrue(Hash160("a") == "0bdc9d2d256b3ee9daae347be6f4dc835a467ffe");
@@ -41,7 +41,7 @@ namespace Zergatul.Cryptography.Tests.Hash
         }
 
         [TestMethod]
-        public void Test256()
+        public void RIPEMD256_Test()
         {
             Assert.IsTrue(Hash256("") == "02ba4c4e5f8ecd1877fc52d64d30e37a2d9774fb1e5d026380ae0168e3c5522d");
             Assert.IsTrue(Hash256("a") == "f9333e45d857f5d90a91bab70a1eba0cfb1be4b0783c9acfcd883a9134692925");
@@ -55,7 +55,7 @@ namespace Zergatul.Cryptography.Tests.Hash
         }
 
         [TestMethod]
-        public void Test320()
+        public void RIPEMD320_Test()
         {
             Assert.IsTrue(Hash320("") == "22d65d5661536cdc75c1fdf5c6de7b41b9f27325ebc61e8557177d705a0ec880151c3a32a00899b8");
             Assert.IsTrue(Hash320("a") == "ce78850638f92658a5a585097579926dda667a5716562cfcf6fbe77f63542f99b04705d6970dff5d");
