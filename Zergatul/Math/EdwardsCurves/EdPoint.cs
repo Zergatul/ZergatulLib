@@ -94,11 +94,7 @@ namespace Zergatul.Math.EdwardsCurves
             for (int bit = 0; bit < bitSize; bit++)
             {
                 if (s.IsBitSet(bit))
-                {
                     q = q + p;
-                    System.Diagnostics.Debug.WriteLine(p.x);
-                    System.Diagnostics.Debug.WriteLine(q.x);
-                }
                 p = p + p;
             }
 
