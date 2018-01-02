@@ -20,10 +20,25 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
         {
             if (data[0] == 4) // uncompressed form
             {
-                throw new NotImplementedException();
+                if (data.Length % 2 == 0)
+                    throw new InvalidOperationException("Invalid EC point format");
+                byte[] x = new byte[data.Length / 2];
+                byte[] y = new byte[data.Length / 2];
+                Array.Copy(data, 1, x, 0, x.Length);
+                Array.Copy(data, 1 + x.Length, y, 0, y.Length);
+
+                return new ECPoint
+                {
+                    x = new BigInteger(x, ByteOrder.BigEndian),
+                    y = new BigInteger(y, ByteOrder.BigEndian),
+                    Curve = curve
+                };
             }
             else
             {
+                if (data[0] != 2 && data[0] != 3)
+                    throw new InvalidOperationException("Invalid EC point format");
+
                 var point = new ECPoint
                 {
                     x = new BigInteger(data, 1, data.Length - 1, ByteOrder.BigEndian),
