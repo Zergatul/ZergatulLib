@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Zergatul.Cryptocurrency.Bitcoin
 {
@@ -82,9 +83,85 @@ namespace Zergatul.Cryptocurrency.Bitcoin
             ByteArray.IsZero(Inputs[0].PrevTx) &&
             Inputs[0].SequenceNo == uint.MaxValue;
 
-        public bool Verify()
+        public bool Verify(ITransactionRepository<Transaction> repository)
         {
-            return false;
+            if (IsCoinbase)
+                return true;
+
+            foreach (var input in Inputs)
+            {
+                if (input.Script == null)
+                    return false;
+
+                var prevTx = repository.GetTransaction(input.PrevTx);
+                if (prevTx == null)
+                    return false;
+
+                if (input.PrevTxOutIndex >= prevTx.Outputs.Count)
+                    return false;
+
+                var prevOutput = prevTx.Outputs[checked((int)input.PrevTxOutIndex)];
+                var script = prevOutput.Script;
+
+                if (script == null)
+                    return false;
+
+                if (input.Script.Code.Any(o => o.Data == null))
+                    return false;
+
+                byte[] verifyBytes = GetVerifyBytes(input, prevOutput.ScriptRaw);
+                if (!script.Run(verifyBytes, input.Script.Code.Select(o => o.Data).ToArray()))
+                    return false;
+
+                // BIP-0016
+                if (script.IsPayToScriptHash)
+                {
+                    Script serializedScript;
+                    try
+                    {
+                        serializedScript = Script.FromBytes(input.Script.Code.Last().Data);
+                    }
+                    catch (ScriptParseException)
+                    {
+                        return false;
+                    }
+
+                    if (!serializedScript.Run(verifyBytes, input.Script.Code.Take(input.Script.Code.Count - 1).Select(o => o.Data).ToArray()))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private byte[] GetVerifyBytes(Input verifyInput, byte[] prevSript)
+        {
+            List<byte> txCopy = new List<byte>();
+
+            txCopy.AddRange(BitHelper.GetBytes(Version, ByteOrder.LittleEndian));
+
+            txCopy.AddRange(VarLengthInt.Serialize(Inputs.Count));
+            foreach (var input in Inputs)
+                if (input != verifyInput)
+                    input.SerializeWithoutScripts(txCopy);
+                else
+                    input.SerializeWithScript(txCopy, prevSript);
+
+            txCopy.AddRange(VarLengthInt.Serialize(Outputs.Count));
+            foreach (var output in Outputs)
+                output.Serialize(txCopy);
+
+            txCopy.AddRange(BitHelper.GetBytes(LockTime, ByteOrder.LittleEndian));
+
+            return txCopy.ToArray();
+        }
+
+        public override string ToString()
+        {
+            if (IDString != null)
+                return "Bitcoin.Transaction: " + IDString;
+            else
+                return "Bitcoin.Transaction";
         }
 
         public class Input
@@ -131,8 +208,29 @@ namespace Zergatul.Cryptocurrency.Bitcoin
                 {
                     Script = null;
                 }
-                if (Script.IsPayToPublicKeyHashInput)
-                    Address = P2PKHAddress.FromPublicKey(Script.Code[1].Data);
+                if (Script?.IsPayToPublicKeyHashInput ?? false)
+                {
+                    var addr = new P2PKHAddress();
+                    addr.FromPublicKey(Script.Code[1].Data);
+                    Address = addr;
+                }
+            }
+
+            public void SerializeWithoutScripts(List<byte> bytes)
+            {
+                bytes.AddRange(PrevTx.Reverse());
+                bytes.AddRange(BitHelper.GetBytes(PrevTxOutIndex, ByteOrder.LittleEndian));
+                bytes.Add(0); // script length
+                bytes.AddRange(BitHelper.GetBytes(SequenceNo, ByteOrder.LittleEndian));
+            }
+
+            public void SerializeWithScript(List<byte> bytes, byte[] script)
+            {
+                bytes.AddRange(PrevTx.Reverse());
+                bytes.AddRange(BitHelper.GetBytes(PrevTxOutIndex, ByteOrder.LittleEndian));
+                bytes.AddRange(VarLengthInt.Serialize(script.Length));
+                bytes.AddRange(script);
+                bytes.AddRange(BitHelper.GetBytes(SequenceNo, ByteOrder.LittleEndian));
             }
         }
 
@@ -168,11 +266,26 @@ namespace Zergatul.Cryptocurrency.Bitcoin
                     Script = null;
                 }
                 if (Script.IsPayToPublicKeyHash)
-                    Address = P2PKHAddress.FromPublicKeyHash(Script.Code[2].Data);
+                {
+                    var addr = new P2PKHAddress();
+                    addr.FromPublicKeyHash(Script.Code[2].Data);
+                    Address = addr;
+                }
                 if (Script.IsPayToPublicKey)
                     Address = P2PKAddress.FromPublicKey(Script.Code[0].Data);
                 if (Script.IsPayToScriptHash)
-                    Address = P2SHAddress.FromScriptHash(Script.Code[1].Data);
+                {
+                    var addr = new P2SHAddress();
+                    addr.FromScriptHash(Script.Code[1].Data);
+                    Address = addr;
+                }
+            }
+
+            public void Serialize(List<byte> bytes)
+            {
+                bytes.AddRange(BitHelper.GetBytes(Amount, ByteOrder.LittleEndian));
+                bytes.AddRange(VarLengthInt.Serialize(ScriptRaw.Length));
+                bytes.AddRange(ScriptRaw);
             }
         }
     }

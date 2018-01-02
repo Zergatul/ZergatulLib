@@ -38,5 +38,34 @@ namespace Zergatul.Cryptocurrency.Bitcoin
         {
             return Transaction.FromBytes(data, ref index);
         }
+
+        public bool Validate(ITransactionRepository<Transaction> repository)
+        {
+            if (!ValidateMerkleRoot())
+                return false;
+
+            switch (Version)
+            {
+                // https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki
+                case 2:
+                    var coinbase = Transactions[0];
+                    var script = coinbase.Inputs[0].Script;
+                    if (script != null) // script is valid
+                    {
+                        if (script.Code.Count == 0)
+                            return false;
+//                        if (script.Code[0] != )
+                    }
+                    else
+                        throw new NotImplementedException();
+                    break;
+            }
+
+            foreach (var tx in Transactions)
+                if (!tx.Verify(repository))
+                    return false;
+
+            return true;
+        }
     }
 }

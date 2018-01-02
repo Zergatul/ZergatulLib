@@ -1,10 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zergatul;
 using Zergatul.Cryptocurrency.Bitcoin;
 
 namespace Zergatul.Cryptocurrency.Tests
@@ -34,7 +29,25 @@ namespace Zergatul.Cryptocurrency.Tests
 
             foreach (var kv in dict)
             {
-                var addr = P2PKHAddress.FromPublicKey(BitHelper.HexToBytes(kv.Key));
+                var addr = new P2PKHAddress();
+                addr.FromPublicKey(BitHelper.HexToBytes(kv.Key));
+                Assert.IsTrue(addr.Value == kv.Value);
+            }
+        }
+
+        [TestMethod]
+        public void FromPublicKeyHashTest()
+        {
+            var dict = new Dictionary<string, string>
+            {
+                ["0000000000000000000000000000000000000000"] = "1111111111111111111114oLvT2",
+                ["0000000000000000000000000000000000000001"] = "11111111111111111111BZbvjr",
+            };
+
+            foreach (var kv in dict)
+            {
+                var addr = new P2PKHAddress();
+                addr.FromPublicKeyHash(BitHelper.HexToBytes(kv.Key));
                 Assert.IsTrue(addr.Value == kv.Value);
             }
         }
@@ -42,7 +55,8 @@ namespace Zergatul.Cryptocurrency.Tests
         [TestMethod]
         public void WIFImportTest()
         {
-            var addr = P2PKHAddress.FromWIF("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ");
+            var addr = new P2PKHAddress();
+            addr.FromWIF("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ");
             Assert.IsTrue(addr.Value == "1GAehh7TsJAHuUAeKZcXf5CnwuGuGgyX2S");
             Assert.IsTrue(addr.Another.Value == "1LoVGDgRs9hTfTNJNuXKSpywcbdvwRXpmK");
         }

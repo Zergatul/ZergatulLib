@@ -11,15 +11,17 @@ namespace Zergatul.Cryptocurrency.Bitcoin
     /// </summary>
     public class P2PKAddress : Address
     {
+        protected override byte _prefix => 0;
+
         public static P2PKAddress FromPublicKey(byte[] pubkeyData)
         {
             var ripesha = new RIPE160SHA256();
             ripesha.Update(pubkeyData);
             byte[] hash = ripesha.ComputeHash();
-            return new P2PKAddress
-            {
-                _value = "1" + Base58Encoding.Encode(0, hash)
-            };
+
+            var addr = new P2PKAddress();
+            addr._value = Base58Encoding.Encode(addr._prefix, hash);
+            return addr;
         }
     }
 }

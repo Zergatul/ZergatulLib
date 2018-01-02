@@ -9,7 +9,7 @@ namespace Zergatul.Cryptocurrency.Bitcoin
 {
     public class Script
     {
-        public List<Operator> Code { get; set; }
+        public ScriptCode Code { get; set; }
 
         public static Script FromBytes(byte[] data)
         {
@@ -17,7 +17,7 @@ namespace Zergatul.Cryptocurrency.Bitcoin
                 throw new ArgumentNullException();
 
             var script = new Script();
-            script.Code = new List<Operator>();
+            script.Code = new ScriptCode();
 
             int index = 0;
             while (index < data.Length)
@@ -109,9 +109,41 @@ namespace Zergatul.Cryptocurrency.Bitcoin
             Code[1].Data?.Length == 20 &&
             Code[2].Opcode == Opcode.OP_EQUAL;
 
-        public bool Run(params byte[][] stack)
+        public bool Run(byte[] verifyBytes, params byte[][] inputs)
         {
+            Stack<byte[]> stack = new Stack<byte[]>(inputs);
+
+            try
+            {
+                foreach (var op in Code)
+                    if (!op.Run(verifyBytes, stack))
+                        return false;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+
+            if (stack.Count == 0)
+                return false;
+
+            byte[] result = stack.Pop();
+            for (int i = 0; i < result.Length; i++)
+                if (result[i] != 0)
+                    return true;
+
             return false;
+        }
+    }
+
+    [System.Diagnostics.DebuggerDisplay("{CodeStr}")]
+    public class ScriptCode : List<Operator>
+    {
+        public string CodeStr => string.Join(" ", this.Select(o => o.Data != null ? BitHelper.BytesToHex(o.Data) : o.Opcode.Value.ToString()));
+
+        public override string ToString()
+        {
+            return CodeStr;
         }
     }
 }

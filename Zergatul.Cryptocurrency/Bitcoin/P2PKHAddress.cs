@@ -15,32 +15,52 @@ namespace Zergatul.Cryptocurrency.Bitcoin
         public P2PKHAddress Another { get; set; }
         public PrivateKey PrivateKey { get; set; }
 
-        public static P2PKHAddress FromPublicKey(byte[] pubkeyData)
+        protected override byte _prefix => 0;
+
+        public P2PKHAddress()
+        {
+
+        }
+
+        public P2PKHAddress(string address)
+        {
+            _value = address;
+            if (!Validate())
+                throw new InvalidOperationException("Invalid address");
+        }
+
+        /// <summary>
+        /// Converts Bitcoin Gold address to Bitcoin
+        /// </summary>
+        /// <param name="address"></param>
+        public P2PKHAddress(BitcoinGold.P2PKHAddress address)
+        {
+            FromPublicKeyHash(address.Hash);
+        }
+
+        public void FromPublicKey(byte[] pubkeyData)
         {
             var ripesha = new RIPE160SHA256();
             ripesha.Update(pubkeyData);
             byte[] hash = ripesha.ComputeHash();
-            return FromPublicKeyHash(hash);
+            FromPublicKeyHash(hash);
         }
 
-        public static P2PKHAddress FromPublicKeyHash(byte[] hash)
+        public void FromPublicKeyHash(byte[] hash)
         {
-            return new P2PKHAddress
-            {
-                _value = "1" + Base58Encoding.Encode(0, hash)
-            };
+            _value = Base58Encoding.Encode(_prefix, hash);
         }
 
-        public static P2PKHAddress FromWIF(string value)
+        public void FromWIF(string value)
         {
             var key = PrivateKey.FromWIF(value);
             var point = key.ToECPoint();
 
-            var addr = FromPublicKey(point.ToUncompressed());
-            addr.PrivateKey = key;
-            addr.Another = FromPublicKey(point.ToCompressed());
-            addr.Another.PrivateKey = key;
-            return addr;
+            FromPublicKey(point.ToUncompressed());
+            PrivateKey = key;
+            Another = new P2PKHAddress();
+            Another.FromPublicKey(point.ToCompressed());
+            Another.PrivateKey = key;
         }
     }
 }

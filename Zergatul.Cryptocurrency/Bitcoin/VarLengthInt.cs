@@ -40,5 +40,15 @@ namespace Zergatul.Cryptocurrency.Bitcoin
                 throw new ArgumentOutOfRangeException();
             return BitHelper.ToUInt64(data, index - 8, ByteOrder.LittleEndian);
         }
+
+        public static byte[] Serialize(int value) => Serialize(checked((ulong)value));
+
+        public static byte[] Serialize(ulong value)
+        {
+            if (value < 0xFD)
+                return new[] { checked((byte)value) };
+
+            throw new NotImplementedException();
+        }
     }
 }
