@@ -71,9 +71,9 @@ namespace Zergatul.Cryptography.Hash
 
         protected override void ProcessBlock()
         {
-            ulong[] blockULong = BitHelper.ToUInt64Array(_block, ByteOrder.LittleEndian);
+            BitHelper.ToUInt64Array(_block, ByteOrder.LittleEndian, B);
             for (int i = 0; i < _blockSizeULong; i++)
-                S[i] ^= blockULong[i];
+                S[i] ^= B[i];
 
             f(S);
         }
