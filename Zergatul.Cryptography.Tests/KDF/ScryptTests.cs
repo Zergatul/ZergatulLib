@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.KDF
     public class ScryptTests
     {
         [TestMethod]
-        public void SalsaTest()
+        public void Scrypt_SalsaTest()
         {
             uint[] input = BitHelper.ToUInt32Array(BitHelper.HexToBytes((
                 "7e 87 9a 21 4f 3e c9 86 7c a9 40 e6 41 71 8f 26" +
@@ -31,7 +31,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void ScryptBlockMixTest()
+        public void Scrypt_ScryptBlockMixTest()
         {
             uint[] input = BitHelper.ToUInt32Array(BitHelper.HexToBytes((
                 "f7 ce 0b 65 3d 2d 72 a4 10 8c f5 ab e9 12 ff dd" +
@@ -60,7 +60,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void ScryptROMixTest()
+        public void Scrypt_ScryptROMixTest()
         {
             uint[] input = BitHelper.ToUInt32Array(BitHelper.HexToBytes((
                 "f7 ce 0b 65 3d 2d 72 a4 10 8c f5 ab e9 12 ff dd" +
@@ -89,7 +89,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void PBKDF2Test()
+        public void Scrypt_PBKDF2Test()
         {
             var pbkdf2 = new PBKDF2(new SHA256());
             byte[] keys = pbkdf2.DeriveKeyBytes(
@@ -101,7 +101,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTest1()
+        public void Scrypt_RFCTest1()
         {
             Test("", "", 16, 1, 1, 64,
                 "77 d6 57 62 38 65 7b 20 3b 19 ca 42 c1 8a 04 97" +
@@ -111,7 +111,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTest2()
+        public void Scrypt_RFCTest2()
         {
             Test("password", "NaCl", 1024, 8, 16, 64,
                 "fd ba be 1c 9d 34 72 00 78 56 e7 19 0d 01 e9 fe" +
@@ -121,7 +121,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTest3()
+        public void Scrypt_RFCTest3()
         {
             Test("pleaseletmein", "SodiumChloride", 16384, 8, 1, 64,
                 "70 23 bd cb 3a fd 73 48 46 1c 06 cd 81 fd 38 eb" +
@@ -131,7 +131,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTest4()
+        public void Scrypt_RFCTest4()
         {
             Test("pleaseletmein", "SodiumChloride", 1048576, 8, 1, 64,
                 "21 01 cb 9b 6a 51 1a ae ad db be 09 cf 70 f8 81" +

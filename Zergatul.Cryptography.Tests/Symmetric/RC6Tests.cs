@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
     public class RC6Tests
     {
         [TestMethod]
-        public void SpecTestVectors()
+        public void RC6_SpecTestVectors()
         {
             TestEncryptDecrypt(20,
                 "00000000000000000000000000000000",
@@ -38,7 +38,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void NESSIE_128()
+        public void RC6_NESSIE_128()
         {
             // Set 1, vector#  0:
             TestEncryptDecrypt("80000000000000000000000000000000", "00000000000000000000000000000000", "1AD578A02A08162850A15A1552A17AD4", "150B461D2ACDFC1EE9D404A6494632DD", "BE843C58B1249AFFB720922524A1B9D3");
@@ -1578,7 +1578,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void NESSIE_192()
+        public void RC6_NESSIE_192()
         {
             // Set 1, vector#  0:
             TestEncryptDecrypt("800000000000000000000000000000000000000000000000", "00000000000000000000000000000000", "8301730C7D5FEFC416BEEC1104C51E36", "6E4E243CBADCB90180F48815B1AE7479", "DDD79ECEF433347F9C3986B067F18CE6");
@@ -3310,7 +3310,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void NESSIE_256()
+        public void RC6_NESSIE_256()
         {
             // Set 1, vector#  0:
             TestEncryptDecrypt("8000000000000000000000000000000000000000000000000000000000000000", "00000000000000000000000000000000", "5172978A58543DE597060983FD799F1B", "4AEE5240AD69F9A75E22B3415A8A7A9F", "CA7EAC56355940685744DF44EFB1AE88");

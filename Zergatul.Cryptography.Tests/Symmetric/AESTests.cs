@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class AESTests
     {
         [TestMethod]
-        public void Key128_1()
+        public void AES_TestKey128_1()
         {
             TestEncryptDecrypt(
                 "2b7e151628aed2a6abf7158809cf4f3c",
@@ -18,7 +18,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Key128_2()
+        public void AES_TestKey128_2()
         {
             TestEncryptDecrypt(
                 "000102030405060708090a0b0c0d0e0f",
@@ -27,7 +27,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Key192_1()
+        public void AES_TestKey192_1()
         {
             TestEncryptDecrypt(
                 "000102030405060708090a0b0c0d0e0f1011121314151617",
@@ -36,7 +36,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Key256_1()
+        public void AES_TestKey256_1()
         {
             TestEncryptDecrypt(
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
@@ -45,7 +45,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void AESASV_GFSbox()
+        public void AES_AESASV_GFSbox()
         {
             Action<string, string> test128 = (plain, cipher) =>
             {
@@ -83,7 +83,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void AESASV_KeySbox()
+        public void AES_AESASV_KeySbox()
         {
             byte[] plain = new byte[16];
             Action<string, string> test = (key, cipher) => TestEncryptDecrypt(key, BitHelper.BytesToHex(plain), cipher);
@@ -154,7 +154,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void AESASV_VarTxt()
+        public void AES_AESASV_VarTxt()
         {
             Action<string, string> test128 = (plain, cipher) =>
             {
@@ -560,7 +560,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
             test256("ffffffffffffffffffffffffffffffff", "acdace8078a32b1a182bfa4987ca1347");
         }
 
-        public void AESASV_VarKey()
+        public void AES_AESASV_VarKey()
         {
             byte[] plain = new byte[16];
             Action<string, string> test = (key, cipher) => TestEncryptDecrypt(key, BitHelper.BytesToHex(plain), cipher);

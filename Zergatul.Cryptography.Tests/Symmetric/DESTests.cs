@@ -9,13 +9,13 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class DESTests
     {
         [TestMethod]
-        public void Test1()
+        public void DES_Test1()
         {
             TestEncryptDecrypt("133457799BBCDFF1", "0123456789abcdef", "85e813540f0ab405");
         }
 
         [TestMethod]
-        public void Test2()
+        public void DES_Test2()
         {
             TestEncryptDecrypt("8000000000000000", "0000000000000000", "95A8D72813DAA94D");
             TestEncryptDecrypt("8000000000000000", "0000000000000000", "F749E1F8DEFAF605", 100);
@@ -23,7 +23,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test3()
+        public void DES_Test3()
         {
             TestEncryptDecrypt("4000000000000000", "0000000000000000", "0EEC1487DD8C26D5");
             TestEncryptDecrypt("4000000000000000", "0000000000000000", "E5BEE86B600F3B48", 100);
@@ -31,7 +31,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test4()
+        public void DES_Test4()
         {
             TestEncryptDecrypt("E6E6E6E6E6E6E6E6", "E6E6E6E6E6E6E6E6", "8A8DD870C9B14AF2");
             TestEncryptDecrypt("E6E6E6E6E6E6E6E6", "E6E6E6E6E6E6E6E6", "C4259776E0BEE1D8", 100);

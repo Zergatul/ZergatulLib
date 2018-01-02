@@ -11,7 +11,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class Poly1305FunctionTests
     {
         [TestMethod]
-        public void Vector1()
+        public void Poly1305Function_Vector1()
         {
             byte[] key = new byte[]
             {
@@ -28,13 +28,13 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector1()
+        public void Poly1305Function_TestVector1()
         {
             TestTag(new byte[32], new byte[48], new byte[16]);
         }
 
         [TestMethod]
-        public void TestVector2()
+        public void Poly1305Function_TestVector2()
         {
             byte[] key = new byte[]
             {
@@ -77,7 +77,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector3()
+        public void Poly1305Function_TestVector3()
         {
             byte[] key = new byte[]
             {
@@ -120,7 +120,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector4()
+        public void Poly1305Function_TestVector4()
         {
             byte[] key = new byte[]
             {
@@ -147,7 +147,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector5()
+        public void Poly1305Function_TestVector5()
         {
             byte[] key = new byte[]
             {
@@ -167,7 +167,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector6()
+        public void Poly1305Function_TestVector6()
         {
             byte[] key = new byte[]
             {
@@ -187,7 +187,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector7()
+        public void Poly1305Function_TestVector7()
         {
             byte[] key = new byte[]
             {
@@ -209,7 +209,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector8()
+        public void Poly1305Function_TestVector8()
         {
             byte[] key = new byte[]
             {
@@ -231,7 +231,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector9()
+        public void Poly1305Function_TestVector9()
         {
             byte[] key = new byte[]
             {
@@ -251,7 +251,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector10()
+        public void Poly1305Function_TestVector10()
         {
             byte[] key = new byte[]
             {
@@ -274,7 +274,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestVector11()
+        public void Poly1305Function_TestVector11()
         {
             byte[] key = new byte[]
             {

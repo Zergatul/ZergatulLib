@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class SEEDTests
     {
         [TestMethod]
-        public void Vector1()
+        public void SEED_Vector1()
         {
             TestEncryptDecrypt(
                 "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00",
@@ -18,7 +18,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector2()
+        public void SEED_Vector2()
         {
             TestEncryptDecrypt(
                 "00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F",
@@ -27,7 +27,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector3()
+        public void SEED_Vector3()
         {
             TestEncryptDecrypt(
                 "47 06 48 08 51 E6 1B E8 5D 74 BF B3 FD 95 61 85",
@@ -36,7 +36,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector4()
+        public void SEED_Vector4()
         {
             TestEncryptDecrypt(
                 "28 DB C3 BC 49 FF D8 7D CF A5 09 B1 1D 42 2B E7",

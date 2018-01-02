@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class CCMTests
     {
         [TestMethod]
-        public void Vector1()
+        public void CCM_Vector1()
         {
             TestEncryptDecrypt(
                 hex_key: "C0 C1 C2 C3  C4 C5 C6 C7  C8 C9 CA CB  CC CD CE CF",
@@ -21,7 +21,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector2()
+        public void CCM_Vector2()
         {
             TestEncryptDecrypt(
                 hex_key: "C0 C1 C2 C3  C4 C5 C6 C7  C8 C9 CA CB  CC CD CE CF",
@@ -32,7 +32,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector3()
+        public void CCM_Vector3()
         {
             TestEncryptDecrypt(
                 hex_key: "C0 C1 C2 C3  C4 C5 C6 C7  C8 C9 CA CB  CC CD CE CF",
@@ -43,7 +43,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector4()
+        public void CCM_Vector4()
         {
             TestEncryptDecrypt(
                 hex_key: "C0 C1 C2 C3  C4 C5 C6 C7  C8 C9 CA CB  CC CD CE CF",
@@ -54,7 +54,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector5()
+        public void CCM_Vector5()
         {
             TestEncryptDecrypt(
                 hex_key: "C0 C1 C2 C3  C4 C5 C6 C7  C8 C9 CA CB  CC CD CE CF",
@@ -65,7 +65,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector6()
+        public void CCM_Vector6()
         {
             TestEncryptDecrypt(
                 hex_key: "C0 C1 C2 C3  C4 C5 C6 C7  C8 C9 CA CB  CC CD CE CF",
@@ -76,7 +76,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector7()
+        public void CCM_Vector7()
         {
             TestEncryptDecrypt(
                 tagLen: 10,
@@ -88,7 +88,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector8()
+        public void CCM_Vector8()
         {
             TestEncryptDecrypt(
                 tagLen: 10,
@@ -100,7 +100,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector9()
+        public void CCM_Vector9()
         {
             TestEncryptDecrypt(
                 tagLen: 10,
@@ -112,7 +112,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector10()
+        public void CCM_Vector10()
         {
             TestEncryptDecrypt(
                 tagLen: 4,
@@ -124,7 +124,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector11()
+        public void CCM_Vector11()
         {
             TestEncryptDecrypt(
                 tagLen: 6,
@@ -136,7 +136,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector12()
+        public void CCM_Vector12()
         {
             TestEncryptDecrypt(
                 tagLen: 8,
@@ -148,7 +148,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector13()
+        public void CCM_Vector13()
         {
             TestEncryptDecrypt(
                 tagLen: 14,

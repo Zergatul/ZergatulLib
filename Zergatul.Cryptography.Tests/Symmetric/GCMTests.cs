@@ -11,7 +11,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class GCMTests
     {
         [TestMethod]
-        public void TestCase1()
+        public void GCM_TestCase1()
         {
             TestEncryptDecrypt(
                 hex_key: "00000000000000000000000000000000",
@@ -23,7 +23,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase2()
+        public void GCM_TestCase2()
         {
             TestEncryptDecrypt(
                 hex_key: "00000000000000000000000000000000",
@@ -35,7 +35,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase3()
+        public void GCM_TestCase3()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308",
@@ -47,7 +47,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase4()
+        public void GCM_TestCase4()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308",
@@ -59,7 +59,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase5()
+        public void GCM_TestCase5()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308",
@@ -71,7 +71,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase6()
+        public void GCM_TestCase6()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308",
@@ -83,7 +83,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase7()
+        public void GCM_TestCase7()
         {
             TestEncryptDecrypt(
                 hex_key: "000000000000000000000000000000000000000000000000",
@@ -95,7 +95,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase8()
+        public void GCM_TestCase8()
         {
             TestEncryptDecrypt(
                 hex_key: "000000000000000000000000000000000000000000000000",
@@ -107,7 +107,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase9()
+        public void GCM_TestCase9()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c",
@@ -119,7 +119,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase10()
+        public void GCM_TestCase10()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c",
@@ -131,7 +131,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase11()
+        public void GCM_TestCase11()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c",
@@ -143,7 +143,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase12()
+        public void GCM_TestCase12()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c",
@@ -155,7 +155,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase13()
+        public void GCM_TestCase13()
         {
             TestEncryptDecrypt(
                 hex_key: "0000000000000000000000000000000000000000000000000000000000000000",
@@ -167,7 +167,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase14()
+        public void GCM_TestCase14()
         {
             TestEncryptDecrypt(
                 hex_key: "0000000000000000000000000000000000000000000000000000000000000000",
@@ -179,7 +179,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase15()
+        public void GCM_TestCase15()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
@@ -191,7 +191,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase16()
+        public void GCM_TestCase16()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
@@ -203,7 +203,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase17()
+        public void GCM_TestCase17()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
@@ -215,7 +215,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void TestCase18()
+        public void GCM_TestCase18()
         {
             TestEncryptDecrypt(
                 hex_key: "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
@@ -227,7 +227,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test128_54ByteAuth()
+        public void GCM_Test128_54ByteAuth()
         {
             TestEncryptDecrypt(
                 hex_key: "AD7A2BD03EAC835A6F620FDCB506B345",
@@ -239,7 +239,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test256_54ByteAuth()
+        public void GCM_Test256_54ByteAuth()
         {
             TestEncryptDecrypt(
                 hex_key: "E3C08A8F06C6E3AD95A70557B23F75483CE33021A9C72B7025666204C69C0B72",
@@ -251,7 +251,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test128_60BytePlain()
+        public void GCM_Test128_60BytePlain()
         {
             TestEncryptDecrypt(
                 hex_key: "AD7A2BD03EAC835A6F620FDCB506B345",
@@ -263,7 +263,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test256_60BytePlain()
+        public void GCM_Test256_60BytePlain()
         {
             TestEncryptDecrypt(
                 hex_key: "E3C08A8F06C6E3AD95A70557B23F75483CE33021A9C72B7025666204C69C0B72",
@@ -275,7 +275,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test128_60ByteAuth()
+        public void GCM_Test128_60ByteAuth()
         {
             TestEncryptDecrypt(
                 hex_key: "071B113B0CA743FECCCF3D051F737382",
@@ -287,7 +287,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test256_60ByteAuth()
+        public void GCM_Test256_60ByteAuth()
         {
             TestEncryptDecrypt(
                 hex_key: "691D3EE909D7F54167FD1CA0B5D769081F2BDE1AEE655FDBAB80BD5295AE6BE7",
@@ -299,7 +299,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test128_75BytePlain()
+        public void GCM_Test128_75BytePlain()
         {
             TestEncryptDecrypt(
                 hex_key: "88EE087FD95DA9FBF6725AA9D757B0CD",
@@ -311,7 +311,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Test256_75BytePlain()
+        public void GCM_Test256_75BytePlain()
         {
             TestEncryptDecrypt(
                 hex_key: "4C973DBC7364621674F8B5B89E5C15511FCED9216490FB1C1A2CAA0FFE0407E5",

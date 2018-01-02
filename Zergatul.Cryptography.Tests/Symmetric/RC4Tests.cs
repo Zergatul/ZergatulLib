@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class RC4Tests
     {
         [TestMethod]
-        public void Vector1()
+        public void RC4_Vector1()
         {
             Test("0102030405",
                 new Dictionary<int, string>
@@ -37,7 +37,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector2()
+        public void RC4_Vector2()
         {
             Test("01020304050607",
                 new Dictionary<int, string>
@@ -64,7 +64,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector3()
+        public void RC4_Vector3()
         {
             Test("0102030405060708",
                 new Dictionary<int, string>
@@ -91,7 +91,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector4()
+        public void RC4_Vector4()
         {
             Test("0102030405060708090a",
                 new Dictionary<int, string>
@@ -118,7 +118,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector5()
+        public void RC4_Vector5()
         {
             Test("0102030405060708090a0b0c0d0e0f10",
                 new Dictionary<int, string>
@@ -145,7 +145,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector6()
+        public void RC4_Vector6()
         {
             Test("0102030405060708090a0b0c0d0e0f101112131415161718",
                 new Dictionary<int, string>
@@ -172,7 +172,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector7()
+        public void RC4_Vector7()
         {
             Test("0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20",
                 new Dictionary<int, string>
@@ -199,7 +199,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector8()
+        public void RC4_Vector8()
         {
             Test("833222772a",
                 new Dictionary<int, string>
@@ -226,7 +226,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector9()
+        public void RC4_Vector9()
         {
             Test("1910833222772a",
                 new Dictionary<int, string>
@@ -253,7 +253,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector10()
+        public void RC4_Vector10()
         {
             Test("641910833222772a",
                 new Dictionary<int, string>
@@ -280,7 +280,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector11()
+        public void RC4_Vector11()
         {
             Test("8b37641910833222772a",
                 new Dictionary<int, string>
@@ -307,7 +307,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector12()
+        public void RC4_Vector12()
         {
             Test("ebb46227c6cc8b37641910833222772a",
                 new Dictionary<int, string>
@@ -334,7 +334,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector13()
+        public void RC4_Vector13()
         {
             Test("c109163908ebe51debb46227c6cc8b37641910833222772a",
                 new Dictionary<int, string>
@@ -361,7 +361,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector14()
+        public void RC4_Vector14()
         {
             Test("1ada31d5cf688221c109163908ebe51debb46227c6cc8b37641910833222772a",
                 new Dictionary<int, string>

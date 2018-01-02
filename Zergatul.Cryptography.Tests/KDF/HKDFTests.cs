@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.KDF
     public class HKDFTests
     {
         [TestMethod]
-        public void RFCTestVector1()
+        public void HKDF_RFCTestVector1()
         {
             Test(42, new SHA256(),
                 "000102030405060708090a0b0c",
@@ -19,7 +19,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTestVector2()
+        public void HKDF_RFCTestVector2()
         {
             Test(82, new SHA256(),
                 "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf",
@@ -29,7 +29,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTestVector3()
+        public void HKDF_RFCTestVector3()
         {
             Test(42, new SHA256(),
                 "",
@@ -39,7 +39,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTestVector4()
+        public void HKDF_RFCTestVector4()
         {
             Test(42, new SHA1(),
                 "000102030405060708090a0b0c",
@@ -49,7 +49,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTestVector5()
+        public void HKDF_RFCTestVector5()
         {
             Test(82, new SHA1(),
                 "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf",
@@ -59,7 +59,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTestVector6()
+        public void HKDF_RFCTestVector6()
         {
             Test(42, new SHA1(),
                 "",
@@ -69,7 +69,7 @@ namespace Zergatul.Cryptography.Tests.KDF
         }
 
         [TestMethod]
-        public void RFCTestVector7()
+        public void HKDF_RFCTestVector7()
         {
             var hkdf = new HKDF(new SHA1());
             hkdf.Init(null, BitHelper.HexToBytes("0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"));

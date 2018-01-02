@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
     public class TwofishTests
     {
         [TestMethod]
-        public void SchneierTests()
+        public void Twofish_SchneierTests()
         {
             TestEncryptDecrypt(
                 "00000000000000000000000000000000",
@@ -29,7 +29,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void SchneierCycleTests()
+        public void Twofish_SchneierCycleTests()
         {
             TestCycleEncryptDecrypt(49, 16, "5D9D4EEFFA9151575524F115815A12E0");
             TestCycleEncryptDecrypt(49, 24, "E75449212BEEF9F4A390BD860A640941");

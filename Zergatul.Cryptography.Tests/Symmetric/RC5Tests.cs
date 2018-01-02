@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
     public class RC5Tests
     {
         [TestMethod]
-        public void Tests_32_12_16()
+        public void RC5_Tests_32_12_16()
         {
             TestEncryptDecrypt(12,
                 "00000000000000000000000000000000",
@@ -35,7 +35,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void NESSIETestVectors()
+        public void RC5_NESSIETestVectors()
         {
             // Set 1, vector#  0:
             TestEncryptDecrypt("80000000000000000000000000000000","0000000000000000","8F681D7F285CDC2F","E178246B535300F4","F10AED16DC85DB9D");
@@ -1383,7 +1383,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void RFC2040TestVectors()
+        public void RC5_RFC2040TestVectors()
         {
             TestEncryptDecryptCBC(0, "00", "0000000000000000", "0000000000000000", "7a7bba4d79111d1e");
             TestEncryptDecryptCBC(0, "00", "0000000000000000", "ffffffffffffffff", "797bba4d78111d1e");
@@ -1415,7 +1415,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void Test64Bit()
+        public void RC5_Test64Bit()
         {
             TestEncryptDecrypt(16, "00", "4c6f6c204b656b20436865627572656b", "fac0622b99469d72217a623ef9cfdc60");
             TestEncryptDecrypt(16,

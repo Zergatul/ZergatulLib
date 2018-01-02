@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.Hash
     public class StreebogTests
     {
         [TestMethod]
-        public void TestEmpty()
+        public void Streebog_TestEmpty()
         {
             Assert.IsTrue(Hash256("") ==
                 "3f539a213e97c802cc229d474c6aa32a825a360b2a933a949fd925208d9ce1bb");
@@ -19,7 +19,7 @@ namespace Zergatul.Cryptography.Tests.Hash
         }
 
         [TestMethod]
-        public void TestFox()
+        public void Streebog_TestFox()
         {
             Assert.IsTrue(Hash256("The quick brown fox jumps over the lazy dog") ==
                 "3e7dea7f2384b6c5a3d0e24aaa29c05e89ddd762145030ec22c71a6db8b2c1f4");
@@ -33,7 +33,7 @@ namespace Zergatul.Cryptography.Tests.Hash
         }
 
         [TestMethod]
-        public void TestRFC1()
+        public void Streebog_TestRFC1()
         {
             Assert.IsTrue(Hash256(BitHelper.HexToBytes("303132333435363738393031323334353637383930313233343536373839303132333435363738393031323334353637383930313233343536373839303132")) ==
                 "9d151eefd8590b89daa6ba6cb74af9275dd051026bb149a452fd84e5e57b5500");
@@ -43,7 +43,7 @@ namespace Zergatul.Cryptography.Tests.Hash
         }
 
         [TestMethod]
-        public void TestRFC2()
+        public void Streebog_TestRFC2()
         {
             Assert.IsTrue(Hash256(BitHelper.HexToBytes("d1e520e2e5f2f0e82c20d1f2f0e8e1eee6e820e2edf3f6e82c20e2e5fef2fa20f120eceef0ff20f1f2f0e5ebe0ece820ede020f5f0e0e1f0fbff20efebfaeafb20c8e3eef0e5e2fb")) ==
                 "9dd2fe4e90409e5da87f53976d7405b0c0cac628fc669a741d50063c557e8f50");
@@ -53,7 +53,7 @@ namespace Zergatul.Cryptography.Tests.Hash
         }
 
         [TestMethod]
-        public void Test1Million()
+        public void Streebog_Test1Million()
         {
             byte[] data = new byte[1000000];
             Action<byte, string, string> testByte = (b, hash256, hash512) =>

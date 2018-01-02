@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class ChaCha20Tests
     {
         [TestMethod]
-        public void QuarterRoundTest()
+        public void ChaCha20_QuarterRoundTest()
         {
             var method = typeof(ChaCha20).GetMethod(
                 "QuarterRound",
@@ -28,7 +28,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void QuarterRoundOnStateTest()
+        public void ChaCha20_QuarterRoundOnStateTest()
         {
             var state = new uint[16]
             {
@@ -58,7 +58,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector1()
+        public void ChaCha20_Vector1()
         {
             byte[] key = BitHelper.HexToBytes("00:01:02:03:04:05:06:07:08:09:0a:0b:0c:0d:0e:0f:10:11:12:13:14:15:16:17:18:19:1a:1b:1c:1d:1e:1f".Replace(":", ""));
             byte[] nonce = BitHelper.HexToBytes("00:00:00:09:00:00:00:4a:00:00:00:00".Replace(":", ""));

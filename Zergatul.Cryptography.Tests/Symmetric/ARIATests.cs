@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class ARIATests
     {
         [TestMethod]
-        public void Key128_1()
+        public void ARIA_Key128_1()
         {
             TestEncryptDecrypt(
                 "000102030405060708090a0b0c0d0e0f",
@@ -18,7 +18,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Key192_1()
+        public void ARIA_Key192_1()
         {
             TestEncryptDecrypt(
                 "000102030405060708090a0b0c0d0e0f1011121314151617",
@@ -27,7 +27,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Key256_1()
+        public void ARIA_Key256_1()
         {
             TestEncryptDecrypt(
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",

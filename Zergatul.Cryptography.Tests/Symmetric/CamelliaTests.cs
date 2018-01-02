@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class CamelliaTests
     {
         [TestMethod]
-        public void Key128_1()
+        public void Camellia_Key128_1()
         {
             TestEncryptDecrypt(
                 "0123456789abcdeffedcba9876543210",
@@ -18,7 +18,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Key192_1()
+        public void Camellia_Key192_1()
         {
             TestEncryptDecrypt(
                 "0123456789abcdeffedcba98765432100011223344556677",
@@ -27,7 +27,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Key256_1()
+        public void Camellia_Key256_1()
         {
             TestEncryptDecrypt(
                 "0123456789abcdeffedcba987654321000112233445566778899aabbccddeeff",

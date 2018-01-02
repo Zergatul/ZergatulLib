@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
     public class SerpentTests
     {
         [TestMethod]
-        public void NESSIETestVectors_Set1()
+        public void Serpent_NESSIETestVectors_Set1()
         {
             // Set 1, vector#  0:
             TestEncryptDecrypt("8000000000000000000000000000000000000000000000000000000000000000","00000000000000000000000000000000","A223AA1288463C0E2BE38EBD825616C0","739E0148971FD975B585EAFDBD659E2C","BEFD00E0D6E27E56951DC6614440D286");
@@ -781,7 +781,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void NESSIETestVectors_Set2()
+        public void Serpent_NESSIETestVectors_Set2()
         {
             // Set 2, vector#  0:
             TestEncryptDecrypt("0000000000000000000000000000000000000000000000000000000000000000","80000000000000000000000000000000","8314675E8AD5C3ECD83D852BCF7F566E","4644E40D4FB7744E554082C4131986C4","BFA1F3B34FAE99E61EB82270659143F4");
@@ -1169,7 +1169,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void NESSIETestVectors_Set3()
+        public void Serpent_NESSIETestVectors_Set3()
         {
             // Set 3, vector#  0:
             TestEncryptDecrypt("0000000000000000000000000000000000000000000000000000000000000000","00000000000000000000000000000000","49672BA898D98DF95019180445491089","5A445EFD4923EBDDEA1D5BE4511BD4D6","D72EC2B7B93FBB567CEFBAB3FAB43FB4");
@@ -1941,7 +1941,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void NESSIETestVectors_Set4()
+        public void Serpent_NESSIETestVectors_Set4()
         {
             // Set 4, vector#  0:
             TestEncryptDecrypt("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F","00112233445566778899AABBCCDDEEFF","2868B7A2D28ECD5E4FDEFAC3C4330074","8BF56992354F3F1A0F4E49DCBA82CBC0","9B1D8B34845DF9BFD36AAAD0CDA1C8FE");

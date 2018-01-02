@@ -11,7 +11,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class Poly1305Tests
     {
         [TestMethod]
-        public void Vector1()
+        public void Poly1305_Vector1()
         {
             byte[] plain = new byte[]
             {
@@ -58,7 +58,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void Vector2()
+        public void Poly1305_Vector2()
         {
             byte[] plain = new byte[]
             {

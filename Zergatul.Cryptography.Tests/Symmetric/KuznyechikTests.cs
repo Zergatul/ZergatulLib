@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
     public class KuznyechikTests
     {
         [TestMethod]
-        public void DocTest()
+        public void Kuznyechik_DocTest()
         {
             TestEncryptDecrypt(1,
                 "8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef",
@@ -18,7 +18,7 @@ namespace Zergatul.Cryptography.Tests.Symmetric
         }
 
         [TestMethod]
-        public void Test1k()
+        public void Kuznyechik_Test1000Iterations()
         {
             TestEncryptDecrypt(1000, "8899aabbccddeeff0011223344556677fedcba98765432100123456789abcdef", "0f4e21c7f09ecebc0cde3f1272abf027", "a903b684fbea616eca252b3c31044178");
             TestEncryptDecrypt(1000, "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", "3dd5cb48f169acbc07dd52e98f8a0184", "7d3b2ee3e477eb64c9ee2fb2dfe4933d");

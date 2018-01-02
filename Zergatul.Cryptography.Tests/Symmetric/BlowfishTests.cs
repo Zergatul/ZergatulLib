@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class BlowfishTests
     {
         [TestMethod]
-        public void EricYoungVectors()
+        public void Blowfish_EricYoungVectors()
         {
             TestEncryptDecrypt("0000000000000000", "0000000000000000", "4EF997456198DD78");
             TestEncryptDecrypt("FFFFFFFFFFFFFFFF", "FFFFFFFFFFFFFFFF", "51866FD5B85ECB8A");
@@ -48,7 +48,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
         }
 
         [TestMethod]
-        public void NonStandardKeySizesTests()
+        public void Blowfish_NonStandardKeySizesTests()
         {
             TestEncryptDecrypt("90", "0001 0203 0405 0607", "c710 970f a369 1224");
             TestEncryptDecrypt("9085", "0001 0203 0405 0607", "5f27 1f50 ddf8 6c12");

@@ -10,7 +10,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
     public class DiffieHellmanTests
     {
         [TestMethod]
-        public void Test1()
+        public void DiffieHellman_Test1()
         {
             var random1 = new TestRandom(new byte[] { 0x03, 0x7C }); // 892
             var random2 = new TestRandom(new byte[] { 0x02, 0xF3 }); // 755
@@ -39,7 +39,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
         }
 
         [TestMethod]
-        public void Test2()
+        public void DiffieHellman_Test2()
         {
             var random = new DefaultSecureRandom();
 

@@ -9,7 +9,7 @@ namespace Zergatul.Cryptography.Tests.BlockCipher
     public class Poly1305KeyGeneratorTests
     {
         [TestMethod]
-        public void Vector1()
+        public void Poly1305KeyGenerator_Vector1()
         {
             byte[] key = BitHelper.HexToBytes("80 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f 90 91 92 93 94 95 96 97 98 99 9a 9b 9c 9d 9e 9f".Replace(" ", ""));
             byte[] nonce = BitHelper.HexToBytes("00 00 00 00 00 01 02 03 04 05 06 07".Replace(" ", ""));
