@@ -59,6 +59,7 @@
     <Compile Include="EllipticPrimeFieldTests.cs" />
     <Compile Include="BinaryPolynomialTests.cs" />
     <Compile Include="EllipticBinaryFieldTests.cs" />
+    <Compile Include="BigRealTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

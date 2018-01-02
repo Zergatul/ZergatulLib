@@ -68,7 +68,10 @@ namespace Zergatul.Math
 
             if (value < 0)
             {
-                _words = new uint[1] { (uint)(-value) };
+                if (value == int.MinValue)
+                    _words = new uint[1] { 0x80000000 };
+                else
+                    _words = new uint[1] { (uint)(-value) };
                 _wordsLength = 1;
                 _sign = -1;
             }
@@ -82,8 +85,11 @@ namespace Zergatul.Math
 
         public BigInteger(long value)
         {
-            if (value < 0)
-                throw new ArgumentException("Value must be >= 0", nameof(value));
+            if (value == 0)
+            {
+                CopyFrom(Zero);
+                return;
+            }
 
             if (value > 0)
             {
@@ -97,9 +103,33 @@ namespace Zergatul.Math
                     _words = new uint[1] { (uint)value };
                     _wordsLength = 1;
                 }
+                _sign = 1;
+                return;
             }
             else
-                CopyFrom(Zero);
+            {
+                if (value == long.MinValue)
+                {
+                    _words = new uint[2] { 0, 0x80000000 };
+                    _wordsLength = 2;
+                }
+                else
+                {
+                    value = -value;
+                    if (value > uint.MaxValue)
+                    {
+                        _words = new uint[2] { (uint)(value & 0xFFFFFFFF), (uint)(value >> 32) };
+                        _wordsLength = 2;
+                    }
+                    else
+                    {
+                        _words = new uint[1] { (uint)value };
+                        _wordsLength = 1;
+                    }
+                }
+                _sign = -1;
+                return;
+            }
         }
 
         public BigInteger(byte[] data, int offset, int length, ByteOrder order)
@@ -521,7 +551,8 @@ namespace Zergatul.Math
                 BigInteger quotient = null;
                 BigInteger remainder = null;
                 UnsignedDivisionGeneral(dividend, divisor, ref quotient, ref remainder, false, true);
-                remainder._sign = dividend._sign;
+                if (!remainder.IsZero)
+                    remainder._sign = dividend._sign;
                 if (remainder._sign == -1)
                     remainder += divisor;
                 return remainder;

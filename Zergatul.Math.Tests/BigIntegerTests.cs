@@ -113,6 +113,26 @@ namespace Zergatul.Math.Tests
             Assert.IsTrue(bi._words[1] == 256 * 256 * 256);
         }
 
+        [TestMethod]
+        public void ConstructorFromInt32()
+        {
+            var bi = new BigInteger(int.MinValue);
+            Assert.IsTrue(bi.ToString() == "-2147483648");
+        }
+
+        [TestMethod]
+        public void ConstructorFromInt64()
+        {
+            var bi = new BigInteger(long.MinValue);
+            Assert.IsTrue(bi.ToString() == "-9223372036854775808");
+
+            bi = new BigInteger((long)uint.MaxValue);
+            Assert.IsTrue(bi.ToString() == "4294967295");
+
+            bi = new BigInteger((long)uint.MaxValue + 1);
+            Assert.IsTrue(bi.ToString() == "4294967296");
+        }
+
         #endregion
 
         #region ToBytes
@@ -652,6 +672,14 @@ namespace Zergatul.Math.Tests
             BigInteger.Division(bi1, bi2, out quotient, out remainder);
             Assert.IsTrue(quotient == 1);
             Assert.IsTrue(remainder == 0);
+        }
+
+        [TestMethod]
+        public void Division_11()
+        {
+            var bi1 = BigInteger.Parse("-3709922803365947854249406587936891007271240697659934190189352926534182226656176161307276765759961107574741733679712927872190108668553201928124260700254843641852246257622014545666253549165226937810500934814536469243449757983154383");
+            var bi2 = BigInteger.Parse("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed", 16);
+            Assert.IsTrue((bi1 % bi2) == 0);
         }
 
         #endregion
