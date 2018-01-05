@@ -62,6 +62,12 @@ namespace Zergatul.Math
                     _mantissaLength = 1;
                 }
 
+                while (mantissa > 0)
+                {
+                    mantissa >>= 1;
+                    exponent++;
+                }
+
                 if (exponent == 0)
                 {
                     _exponentLength = 0;
@@ -86,18 +92,51 @@ namespace Zergatul.Math
             }
 
             _mantissaBits = mantissaBits;
-
-            TruncateMantissaBits();
         }
 
         #endregion
 
         #region ToString
 
-        public string ToExpString()
+        //public string ToExpString()
+        //{
+            
+        //}
+
+        //public string ToNormalString()
+        //{
+        //    return "";
+        //}
+
+        public override string ToString()
         {
-            //if ()
-            return "";
+            if (_mantissaLength == 0)
+                return "0";
+
+            BigInteger mantissa = new BigInteger(_mantissa.Take(_mantissaLength).ToArray(), ByteOrder.LittleEndian);
+            BigInteger integerPart;
+            BigInteger fractionalPart;
+
+            int exponentInt;
+            if (_exponentLength > 0)
+            {
+                if (_exponentLength > 1 || _exponent[0] > int.MaxValue)
+                    throw new NotImplementedException();
+
+                if (_exponentSign == 1)
+                    exponentInt = (int)_exponent[0];
+                else
+                    exponentInt = -(int)_exponent[0];
+            }
+            else
+                exponentInt = 0;
+
+            int mantissaBitLength = mantissa.BitSize;
+            integerPart = mantissa << (mantissaBitLength + exponentInt - 1);
+
+            string sign = _mantissaSign == -1 ? "-" : "";
+
+            return sign + integerPart.ToString();
         }
 
         #endregion
