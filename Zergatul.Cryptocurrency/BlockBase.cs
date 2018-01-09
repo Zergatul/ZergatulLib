@@ -86,7 +86,7 @@ namespace Zergatul.Cryptocurrency
             while (hashes.Count > 1)
             {
                 List<byte[]> newHashes = new List<byte[]>();
-                for (int i = 0; i < hashes.Count / 2; i++)
+                for (int i = 0; i < (hashes.Count + 1) / 2; i++)
                 {
                     byte[] left = hashes[2 * i];
                     byte[] right = 2 * i + 1 >= hashes.Count ? left : hashes[2 * i + 1];

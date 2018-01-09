@@ -58,6 +58,9 @@
     <Compile Include="Bitcoin\TestTransactionRepository.cs" />
     <Compile Include="Bitcoin\TransactionTests.cs" />
     <Compile Include="Bitcoin\Base58Tests.cs" />
+    <Compile Include="Litecoin\AddressTests.cs" />
+    <Compile Include="Litecoin\TestTransactionRepository.cs" />
+    <Compile Include="Litecoin\TransactionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Bitcoin\BlockTests.cs" />
     <Compile Include="Bitcoin\PrivateKeyTests.cs" />
@@ -77,6 +80,9 @@
     <Content Include="Bitcoin\Block-000170.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Bitcoin\Block-080003.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Bitcoin\Block-160720.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -92,7 +98,13 @@
     <Content Include="Bitcoin\Block-057043.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Bitcoin\Block-050001.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Bitcoin\Transactions.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Litecoin\Transactions.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

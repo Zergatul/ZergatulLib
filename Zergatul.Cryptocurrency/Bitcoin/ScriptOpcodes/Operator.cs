@@ -138,6 +138,11 @@ namespace Zergatul.Cryptocurrency.Bitcoin.ScriptOpcodes
             stack.Push(hash160.ComputeHash());
         }
 
+        private const int SIGHASH_ALL = 0x00000001;
+        private const int SIGHASH_NONE = 0x00000002;
+        private const int SIGHASH_SINGLE = 0x00000003;
+        private const int SIGHASH_ANYONECANPAY = 0x00000080;
+
         private void OP_CHECKSIG(byte[] verifyBytes, Stack<byte[]> stack)
         {
             if (stack.Count < 2)
@@ -146,12 +151,24 @@ namespace Zergatul.Cryptocurrency.Bitcoin.ScriptOpcodes
             byte[] pubkey = stack.Pop();
             byte[] signature = stack.Pop();
 
-            int hashTypeCode = signature[signature.Length - 1];
-            if (hashTypeCode != 1)
-                throw new NotImplementedException();
-            signature = ByteArray.SubArray(signature, 0, signature.Length - 1);
+            byte[] signedData;
 
-            byte[] signedData = ByteArray.Concat(verifyBytes, BitHelper.GetBytes(hashTypeCode, ByteOrder.LittleEndian));
+            int hashTypeCode = signature[signature.Length - 1];
+            if ((hashTypeCode & 0x31) == SIGHASH_NONE)
+                throw new NotImplementedException();
+            else if ((hashTypeCode & 0x31) == SIGHASH_SINGLE)
+                throw new NotImplementedException();
+            else if ((hashTypeCode & SIGHASH_ANYONECANPAY) != 0)
+            {
+                signedData = new byte[] { 0 };
+                //stack.Push()
+            }
+            else
+            {
+                signedData = ByteArray.Concat(verifyBytes, BitHelper.GetBytes(hashTypeCode, ByteOrder.LittleEndian));
+            }
+
+            signature = ByteArray.SubArray(signature, 0, signature.Length - 1);
 
             var hash256 = new DoubleSHA256();
             hash256.Update(signedData);

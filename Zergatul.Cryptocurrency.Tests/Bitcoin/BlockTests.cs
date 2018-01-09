@@ -53,6 +53,30 @@ namespace Zergatul.Cryptocurrency.Tests.Bitcoin
         }
 
         [TestMethod]
+        public void ParseVer1_50001()
+        {
+            var block = Block.FromHex(File.ReadAllText("Bitcoin/Block-050001.txt"));
+
+            Assert.IsTrue(block.BlockIDString == "000000001c920d495e1eeef2452b6d1c6c229a919b28196c103ecffebabee141");
+
+            Assert.IsTrue(block.MerkleRootString == "ee3a2d2b895cafacff526d06a55b55e049cf84a9735e4a63f7fd08f96d0f4649");
+
+            Assert.IsTrue(block.ValidateMerkleRoot());
+        }
+
+        [TestMethod]
+        public void ParseVer1_80003()
+        {
+            var block = Block.FromHex(File.ReadAllText("Bitcoin/Block-080003.txt"));
+
+            Assert.IsTrue(block.BlockIDString == "000000000042a2cf1cddf23ee040f9ee162f84db7898efc9a03c181b50c2f2a7");
+
+            Assert.IsTrue(block.MerkleRootString == "6796c0612630413f02e962224fe9c9d77e50400e217c7c0d556b1b83beee6558");
+
+            Assert.IsTrue(block.ValidateMerkleRoot());
+        }
+
+        [TestMethod]
         public void ParseVer1_57043_Pizza()
         {
             var block = Block.FromHex(File.ReadAllText("Bitcoin/Block-057043.txt"));
@@ -127,19 +151,19 @@ namespace Zergatul.Cryptocurrency.Tests.Bitcoin
         [TestMethod]
         public void Parse497401()
         {
-            var block = Block.FromHex(File.ReadAllText("Bitcoin/Block-0000000000000000009c2165d2665885cd634e34ebca1fb9d46ba7fc3a64ae25.txt"));
+            var block = Block.FromHex(File.ReadAllText("Bitcoin/Block-497401.txt"));
 
             Assert.IsTrue(block.BlockIDString == "0000000000000000009c2165d2665885cd634e34ebca1fb9d46ba7fc3a64ae25");
 
-            Assert.IsTrue(block.Version == 1);
-            Assert.IsTrue(block.PrevBlockIDString == "0000000000000000000000000000000000000000000000000000000000000000");
-            Assert.IsTrue(block.MerkleRootString == "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-            Assert.IsTrue(block.Date == new DateTime(2009, 1, 3, 18, 15, 5));
-            Assert.IsTrue(block.Bits == 486604799);
-            Assert.IsTrue(block.Nonce == 2083236893);
+            Assert.IsTrue(block.Version == 0x20000000);
+            Assert.IsTrue(block.PrevBlockIDString == "0000000000000000001dfb2206314e39ee12a850382fc128dccf2c966e2aed25");
+            Assert.IsTrue(block.MerkleRootString == "cf5c3692bda0a20c61041eb4c8808f98100df69f42ddcf94345f0c3192932543");
+            Assert.IsTrue(block.Date == new DateTime(2017, 12, 3, 17, 7, 58));
+            Assert.IsTrue(block.Bits == 402706678);
+            Assert.IsTrue(block.Nonce == 335261844);
 
-            Assert.IsTrue(block.Transactions.Length == 1);
-            Assert.IsTrue(block.Transactions[0].IDString == "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+            Assert.IsTrue(block.Transactions.Length == 2301);
+            Assert.IsTrue(block.Transactions[0].IDString == "69efdcb4169c4f09a3e83ec9bafef534b9ec3bbcf1e6b921f95a0b6f3f356301");
 
             Assert.IsTrue(block.ValidateMerkleRoot());
         }

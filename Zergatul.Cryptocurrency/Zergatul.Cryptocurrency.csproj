@@ -65,6 +65,7 @@
     <Compile Include="Bitcoin\VarLengthInt.cs" />
     <Compile Include="BlockBase.cs" />
     <Compile Include="ITransactionRepository.cs" />
+    <Compile Include="Litecoin\Address.cs" />
     <Compile Include="Litecoin\Block.cs" />
     <Compile Include="Litecoin\Transaction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
