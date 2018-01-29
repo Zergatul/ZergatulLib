@@ -62,7 +62,7 @@ namespace Zergatul.Cryptography.Hash
                 throw new InvalidOperationException();
 
             for (int i = 0; i < length; i++)
-                _buffer.Add(data[i]);
+                _buffer.Add(data[index + i]);
             _totalBytes += (ulong)length;
 
             ProcessBuffer();
