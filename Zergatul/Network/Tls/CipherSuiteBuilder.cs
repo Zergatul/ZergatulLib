@@ -96,7 +96,7 @@ namespace Zergatul.Network.Tls
 
         public virtual void GenerateKeyMaterial()
         {
-            // RFC 5426 // Page 25
+            // RFC 5246 // Page 25
             /*
                 To generate the key material, compute
 
@@ -111,7 +111,7 @@ namespace Zergatul.Network.Tls
                 ByteArray.Concat(SecurityParameters.ServerRandom, SecurityParameters.ClientRandom),
                 2 * (SecurityParameters.MACLength + SecurityParameters.EncKeyLength + SecurityParameters.FixedIVLength));
 
-            // RFC 5426 // Page 25
+            // RFC 5246 // Page 25
             /*
                 Then, the key_block is partitioned as follows:
 
