@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Math.EllipticCurves.PrimeField
 {
+#if !UseOpenSSL
+
     /// <summary>
     /// y² ≡ x³ + ax + b (mod p)
     /// </summary>
@@ -33,6 +35,11 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
 
             this.g = g;
             this.g.Curve = this;
+        }
+
+        public ECPoint GeneratorMultiplication(BigInteger value)
+        {
+            return value * g;
         }
 
         #region IEllipticCurve
@@ -225,4 +232,85 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
 
         #endregion
     }
+
+#else
+
+    /// <summary>
+    /// y² ≡ x³ + ax + b (mod p)
+    /// </summary>
+    public class EllipticCurve : IEllipticCurve
+    {
+        public BigInteger a;
+        public BigInteger b;
+        public BigInteger p;
+        public ECPoint g;
+        public BigInteger n;
+        public int h;
+
+        internal IntPtr EC_GROUP;
+
+        public EllipticCurve()
+        {
+
+        }
+
+        public EllipticCurve(BigInteger a, BigInteger b, BigInteger p, ECPoint g, BigInteger n, int h)
+        {
+            this.a = a;
+            this.b = b;
+            this.p = p;
+            this.n = n;
+            this.h = h;
+
+            this.g = g;
+            this.g.Curve = this;
+        }
+
+        public EllipticCurve(int nid)
+        {
+            EC_GROUP = OpenSSL.EC_GROUP_new_by_curve_name(nid);
+        }
+
+        public ECPoint GeneratorMultiplication(BigInteger value)
+        {
+            var point = new ECPoint();
+            point.Curve = this;
+
+            point.EC_POINT = OpenSSL.EC_POINT_new(EC_GROUP);
+            if (point.EC_POINT == null)
+                throw new InvalidOperationException();
+
+            if (OpenSSL.EC_POINT_mul(point.Curve.EC_GROUP, point.EC_POINT, value.BIGNUM, IntPtr.Zero, IntPtr.Zero, BigInteger.BN_CTX) != 1)
+                throw new InvalidOperationException();
+
+            return point;
+        }
+
+        #region IEllipticCurve
+
+        public int BitSize => n.BitSize;
+
+        #endregion
+
+        #region Curves
+
+        public static EllipticCurve secp112r1 = new EllipticCurve(OpenSSL.NID_secp112r1);
+        public static EllipticCurve secp112r2 = new EllipticCurve(OpenSSL.NID_secp112r2);
+        public static EllipticCurve secp128r1 = new EllipticCurve(OpenSSL.NID_secp128r1);
+        public static EllipticCurve secp128r2 = new EllipticCurve(OpenSSL.NID_secp128r2);
+        public static EllipticCurve secp160k1 = new EllipticCurve(OpenSSL.NID_secp160k1);
+        public static EllipticCurve secp160r1 = new EllipticCurve(OpenSSL.NID_secp160r1);
+        public static EllipticCurve secp160r2 = new EllipticCurve(OpenSSL.NID_secp160r2);
+        public static EllipticCurve secp192k1 = new EllipticCurve(OpenSSL.NID_secp192k1);
+        public static EllipticCurve secp192r1 = null; // new EllipticCurve(OpenSSL.NID_secp192;
+        public static EllipticCurve secp224k1 = new EllipticCurve(OpenSSL.NID_secp224k1);
+        public static EllipticCurve secp224r1 = new EllipticCurve(OpenSSL.NID_secp224r1);
+        public static EllipticCurve secp256k1 = new EllipticCurve(OpenSSL.NID_secp256k1);
+        public static EllipticCurve secp256r1 = new EllipticCurve(OpenSSL.NID_X9_62_prime256v1);
+        public static EllipticCurve secp384r1 = new EllipticCurve(OpenSSL.NID_secp384r1);
+        public static EllipticCurve secp521r1 = new EllipticCurve(OpenSSL.NID_secp521r1);
+
+        #endregion
+    }
+#endif
 }

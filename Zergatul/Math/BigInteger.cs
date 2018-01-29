@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Math
 {
-    // https://github.com/Zergatul/zChat/blob/master/client/bigint.js
+#if !UseOpenSSL
+
     public class BigInteger : IComparable<BigInteger>, IComparable<int>, IEquatable<BigInteger>, IEquatable<int>
     {
         private static IRandom _random = new DefaultRandom();
@@ -36,8 +37,10 @@ namespace Zergatul.Math
         #endregion
 
         #region Public constants
+
         public static readonly BigInteger Zero = new BigInteger(new uint[0]);
         public static readonly BigInteger One = new BigInteger(1);
+
         #endregion
 
         #region Contructors
@@ -1895,4 +1898,691 @@ namespace Zergatul.Math
 
         #endregion
     }
+
+#else
+
+    public class BigInteger : IComparable<BigInteger>, IComparable<int>, IEquatable<BigInteger>, IEquatable<int>
+    {
+        internal IntPtr BIGNUM;
+        private bool _disposable;
+
+        internal static readonly IntPtr BN_CTX = OpenSSL.BN_CTX_new();
+
+        #region Public properties
+
+        public bool IsZero => OpenSSL.BN_is_zero(BIGNUM) == 1;
+
+        public bool IsOdd => OpenSSL.BN_is_odd(BIGNUM) == 1;
+
+        public bool IsEven => OpenSSL.BN_is_odd(BIGNUM) == 0;
+
+        public int BitSize => OpenSSL.BN_num_bits(BIGNUM);
+
+        #endregion
+
+        #region Public constants
+
+        public static readonly BigInteger Zero = new BigInteger(OpenSSL.BN_new());
+        public static readonly BigInteger One = new BigInteger(OpenSSL.BN_value_one(), false);
+
+        #endregion
+
+        #region Contructors
+
+        private BigInteger(IntPtr bignum)
+            : this(bignum, true)
+        {
+            
+        }
+
+        private BigInteger(IntPtr bignum, bool disposable)
+        {
+            if (bignum == IntPtr.Zero)
+                throw new InvalidOperationException();
+
+            this.BIGNUM = bignum;
+            this._disposable = disposable;
+        }
+
+        public BigInteger(int value)
+        {
+            this.BIGNUM = OpenSSL.BN_new();
+            if (value >= 0)
+                OpenSSL.BN_set_word(this.BIGNUM, (ulong)value);
+            else
+            {
+                OpenSSL.BN_set_word(this.BIGNUM, (ulong)(-(long)value));
+                OpenSSL.BN_set_negative(this.BIGNUM, 1);
+            }
+        }
+
+        public BigInteger(long value)
+        {
+            this.BIGNUM = OpenSSL.BN_new();
+            if (value >= 0)
+                OpenSSL.BN_set_word(this.BIGNUM, (ulong)value);
+            else
+            {
+                if (value != long.MinValue)
+                    OpenSSL.BN_set_word(this.BIGNUM, (ulong)(-value));
+                else
+                    OpenSSL.BN_set_word(this.BIGNUM, 0x8000000000000000);
+                OpenSSL.BN_set_negative(this.BIGNUM, 1);
+            }
+        }
+
+        public BigInteger(byte[] data, int offset, int length, ByteOrder order)
+        {
+            byte[] buffer = new byte[length];
+            Array.Copy(data, offset, buffer, 0, length);
+
+            if (order == ByteOrder.LittleEndian)
+                Array.Reverse(buffer);
+
+            this.BIGNUM = OpenSSL.BN_bin2bn(buffer, length, IntPtr.Zero);
+            if (this.BIGNUM == IntPtr.Zero)
+                throw new InvalidOperationException();
+        }
+
+        public BigInteger(byte[] data, ByteOrder order)
+            : this(data, 0, data.Length, order)
+        {
+
+        }
+
+        public BigInteger(uint[] words, ByteOrder order)
+            : this(BitHelper.ToByteArray(words, order), order)
+        {
+
+        }
+
+        public static BigInteger Parse(string value, int radix = 10)
+        {
+            return Parse(value, radix, DefaultSymbols);
+        }
+
+        public static BigInteger Parse(string value, int radix, char[] symbols)
+        {
+            if (radix == 10 && symbols == DefaultSymbols)
+            {
+                IntPtr bignum = IntPtr.Zero;
+                OpenSSL.BN_dec2bn(ref bignum, value);
+                return new BigInteger(bignum);
+            }
+            if (radix == 16 && symbols == DefaultSymbols)
+            {
+                IntPtr bignum = IntPtr.Zero;
+                OpenSSL.BN_hex2bn(ref bignum, value);
+                return new BigInteger(bignum);
+            }
+
+            bool negative = value[0] == '-';
+            if (negative)
+                value = value.Substring(1);
+
+            int[] indexes = new int[value.Length];
+            for (int i = 0; i < value.Length; i++)
+            {
+                int index = -1;
+                for (int j = 0; j < radix; j++)
+                    if (symbols[j] == value[i])
+                    {
+                        index = j;
+                        break;
+                    }
+
+                if (index == -1)
+                    throw new InvalidOperationException();
+
+                indexes[i] = index;
+            }
+
+            IntPtr res = OpenSSL.BN_new();
+            try
+            {
+                ulong rad = checked((ulong)radix);
+                for (int i = 0; i < indexes.Length; i++)
+                {
+                    OpenSSL.BN_mul_word(res, rad);
+                    OpenSSL.BN_add_word(res, checked((ulong)indexes[i]));
+                }
+            }
+            catch
+            {
+                OpenSSL.BN_free(res);
+                throw;
+            }
+
+            if (negative)
+                OpenSSL.BN_set_negative(res, 1);
+
+            return new BigInteger(res);
+        }
+
+        /// <summary>
+        /// Generates random number in range [0..value-1]
+        /// </summary>
+        public static BigInteger Random(BigInteger value, IRandom random)
+        {
+            if (value.IsZero)
+                throw new InvalidOperationException();
+
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Generates random number in range [from..to-1]
+        /// </summary>
+        public static BigInteger Random(BigInteger from, BigInteger to, IRandom random)
+        {
+            if (from >= to)
+                throw new InvalidOperationException();
+
+            return Random(to - from, random) + from;
+        }
+
+        ~BigInteger()
+        {
+            if (this.BIGNUM != IntPtr.Zero)
+            {
+                if (_disposable)
+                    OpenSSL.BN_free(this.BIGNUM);
+                this.BIGNUM = IntPtr.Zero;
+            }
+        }
+
+        #endregion
+
+        #region Public methods
+
+        public bool IsBitSet(int position)
+        {
+            return OpenSSL.BN_is_bit_set(this.BIGNUM, position) == 1;
+        }
+
+        public static BigInteger Sum(BigInteger summand1, BigInteger summand2)
+        {
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_add(result.BIGNUM, summand1.BIGNUM, summand2.BIGNUM);
+            return result;
+        }
+
+        public static BigInteger Sum(BigInteger summand1, int summand2)
+        {
+            if (summand2 == 0)
+                return summand1;
+            if (summand2 > 0)
+            {
+                BigInteger result = new BigInteger(OpenSSL.BN_dup(summand1.BIGNUM));
+                OpenSSL.BN_add_word(result.BIGNUM, (ulong)summand2);
+                return result;
+            }
+            else
+            {
+                BigInteger result = new BigInteger(OpenSSL.BN_dup(summand1.BIGNUM));
+                OpenSSL.BN_sub_word(result.BIGNUM, (ulong)(-summand2));
+                return result;
+            }
+        }
+
+        public static BigInteger Difference(BigInteger minuend, BigInteger subtrahend)
+        {
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_sub(result.BIGNUM, minuend.BIGNUM, subtrahend.BIGNUM);
+            return result;
+        }
+
+        public static BigInteger Difference(BigInteger minuend, int subtrahend)
+        {
+            if (subtrahend == 0)
+                return minuend;
+
+            if (subtrahend > 0)
+            {
+                BigInteger result = new BigInteger(OpenSSL.BN_dup(minuend.BIGNUM));
+                OpenSSL.BN_sub_word(result.BIGNUM, (ulong)subtrahend);
+                return result;
+            }
+            else
+            {
+                BigInteger result = new BigInteger(OpenSSL.BN_dup(minuend.BIGNUM));
+                OpenSSL.BN_add_word(result.BIGNUM, (ulong)(-subtrahend));
+                return result;
+            }
+        }
+
+        public BigInteger AdditiveInverse()
+        {
+            if (IsZero)
+                return Zero;
+
+            BigInteger result = new BigInteger(OpenSSL.BN_dup(this.BIGNUM));
+            if (OpenSSL.BN_is_negative(result.BIGNUM) == 1)
+                OpenSSL.BN_set_negative(result.BIGNUM, 0);
+            else
+                OpenSSL.BN_set_negative(result.BIGNUM, 1);
+            return result;
+        }
+
+        public static BigInteger ShiftRight(BigInteger value, int bits)
+        {
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_rshift(result.BIGNUM, value.BIGNUM, bits);
+            return result;
+        }
+
+        public static BigInteger ShiftLeft(BigInteger value, int bits)
+        {
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_lshift(result.BIGNUM, value.BIGNUM, bits);
+            return result;
+        }
+
+        public static BigInteger Product(BigInteger factor1, BigInteger factor2)
+        {
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_mul(result.BIGNUM, factor1.BIGNUM, factor2.BIGNUM, BN_CTX);
+            return result;
+        }
+
+        public static BigInteger Product(BigInteger factor1, int factor2)
+        {
+            if (factor1.IsZero || factor2 == 0)
+                return Zero;
+
+            if (factor2 > 0)
+            {
+                BigInteger result = new BigInteger(OpenSSL.BN_dup(factor1.BIGNUM));
+                OpenSSL.BN_mul_word(result.BIGNUM, (ulong)factor2);
+                return result;
+            }
+            else
+            {
+                BigInteger result = new BigInteger(OpenSSL.BN_dup(factor1.BIGNUM));
+                OpenSSL.BN_mul_word(result.BIGNUM, (ulong)(-factor2));
+                if (OpenSSL.BN_is_negative(result.BIGNUM) == 1)
+                    OpenSSL.BN_set_negative(result.BIGNUM, 0);
+                else
+                    OpenSSL.BN_set_negative(result.BIGNUM, 1);
+                return result;
+            }
+        }
+
+        public static void Division(BigInteger dividend, BigInteger divisor, out BigInteger quotient, out BigInteger remainder)
+        {
+            quotient = new BigInteger(OpenSSL.BN_new());
+            remainder = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_div(quotient.BIGNUM, remainder.BIGNUM, dividend.BIGNUM, divisor.BIGNUM, BN_CTX);
+        }
+
+        public static void Division(BigInteger dividend, int divisor, out BigInteger quotient, out int remainder)
+        {
+            BigInteger divisorBigInt = new BigInteger(divisor);
+            quotient = new BigInteger(OpenSSL.BN_new());
+            IntPtr remainderBigNum = OpenSSL.BN_new();
+            OpenSSL.BN_div(quotient.BIGNUM, remainderBigNum, dividend.BIGNUM, divisorBigInt.BIGNUM, BN_CTX);
+            remainder = checked((int)OpenSSL.BN_get_word(remainderBigNum));
+        }
+
+        public static BigInteger Modulo(BigInteger dividend, BigInteger divisor)
+        {
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_div(IntPtr.Zero, result.BIGNUM, dividend.BIGNUM, divisor.BIGNUM, BN_CTX);
+            return result;
+        }
+
+        public static BigInteger ModularInverse(BigInteger value, BigInteger modulus)
+        {
+            return new BigInteger(OpenSSL.BN_mod_inverse(IntPtr.Zero, value.BIGNUM, modulus.BIGNUM, BN_CTX));
+        }
+
+        public static BigInteger ModularDivision(BigInteger dividend, BigInteger divisor, BigInteger modulus)
+        {
+            if (dividend < 0)
+                dividend += modulus;
+            if (divisor < 0)
+                divisor += modulus;
+            return dividend * ModularInverse(divisor, modulus) % modulus;
+        }
+
+        public static BigInteger ModularExponentiation(BigInteger @base, BigInteger exponent, BigInteger modulus)
+        {
+            if (modulus.IsZero)
+                throw new ArgumentException("Modulus cannot be zero.", nameof(modulus));
+            if (modulus == 1)
+                return Zero;
+            if (@base >= modulus)
+                @base = Modulo(@base, modulus);
+            if (@base.IsZero)
+                return Zero;
+            if (exponent.IsZero)
+                return One;
+
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            if (OpenSSL.BN_mod_exp(result.BIGNUM, @base.BIGNUM, exponent.BIGNUM, modulus.BIGNUM, BN_CTX) != 1)
+                throw new InvalidOperationException();
+
+            return result;
+        }
+
+        /// <summary>
+        /// <para>Calculates square root mod <param name="modulus">modulus</param></para>
+        /// <para><param name="modulus">modulus</param> should be prime</para>
+        /// </summary>
+        public static BigInteger ModularSquareRoot(BigInteger value, BigInteger modulus)
+        {
+            IntPtr bignum = OpenSSL.BN_mod_sqrt(IntPtr.Zero, value.BIGNUM, modulus.BIGNUM, BN_CTX);
+            if (bignum == IntPtr.Zero)
+                return null;
+
+            return new BigInteger(bignum);
+        }
+
+        public string ToString(int radix)
+        {
+            return ToString(radix, DefaultSymbols);
+        }
+
+        public string ToString(int radix, char[] symbols)
+        {
+            if (IsZero)
+                return symbols[0].ToString();
+
+            if (radix == 10 && symbols == DefaultSymbols)
+                return OpenSSL.BN_bn2dec(this.BIGNUM);
+
+            if (radix == 16 && symbols == DefaultSymbols)
+                return OpenSSL.BN_bn2hex(this.BIGNUM).TrimStart('0');
+
+            List<char> list = new List<char>();
+            bool negative = OpenSSL.BN_is_negative(this.BIGNUM) == 1;
+            IntPtr rad = OpenSSL.BN_new();
+            IntPtr num = OpenSSL.BN_dup(this.BIGNUM);
+            IntPtr div = OpenSSL.BN_new();
+            IntPtr rem = OpenSSL.BN_new();
+            try
+            {
+                OpenSSL.BN_set_word(rad, checked((ulong)radix));
+                while (OpenSSL.BN_is_zero(num) == 0)
+                {
+                    OpenSSL.BN_div(div, rem, num, rad, BN_CTX);
+                    int word = checked((int)OpenSSL.BN_get_word(rem));
+                    list.Add(symbols[word]);
+
+                    OpenSSL.BN_swap(div, num);
+                }
+            }
+            finally
+            {
+                OpenSSL.BN_free(rad);
+                OpenSSL.BN_free(num);
+                OpenSSL.BN_free(div);
+                OpenSSL.BN_free(rem);
+            }
+
+            if (negative)
+                list.Add('-');
+            list.Reverse();
+
+            var sb = new StringBuilder(list.Count);
+            for (int i = 0; i < list.Count; i++)
+                sb.Append(list[i]);
+
+            return sb.ToString();
+        }
+
+        public byte[] ToBytes(ByteOrder order)
+        {
+            int length = (this.BitSize + 7) / 8;
+            byte[] result = new byte[length];
+            OpenSSL.BN_bn2bin(this.BIGNUM, result);
+
+            if (order == ByteOrder.LittleEndian)
+                Array.Reverse(result);
+
+            return result;
+        }
+
+        /// <summary>
+        /// length - pads zeros if resulting array is shorter
+        /// </summary>
+        public byte[] ToBytes(ByteOrder order, int length)
+        {
+            int fullLength = (this.BitSize + 7) / 8;
+            byte[] bytes = new byte[fullLength];
+            OpenSSL.BN_bn2bin(this.BIGNUM, bytes);
+
+            byte[] result = new byte[length];
+            if (fullLength > length)
+                Array.Copy(bytes, fullLength - length, result, 0, length);
+            else
+                Array.Copy(bytes, 0, result, length - fullLength, fullLength);
+
+            if (order == ByteOrder.LittleEndian)
+                Array.Reverse(result);
+
+            return result;
+        }
+
+        #endregion
+
+        #region System.Object overrides
+
+        public override bool Equals(object obj)
+        {
+            if (obj is BigInteger)
+                return this.Equals(obj as BigInteger);
+            else
+                return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return (int)BIGNUM;
+        }
+
+        public override string ToString()
+        {
+            return ToString(10);
+        }
+
+        #endregion
+
+        #region IEquatable<BigInteger>
+
+        public bool Equals(BigInteger other)
+        {
+            return OpenSSL.BN_cmp(this.BIGNUM, other.BIGNUM) == 0;
+        }
+
+        #endregion
+
+        #region IEquatable<int>
+
+        public bool Equals(int other)
+        {
+            return Equals(new BigInteger(other));
+        }
+
+        #endregion
+
+        #region IComparable<BigInteger>
+
+        public int CompareTo(BigInteger other)
+        {
+            return OpenSSL.BN_cmp(this.BIGNUM, other.BIGNUM);
+        }
+
+        #endregion
+
+        #region IComparable<int>
+
+        public int CompareTo(int other)
+        {
+            return CompareTo(new BigInteger(other));
+        }
+
+        #endregion
+
+        #region Operators
+
+        #region Comparison
+
+        public static bool operator ==(BigInteger left, BigInteger right)
+        {
+            bool leftnull = ReferenceEquals(left, null);
+            bool rightnull = ReferenceEquals(right, null);
+            if (leftnull && rightnull)
+                return true;
+            if (leftnull ^ rightnull)
+                return false;
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(BigInteger left, BigInteger right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator ==(BigInteger left, int right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(BigInteger left, int right)
+        {
+            return !left.Equals(right);
+        }
+
+        public static bool operator >=(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
+
+        public static bool operator <=(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator <(BigInteger left, BigInteger right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        public static bool operator >(BigInteger left, int right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator <(BigInteger left, int right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        #endregion
+
+        #region Bit
+
+        public static BigInteger operator >>(BigInteger left, int right)
+        {
+            return ShiftRight(left, right);
+        }
+
+        public static BigInteger operator <<(BigInteger left, int right)
+        {
+            return ShiftLeft(left, right);
+        }
+
+        #endregion
+
+        #region Arithmetic
+
+        public static BigInteger operator +(BigInteger left, BigInteger right)
+        {
+            return Sum(left, right);
+        }
+
+        public static BigInteger operator +(BigInteger left, int right)
+        {
+            return Sum(left, right);
+        }
+
+        public static BigInteger operator -(BigInteger left, BigInteger right)
+        {
+            return Difference(left, right);
+        }
+
+        public static BigInteger operator -(BigInteger left, int right)
+        {
+            return Difference(left, right);
+        }
+
+        public static BigInteger operator *(BigInteger left, BigInteger right)
+        {
+            return Product(left, right);
+        }
+
+        public static BigInteger operator *(BigInteger left, int right)
+        {
+            return Product(left, right);
+        }
+
+        public static BigInteger operator *(int left, BigInteger right)
+        {
+            return Product(right, left);
+        }
+
+        public static BigInteger operator /(BigInteger left, BigInteger right)
+        {
+            BigInteger result = new BigInteger(OpenSSL.BN_new());
+            OpenSSL.BN_div(result.BIGNUM, IntPtr.Zero, left.BIGNUM, right.BIGNUM, BN_CTX);
+            return result;
+        }
+
+        public static BigInteger operator /(BigInteger left, int right)
+        {
+            return left / new BigInteger(right);
+        }
+
+        public static BigInteger operator %(BigInteger left, BigInteger right)
+        {
+            return Modulo(left, right);
+        }
+
+        #endregion
+
+        #region Conversion
+
+        public static explicit operator int(BigInteger value)
+        {
+            if (value < int.MinValue || value > int.MaxValue)
+                throw new ArgumentOutOfRangeException();
+
+            if (value.IsZero)
+                return 0;
+
+            ulong result = OpenSSL.BN_get_word(value.BIGNUM);
+            if (OpenSSL.BN_is_negative(value.BIGNUM) == 1)
+                return (int)(-((long)result));
+            else
+                return (int)result;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Private static members
+
+        private static char[] DefaultSymbols = "0123456789abcdefghijklmnopqrstuvwxyz".ToCharArray();
+
+        #endregion
+    }
+
+#endif
 }

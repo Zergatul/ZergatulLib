@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Math.EllipticCurves.PrimeField
 {
+#if !UseOpenSSL
+
     public class ECPoint : IEquatable<ECPoint>
     {
         public EllipticCurve Curve;
@@ -14,7 +16,7 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
 
         public static readonly ECPoint Infinity = new ECPoint();
 
-        #region Constructors
+    #region Constructors
 
         public static ECPoint FromBytes(byte[] data, EllipticCurve curve)
         {
@@ -69,9 +71,9 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
                 return FromBytes(bytes, curve);
         }
 
-        #endregion
+    #endregion
 
-        #region System.Object
+    #region System.Object
 
         public override bool Equals(object obj)
         {
@@ -83,9 +85,9 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             return Curve.GetHashCode() ^ x.GetHashCode() ^ y.GetHashCode();
         }
 
-        #endregion
+    #endregion
 
-        #region IEquatable<ECPoint>
+    #region IEquatable<ECPoint>
 
         public bool Equals(ECPoint other)
         {
@@ -97,9 +99,9 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             return this.Curve == other.Curve && this.x == other.x && this.y == other.y;
         }
 
-        #endregion
+    #endregion
 
-        #region Operations
+    #region Operations
 
         public static ECPoint Sum(ECPoint p1, ECPoint p2)
         {
@@ -152,6 +154,180 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             return (y * y % Curve.p) == ((x * x * x + Curve.a * x + Curve.b) % Curve.p);
         }
 
+    #endregion
+
+    #region Operators
+
+        public static bool operator ==(ECPoint p1, ECPoint p2)
+        {
+            if (ReferenceEquals(p1, null))
+                return ReferenceEquals(p2, null);
+            else
+                return p1.Equals(p2);
+        }
+
+        public static bool operator !=(ECPoint p1, ECPoint p2)
+        {
+            if (ReferenceEquals(p1, null))
+                return !ReferenceEquals(p2, null);
+            else
+                return !p1.Equals(p2);
+        }
+
+        public static ECPoint operator +(ECPoint p1, ECPoint p2)
+        {
+            return Sum(p1, p2);
+        }
+
+        public static ECPoint operator *(BigInteger m, ECPoint p)
+        {
+            return Multiplication(p, m);
+        }
+
+    #endregion
+
+        public void CalculateY(bool isOdd)
+        {
+            BigInteger y2 = (x * x * x + Curve.a * x + Curve.b) % Curve.p;
+            BigInteger sqrt = BigInteger.ModularSquareRoot(y2, Curve.p);
+
+            if (sqrt.IsOdd == isOdd)
+                y = sqrt;
+            else
+                y = Curve.p - sqrt;
+        }
+
+        public byte[] ToUncompressed()
+        {
+            int len = (Curve.BitSize + 7) / 8;
+            byte[] data = new byte[2 * len + 1];
+            data[0] = 0x04;
+            Array.Copy(x.ToBytes(ByteOrder.BigEndian, len), 0, data, 1, len);
+            Array.Copy(y.ToBytes(ByteOrder.BigEndian, len), 0, data, 1 + len, len);
+
+            return data;
+        }
+
+        public byte[] ToCompressed()
+        {
+            int len = (Curve.BitSize + 7) / 8;
+            byte[] data = new byte[len + 1];
+            if (y.IsOdd)
+                data[0] = 0x03;
+            else
+                data[0] = 0x02;
+            Array.Copy(x.ToBytes(ByteOrder.BigEndian, len), 0, data, 1, len);
+
+            return data;
+        }
+    }
+
+#else
+
+    public class ECPoint : IEquatable<ECPoint>
+    {
+        public EllipticCurve Curve;
+        public BigInteger x;
+        public BigInteger y;
+
+        public static readonly ECPoint Infinity = new ECPoint();
+
+        internal IntPtr EC_POINT;
+
+        #region Constructors
+
+        public static ECPoint FromBytes(byte[] data, EllipticCurve curve)
+        {
+            var point = new ECPoint();
+            point.Curve = curve;
+
+            point.EC_POINT = OpenSSL.EC_POINT_new(curve.EC_GROUP);
+            if (point.EC_POINT == null)
+                throw new InvalidOperationException();
+
+            if (OpenSSL.EC_POINT_oct2point(curve.EC_GROUP, point.EC_POINT, data, data.Length, IntPtr.Zero) != 1)
+                throw new InvalidOperationException();
+
+            return point;
+        }
+
+        #endregion
+
+        #region System.Object
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Curve.GetHashCode() ^ x.GetHashCode() ^ y.GetHashCode();
+        }
+
+        #endregion
+
+        #region IEquatable<ECPoint>
+
+        public bool Equals(ECPoint other)
+        {
+            if (ReferenceEquals(other, null))
+                return false;
+            if (ReferenceEquals(this, other))
+                return true;
+
+            if (this.Curve != other.Curve)
+                return false;
+
+            int cmp = OpenSSL.EC_POINT_cmp(this.Curve.EC_GROUP, this.EC_POINT, other.EC_POINT, IntPtr.Zero);
+            if (cmp == -1)
+                throw new InvalidOperationException();
+
+            return cmp == 0;
+        }
+
+        #endregion
+
+        #region Operations
+
+        public static ECPoint Sum(ECPoint p1, ECPoint p2)
+        {
+            if (p1.Curve != p2.Curve)
+                throw new ArgumentException("Points should belong to single curve");
+
+            var point = new ECPoint();
+            point.Curve = p1.Curve;
+
+            point.EC_POINT = OpenSSL.EC_POINT_new(point.Curve.EC_GROUP);
+            if (point.EC_POINT == null)
+                throw new InvalidOperationException();
+
+            if (OpenSSL.EC_POINT_add(point.Curve.EC_GROUP, point.EC_POINT, p1.EC_POINT, p2.EC_POINT, IntPtr.Zero) != 1)
+                throw new InvalidOperationException();
+
+            return point;
+        }
+
+        public static ECPoint Multiplication(ECPoint p, BigInteger m)
+        {
+            var point = new ECPoint();
+            point.Curve = p.Curve;
+
+            point.EC_POINT = OpenSSL.EC_POINT_new(point.Curve.EC_GROUP);
+            if (point.EC_POINT == null)
+                throw new InvalidOperationException();
+
+            if (OpenSSL.EC_POINT_mul(point.Curve.EC_GROUP, point.EC_POINT, m.BIGNUM, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero) != 1)
+                throw new InvalidOperationException();
+
+            return point;
+        }
+
+        public bool Validate()
+        {
+            return (y * y % Curve.p) == ((x * x * x + Curve.a * x + Curve.b) % Curve.p);
+        }
+
         #endregion
 
         #region Operators
@@ -197,26 +373,30 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
 
         public byte[] ToUncompressed()
         {
-            int len = (Curve.BitSize + 7) / 8;
-            byte[] data = new byte[2 * len + 1];
-            data[0] = 0x04;
-            Array.Copy(x.ToBytes(ByteOrder.BigEndian, len), 0, data, 1, len);
-            Array.Copy(y.ToBytes(ByteOrder.BigEndian, len), 0, data, 1 + len, len);
+            int length = OpenSSL.EC_POINT_point2oct(this.Curve.EC_GROUP, this.EC_POINT, OpenSSL.PointConversionForm.Uncompressed, null, 0, IntPtr.Zero);
+            if (length == 0)
+                throw new InvalidOperationException();
 
-            return data;
+            byte[] result = new byte[length];
+            if (OpenSSL.EC_POINT_point2oct(this.Curve.EC_GROUP, this.EC_POINT, OpenSSL.PointConversionForm.Uncompressed, result, length, IntPtr.Zero) == 0)
+                throw new InvalidOperationException();
+
+            return result;
         }
 
         public byte[] ToCompressed()
         {
-            int len = (Curve.BitSize + 7) / 8;
-            byte[] data = new byte[len + 1];
-            if (y.IsOdd)
-                data[0] = 0x03;
-            else
-                data[0] = 0x02;
-            Array.Copy(x.ToBytes(ByteOrder.BigEndian, len), 0, data, 1, len);
+            int length = OpenSSL.EC_POINT_point2oct(this.Curve.EC_GROUP, this.EC_POINT, OpenSSL.PointConversionForm.Compressed, null, 0, IntPtr.Zero);
+            if (length == 0)
+                throw new InvalidOperationException();
 
-            return data;
+            byte[] result = new byte[length];
+            if (OpenSSL.EC_POINT_point2oct(this.Curve.EC_GROUP, this.EC_POINT, OpenSSL.PointConversionForm.Compressed, result, length, IntPtr.Zero) == 0)
+                throw new InvalidOperationException();
+
+            return result;
         }
     }
+
+#endif
 }
