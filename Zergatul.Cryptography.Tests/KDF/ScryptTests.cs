@@ -9,6 +9,8 @@ namespace Zergatul.Cryptography.Tests.KDF
     [TestClass]
     public class ScryptTests
     {
+#if !UseOpenSSL
+
         [TestMethod]
         public void Scrypt_SalsaTest()
         {
@@ -88,6 +90,8 @@ namespace Zergatul.Cryptography.Tests.KDF
             Assert.IsTrue(ByteArray.Equals(vector, correct));
         }
 
+#endif
+
         [TestMethod]
         public void Scrypt_PBKDF2Test()
         {
@@ -138,6 +142,13 @@ namespace Zergatul.Cryptography.Tests.KDF
                 "ec 56 8d 57 4a 2f fd 4d ab e5 ee 98 20 ad aa 47" +
                 "8e 56 fd 8f 4b a5 d0 9f fa 1c 6d 92 7c 40 f4 c3" +
                 "37 30 40 49 e8 a9 52 fb cb f4 5c 6f a7 7a 41 a4");
+        }
+
+        [TestMethod]
+        public void Scrypt_Test1()
+        {
+            Test("password", "ricmoo", 262144, 8, 1, 32,
+                "e286ed0298808c0b4bb4272ce947091b0da06bb530c4cbab3923e44ff48bbc25");
         }
 
         private static void Test(string password, string salt, ulong N, int r, int p, int keyLength, string key)
