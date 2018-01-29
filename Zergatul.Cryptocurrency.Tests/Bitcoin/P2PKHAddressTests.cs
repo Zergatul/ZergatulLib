@@ -58,7 +58,25 @@ namespace Zergatul.Cryptocurrency.Tests
             var addr = new P2PKHAddress();
             addr.FromWIF("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ");
             Assert.IsTrue(addr.Value == "1GAehh7TsJAHuUAeKZcXf5CnwuGuGgyX2S");
-            Assert.IsTrue(addr.Another.Value == "1LoVGDgRs9hTfTNJNuXKSpywcbdvwRXpmK");
+            Assert.IsTrue(addr.ToCompressed().Value == "1LoVGDgRs9hTfTNJNuXKSpywcbdvwRXpmK");
+
+            addr.FromWIF("5JRks4Vf268r9cuCKiod2iFz1VcSpawX5m6T3PKSA1v7cRqfZZD");
+            Assert.IsTrue(addr.Value == "1Aop6KxiZLccPPPjqmfZHYgnmCKuhiVq57");
+            Assert.IsTrue(addr.ToCompressed().Value == "1JMsC6fCtYWkTjPPdDrYX3we2aBrewuEM3");
+            Assert.IsTrue(addr.ToWIF() == "5JRks4Vf268r9cuCKiod2iFz1VcSpawX5m6T3PKSA1v7cRqfZZD");
+
+            addr.FromWIF("KyvGbxRUoofdw3TNydWn2Z78dBHSy2odn1d3wXWN2o3SAtccFNJL");
+            Assert.IsTrue(addr.Value == "1JMsC6fCtYWkTjPPdDrYX3we2aBrewuEM3");
+            Assert.IsTrue(addr.ToUncompressed().Value == "1Aop6KxiZLccPPPjqmfZHYgnmCKuhiVq57");
+            Assert.IsTrue(addr.ToWIF() == "KyvGbxRUoofdw3TNydWn2Z78dBHSy2odn1d3wXWN2o3SAtccFNJL");
+
+            addr.FromWIF("Kx6EWgKRJ2GZuXbrDquQPAE8MWZLLdsT4YYgQs4hdF7rRL4jGLHx");
+            Assert.IsTrue(addr.Value == "13pRRXkGVC9mhUSiw6xkYkMi1EX91VvsBE");
+            Assert.IsTrue(addr.ToWIF() == "Kx6EWgKRJ2GZuXbrDquQPAE8MWZLLdsT4YYgQs4hdF7rRL4jGLHx");
+
+            addr.FromWIF("5J1jV2CspMgKnS4N7zJJz8Xcej3Lngcu89WP53jXW4CXEGF9M3A");
+            Assert.IsTrue(addr.Value == "1Nt6XLmq8k8noafGGFdfwue74uJTFu9vQC");
+            Assert.IsTrue(addr.ToWIF() == "5J1jV2CspMgKnS4N7zJJz8Xcej3Lngcu89WP53jXW4CXEGF9M3A");
         }
     }
 }

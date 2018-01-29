@@ -55,16 +55,18 @@
     <Compile Include="BitcoinGold\AddressTests.cs" />
     <Compile Include="Bitcoin\P2PKHAddressTests.cs" />
     <Compile Include="Bitcoin\ScriptTests.cs" />
-    <Compile Include="Bitcoin\TestTransactionRepository.cs" />
     <Compile Include="Bitcoin\TransactionTests.cs" />
     <Compile Include="Bitcoin\Base58Tests.cs" />
     <Compile Include="Litecoin\AddressTests.cs" />
-    <Compile Include="Litecoin\TestTransactionRepository.cs" />
     <Compile Include="Litecoin\TransactionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Bitcoin\BlockTests.cs" />
     <Compile Include="Bitcoin\PrivateKeyTests.cs" />
     <Compile Include="Ripple\AccountTests.cs" />
+    <Compile Include="Verge\AddressTests.cs" />
+    <Compile Include="Verge\TransactionTests.cs" />
+    <Compile Include="Zcash\AddressTests.cs" />
+    <Compile Include="Zcash\BlockTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul.Cryptocurrency\Zergatul.Cryptocurrency.csproj">
@@ -105,6 +107,36 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Litecoin\Transactions.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Verge\Transactions.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-195522.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-195932.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-198462.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-198833.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-198996.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-199359.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-200000.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Block-050000.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Zcash\Transactions.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

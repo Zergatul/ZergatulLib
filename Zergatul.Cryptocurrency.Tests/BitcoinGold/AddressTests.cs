@@ -19,11 +19,15 @@ namespace Zergatul.Cryptocurrency.Tests.BitcoinGold
 
             foreach (var kv in dict)
             {
-                var btc = new Cryptocurrency.Bitcoin.P2PKHAddress(kv.Key);
-                Assert.IsTrue(new Cryptocurrency.BitcoinGold.P2PKHAddress(btc).Value == kv.Value);
+                P2PKHAddressBase btc = new Cryptocurrency.Bitcoin.P2PKHAddress();
+                btc.Parse(kv.Key);
+                P2PKHAddressBase bcg = btc.Convert(BlockchainCryptoFactory.BitcoinGold);
+                Assert.IsTrue(bcg.Value == kv.Value);
 
-                var bcg = new Cryptocurrency.BitcoinGold.P2PKHAddress(kv.Value);
-                Assert.IsTrue(new Cryptocurrency.Bitcoin.P2PKHAddress(bcg).Value == kv.Key);
+                bcg = new Cryptocurrency.BitcoinGold.P2PKHAddress();
+                bcg.Parse(kv.Value);
+                btc = bcg.Convert(BlockchainCryptoFactory.Bitcoin);
+                Assert.IsTrue(btc.Value == kv.Key);
             }
 
             dict = new Dictionary<string, string>
@@ -34,11 +38,15 @@ namespace Zergatul.Cryptocurrency.Tests.BitcoinGold
 
             foreach (var kv in dict)
             {
-                var btc = new Cryptocurrency.Bitcoin.P2SHAddress(kv.Key);
-                Assert.IsTrue(new Cryptocurrency.BitcoinGold.P2SHAddress(btc).Value == kv.Value);
+                P2SHAddressBase btc = new Cryptocurrency.Bitcoin.P2SHAddress();
+                btc.Parse(kv.Key);
+                P2SHAddressBase bcg = btc.Convert(BlockchainCryptoFactory.BitcoinGold);
+                Assert.IsTrue(bcg.Value == kv.Value);
 
-                var bcg = new Cryptocurrency.BitcoinGold.P2SHAddress(kv.Value);
-                Assert.IsTrue(new Cryptocurrency.Bitcoin.P2SHAddress(bcg).Value == kv.Key);
+                bcg = new Cryptocurrency.BitcoinGold.P2SHAddress();
+                bcg.Parse(kv.Value);
+                btc = bcg.Convert(BlockchainCryptoFactory.Bitcoin);
+                Assert.IsTrue(btc.Value == kv.Key);
             }
         }
     }

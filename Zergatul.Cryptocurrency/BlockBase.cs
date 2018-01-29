@@ -15,7 +15,7 @@ namespace Zergatul.Cryptocurrency
         public byte[] MerkleRoot { get; set; }
         public uint Timestamp { get; set; }
         public uint Bits { get; set; }
-        public uint Nonce { get; set; }
+        public byte[] Nonce { get; set; }
         public byte[] BlockID { get; set; }
 
         public byte[] MiningWork { get; protected set; }
@@ -27,8 +27,14 @@ namespace Zergatul.Cryptocurrency
         public string MiningWorkString => BitHelper.BytesToHex(MiningWork);
 
         protected TransactionBase[] _txs;
+        protected BlockchainCryptoFactory _factory;
 
-        protected void Parse(byte[] data)
+        protected BlockBase(BlockchainCryptoFactory factory)
+        {
+            this._factory = factory;
+        }
+
+        protected virtual void Parse(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException();
@@ -43,9 +49,22 @@ namespace Zergatul.Cryptocurrency
             Array.Reverse(MerkleRoot);
             Timestamp = BitHelper.ToUInt32(data, 68, ByteOrder.LittleEndian);
             Bits = BitHelper.ToUInt32(data, 72, ByteOrder.LittleEndian);
-            Nonce = BitHelper.ToUInt32(data, 76, ByteOrder.LittleEndian);
+            Nonce = ByteArray.SubArray(data, 76, 4);
 
             int index = 80;
+            ParseTransactions(data, ref index);
+
+            if (index != data.Length)
+                throw new BlockParseException();
+
+            var hash256 = new DoubleSHA256();
+            hash256.Update(data, 0, 80);
+            BlockID = hash256.ComputeHash();
+            Array.Reverse(BlockID);
+        }
+
+        protected virtual void ParseTransactions(byte[] data, ref int index)
+        {
             try
             {
                 _txs = new TransactionBase[VarLengthInt.Parse(data, ref index)];
@@ -57,19 +76,10 @@ namespace Zergatul.Cryptocurrency
 
             for (int i = 0; i < _txs.Length; i++)
             {
-                _txs[i] = ParseTransaction(data, ref index);
+                _txs[i] = _factory.GetTransaction();
+                _txs[i].Parse(data, ref index);
             }
-
-            if (index != data.Length)
-                throw new BlockParseException();
-
-            var hash256 = new DoubleSHA256();
-            hash256.Update(data, 0, 80);
-            BlockID = hash256.ComputeHash();
-            Array.Reverse(BlockID);
         }
-
-        protected abstract TransactionBase ParseTransaction(byte[] data, ref int index);
 
         public bool ValidateMerkleRoot()
         {

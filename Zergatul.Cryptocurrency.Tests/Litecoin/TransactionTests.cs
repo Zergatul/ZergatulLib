@@ -22,7 +22,7 @@ namespace Zergatul.Cryptocurrency.Tests.Litecoin
         [ClassInitialize]
         public static void Init(TestContext context)
         {
-            _repository = new TestTransactionRepository();
+            //_repository = new TestTransactionRepository();
         }
     }
 }

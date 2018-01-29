@@ -23,6 +23,12 @@ namespace Zergatul.Cryptocurrency.Litecoin
             }
         }
 
+        public Block()
+            : base(BlockchainCryptoFactory.Litecoin)
+        {
+
+        }
+
         public static Block FromBytes(byte[] data)
         {
             var block = new Block();
@@ -38,10 +44,5 @@ namespace Zergatul.Cryptocurrency.Litecoin
         }
 
         public static Block FromHex(string hex) => FromBytes(BitHelper.HexToBytes(hex));
-
-        protected override TransactionBase ParseTransaction(byte[] data, ref int index)
-        {
-            return null;
-        }
     }
 }

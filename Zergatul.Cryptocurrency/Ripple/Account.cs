@@ -66,7 +66,7 @@ namespace Zergatul.Cryptocurrency.Ripple
 
             return new Account
             {
-                Value = Base58Encoding.Encode(0, hash, Constants.Dictionary)
+                Value = Base58Encoding.Encode(new byte[] { 0 }, hash, Constants.Dictionary)
             };
         }
 

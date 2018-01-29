@@ -1,41 +1,21 @@
-﻿namespace Zergatul.Cryptocurrency.Bitcoin
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Zergatul.Cryptocurrency.Bitcoin
 {
-    /// <summary>
-    /// Pay-to-script-hash
-    /// </summary>
-    public class P2SHAddress : Address
+    public class P2SHAddress : Cryptocurrency.P2SHAddressBase
     {
-        protected override byte _prefix => 5;
+        private static readonly byte[] Prefix = new byte[] { 0x05 };
+
+        protected override byte[] _prefix => Prefix;
 
         public P2SHAddress()
+            : base(BlockchainCryptoFactory.Bitcoin)
         {
 
-        }
-
-        public P2SHAddress(string address)
-        {
-            _value = address;
-        }
-
-        /// <summary>
-        /// Converts Bitcoin Gold address to Bitcoin address
-        /// </summary>
-        public P2SHAddress(BitcoinGold.P2SHAddress address)
-        {
-            FromScriptHash(address.Hash);
-        }
-
-        public void FromScript(byte[] scriptData)
-        {
-            var ripesha = new RIPE160SHA256();
-            ripesha.Update(scriptData);
-            byte[] hash = ripesha.ComputeHash();
-            FromScriptHash(hash);
-        }
-
-        public void FromScriptHash(byte[] hash)
-        {
-            _value = Base58Encoding.Encode(_prefix, hash);
         }
     }
 }

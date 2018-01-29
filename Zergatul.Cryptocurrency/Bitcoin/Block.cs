@@ -23,6 +23,14 @@ namespace Zergatul.Cryptocurrency.Bitcoin
             }
         }
 
+        public uint NonceUInt32 => BitHelper.ToUInt32(Nonce, ByteOrder.LittleEndian);
+
+        public Block()
+            : base(BlockchainCryptoFactory.Bitcoin)
+        {
+
+        }
+
         public static Block FromBytes(byte[] data)
         {
             var block = new Block();
@@ -33,11 +41,6 @@ namespace Zergatul.Cryptocurrency.Bitcoin
         }
 
         public static Block FromHex(string hex) => FromBytes(BitHelper.HexToBytes(hex));
-
-        protected override TransactionBase ParseTransaction(byte[] data, ref int index)
-        {
-            return Transaction.FromBytes(data, ref index);
-        }
 
         public bool Validate(ITransactionRepository<Transaction> repository)
         {
