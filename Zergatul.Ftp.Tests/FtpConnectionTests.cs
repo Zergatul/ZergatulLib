@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Sockets;
 using System.Net;
 using Zergatul.Network;
+using Zergatul.Network.Ftp;
 
 namespace Zergatul.Ftp.Tests
 {

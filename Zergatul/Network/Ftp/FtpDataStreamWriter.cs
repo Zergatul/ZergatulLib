@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Zergatul.Ftp
+namespace Zergatul.Network.Ftp
 {
     public class FtpDataStreamWriter
     {

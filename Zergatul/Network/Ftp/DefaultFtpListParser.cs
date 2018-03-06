@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Zergatul.Network;
 
-namespace Zergatul.Ftp
+namespace Zergatul.Network.Ftp
 {
     public class DefaultFtpListParser : IFtpListParser
     {

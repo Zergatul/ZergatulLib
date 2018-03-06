@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using Zergatul.Network;
 using Zergatul.Network.Proxy;
 
-namespace Zergatul.Ftp
+namespace Zergatul.Network.Ftp
 {
     // RFCs
     // FILE TRANSFER PROTOCOL (FTP) https://tools.ietf.org/html/rfc959

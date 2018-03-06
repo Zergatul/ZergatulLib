@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Ftp
+namespace Zergatul.Network.Ftp
 {
     public enum FtpDataChannelProtectionLevel
     {
