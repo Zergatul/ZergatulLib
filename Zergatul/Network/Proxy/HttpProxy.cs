@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -27,7 +28,7 @@ namespace Zergatul.Network.Proxy
         {
             tcp = ConnectToServer(tcp);
 
-            var stream = tcp.GetStream();
+            var stream = GetStream(tcp);
             byte[] data = Encoding.ASCII.GetBytes(string.Format("CONNECT {0}:{1}  HTTP/1.1{2}Host: {0}{2}{2}", address, port, Constants.TelnetEndOfLine));
             stream.Write(data, 0, data.Length);
 
@@ -38,7 +39,7 @@ namespace Zergatul.Network.Proxy
         {
             tcp = ConnectToServer(tcp);
 
-            var stream = tcp.GetStream();
+            var stream = GetStream(tcp);
             byte[] data = Encoding.ASCII.GetBytes(string.Format("CONNECT {0}:{1}  HTTP/1.1{2}Host: {0}{2}{2}", hostname, port, Constants.TelnetEndOfLine));
             stream.Write(data, 0, data.Length);
 
@@ -55,6 +56,11 @@ namespace Zergatul.Network.Proxy
             string str = Encoding.ASCII.GetString(response.ToArray());
 
             return tcp;
+        }
+
+        protected virtual Stream GetStream(TcpClient tcp)
+        {
+            return tcp.GetStream();
         }
 
         public override TcpListener CreateListener(int port)
