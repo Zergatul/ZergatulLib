@@ -39,9 +39,25 @@ namespace Zergatul.Cryptography.Certificate
                 throw new InvalidOperationException("There can be only 1 self signed certificate in chain");
 
             var list = certificates.ToList();
+            while (true)
+            {
+                var certWithoutParent = list.FirstOrDefault(c =>
+                {
+                    var authKey = c.Extensions.Get<AuthorityKeyIdentifier>().KeyIdentifier;
+                    return !list.Any(_ => ByteArray.Equals(_.Extensions.Get<SubjectKeyIdentifier>().KeyIdentifier, authKey));
+                });
+                if (certWithoutParent == null)
+                    break;
+
+                var parent = store.FindBySubjectKeyId(certWithoutParent.Extensions.Get<AuthorityKeyIdentifier>().KeyIdentifier);
+                if (parent == null)
+                    throw new InvalidOperationException("Cannot find certificate in store to create chain");
+                list.Add(parent);
+            }
+
             var root = new LinkedCertificate
             {
-                Certificate = certificates.Single(c => c.IsSelfSigned())
+                Certificate = list.Single(c => c.IsSelfSigned())
             };
 
             list.Remove(root.Certificate);
