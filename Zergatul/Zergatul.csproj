@@ -284,6 +284,8 @@
     <Compile Include="Network\Proxy\Socks4Exception.cs" />
     <Compile Include="Network\Proxy\Socks5.cs" />
     <Compile Include="Network\Proxy\Socks5Exception.cs" />
+    <Compile Include="Network\Sasl\Mechanism.cs" />
+    <Compile Include="Network\Sasl\PlainMechanism.cs" />
     <Compile Include="Network\Smtp\EmailFormatter.cs" />
     <Compile Include="Network\Smtp\SmtpCommands.cs" />
     <Compile Include="Network\Smtp\SmtpConnection.cs" />

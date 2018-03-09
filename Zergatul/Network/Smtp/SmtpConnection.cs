@@ -12,6 +12,8 @@ namespace Zergatul.Network.Smtp
 {
     public class SmtpConnection
     {
+        private static readonly string _endOfMailData = Constants.TelnetEndOfLine + "." + Constants.TelnetEndOfLine;
+
         #region Private fields
 
         private TcpClient _tcpClient;
@@ -31,6 +33,7 @@ namespace Zergatul.Network.Smtp
 
         public string Greeting { get; private set; }
         public string ExtendedHelloResponse { get; private set; }
+        public string[] SupportedCommands { get; private set; }
 
         #endregion
 
@@ -64,6 +67,7 @@ namespace Zergatul.Network.Smtp
 
                 Greeting = greeting.Message;
                 ExtendedHelloResponse = reply.Message;
+                ParseExtendedHello();
             }
             else
             {
@@ -71,11 +75,15 @@ namespace Zergatul.Network.Smtp
                 if (reply.Code != SmtpReplyCode.OK)
                     throw new SmtpException();
                 ExtendedHelloResponse = reply.Message;
+                ParseExtendedHello();
             }
         }
 
         public void StartTls(string host)
         {
+            if (!SupportedCommands.Contains(SmtpCommands.STARTTLS))
+                throw new SmtpException("Not supported");
+
             var reply = SendCommand(SmtpCommands.STARTTLS);
             if (reply.Code != SmtpReplyCode.ServiceReady)
                 throw new SmtpException();
@@ -93,12 +101,22 @@ namespace Zergatul.Network.Smtp
 
         public void AuthPlain(string user, string password)
         {
-            string message = '\0' + user + '\0' + password;
-            byte[] bytes = Encoding.UTF8.GetBytes(message);
+            if (!SupportedCommands.Contains(SmtpCommands.AUTH + " PLAIN"))
+                throw new SmtpException("Not supported");
 
-            var reply = SendCommand(SmtpCommands.AUTH, "PLAIN " + Convert.ToBase64String(bytes));
-            if (reply.Code != SmtpReplyCode.AuthSucceded)
-                throw new SmtpException();
+            var reply = SendCommand(SmtpCommands.AUTH, "PLAIN " + Sasl.PlainMechanism.Encode(null, user, password));
+
+            switch (reply.Code)
+            {
+                case SmtpReplyCode.AuthSucceded:
+                    return;
+
+                case SmtpReplyCode.InvalidCredentials:
+                    throw new SmtpException("Invalid credentials");
+
+                default:
+                    throw new SmtpException();
+            }
         }
 
         public void Mail(string path)
@@ -121,7 +139,10 @@ namespace Zergatul.Network.Smtp
             if (reply.Code != SmtpReplyCode.StartInput)
                 throw new SmtpException();
 
-            mail += Constants.TelnetEndOfLine + "." + Constants.TelnetEndOfLine;
+            if (mail.Contains(_endOfMailData))
+                throw new SmtpException("Mail data cannot contain terminator");
+
+            mail += _endOfMailData;
             byte[] buffer = Encoding.UTF8.GetBytes(mail);
             _stream.Write(buffer, 0, buffer.Length);
 
@@ -155,6 +176,33 @@ namespace Zergatul.Network.Smtp
             if (Log != null)
                 Log.WriteLine(reply.Message);
             return reply;
+        }
+
+        private void ParseExtendedHello()
+        {
+            var lines = ExtendedHelloResponse.Split(Constants.TelnetEndOfLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            // line[0] - domain
+            var commands = new List<string>();
+            foreach (var line in lines.Skip(1))
+            {
+                if (line == SmtpCommands.STARTTLS)
+                {
+                    commands.Add(SmtpCommands.STARTTLS);
+                    continue;
+                }
+
+                var words = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (words.Length == 0)
+                    continue;
+
+                if (words[0] == SmtpCommands.AUTH)
+                {
+                    foreach (var type in words.Skip(1))
+                        commands.Add(SmtpCommands.AUTH + " " + type);
+                }
+            }
+
+            SupportedCommands = commands.ToArray();
         }
 
         #endregion

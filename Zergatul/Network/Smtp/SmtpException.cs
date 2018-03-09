@@ -8,5 +8,14 @@ namespace Zergatul.Network.Smtp
 {
     public class SmtpException : Exception
     {
+        public SmtpException()
+        {
+
+        }
+
+        public SmtpException(string message) : base(message)
+        {
+
+        }
     }
 }

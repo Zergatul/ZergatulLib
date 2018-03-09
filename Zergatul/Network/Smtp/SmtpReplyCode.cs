@@ -30,6 +30,11 @@
         /// <summary>
         /// Authentication credentials invalid
         /// </summary>
-        InvalidCredentials = 535
+        InvalidCredentials = 535,
+
+        /// <summary>
+        /// Requested action not taken: mailbox unavailable (e.g., mailbox not found, no access, or command rejected for policy reasons)
+        /// </summary>
+        RequestedActionNotTaken = 550
     }
 }
