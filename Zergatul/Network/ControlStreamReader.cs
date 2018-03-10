@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,6 +17,9 @@ namespace Zergatul.Network
         int _bufPos, _bufLen;
         List<byte> _line;
 
+        public Stopwatch Timer;
+        public int Timeout;
+
         public ControlStreamReader(Stream stream)
         {
             this._stream = stream;
@@ -25,6 +29,15 @@ namespace Zergatul.Network
             this._bufLen = 0;
         }
 
+        public void CheckTimeout()
+        {
+            if (Timeout > 0)
+            {
+                if (Timer.ElapsedMilliseconds > Timeout)
+                    throw new TimeoutException();
+            }
+        }
+
         private void ReadBuffer()
         {
             if (_bufPos + 1 < _bufLen)
@@ -32,6 +45,8 @@ namespace Zergatul.Network
 
             _bufPos = 0;
             _bufLen = _stream.Read(_buffer, 0, _buffer.Length);
+
+            CheckTimeout();
         }
 
         private bool EndOfLine()

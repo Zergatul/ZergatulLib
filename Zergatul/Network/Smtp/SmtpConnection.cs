@@ -26,6 +26,11 @@ namespace Zergatul.Network.Smtp
 
         public ProxyBase Proxy { get; set; }
 
+        public int ConnectTimeout { get; set; } = -1;
+        public int ReadTimeout { get; set; } = -1;
+        public int WriteTimeout { get; set; } = -1;
+        public int CommandTimeout { get; set; } = -1;
+
         /// <summary>
         /// All comunication via control connection will be logged here
         /// </summary>
@@ -42,21 +47,46 @@ namespace Zergatul.Network.Smtp
         public void Connect(string host, int port)
         {
             if (Proxy != null)
+            {
+                Proxy.ConnectTimeout = ConnectTimeout;
+                Proxy.ReadTimeout = ReadTimeout;
+                Proxy.WriteTimeout = WriteTimeout;
                 _tcpClient = Proxy.CreateConnection(host, port);
+            }
             else
             {
                 _tcpClient = new TcpClient(AddressFamily.InterNetwork);
-                _tcpClient.Connect(host, port);
+                _tcpClient.ConnectWithTimeout(host, port, ConnectTimeout);
             }
 
             _stream = _tcpClient.GetStream();
+
+            if (ReadTimeout >= 0)
+                _tcpClient.ReceiveTimeout = ReadTimeout;
+            if (WriteTimeout >= 0)
+                _tcpClient.SendTimeout = WriteTimeout;
+
             _reader = new SmtpControlStreamReader(_stream);
         }
 
         public void ExtendedHello(string domain)
         {
+            SetupCommandTimeout();
+
             if (Greeting == null)
             {
+                //var greeting = _reader.ReadServerReply();
+                //var reply = SendCommand(SmtpCommands.EHLO, domain);
+
+                //if (greeting.Code != SmtpReplyCode.ServiceReady)
+                //    throw new SmtpException();
+                //if (reply.Code != SmtpReplyCode.OK)
+                //    throw new SmtpException();
+
+                //Greeting = greeting.Message;
+                //ExtendedHelloResponse = reply.Message;
+                //ParseExtendedHello();
+
                 var greeting = SendCommand(SmtpCommands.EHLO, domain);
                 var reply = _reader.ReadServerReply();
 
@@ -81,6 +111,8 @@ namespace Zergatul.Network.Smtp
 
         public void StartTls(string host)
         {
+            SetupCommandTimeout();
+
             if (!SupportedCommands.Contains(SmtpCommands.STARTTLS))
                 throw new SmtpException("Not supported");
 
@@ -101,6 +133,8 @@ namespace Zergatul.Network.Smtp
 
         public void AuthPlain(string user, string password)
         {
+            SetupCommandTimeout();
+
             if (!SupportedCommands.Contains(SmtpCommands.AUTH + " PLAIN"))
                 throw new SmtpException("Not supported");
 
@@ -121,6 +155,8 @@ namespace Zergatul.Network.Smtp
 
         public void Mail(string path)
         {
+            SetupCommandTimeout();
+
             var reply = SendCommand(SmtpCommands.MAIL, $"FROM:<{path}>");
             if (reply.Code != SmtpReplyCode.OK)
                 throw new SmtpException();
@@ -128,6 +164,8 @@ namespace Zergatul.Network.Smtp
 
         public void Recipient(string path)
         {
+            SetupCommandTimeout();
+
             var reply = SendCommand(SmtpCommands.RCPT, $"TO:<{path}>");
             if (reply.Code != SmtpReplyCode.OK)
                 throw new SmtpException();
@@ -135,6 +173,8 @@ namespace Zergatul.Network.Smtp
 
         public void Data(string mail)
         {
+            SetupCommandTimeout();
+
             var reply = SendCommand(SmtpCommands.DATA);
             if (reply.Code != SmtpReplyCode.StartInput)
                 throw new SmtpException();
@@ -153,6 +193,8 @@ namespace Zergatul.Network.Smtp
 
         public void Quit()
         {
+            SetupCommandTimeout();
+
             var reply = SendCommand(SmtpCommands.QUIT);
             if (reply.Code != SmtpReplyCode.ChannelClosing)
                 throw new SmtpException();
@@ -172,10 +214,22 @@ namespace Zergatul.Network.Smtp
             if (Log != null)
                 Log.WriteLine(commandWithParam);
             _stream.Write(bytes, 0, bytes.Length);
+            _reader.CheckTimeout();
             var reply = _reader.ReadServerReply();
             if (Log != null)
                 Log.WriteLine(reply.Message);
             return reply;
+        }
+
+        private void SetupCommandTimeout()
+        {
+            if (CommandTimeout > 0)
+            {
+                _reader.Timer = System.Diagnostics.Stopwatch.StartNew();
+                _reader.Timeout = CommandTimeout;
+            }
+            else
+                _reader.Timeout = -1;
         }
 
         private void ParseExtendedHello()

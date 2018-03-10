@@ -12,7 +12,11 @@ namespace Zergatul.Network.Proxy
     {
         public abstract bool AllowConnectionsByDomainName { get; }
         public abstract bool AllowListener { get; }
-        public virtual bool ResolveDnsLocally { get; set; }
+        public bool ResolveDnsLocally { get; set; }
+
+        public int ConnectTimeout { get; set; } = -1;
+        public int ReadTimeout { get; set; } = -1;
+        public int WriteTimeout { get; set; } = -1;
 
         protected IPAddress _serverAddress;
         protected string _serverHostname;
@@ -46,10 +50,14 @@ namespace Zergatul.Network.Proxy
             if (tcp == null)
             {
                 tcp = new TcpClient();
+                if (ReadTimeout > 0)
+                    tcp.ReceiveTimeout = ReadTimeout;
+                if (WriteTimeout > 0)
+                    tcp.SendTimeout = WriteTimeout;
                 if (_serverAddress != null)
-                    tcp.Connect(_serverAddress, _serverPort);
+                    tcp.ConnectWithTimeout(_serverAddress, _serverPort, ConnectTimeout);
                 else
-                    tcp.Connect(_serverHostname, _serverPort);
+                    tcp.ConnectWithTimeout(_serverHostname, _serverPort, ConnectTimeout);
             }
             return tcp;
         }

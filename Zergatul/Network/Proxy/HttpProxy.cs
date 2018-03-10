@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Zergatul.Network.Proxy
@@ -54,6 +55,22 @@ namespace Zergatul.Network.Proxy
                     break;
             }
             string str = Encoding.ASCII.GetString(response.ToArray());
+            int index = str.IndexOf(Constants.TelnetEndOfLine);
+            if (index == -1)
+                throw new Exception("Invalid server reply");
+            string line = str.Substring(0, index);
+
+            var regex = new Regex(@"(?<version>\w+) (?<code>\d+) (?<message>.+)");
+            var match = regex.Match(line);
+            if (match.Success)
+            {
+                string version = match.Groups["version"].Value;
+                int code = int.Parse(match.Groups["code"].Value);
+                if (code != 200)
+                    throw new Exception("Invalid reply code: " + code + " " + match.Groups["message"].Value);
+            }
+            else
+                throw new Exception("Cannot parse response: " + line);
 
             return tcp;
         }
