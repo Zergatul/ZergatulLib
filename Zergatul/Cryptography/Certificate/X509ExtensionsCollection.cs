@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.ASN1.Structures.X509;
+using Zergatul.Network.Asn1.Structures.X509;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -15,7 +15,7 @@ namespace Zergatul.Cryptography.Certificate
         internal X509ExtensionsCollection(IEnumerable<Extension> extensions)
         {
             if (extensions != null)
-                this._extensions = extensions.Select(e => X509Extension.Parse(e)).ToList();
+                this._extensions = extensions.Select(e => X509Extension.Parse(e)).Where(ext => ext != null).ToList();
             else
                 this._extensions = new List<X509Extension>();
         }
