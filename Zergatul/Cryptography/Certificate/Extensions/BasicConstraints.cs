@@ -1,4 +1,4 @@
-﻿using Zergatul.Network.ASN1;
+﻿using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate.Extensions
 {
@@ -12,11 +12,10 @@ namespace Zergatul.Cryptography.Certificate.Extensions
 
         protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data);
+            var element = Asn1Element.ReadFrom(data);
 
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);
-
 
             if (seq.Elements.Count >= 1)
             {

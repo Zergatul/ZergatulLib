@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate.Extensions
 {
@@ -16,7 +16,7 @@ namespace Zergatul.Cryptography.Certificate.Extensions
 
         protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data);
+            var element = Asn1Element.ReadFrom(data);
             Names = new GeneralNames(element);
         }
     }
