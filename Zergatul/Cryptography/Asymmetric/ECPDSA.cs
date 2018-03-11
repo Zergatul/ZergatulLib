@@ -1,7 +1,7 @@
 ﻿using System;
 using Zergatul.Math;
-using Zergatul.Network.ASN1;
-using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Asn1;
+using Zergatul.Network.Asn1.Structures;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
@@ -44,6 +44,7 @@ namespace Zergatul.Cryptography.Asymmetric
                 throw new InvalidOperationException("Private key is required for signing");
 
             BigInteger h = new BigInteger(hash, ByteOrder.BigEndian);
+            h = TruncateH(h, hash.Length);
 
             var curve = Parameters.Curve;
             var q = curve.n;
@@ -78,7 +79,7 @@ namespace Zergatul.Cryptography.Asymmetric
             Parameters.Hash.Update(data);
             byte[] digest = Parameters.Hash.ComputeHash();
 
-            return Verify(digest, signature);
+            return VerifyHash(digest, signature);
         }
 
         public override bool VerifyHash(byte[] hash, byte[] signature)
@@ -88,9 +89,10 @@ namespace Zergatul.Cryptography.Asymmetric
             if (PublicKey == null)
                 throw new InvalidOperationException("Public key is required for verification");
 
-            BigInteger h = new BigInteger(hash, ByteOrder.BigEndian);
+            var h = new BigInteger(hash, ByteOrder.BigEndian);
+            h = TruncateH(h, hash.Length);
 
-            var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+            var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
 
             var curve = Parameters.Curve;
             var r = ed.r;
@@ -104,6 +106,15 @@ namespace Zergatul.Cryptography.Asymmetric
             var v = point.x % q;
 
             return v == r;
+        }
+
+        private BigInteger TruncateH(BigInteger h, int length)
+        {
+            if (Parameters.Curve.n.BitSize < length * 8)
+            {
+                h = h >> (length * 8 - Parameters.Curve.n.BitSize);
+            }
+            return h;
         }
 
         #region Converters
