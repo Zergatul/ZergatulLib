@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.X509
+namespace Zergatul.Network.Asn1.Structures.X509
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5280#section-4.1
@@ -22,7 +22,7 @@ namespace Zergatul.Network.ASN1.Structures.X509
         public byte[] SubjectUniqueID { get; private set; }
         public Extension[] Extensions { get; private set; }
 
-        public static TBSCertificate Parse(ASN1Element element)
+        public static TBSCertificate Parse(Asn1Element element)
         {
             var result = new TBSCertificate();
 

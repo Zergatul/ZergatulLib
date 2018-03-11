@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Math;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc4492#page-21
@@ -32,7 +32,7 @@ namespace Zergatul.Network.ASN1.Structures
             return seq.ToBytes();
         }
 
-        public static ECDSASignatureValue Parse(ASN1Element element)
+        public static ECDSASignatureValue Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -18,7 +18,7 @@ namespace Zergatul.Cryptography.Certificate
         public bool PrivilegeWithdrawn { get; private set; }
         public bool AACompromise { get; private set; }
 
-        internal ReasonFlags(ASN1Element element)
+        internal ReasonFlags(Asn1Element element)
         {
             var bs = element as BitString;
             CertificateParseException.ThrowIfFalse(bs != null);

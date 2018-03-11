@@ -1,7 +1,7 @@
 ﻿using System;
 using Zergatul.Math;
-using Zergatul.Network.ASN1;
-using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Asn1;
+using Zergatul.Network.Asn1.Structures;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
@@ -76,7 +76,7 @@ namespace Zergatul.Cryptography.Asymmetric
             byte[] digest = Parameters.Hash.ComputeHash();
             BigInteger h = new BigInteger(digest, ByteOrder.BigEndian);
 
-            var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+            var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
 
             var curve = Parameters.Curve;
             var r = ed.r;

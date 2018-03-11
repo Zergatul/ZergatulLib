@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.X509
+namespace Zergatul.Network.Asn1.Structures.X509
 {
     class Extension
     {
@@ -12,7 +12,7 @@ namespace Zergatul.Network.ASN1.Structures.X509
         public bool Critical { get; private set; }
         public byte[] Value { get; private set; }
 
-        public static Extension Parse(ASN1Element element)
+        public static Extension Parse(Asn1Element element)
         {
             var result = new Extension();
 

@@ -6,16 +6,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class UTCTime : ASN1TimeElement
+    public class UTCTime : Asn1TimeElement
     {
         public UTCTime()
-            : base(new ASN1Tag
+            : base(new Asn1Tag
             {
-                Class = ASN1TagClass.Universal,
-                ValueType = ASN1ValueType.Primitive,
-                Number = ASN1TagNumber.UTCTime
+                Class = Asn1TagClass.Universal,
+                ValueType = Asn1ValueType.Primitive,
+                Number = Asn1TagNumber.UTCTime
             })
         {
 

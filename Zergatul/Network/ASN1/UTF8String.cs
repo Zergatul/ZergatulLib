@@ -5,16 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class UTF8String : ASN1StringElement
+    public class UTF8String : Asn1StringElement
     {
         public UTF8String()
-            : base(new ASN1Tag
+            : base(new Asn1Tag
             {
-                Class = ASN1TagClass.Universal,
-                ValueType = ASN1ValueType.Primitive,
-                Number = ASN1TagNumber.UTF8String
+                Class = Asn1TagClass.Universal,
+                ValueType = Asn1ValueType.Primitive,
+                Number = Asn1TagNumber.UTF8String
             })
         {
 

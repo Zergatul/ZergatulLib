@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5280#section-4.1.1.2
@@ -14,25 +14,25 @@ namespace Zergatul.Network.ASN1.Structures
     public class AlgorithmIdentifier
     {
         public OID Algorithm { get; private set; }
-        public ASN1Element Parameters { get; private set; }
+        public Asn1Element Parameters { get; private set; }
 
         private AlgorithmIdentifier()
         {
 
         }
 
-        public AlgorithmIdentifier(OID algorithm, ASN1Element parameters)
+        public AlgorithmIdentifier(OID algorithm, Asn1Element parameters)
         {
             this.Algorithm = algorithm;
             this.Parameters = parameters;
         }
 
-        public ASN1Element ToASN1()
+        public Asn1Element ToASN1()
         {
             return new Sequence(new ObjectIdentifier(Algorithm), Parameters);
         }
 
-        public static AlgorithmIdentifier Parse(ASN1Element element)
+        public static AlgorithmIdentifier Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

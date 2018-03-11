@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.X509
+namespace Zergatul.Network.Asn1.Structures.X509
 {
     class SubjectPublicKeyInfo
     {
         public AlgorithmIdentifier Algorithm { get; private set; }
         public byte[] SubjectPublicKey { get; private set; }
 
-        public static SubjectPublicKeyInfo Parse(ASN1Element element)
+        public static SubjectPublicKeyInfo Parse(Asn1Element element)
         {
             var result = new SubjectPublicKeyInfo();
 

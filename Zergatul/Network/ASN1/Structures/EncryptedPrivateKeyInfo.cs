@@ -8,7 +8,7 @@ using Zergatul.Cryptography.Symmetric.CipherMode;
 using Zergatul.Cryptography.Generator;
 using Zergatul.Cryptography.Hash;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5208#section-6
@@ -19,7 +19,7 @@ namespace Zergatul.Network.ASN1.Structures
         public byte[] EncryptedData { get; private set; }
         public PrivateKeyInfo PrivateKey { get; private set; }
 
-        public static EncryptedPrivateKeyInfo Parse(ASN1Element element)
+        public static EncryptedPrivateKeyInfo Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);
@@ -55,7 +55,7 @@ namespace Zergatul.Network.ASN1.Structures
             else
                 throw new NotImplementedException();
 
-            PrivateKey = PrivateKeyInfo.Parse(ASN1Element.ReadFrom(data));
+            PrivateKey = PrivateKeyInfo.Parse(Asn1Element.ReadFrom(data));
         }
     }
 }

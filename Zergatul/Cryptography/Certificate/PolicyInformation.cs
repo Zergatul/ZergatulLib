@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -16,7 +16,7 @@ namespace Zergatul.Cryptography.Certificate
 
         private List<PolicyQualifierInfo> _policyQualifiers;
 
-        internal PolicyInformation(ASN1Element element)
+        internal PolicyInformation(Asn1Element element)
         {
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);

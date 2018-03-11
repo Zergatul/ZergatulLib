@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc2315#section-7
@@ -16,7 +16,7 @@ namespace Zergatul.Network.ASN1.Structures
         public EncryptedData EncryptedData { get; private set; }
         public SafeBag[] Bags { get; private set; }
 
-        public static ContentInfo Parse(ASN1Element element)
+        public static ContentInfo Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);
@@ -59,7 +59,7 @@ namespace Zergatul.Network.ASN1.Structures
             if (EncryptedData != null)
                 Data = EncryptedData.Decrypt(password);
 
-            var element = ASN1Element.ReadFrom(Data);
+            var element = Asn1Element.ReadFrom(Data);
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);
 

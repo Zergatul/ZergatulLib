@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Zergatul.Cryptography.Generator;
 using Zergatul.Cryptography.Hash;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     public class PKCS12Store
     {
@@ -16,7 +16,7 @@ namespace Zergatul.Network.ASN1.Structures
 
         public ContentInfo[] Parts;
 
-        public static PKCS12Store Parse(ASN1Element element, string password)
+        public static PKCS12Store Parse(Asn1Element element, string password)
         {
             var result = new PKCS12Store();
 
@@ -60,7 +60,7 @@ namespace Zergatul.Network.ASN1.Structures
         {
             if (AuthSafe.Data != null)
             {
-                var element = ASN1Element.ReadFrom(AuthSafe.Data);
+                var element = Asn1Element.ReadFrom(AuthSafe.Data);
                 var seq = element as Sequence;
                 ParseException.ThrowIfNull(seq);
 

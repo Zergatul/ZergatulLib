@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Certificate;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc8017#section-9.2
@@ -75,12 +75,12 @@ namespace Zergatul.Network.ASN1.Structures
             if (index >= data.Length)
                 throw new ParseException();
 
-            ASN1Element element;
+            Asn1Element element;
 
             using (var ms = new MemoryStream(data, index, data.Length - index))
                 try
                 {
-                    element = ASN1Element.ReadFrom(ms);
+                    element = Asn1Element.ReadFrom(ms);
                     if (ms.Position != ms.Length)
                         throw new ParseException();
                 }

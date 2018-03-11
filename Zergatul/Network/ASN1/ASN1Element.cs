@@ -5,20 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
     // https://habrahabr.ru/post/150757/
     // https://habrahabr.ru/post/150888/
-    public abstract class ASN1Element
+    public abstract class Asn1Element
     {
-        public ASN1Tag Tag { get; protected set; }
+        public Asn1Tag Tag { get; protected set; }
         public long Length { get; protected set; }
         public int HeaderLength { get; protected set; }
 
         public byte[] Raw { get; protected set; }
         protected List<byte> _raw;
 
-        public ASN1Element(ASN1Tag tag)
+        public Asn1Element(Asn1Tag tag)
         {
             this.Tag = tag;
         }
@@ -49,7 +49,7 @@ namespace Zergatul.Network.ASN1
             }
         }
 
-        public static ASN1Element ReadFrom(Stream stream)
+        public static Asn1Element ReadFrom(Stream stream)
         {
             int result = stream.ReadByte();
             if (result == -1)
@@ -59,17 +59,17 @@ namespace Zergatul.Network.ASN1
             raw.Add((byte)result);
 
             int tagLength;
-            ASN1Tag tag = ASN1Tag.FromByte((byte)result, stream, raw, out tagLength);
+            Asn1Tag tag = Asn1Tag.FromByte((byte)result, stream, raw, out tagLength);
             int lenLength;
             long length = ReadLength(stream, raw, out lenLength);
 
             if (length == long.MinValue)
                 throw new NotImplementedException("Indefinite length not implemented");
 
-            if (tag.Class == ASN1TagClass.Application)
+            if (tag.Class == Asn1TagClass.Application)
                 throw new NotImplementedException("Application tag class not implemented");
 
-            if (tag.Class == ASN1TagClass.ContextSpecific)
+            if (tag.Class == Asn1TagClass.ContextSpecific)
             {
                 var cs = new ContextSpecific();
                 cs.Tag = tag;
@@ -81,7 +81,7 @@ namespace Zergatul.Network.ASN1
                 return cs;
             }
 
-            ASN1Element element = Resolve(tag.Number);
+            Asn1Element element = Resolve(tag.Number);
             element.Tag = tag;
             element.HeaderLength = tagLength + lenLength;
             element.Length = length;
@@ -92,50 +92,50 @@ namespace Zergatul.Network.ASN1
             return element;
         }
 
-        public static ASN1Element ReadFrom(byte[] data)
+        public static Asn1Element ReadFrom(byte[] data)
         {
             using (var ms = new MemoryStream(data))
                 return ReadFrom(ms);
         }
 
-        protected static ASN1Element Resolve(ASN1TagNumber tag)
+        protected static Asn1Element Resolve(Asn1TagNumber tag)
         {
             switch (tag)
             {
-                case ASN1TagNumber.EOC:
+                case Asn1TagNumber.EOC:
                     throw new NotImplementedException();
-                case ASN1TagNumber.BOOLEAN:
+                case Asn1TagNumber.BOOLEAN:
                     return new Boolean();
-                case ASN1TagNumber.INTEGER:
+                case Asn1TagNumber.INTEGER:
                     return new Integer();
-                case ASN1TagNumber.BIT_STRING:
+                case Asn1TagNumber.BIT_STRING:
                     return new BitString();
-                case ASN1TagNumber.OCTET_STRING:
+                case Asn1TagNumber.OCTET_STRING:
                     return new OctetString();
-                case ASN1TagNumber.NULL:
+                case Asn1TagNumber.NULL:
                     return new Null();
-                case ASN1TagNumber.OBJECT_IDENTIFIER:
+                case Asn1TagNumber.OBJECT_IDENTIFIER:
                     return new ObjectIdentifier();
-                case ASN1TagNumber.UTF8String:
+                case Asn1TagNumber.UTF8String:
                     return new UTF8String();
-                case ASN1TagNumber.SEQUENCE:
+                case Asn1TagNumber.SEQUENCE:
                     return new Sequence();
-                case ASN1TagNumber.SET:
+                case Asn1TagNumber.SET:
                     return new Set();
-                case ASN1TagNumber.PrintableString:
+                case Asn1TagNumber.PrintableString:
                     return new PrintableString();
-                case ASN1TagNumber.IA5String:
+                case Asn1TagNumber.IA5String:
                     return new IA5String();
-                case ASN1TagNumber.UTCTime:
+                case Asn1TagNumber.UTCTime:
                     return new UTCTime();
-                case ASN1TagNumber.VisibleString:
+                case Asn1TagNumber.VisibleString:
                     return new VisibleString();
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        protected static void StaticReadBody(ASN1Element element, byte[] data)
+        protected static void StaticReadBody(Asn1Element element, byte[] data)
         {
             element.ReadBody(data);
         }
@@ -198,7 +198,7 @@ namespace Zergatul.Network.ASN1
                 stream.WriteByte((byte)(length >> (8 * (octets - 1 - i))));
         }
 
-        protected static long GetElementsLength(IList<ASN1Element> elements)
+        protected static long GetElementsLength(IList<Asn1Element> elements)
         {
             long length = 0;
             for (int i = 0; i < elements.Count; i++)

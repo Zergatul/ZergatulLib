@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.PKCS7
+namespace Zergatul.Network.Asn1.Structures.PKCS7
 {
     public class Attribute
     {
         public OID Type { get; private set; }
-        public ASN1Element[] Values { get; private set; }
+        public Asn1Element[] Values { get; private set; }
 
-        public static Attribute Parse(ASN1Element element)
+        public static Attribute Parse(Asn1Element element)
         {
             var result = new Attribute();
 

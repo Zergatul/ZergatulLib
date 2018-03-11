@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Math;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc3447#appendix-A.1.2
@@ -54,7 +54,7 @@ namespace Zergatul.Network.ASN1.Structures
         /// </summary>
         public BigInteger Coefficient { get; private set; }
 
-        public static RSAPrivateKey Parse(ASN1Element element)
+        public static RSAPrivateKey Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

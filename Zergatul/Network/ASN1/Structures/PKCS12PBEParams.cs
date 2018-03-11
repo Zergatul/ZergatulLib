@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc7292#appendix-C
@@ -14,7 +14,7 @@ namespace Zergatul.Network.ASN1.Structures
         public byte[] Salt { get; private set; }
         public int Iterations { get; private set; }
 
-        public static PKCS12PBEParams Parse(ASN1Element element)
+        public static PKCS12PBEParams Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

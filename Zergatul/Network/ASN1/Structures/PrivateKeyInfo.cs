@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Math;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5208#section-5
@@ -22,7 +22,7 @@ namespace Zergatul.Network.ASN1.Structures
         public ECPrivateKey EC { get; private set; }
         public BigInteger DH { get; set; }
 
-        public static PrivateKeyInfo Parse(ASN1Element element)
+        public static PrivateKeyInfo Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);
@@ -42,14 +42,14 @@ namespace Zergatul.Network.ASN1.Structures
             };
 
             if (result.Algorithm.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.RSA)
-                result.RSA = RSAPrivateKey.Parse(ASN1Element.ReadFrom(result.PrivateKey));
+                result.RSA = RSAPrivateKey.Parse(Asn1Element.ReadFrom(result.PrivateKey));
             else if (result.Algorithm.Algorithm == OID.ISO.MemberBody.US.X957.X9Algorithm.DSA)
-                result.DSA = DSAPrivateKey.Parse(ASN1Element.ReadFrom(result.PrivateKey));
+                result.DSA = DSAPrivateKey.Parse(Asn1Element.ReadFrom(result.PrivateKey));
             else if (result.Algorithm.Algorithm == OID.ISO.MemberBody.US.ANSI_X962.KeyType.ECPublicKey)
-                result.EC = ECPrivateKey.Parse(ASN1Element.ReadFrom(result.PrivateKey));
+                result.EC = ECPrivateKey.Parse(Asn1Element.ReadFrom(result.PrivateKey));
             else if (result.Algorithm.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS3.DHKeyAgreement)
             {
-                var key = ASN1Element.ReadFrom(result.PrivateKey);
+                var key = Asn1Element.ReadFrom(result.PrivateKey);
                 var integer = key as Integer;
                 ParseException.ThrowIfNull(integer);
                 result.DH = integer.Value;

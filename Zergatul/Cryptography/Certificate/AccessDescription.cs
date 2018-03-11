@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -13,7 +13,7 @@ namespace Zergatul.Cryptography.Certificate
         public OID AccessMethod { get; private set; }
         public GeneralName AccessLocation { get; private set; }
 
-        internal AccessDescription(ASN1Element element)
+        internal AccessDescription(Asn1Element element)
         {
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);

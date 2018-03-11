@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -16,7 +16,7 @@ namespace Zergatul.Cryptography.Certificate
         public ReasonFlags Reasons { get; private set; }
         public GeneralNames CRLIssuer { get; private set; }
 
-        internal DistributionPoint(ASN1Element element)
+        internal DistributionPoint(Asn1Element element)
         {
             var seq = element as Sequence;
             CertificateParseException.ThrowIfFalse(seq != null);

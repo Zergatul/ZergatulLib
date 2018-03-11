@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Math;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     // https://tools.ietf.org/html/rfc3279
     public class DSAPrivateKey
@@ -16,7 +16,7 @@ namespace Zergatul.Network.ASN1.Structures
         public BigInteger x { get; private set; }
         public BigInteger y { get; private set; }
 
-        public static DSAPrivateKey Parse(ASN1Element element)
+        public static DSAPrivateKey Parse(Asn1Element element)
         {
             return new DSAPrivateKey
             {

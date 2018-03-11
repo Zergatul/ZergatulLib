@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public enum ASN1TagClass : byte
+    public enum Asn1TagClass : byte
     {
         Universal = 0,
         Application = 1,

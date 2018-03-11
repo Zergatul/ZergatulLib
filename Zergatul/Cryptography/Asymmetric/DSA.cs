@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Math;
-using Zergatul.Network.ASN1;
-using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Asn1;
+using Zergatul.Network.Asn1.Structures;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
@@ -80,7 +80,7 @@ namespace Zergatul.Cryptography.Asymmetric
 
             BigInteger h = new BigInteger(hash, 0, System.Math.Min(hash.Length, Parameters.q.BitSize / 8), ByteOrder.BigEndian);
 
-            var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+            var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
 
             BigInteger p = Parameters.p;
             BigInteger q = Parameters.q;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     public class MACData
     {
@@ -12,7 +12,7 @@ namespace Zergatul.Network.ASN1.Structures
         public byte[] MACSalt { get; private set; }
         public int Iterations { get; private set; }
 
-        public static MACData Parse(ASN1Element element)
+        public static MACData Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

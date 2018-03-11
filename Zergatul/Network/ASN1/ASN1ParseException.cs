@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class ASN1ParseException : Exception
+    public class Asn1ParseException : Exception
     {
     }
 }

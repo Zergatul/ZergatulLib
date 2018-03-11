@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class ASN1Tag
+    public class Asn1Tag
     {
-        public ASN1TagClass Class;
-        public ASN1ValueType ValueType;
-        public ASN1TagNumber Number;
+        public Asn1TagClass Class;
+        public Asn1ValueType ValueType;
+        public Asn1TagNumber Number;
 
         public int TagNumberEx;
 
@@ -24,14 +24,14 @@ namespace Zergatul.Network.ASN1
             stream.WriteByte((byte)value);
         }
 
-        public static ASN1Tag FromByte(byte value, Stream stream, List<byte> raw, out int length)
+        public static Asn1Tag FromByte(byte value, Stream stream, List<byte> raw, out int length)
         {
             length = 1;
-            ASN1Tag result = new ASN1Tag
+            Asn1Tag result = new Asn1Tag
             {
-                Class = (ASN1TagClass)(value >> 6),
-                ValueType = (ASN1ValueType)((value >> 5) & 1),
-                Number = (ASN1TagNumber)(value & 0x1F)
+                Class = (Asn1TagClass)(value >> 6),
+                ValueType = (Asn1ValueType)((value >> 5) & 1),
+                Number = (Asn1TagNumber)(value & 0x1F)
             };
 
             if ((int)result.Number == 0x1F)

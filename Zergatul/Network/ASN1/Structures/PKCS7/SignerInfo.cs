@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.PKCS7
+namespace Zergatul.Network.Asn1.Structures.PKCS7
 {
     class SignerInfo
     {
@@ -18,7 +18,7 @@ namespace Zergatul.Network.ASN1.Structures.PKCS7
 
         public byte[] SignedAttributesRaw { get; private set; }
 
-        public static SignerInfo Parse(ASN1Element element)
+        public static SignerInfo Parse(Asn1Element element)
         {
             var result = new SignerInfo();
 

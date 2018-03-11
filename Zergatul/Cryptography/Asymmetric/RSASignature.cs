@@ -1,7 +1,7 @@
 ﻿using System;
 using Zergatul.Math;
-using Zergatul.Network.ASN1;
-using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Asn1;
+using Zergatul.Network.Asn1.Structures;
 
 namespace Zergatul.Cryptography.Asymmetric
 {

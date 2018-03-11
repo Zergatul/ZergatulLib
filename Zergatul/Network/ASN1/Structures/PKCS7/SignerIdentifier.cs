@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.PKCS7
+namespace Zergatul.Network.Asn1.Structures.PKCS7
 {
     class SignerIdentifier
     {
         public IssuerAndSerialNumber IssuerAndSerialNumber { get; private set; }
         public byte[] SubjectKeyIdentifier { get; private set; }
 
-        public static SignerIdentifier Parse(ASN1Element element, SignerInfo info)
+        public static SignerIdentifier Parse(Asn1Element element, SignerInfo info)
         {
             var result = new SignerIdentifier();
 

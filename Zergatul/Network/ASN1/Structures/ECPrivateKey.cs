@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5915#section-3
@@ -16,7 +16,7 @@ namespace Zergatul.Network.ASN1.Structures
         public ECParameters Parameters { get; private set; }
         public byte[] PublicKey { get; private set; }
 
-        public static ECPrivateKey Parse(ASN1Element element)
+        public static ECPrivateKey Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

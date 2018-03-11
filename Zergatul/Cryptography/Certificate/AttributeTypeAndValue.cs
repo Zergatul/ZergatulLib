@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -13,7 +13,7 @@ namespace Zergatul.Cryptography.Certificate
         public OID Type { get; private set; }
         public object Value { get; private set; }
 
-        internal AttributeTypeAndValue(ASN1Element element)
+        internal AttributeTypeAndValue(Asn1Element element)
         {
             var seq = element as Sequence;
 

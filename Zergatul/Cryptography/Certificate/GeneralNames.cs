@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -13,7 +13,7 @@ namespace Zergatul.Cryptography.Certificate
 
         private List<GeneralName> _list;
 
-        internal GeneralNames(ASN1Element element)
+        internal GeneralNames(Asn1Element element)
         {
             if (element is Sequence)
                 _list = ((Sequence)element).Elements.Select(e => new GeneralName(e)).ToList();

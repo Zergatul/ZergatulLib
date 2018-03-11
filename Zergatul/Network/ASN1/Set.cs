@@ -5,21 +5,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class Set : ASN1Element
+    public class Set : Asn1Element
     {
-        public List<ASN1Element> Elements { get; private set; }
+        public List<Asn1Element> Elements { get; private set; }
 
-        public Set(params ASN1Element[] elements)
-            : base(new ASN1Tag
+        public Set(params Asn1Element[] elements)
+            : base(new Asn1Tag
             {
-                Class = ASN1TagClass.Universal,
-                ValueType = ASN1ValueType.Constructed,
-                Number = ASN1TagNumber.SET
+                Class = Asn1TagClass.Universal,
+                ValueType = Asn1ValueType.Constructed,
+                Number = Asn1TagNumber.SET
             })
         {
-            this.Elements = new List<ASN1Element>();
+            this.Elements = new List<Asn1Element>();
             if (elements != null)
                 this.Elements.AddRange(elements);
         }

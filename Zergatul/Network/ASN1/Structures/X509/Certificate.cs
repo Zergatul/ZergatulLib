@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.X509
+namespace Zergatul.Network.Asn1.Structures.X509
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5280#section-4.1
@@ -17,7 +17,7 @@ namespace Zergatul.Network.ASN1.Structures.X509
 
         public byte[] TBSCertificateRaw { get; private set; }
 
-        public static Certificate Parse(ASN1Element element)
+        public static Certificate Parse(Asn1Element element)
         {
             var result = new Certificate();
 

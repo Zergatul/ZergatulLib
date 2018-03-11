@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public abstract class ASN1TimeElement : ASN1Element
+    public abstract class Asn1TimeElement : Asn1Element
     {
         public DateTime Date { get; protected set; }
 
-        public ASN1TimeElement(ASN1Tag tag)
+        public Asn1TimeElement(Asn1Tag tag)
             : base(tag)
         {
 

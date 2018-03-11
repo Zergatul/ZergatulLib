@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -26,7 +26,7 @@ namespace Zergatul.Cryptography.Certificate
 
         private List<RelativeDistinguishedName> _directoryName;
 
-        internal GeneralName(ASN1Element element)
+        internal GeneralName(Asn1Element element)
         {
             var cs = element as ContextSpecific;
 
@@ -36,7 +36,7 @@ namespace Zergatul.Cryptography.Certificate
             {
                 case 0:
                     CertificateParseException.ThrowIfFalse(cs.IsImplicit);
-                    OtherName = new OtherName(ASN1Element.ReadFrom(cs.Implicit));
+                    OtherName = new OtherName(Asn1Element.ReadFrom(cs.Implicit));
                     break;
                 case 1:
                     CertificateParseException.ThrowIfTrue(cs.IsImplicit);

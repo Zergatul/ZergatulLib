@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.X509
+namespace Zergatul.Network.Asn1.Structures.X509
 {
     class Name
     {
         public RelativeDistinguishedName[] RDN { get; private set; }
 
-        public static Name Parse(ASN1Element element)
+        public static Name Parse(Asn1Element element)
         {
             var result = new Name();
 

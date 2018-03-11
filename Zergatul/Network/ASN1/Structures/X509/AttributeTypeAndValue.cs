@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.X509
+namespace Zergatul.Network.Asn1.Structures.X509
 {
     class AttributeTypeAndValue
     {
         public OID Type { get; private set; }
-        public ASN1StringElement Value { get; private set; }
+        public Asn1StringElement Value { get; private set; }
 
-        public static AttributeTypeAndValue Parse(ASN1Element element)
+        public static AttributeTypeAndValue Parse(Asn1Element element)
         {
             var result = new AttributeTypeAndValue();
 
@@ -23,7 +23,7 @@ namespace Zergatul.Network.ASN1.Structures.X509
             ParseException.ThrowIfNull(oid);
             result.Type = oid.OID;
 
-            var str = seq.Elements[1] as ASN1StringElement;
+            var str = seq.Elements[1] as Asn1StringElement;
             ParseException.ThrowIfNull(str);
             result.Value = str;
 

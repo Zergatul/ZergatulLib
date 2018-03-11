@@ -8,7 +8,7 @@ using Zergatul.Cryptography.Symmetric.CipherMode;
 using Zergatul.Cryptography.Generator;
 using Zergatul.Cryptography.Hash;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc2315#section-13
@@ -18,7 +18,7 @@ namespace Zergatul.Network.ASN1.Structures
         public int Version { get; private set; }
         public EncryptedContentInfo Content { get; private set; }
 
-        public static EncryptedData Parse(ASN1Element element)
+        public static EncryptedData Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

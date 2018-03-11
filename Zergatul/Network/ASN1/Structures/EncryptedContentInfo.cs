@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc2315#section-10.1
@@ -15,7 +15,7 @@ namespace Zergatul.Network.ASN1.Structures
         public AlgorithmIdentifier EncryptionAlgorithm { get; private set; }
         public byte[] Content { get; private set; }
 
-        public static EncryptedContentInfo Parse(ASN1Element element)
+        public static EncryptedContentInfo Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

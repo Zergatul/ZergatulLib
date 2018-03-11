@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Network;
-using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Asn1.Structures;
 
 namespace Zergatul.Cryptography.Certificate
 {

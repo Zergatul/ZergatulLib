@@ -6,19 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Math;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class Integer : ASN1Element
+    public class Integer : Asn1Element
     {
         public byte[] Data { get; private set; }
         public BigInteger Value => GetValue();
 
         public Integer()
-            : base(new ASN1Tag
+            : base(new Asn1Tag
             {
-                Class = ASN1TagClass.Universal,
-                ValueType = ASN1ValueType.Primitive,
-                Number = ASN1TagNumber.INTEGER
+                Class = Asn1TagClass.Universal,
+                ValueType = Asn1ValueType.Primitive,
+                Number = Asn1TagNumber.INTEGER
             })
         {
 

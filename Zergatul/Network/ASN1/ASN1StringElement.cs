@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public abstract class ASN1StringElement : ASN1Element
+    public abstract class Asn1StringElement : Asn1Element
     {
-        public ASN1StringElement(ASN1Tag tag)
+        public Asn1StringElement(Asn1Tag tag)
             : base(tag)
         {
 

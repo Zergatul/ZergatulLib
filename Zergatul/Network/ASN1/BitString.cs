@@ -5,19 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class BitString : ASN1Element
+    public class BitString : Asn1Element
     {
         public int PadBits { get; private set; }
         public byte[] Data { get; private set; }
 
         public BitString()
-            : base(new ASN1Tag
+            : base(new Asn1Tag
             {
-                Class = ASN1TagClass.Universal,
-                ValueType = ASN1ValueType.Primitive,
-                Number = ASN1TagNumber.BIT_STRING
+                Class = Asn1TagClass.Universal,
+                ValueType = Asn1ValueType.Primitive,
+                Number = Asn1TagNumber.BIT_STRING
             })
         {
 

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Hash;
-using Zergatul.Network.ASN1;
-using Zergatul.Network.ASN1.Structures.PKCS7;
+using Zergatul.Network.Asn1;
+using Zergatul.Network.Asn1.Structures.PKCS7;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5652
@@ -16,7 +16,7 @@ namespace Zergatul.Network.ASN1.Structures
     {
         private SignedData _signedData;
 
-        public static CryptographicMessageSyntax Parse(ASN1Element element)
+        public static CryptographicMessageSyntax Parse(Asn1Element element)
         {
             var result = new CryptographicMessageSyntax();
 

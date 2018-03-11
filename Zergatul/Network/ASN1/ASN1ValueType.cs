@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public enum ASN1ValueType : byte
+    public enum Asn1ValueType : byte
     {
         Primitive = 0,
         Constructed = 1

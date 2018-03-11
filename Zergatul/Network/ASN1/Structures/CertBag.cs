@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Certificate;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc7292#section-4.2.3
@@ -15,7 +15,7 @@ namespace Zergatul.Network.ASN1.Structures
         public OID Id { get; private set; }
         public X509Certificate X509Certificate { get; private set; }
 
-        public static CertBag Parse(ASN1Element element)
+        public static CertBag Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

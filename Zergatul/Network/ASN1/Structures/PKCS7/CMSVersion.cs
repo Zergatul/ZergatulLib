@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.PKCS7
+namespace Zergatul.Network.Asn1.Structures.PKCS7
 {
     enum CMSVersion
     {

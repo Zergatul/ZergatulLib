@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography.Certificate;
 
-namespace Zergatul.Network.ASN1.Structures.PKCS7
+namespace Zergatul.Network.Asn1.Structures.PKCS7
 {
     class SignedData
     {
@@ -15,7 +15,7 @@ namespace Zergatul.Network.ASN1.Structures.PKCS7
         public X509Certificate[] Certificates { get; private set; }
         public SignerInfo[] SignerInfos { get; private set; }
 
-        public static SignedData Parse(ASN1Element element)
+        public static SignedData Parse(Asn1Element element)
         {
             var result = new SignedData();
 

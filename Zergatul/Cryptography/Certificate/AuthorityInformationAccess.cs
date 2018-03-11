@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -20,7 +20,7 @@ namespace Zergatul.Cryptography.Certificate
 
         protected override void Parse(byte[] data)
         {
-            var element = ASN1Element.ReadFrom(data);
+            var element = Asn1Element.ReadFrom(data);
 
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -14,7 +14,7 @@ namespace Zergatul.Cryptography.Certificate
 
         public UserNotice UserNotice { get; private set; }
 
-        internal Qualifier(OID policyQualifierId, ASN1Element element)
+        internal Qualifier(OID policyQualifierId, Asn1Element element)
         {
             if (policyQualifierId == OID.ISO.IdentifiedOrganization.DOD.Internet.Security.Mechanisms.PKIX.QT.CPS)
             {

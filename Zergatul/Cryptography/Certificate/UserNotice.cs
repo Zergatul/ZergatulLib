@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -15,7 +15,7 @@ namespace Zergatul.Cryptography.Certificate
         public NoticeReference NoticeRef { get; private set; }
         public string ExplicitText { get; private set; }
 
-        internal UserNotice(ASN1Element element)
+        internal UserNotice(Asn1Element element)
         {
             var seq = element as Sequence;
             CertificateParseException.ThrowIfNull(seq);
@@ -24,8 +24,8 @@ namespace Zergatul.Cryptography.Certificate
             {
                 if (seq.Elements[i] is Sequence)
                     NoticeRef = new NoticeReference(seq.Elements[i]);
-                if (seq.Elements[i] is ASN1StringElement)
-                    ExplicitText = ((ASN1StringElement)seq.Elements[i]).Value;
+                if (seq.Elements[i] is Asn1StringElement)
+                    ExplicitText = ((Asn1StringElement)seq.Elements[i]).Value;
             }
         }
     }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     public class SafeBag
     {
@@ -15,7 +15,7 @@ namespace Zergatul.Network.ASN1.Structures
 
         private List<PKCS12Attribute> _attributes;
 
-        public static SafeBag Parse(ASN1Element element)
+        public static SafeBag Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

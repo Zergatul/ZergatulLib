@@ -5,16 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1
+namespace Zergatul.Network.Asn1
 {
-    public class Null : ASN1Element
+    public class Null : Asn1Element
     {
         public Null()
-            : base(new ASN1Tag
+            : base(new Asn1Tag
             {
-                Class = ASN1TagClass.Universal,
-                ValueType = ASN1ValueType.Primitive,
-                Number = ASN1TagNumber.NULL
+                Class = Asn1TagClass.Universal,
+                ValueType = Asn1ValueType.Primitive,
+                Number = Asn1TagNumber.NULL
             })
         {
 

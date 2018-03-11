@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc2315#section-9.4
@@ -25,7 +25,7 @@ namespace Zergatul.Network.ASN1.Structures
             this.Digest = digest;
         }
 
-        public ASN1Element ToASN1()
+        public Asn1Element ToASN1()
         {
             return new Sequence(Algorithm.ToASN1(), new OctetString(Digest));
         }
@@ -35,7 +35,7 @@ namespace Zergatul.Network.ASN1.Structures
             return ToASN1().ToBytes();
         }
 
-        public static DigestInfo Parse(ASN1Element element)
+        public static DigestInfo Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

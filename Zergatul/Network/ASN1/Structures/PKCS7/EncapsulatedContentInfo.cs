@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.PKCS7
+namespace Zergatul.Network.Asn1.Structures.PKCS7
 {
     class EncapsulatedContentInfo
     {
         public OID ContentType { get; private set; }
         public byte[] Content { get; private set; }
 
-        public static EncapsulatedContentInfo Parse(ASN1Element element)
+        public static EncapsulatedContentInfo Parse(Asn1Element element)
         {
             var result = new EncapsulatedContentInfo();
 

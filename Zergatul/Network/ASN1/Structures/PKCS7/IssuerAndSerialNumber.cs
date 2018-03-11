@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures.PKCS7
+namespace Zergatul.Network.Asn1.Structures.PKCS7
 {
     class IssuerAndSerialNumber
     {
         public X509.Name Issuer { get; private set; }
         public byte[] SerialNumber { get; private set; }
 
-        public static IssuerAndSerialNumber Parse(ASN1Element element)
+        public static IssuerAndSerialNumber Parse(Asn1Element element)
         {
             var result = new IssuerAndSerialNumber();
 

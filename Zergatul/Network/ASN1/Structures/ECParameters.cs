@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     /// <summary>
     /// https://tools.ietf.org/html/rfc5480#section-2.1.1
@@ -13,7 +13,7 @@ namespace Zergatul.Network.ASN1.Structures
     {
         public OID NamedCurve { get; private set; }
 
-        public static ECParameters Parse(ASN1Element element)
+        public static ECParameters Parse(Asn1Element element)
         {
             if (element is ObjectIdentifier)
                 return new ECParameters

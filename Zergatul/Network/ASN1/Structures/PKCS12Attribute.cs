@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Zergatul.Network.ASN1.Structures
+namespace Zergatul.Network.Asn1.Structures
 {
     public class PKCS12Attribute
     {
         public OID Id { get; private set; }
         public byte[] LocalKeyId { get; private set; }
 
-        public static PKCS12Attribute Parse(ASN1Element element)
+        public static PKCS12Attribute Parse(Asn1Element element)
         {
             var seq = element as Sequence;
             ParseException.ThrowIfNull(seq);

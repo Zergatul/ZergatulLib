@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
     public class OtherName
     {
-        internal OtherName(ASN1Element element)
+        internal OtherName(Asn1Element element)
         {
             throw new NotImplementedException();
         }

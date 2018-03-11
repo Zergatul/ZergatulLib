@@ -1,55 +1,66 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zergatul.Network;
-using Zergatul.Network.ASN1.Structures.X509;
+using Zergatul.Network.Asn1.Structures.X509;
 
 namespace Zergatul.Cryptography.Certificate
 {
-    public class AttributesCollection : IReadOnlyDictionary<string, string>
+    public class AttributesCollection : IReadOnlyCollection<AttributePair<OID, string>>
     {
-        private Dictionary<string, string> _strDictionary;
-        private Dictionary<OID, string> _oidDictionary;
+        #region Private
+
+        private List<AttributePair<string, string>> _strList;
+        private List<AttributePair<OID, string>> _oidList;
         private string _value;
+
+        #endregion
+
+        #region .ctor
 
         internal AttributesCollection(Name name)
         {
-            this._strDictionary = new Dictionary<string, string>();
-            this._oidDictionary = new Dictionary<OID, string>();
+            this._strList = new List<AttributePair<string, string>>();
+            this._oidList = new List<AttributePair<OID, string>>();
 
             foreach (var rnd in name.RDN)
                 foreach (var attr in rnd.Attributes)
                 {
                     string key = attr.Type.ShortName ?? "OID." + attr.Type.DotNotation;
-                    _strDictionary.Add(key, attr.Value.Value);
-                    _oidDictionary.Add(attr.Type, attr.Value.Value);
+                    _strList.Add(new AttributePair<string, string>(key, attr.Value.Value));
+                    _oidList.Add(new AttributePair<OID, string>(attr.Type, attr.Value.Value));
                 }
 
             this._value = string.Join(", ",
                 name.RDN.SelectMany(rdn => rdn.Attributes).Reverse().Select(r => (r.Type.ShortName ?? "OID." + r.Type.DotNotation) + "=" + r.Value.Value));
         }
 
+        #endregion
+
+        #region Public
+
         public override string ToString() => _value;
 
-        #region IReadOnlyDictionary<string, string>
+        public IEnumerable<string> GetValuesByString(string key)
+        {
+            return _strList.Where(p => p.Key == key).Select(p => p.Value);
+        }
 
-        public string this[string key] => _strDictionary[key];
+        public IEnumerable<string> GetValuesByOID(OID key)
+        {
+            return _oidList.Where(p => p.Key == key).Select(p => p.Value);
+        }
 
-        public int Count => _strDictionary.Count;
+        public string this[string key] => GetValuesByString(key).SingleOrDefault();
 
-        public IEnumerable<string> Keys => _strDictionary.Keys;
+        public string this[OID key] => GetValuesByOID(key).SingleOrDefault();
 
-        public IEnumerable<string> Values => _strDictionary.Values;
+        #endregion
 
-        public bool ContainsKey(string key) => _strDictionary.ContainsKey(key);
+        #region IReadOnlyCollection
 
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator() => _strDictionary.GetEnumerator();
-
-        public bool TryGetValue(string key, out string value) => _strDictionary.TryGetValue(key, out value);
-
+        public int Count => _strList.Count;
+        public IEnumerator<AttributePair<OID, string>> GetEnumerator() => _oidList.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         #endregion
