@@ -43,8 +43,11 @@ namespace Zergatul.Cryptography.Certificate
             {
                 var certWithoutParent = list.FirstOrDefault(c =>
                 {
-                    var authKey = c.Extensions.Get<AuthorityKeyIdentifier>().KeyIdentifier;
-                    return !list.Any(_ => ByteArray.Equals(_.Extensions.Get<SubjectKeyIdentifier>().KeyIdentifier, authKey));
+                    var authKeyIdExt = c.Extensions.Get<AuthorityKeyIdentifier>();
+                    if (authKeyIdExt == null)
+                        return false;
+                    var authKey = authKeyIdExt.KeyIdentifier;
+                    return !list.Any(_ => ByteArray.Equals(_.Extensions.Get<SubjectKeyIdentifier>()?.KeyIdentifier, authKey));
                 });
                 if (certWithoutParent == null)
                     break;
@@ -105,13 +108,23 @@ namespace Zergatul.Cryptography.Certificate
                 var signed = lc.Certificate;
                 var parent = lc.Parent.Certificate;
 
-                if (signed.SignatureAlgorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.SHA256WithRSA)
+                var hash = OIDInfoResolver.GetHash(signed.SignatureAlgorithm);
+                if (hash == null)
+                    throw new NotImplementedException();
+
+                if (OIDInfoResolver.IsRSA(signed.SignatureAlgorithm))
                 {
-                    var hash = new SHA256();
                     var rsa = (RSASignature)parent.PublicKey.ResolveAlgorithm().ToSignature();
                     rsa.Parameters.Scheme = RSASignatureScheme.RSASSA_PKCS1_v1_5;
                     rsa.Parameters.Hash = hash;
                     if (!rsa.Verify(signed.SignedData, signed.Signature))
+                        return false;
+                }
+                else if (OIDInfoResolver.IsECDSA(signed.SignatureAlgorithm))
+                {
+                    var ecdsa = (ECPDSA)parent.PublicKey.ResolveAlgorithm().ToSignature();
+                    ecdsa.Parameters.Hash = hash;
+                    if (!ecdsa.Verify(signed.SignedData, signed.Signature))
                         return false;
                 }
                 else
