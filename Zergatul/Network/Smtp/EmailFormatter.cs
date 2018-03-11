@@ -15,6 +15,7 @@ namespace Zergatul.Network.Smtp
                 $"Subject: {subject}{Environment.NewLine}" +
                 $"To: {to}{Environment.NewLine}" +
                 (string.IsNullOrEmpty(cc) ? "" : $"CC: {cc}{Environment.NewLine}") +
+                $"Content-Type: text/plain; charset=\"utf-8\";{Environment.NewLine}" +
                 Environment.NewLine +
                 body;
         }
