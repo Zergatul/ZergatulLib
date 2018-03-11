@@ -12,6 +12,7 @@ namespace Zergatul.Network.Tls
         private Stream _stream;
         private byte[] _array;
         private byte[] _buffer = new byte[4];
+        private int _bufIndex = 0;
 
         internal int Position { get; private set; }
         private int? _limit;
@@ -34,6 +35,22 @@ namespace Zergatul.Network.Tls
             Position = 0;
         }
 
+        public bool IsDataAvailable()
+        {
+            if (_stream != null)
+            {
+                if (_bufIndex > 0)
+                    return true;
+                _bufIndex = _stream.Read(_buffer, 0, 1);
+                return _bufIndex > 0;
+            }
+
+            if (_array != null)
+                return Position < _array.Length;
+
+            throw new InvalidOperationException();
+        }
+
         private void FillBuffer(int count)
         {
             if (count > _buffer.Length)
@@ -41,13 +58,14 @@ namespace Zergatul.Network.Tls
 
             if (_stream != null)
             {
-                int totalRead = 0;
+                int totalRead = _bufIndex;
                 while (true)
                 {
                     totalRead += _stream.Read(_buffer, totalRead, count - totalRead);
                     if (totalRead == count)
                         break;
                 }
+                _bufIndex = 0;
             }
 
             if (_array != null)

@@ -65,6 +65,7 @@ namespace Zergatul.Network.Tls
     public partial class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }
+        public CipherSuite? UsedCipherSuite { get; private set; }
 
         private Stream _innerStream;
         private BinaryReader _reader;
@@ -81,7 +82,7 @@ namespace Zergatul.Network.Tls
 
         private List<ContentMessage> _messageBuffer;
 
-        private string _clientHost;
+        private string _serverHost;
 
         internal SecurityParameters SecurityParameters;
         internal ulong ClientSequenceNum;
@@ -111,7 +112,7 @@ namespace Zergatul.Network.Tls
         {
             Role = Role.Client;
             State = ConnectionState.Start;
-            _clientHost = host;
+            _serverHost = host;
 
             GenerateRandom();
 
@@ -168,12 +169,15 @@ namespace Zergatul.Network.Tls
         {
             while (State != waitFor)
             {
-                ReadSingleRecordMessage();
+                ReadSingleRecordMessage(true);
             }
         }
 
-        private RecordMessage ReadSingleRecordMessage()
+        private RecordMessage ReadSingleRecordMessage(bool force)
         {
+            if (!force && !_reader.IsDataAvailable())
+                return null;
+
             var message = new RecordMessage(this);
             message.OnContentMessage += OnContentMessage;
             try
@@ -340,7 +344,7 @@ namespace Zergatul.Network.Tls
                         new ServerName
                         {
                             NameType = NameType.HostName,
-                            HostName = _clientHost
+                            HostName = _serverHost
                         }
                     }
                 },
@@ -562,6 +566,8 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Unexpected ServerHello message");
             }
 
+            this.UsedCipherSuite = message.CipherSuite;
+
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
             SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
             SecurityParameters.ServerRandom = message.Random.ToArray();
@@ -592,7 +598,11 @@ namespace Zergatul.Network.Tls
                 if (Settings.CertificateValidationOverride != null)
                     trusted = Settings.CertificateValidationOverride(tree.Root.Certificate);
                 else
-                    trusted = tree.Validate(SecurityParameters.ServerCertificate);
+                {
+                    trusted =
+                        SecurityParameters.ServerCertificate.IsHostAllowed(_serverHost) &&
+                        tree.Validate(SecurityParameters.ServerCertificate);
+                }
 
                 if (!trusted)
                 {
@@ -871,20 +881,24 @@ namespace Zergatul.Network.Tls
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            while (_readBuffer.Count < count)
+            if (State != ConnectionState.Closed)
             {
-                var message = ReadSingleRecordMessage();
-                foreach (var cm in message.ContentMessages)
-                    if (cm is ApplicationData)
+                var message = ReadSingleRecordMessage(false);
+                if (message != null)
+                    foreach (var cm in message.ContentMessages)
                     {
-                        var appData = cm as ApplicationData;
-                        _readBuffer.AddRange(appData.Data);
+                        if (cm is ApplicationData)
+                        {
+                            var appData = cm as ApplicationData;
+                            _readBuffer.AddRange(appData.Data);
+                        }
                     }
             }
 
+            if (count > _readBuffer.Count)
+                count = _readBuffer.Count;
             for (int i = 0; i < count; i++)
                 buffer[offset + i] = _readBuffer[i];
-
             _readBuffer.RemoveRange(0, count);
 
             return count;
