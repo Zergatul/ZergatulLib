@@ -8,7 +8,7 @@ using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math;
 using Zergatul.Math.EllipticCurves;
 using Zergatul.Network;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -16,9 +16,9 @@ namespace Zergatul.Cryptography.Certificate
     {
         public OID Algorithm { get; private set; }
         public byte[] Key { get; private set; }
-        public ASN1Element Parameters { get; private set; }
+        public Asn1Element Parameters { get; private set; }
 
-        internal PublicKey(Network.ASN1.Structures.X509.SubjectPublicKeyInfo keyInfo)
+        internal PublicKey(Network.Asn1.Structures.X509.SubjectPublicKeyInfo keyInfo)
         {
             this.Algorithm = keyInfo.Algorithm.Algorithm;
             this.Key = keyInfo.SubjectPublicKey;
@@ -30,12 +30,11 @@ namespace Zergatul.Cryptography.Certificate
             var oid = (Parameters as ObjectIdentifier)?.OID;
             if (oid != null)
             {
-                if (oid == OID.ISO.IdentifiedOrganization.Certicom.Curve.secp521r1)
-                    return Math.EllipticCurves.PrimeField.EllipticCurve.secp521r1;
-                else if (oid == OID.ISO.MemberBody.US.ANSI_X962.Curves.Prime.Prime256v1)
-                    return Math.EllipticCurves.PrimeField.EllipticCurve.secp256r1;
-                else
+                var curve = OIDInfoResolver.GetCurve(oid);
+                if (curve == null)
                     throw new NotImplementedException();
+                else
+                    return curve;
             }
 
             return null;
@@ -45,7 +44,7 @@ namespace Zergatul.Cryptography.Certificate
         {
             if (Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.RSA)
             {
-                var element = ASN1Element.ReadFrom(Key);
+                var element = Asn1Element.ReadFrom(Key);
                 var seq = element as Sequence;
                 if (seq != null && seq.Elements.Count == 2 && seq.Elements[0] is Integer && seq.Elements[1] is Integer)
                 {
@@ -75,7 +74,7 @@ namespace Zergatul.Cryptography.Certificate
             }
             else if (Algorithm == OID.ISO.MemberBody.US.X957.X9Algorithm.DSA)
             {
-                var element = ASN1Element.ReadFrom(Key);
+                var element = Asn1Element.ReadFrom(Key);
                 var integer = element as Integer;
                 if (integer == null)
                     throw new InvalidOperationException();
@@ -101,7 +100,7 @@ namespace Zergatul.Cryptography.Certificate
             }
             else if (Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS3.DHKeyAgreement)
             {
-                var element = ASN1Element.ReadFrom(Key);
+                var element = Asn1Element.ReadFrom(Key);
                 var integer = element as Integer;
                 if (integer == null)
                     throw new InvalidOperationException();

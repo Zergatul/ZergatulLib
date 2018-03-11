@@ -84,9 +84,9 @@
           <oid value="4" id="signatures" class="Signatures" desc="ANSI X9.62 Elliptic Curve Digital Signature Algorithm (ECDSA) signatures and modules">
             <oid value="3" id="ecdsa-with-SHA2" class="ECDSAWithSHA2" desc="">
               <oid value="1" id="ecdsa-with-SHA224" class="ECDSAWithSHA224" desc="" />
-              <oid value="1" id="ecdsa-with-SHA256" class="ECDSAWithSHA256" desc="" />
-              <oid value="1" id="ecdsa-with-SHA384" class="ECDSAWithSHA384" desc="" />
-              <oid value="1" id="ecdsa-with-SHA512" class="ECDSAWithSHA512" desc="" />
+              <oid value="2" id="ecdsa-with-SHA256" class="ECDSAWithSHA256" desc="" />
+              <oid value="3" id="ecdsa-with-SHA384" class="ECDSAWithSHA384" desc="" />
+              <oid value="4" id="ecdsa-with-SHA512" class="ECDSAWithSHA512" desc="" />
             </oid>
           </oid>
         </oid>
@@ -98,7 +98,7 @@
               <oid value="2" id="md2WithRSAEncryption" class="MD2WithRSA" desc="Message Digest 2 (MD2) checksum with Rivest, Shamir and Adleman (RSA) encryption" />
               <oid value="3" id="md4withRSAEncryption" class="MD4WithRSA" desc="Message Digest 4 (MD4) checksum with Rivest, Shamir and Adleman (RSA) encryption" />
               <oid value="4" id="md5WithRSAEncryption" class="MD5WithRSA" desc="Rivest, Shamir and Adleman (RSA) encryption with Message Digest 5 (MD5) signature" />
-              <oid value="5" id="sha1-with-rsa-signature" class="SHA1WithRSASignature" desc="Rivest, Shamir and Adleman (RSA) with Secure Hash Algorithm (SHA-1) signature" />
+              <oid value="5" id="sha1-with-rsa-signature" class="SHA1WithRSA" desc="Rivest, Shamir and Adleman (RSA) with Secure Hash Algorithm (SHA-1) signature" />
               <oid value="6" id="rsaOAEPEncryptionSET" class="RSAOAEPEncryptionSET" desc="Rivest, Shamir and Adleman (RSA) Optimal Asymmetric Encryption Padding (OAEP) encryption set" />
               <oid value="7" id="id-RSAES-OAEP" class="RSAESOAEP" desc="Public-key encryption scheme combining Optimal Asymmetric Encryption Padding (OAEP) with the Rivest, Shamir and Adleman Encryption Scheme (RSAES)" />
               <oid value="8" id="id-mgf1" class="MGF1" desc="Rivest, Shamir and Adleman (RSA) algorithm that uses the Mask Generator Function 1 (MGF1)" />
