@@ -3,8 +3,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Math.EllipticCurves.PrimeField;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Cryptography.Asymmetric;
-using Zergatul.Network.ASN1.Structures;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1.Structures;
+using Zergatul.Network.Asn1;
 using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Tests.Asymmetric
@@ -79,7 +79,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
             ecdsa1.Random = new StaticRandom(Dec(BitHelper.HexToBytes(k)));
             byte[] signature = ecdsa1.Sign(System.Text.Encoding.ASCII.GetBytes(plain));
-            var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+            var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
             Assert.IsTrue(ed.r == new BigInteger(BitHelper.HexToBytes(r), ByteOrder.BigEndian));
             Assert.IsTrue(ed.s == new BigInteger(BitHelper.HexToBytes(s), ByteOrder.BigEndian));
 

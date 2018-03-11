@@ -3,8 +3,8 @@ using Zergatul.Math.EllipticCurves.BinaryField;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.Hash;
 using System.Text;
-using Zergatul.Network.ASN1.Structures;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1.Structures;
+using Zergatul.Network.Asn1;
 using Zergatul.Math;
 
 namespace Zergatul.Cryptography.Tests.Asymmetric
@@ -64,7 +64,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
                 byte[] signature = ecdsa1.Sign(msg);
 
-                var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+                var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
                 Assert.IsTrue(ed.r == new BigInteger(BitHelper.HexToBytes(tc[3]), ByteOrder.BigEndian));
                 Assert.IsTrue(ed.s == new BigInteger(BitHelper.HexToBytes(tc[4]), ByteOrder.BigEndian));
 

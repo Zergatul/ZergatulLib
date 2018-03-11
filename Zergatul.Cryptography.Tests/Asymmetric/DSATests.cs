@@ -5,8 +5,8 @@ using Zergatul.Math;
 using System.Collections.Generic;
 using Zergatul.Cryptography.Hash;
 using System.Text;
-using Zergatul.Network.ASN1.Structures;
-using Zergatul.Network.ASN1;
+using Zergatul.Network.Asn1.Structures;
+using Zergatul.Network.Asn1;
 
 namespace Zergatul.Cryptography.Tests.Asymmetric
 {
@@ -118,7 +118,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
                 byte[] signature = dsa.Sign(Encoding.ASCII.GetBytes(msg));
 
-                var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+                var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
                 Assert.IsTrue(ed.r.ToString(16).ToUpper() == r);
                 Assert.IsTrue(ed.s.ToString(16).ToUpper() == s);
 
@@ -246,7 +246,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
 
                 byte[] signature = dsa.Sign(Encoding.ASCII.GetBytes(msg));
 
-                var ed = ECDSASignatureValue.Parse(ASN1Element.ReadFrom(signature));
+                var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
                 Assert.IsTrue(ed.r.ToString(16).ToUpper() == r);
                 Assert.IsTrue(ed.s.ToString(16).ToUpper() == s);
 

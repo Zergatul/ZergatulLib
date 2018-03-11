@@ -82,6 +82,11 @@ namespace Zergatul.Cryptography.Tests.Certificate
             Assert.IsFalse(cert.Extensions.Get<SubjectKeyIdentifier>().Critical);
             Assert.IsTrue(cert.Extensions.Get<SubjectKeyIdentifier>().KeyIdentifier.SequenceEqual(
                 BitHelper.HexToBytes("ad8ab41c0751d7928907b0b784622f36557a5f4d")));
+
+            Assert.IsTrue(cert.IsHostAllowed("tools.ietf.org"));
+            Assert.IsTrue(cert.IsHostAllowed("www.tools.ietf.org"));
+            Assert.IsTrue(cert.IsHostAllowed("srv1.tools.ietf.org"));
+            Assert.IsFalse(cert.IsHostAllowed("sub2.srv1.tools.ietf.org"));
         }
 
         [TestMethod]
