@@ -19,6 +19,7 @@ namespace Zergatul.Network.Smtp
         private TcpClient _tcpClient;
         private Stream _stream;
         private SmtpControlStreamReader _reader;
+        private ITlsProvider _tlsProvider;
 
         #endregion
 
@@ -39,6 +40,24 @@ namespace Zergatul.Network.Smtp
         public string Greeting { get; private set; }
         public string ExtendedHelloResponse { get; private set; }
         public string[] SupportedCommands { get; private set; }
+
+        #endregion
+
+        #region .ctor
+
+        public SmtpConnection()
+            : this(new DefaultTlsProvider())
+        {
+
+        }
+
+        public SmtpConnection(ITlsProvider tlsProvider)
+        {
+            if (tlsProvider == null)
+                throw new ArgumentNullException(nameof(tlsProvider));
+
+            this._tlsProvider = tlsProvider;
+        }
 
         #endregion
 
@@ -67,46 +86,26 @@ namespace Zergatul.Network.Smtp
                 _tcpClient.SendTimeout = WriteTimeout;
 
             _reader = new SmtpControlStreamReader(_stream);
+
+            SetupCommandTimeout();
+
+            var greetingReply = _reader.ReadServerReply();
+            if (greetingReply.Code != SmtpReplyCode.ServiceReady)
+                throw new SmtpException();
+
+            Greeting = greetingReply.Message;
         }
 
         public void ExtendedHello(string domain)
         {
             SetupCommandTimeout();
 
-            if (Greeting == null)
-            {
-                //var greeting = _reader.ReadServerReply();
-                //var reply = SendCommand(SmtpCommands.EHLO, domain);
+            var reply = SendCommand(SmtpCommands.EHLO, domain);
+            if (reply.Code != SmtpReplyCode.OK)
+                throw new SmtpException();
 
-                //if (greeting.Code != SmtpReplyCode.ServiceReady)
-                //    throw new SmtpException();
-                //if (reply.Code != SmtpReplyCode.OK)
-                //    throw new SmtpException();
-
-                //Greeting = greeting.Message;
-                //ExtendedHelloResponse = reply.Message;
-                //ParseExtendedHello();
-
-                var greeting = SendCommand(SmtpCommands.EHLO, domain);
-                var reply = _reader.ReadServerReply();
-
-                if (greeting.Code != SmtpReplyCode.ServiceReady)
-                    throw new SmtpException();
-                if (reply.Code != SmtpReplyCode.OK)
-                    throw new SmtpException();
-
-                Greeting = greeting.Message;
-                ExtendedHelloResponse = reply.Message;
-                ParseExtendedHello();
-            }
-            else
-            {
-                var reply = SendCommand(SmtpCommands.EHLO, domain);
-                if (reply.Code != SmtpReplyCode.OK)
-                    throw new SmtpException();
-                ExtendedHelloResponse = reply.Message;
-                ParseExtendedHello();
-            }
+            ExtendedHelloResponse = reply.Message;
+            ParseExtendedHello();
         }
 
         public void StartTls(string host)
@@ -120,15 +119,9 @@ namespace Zergatul.Network.Smtp
             if (reply.Code != SmtpReplyCode.ServiceReady)
                 throw new SmtpException();
 
-            //TlsStream tls = new TlsStream(_stream);
-            //tls.AuthenticateAsClient(host);
-            //_stream = tls;
-            //_reader = new SmtpControlStreamReader(tls);
-
-            var ssl = new System.Net.Security.SslStream(_stream);
-            ssl.AuthenticateAsClient(host);
-            _stream = ssl;
-            _reader = new SmtpControlStreamReader(ssl);
+            var tls = _tlsProvider.AuthenticateAsClient(_stream, host);
+            _stream = tls;
+            _reader = new SmtpControlStreamReader(tls);
         }
 
         public void AuthPlain(string user, string password)

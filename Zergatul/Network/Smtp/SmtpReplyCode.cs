@@ -28,6 +28,11 @@
         StartInput = 354,
 
         /// <summary>
+        /// Authentication mechanism is too weak
+        /// </summary>
+        AuthenticationMechanismTooWeak = 534,
+
+        /// <summary>
         /// Authentication credentials invalid
         /// </summary>
         InvalidCredentials = 535,
