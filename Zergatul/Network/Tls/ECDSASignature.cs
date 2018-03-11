@@ -1,6 +1,6 @@
 ﻿using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.Hash;
-using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Asn1.Structures;
 using Zergatul.Network.Tls.Extensions;
 
 namespace Zergatul.Network.Tls

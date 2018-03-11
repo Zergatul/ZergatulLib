@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
-using Zergatul.Network.ASN1;
-using Zergatul.Network.ASN1.Structures;
+using Zergatul.Network.Asn1;
+using Zergatul.Network.Asn1.Structures;
 using Zergatul.Network.Tls.Extensions;
 
 namespace Zergatul.Network.Tls
