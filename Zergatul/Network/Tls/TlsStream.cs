@@ -65,7 +65,7 @@ namespace Zergatul.Network.Tls
     public partial class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }
-        public CipherSuite? UsedCipherSuite { get; private set; }
+        public CipherSuite? NegotiatedCipherSuite { get; private set; }
 
         private Stream _innerStream;
         private BinaryReader _reader;
@@ -90,9 +90,23 @@ namespace Zergatul.Network.Tls
 
         private TlsExtension[] _clientExtensions;
         private TlsExtension[] _serverExtensions;
+        private TlsStreamSession _clientSession;
+        private TlsStreamSession _serverSession;
+        private bool _reuseSession;
 
-        public TlsStream(Stream innerStream, ISecureRandom random = null)
+        private Flows _flows;
+
+        public TlsStream(Stream innerStream, ProtocolVersion version = ProtocolVersion.Tls12, ISecureRandom random = null)
         {
+            switch (version)
+            {
+                case ProtocolVersion.Tls12:
+                case ProtocolVersion.Tls13:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(version));
+            }
+
             this._innerStream = innerStream;
             this._reader = new BinaryReader(innerStream);
 
@@ -101,11 +115,14 @@ namespace Zergatul.Network.Tls
             this._utils = new TlsUtils(this._random);
 
             this.SecurityParameters = new SecurityParameters();
+            this.SecurityParameters.Version = version;
             this.SecurityParameters.HandshakeData = new List<byte>();
 
             this.Settings = TlsStreamSettings.Default;
 
             this.State = ConnectionState.NoConnection;
+
+            this._flows = new Flows(this);
         }
 
         public void AuthenticateAsClient(string host)
@@ -114,22 +131,31 @@ namespace Zergatul.Network.Tls
             State = ConnectionState.Start;
             _serverHost = host;
 
-            GenerateRandom();
+            switch (this.SecurityParameters.Version)
+            {
+                case ProtocolVersion.Tls12:
 
-            WriteHandshakeMessage(GenerateClientHello());
+                    GenerateRandom();
 
-            ReadRecordMessage(ConnectionState.ServerHelloDone);
+                    WriteHandshakeMessage(GenerateClientHello());
 
-            WriteHandshakeMessage(GenerateClientKeyExchange());
+                    ReadRecordMessage(ConnectionState.ServerHelloDone);
 
-            WriteChangeCipherSpec();
+                    WriteHandshakeMessage(GenerateClientKeyExchange());
 
-            ClientSequenceNum = 0;
-            ServerSequenceNum = 0;
+                    WriteChangeCipherSpec();
 
-            WriteHandshakeMessage(GenerateFinished());
+                    ClientSequenceNum = 0;
+                    ServerSequenceNum = 0;
 
-            ReadRecordMessage(ConnectionState.ServerFinished);
+                    WriteHandshakeMessage(GenerateFinished());
+
+                    ReadRecordMessage(ConnectionState.ServerFinished);
+
+                    break;
+                case ProtocolVersion.Tls13:
+                    break;
+            }
         }
 
         public void AuthenticateAsServer(string host, X509Certificate certificate = null)
@@ -375,12 +401,16 @@ namespace Zergatul.Network.Tls
                 extensions.Add(new SupportedGroups(Settings.SupportedCurves));
             extensions.Add(new SupportedPointFormats(ECPointFormat.Uncompressed));
 
+            if (Settings.ReuseSessions)
+                _clientSession = TlsStreamSessions.Instance[_serverHost];
+
             return new HandshakeMessage(this)
             {
                 Body = new ClientHello
                 {
                     ClientVersion = ProtocolVersion.Tls12,
                     Random = SecurityParameters.ClientRandom,
+                    SessionID = _clientSession?.ID ?? new byte[0],
                     CipherSuites = Settings.CipherSuites,
                     Extensions = extensions.ToArray()
                 }
@@ -566,11 +596,13 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Unexpected ServerHello message");
             }
 
-            this.UsedCipherSuite = message.CipherSuite;
+            this.NegotiatedCipherSuite = message.CipherSuite;
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
             SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
             SecurityParameters.ServerRandom = message.Random.ToArray();
+
+            TlsStreamSessions.Instance.AddSession(_serverHost, message.SessionID);
 
             this._serverExtensions = message.Extensions.ToArray();
 
@@ -595,8 +627,8 @@ namespace Zergatul.Network.Tls
 
             if (Role == Role.Client)
             {
-                if (Settings.CertificateValidationOverride != null)
-                    trusted = Settings.CertificateValidationOverride(tree.Root.Certificate);
+                if (Settings.ServerCertificateValidationOverride != null)
+                    trusted = Settings.ServerCertificateValidationOverride(tree.Root.Certificate);
                 else
                 {
                     trusted =
@@ -881,7 +913,7 @@ namespace Zergatul.Network.Tls
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (State != ConnectionState.Closed)
+            if (count > _readBuffer.Count && State != ConnectionState.Closed)
             {
                 var message = ReadSingleRecordMessage(false);
                 if (message != null)

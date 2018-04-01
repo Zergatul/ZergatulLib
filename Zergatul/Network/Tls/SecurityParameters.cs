@@ -9,7 +9,7 @@ namespace Zergatul.Network.Tls
 {
     internal class SecurityParameters
     {
-        ProtocolVersion Version;
+        public ProtocolVersion Version;
         //ConnectionEnd entity;
         //PRFAlgorithm prf_algorithm;
         //BulkCipherAlgorithm bulk_cipher_algorithm;
@@ -27,6 +27,7 @@ namespace Zergatul.Network.Tls
         public byte[] ServerRandom;
 
         public X509Certificate ServerCertificate;
+        public bool CertificateRequested;
 
         public List<byte> HandshakeData;
         public byte[] ClientFinishedHandshakeData;

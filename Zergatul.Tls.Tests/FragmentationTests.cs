@@ -36,7 +36,7 @@ namespace Zergatul.Tls.Tests
             var tlsSettings = new TlsStreamSettings
             {
                 SupportExtendedMasterSecret = true,
-                CertificateValidationOverride = c => true,
+                ServerCertificateValidationOverride = c => true,
                 CipherSuites = new CipherSuite[]
                 {
                     CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA

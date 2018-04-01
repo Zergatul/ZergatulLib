@@ -394,6 +394,8 @@
     <Compile Include="Network\Tls\TlsProvider.cs" />
     <Compile Include="Network\Tls\TlsStream.cs" />
     <Compile Include="Network\Tls\TlsStreamException.cs" />
+    <Compile Include="Network\Tls\TlsStreamMessageFlow.cs" />
+    <Compile Include="Network\Tls\TlsStreamSessions.cs" />
     <Compile Include="Network\Tls\TlsStreamSettings.cs" />
     <Compile Include="Network\Tls\TlsStreamSupportedCipherSuites.cs" />
     <Compile Include="Network\Tls\TlsUtils.cs" />

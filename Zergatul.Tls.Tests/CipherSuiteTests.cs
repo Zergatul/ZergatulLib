@@ -2035,7 +2035,7 @@ namespace Zergatul.Tls.Tests
                     else
                         throw new InvalidOperationException();
                 },
-                CertificateValidationOverride = c => true
+                ServerCertificateValidationOverride = c => true
             };
 
             var evt = new ManualResetEvent(false);

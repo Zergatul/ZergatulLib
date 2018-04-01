@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zergatul.Network.Tls
+﻿namespace Zergatul.Network.Tls
 {
     internal enum ConnectionState
     {
@@ -14,9 +8,11 @@ namespace Zergatul.Network.Tls
         ServerHello,
         ServerCertificate,
         ServerKeyExchange,
+        CertificateRequest,
         ServerHelloDone,
         ClientCertificate,
         ClientKeyExchange,
+        CertificateVerify,
         ClientChangeCipherSpec,
         ClientFinished,
         ServerChangeCipherSpec,

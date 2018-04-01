@@ -10,11 +10,14 @@ namespace Zergatul.Network.Tls
         public NamedGroup[] SupportedCurves;
         public bool SupportExtendedMasterSecret;
         public DiffieHellmanParameters DHParameters;
+        public bool ReuseSessions;
 
         public byte[] PSKIdentityHint;
         public Func<byte[], PreSharedKey> GetPSKByHint;
         public Func<byte[], PreSharedKey> GetPSKByIdentity;
-        public Func<X509Certificate, bool> CertificateValidationOverride;
+        public Func<X509Certificate, bool> ServerCertificateValidationOverride;
+        public bool RequestClientCertificate;
+        public Func<X509Certificate, bool> ClientCertificateValidate;
 
         public TlsStreamSettings Clone()
         {
@@ -35,6 +38,7 @@ namespace Zergatul.Network.Tls
         public static TlsStreamSettings Default = new TlsStreamSettings
         {
             SupportExtendedMasterSecret = true,
+            ReuseSessions = true,
             DHParameters = DiffieHellmanParameters.Group14,
             CipherSuites = new CipherSuite[]
             {
