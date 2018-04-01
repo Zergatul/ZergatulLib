@@ -6,6 +6,8 @@ namespace Zergatul.Cryptocurrency.Bitcoin
 {
     public class Transaction : TransactionBase<TxInput, TxOutput>
     {
+        public decimal? FeeBTC => Fee == null ? 0 : 1m * Fee.Value / BlockchainCryptoFactory.Bitcoin.Multiplier;
+
         public override void Parse(byte[] data, ref int index)
         {
             if (data == null)
@@ -15,8 +17,8 @@ namespace Zergatul.Cryptocurrency.Bitcoin
 
             if (data.Length < index + 4)
                 throw new ArgumentException("Data too short", nameof(data));
-            Version = BitHelper.ToUInt32(data, index, ByteOrder.LittleEndian);
-            index += 4;
+
+            ParseHeader(data, ref index);
 
             int segwitMarkerStart = index;
             int segwitMarkerEnd;

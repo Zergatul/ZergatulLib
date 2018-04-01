@@ -17,7 +17,47 @@ namespace Zergatul.Cryptocurrency
         public AddressBase Address { get; set; }
 
         public TransactionBase Transaction { get; set; }
-        public TransactionBase PrevTransaction { get; set; }
+
+        private TransactionBase _prevTransaction;
+        public TransactionBase PrevTransaction
+        {
+            get
+            {
+                return _prevTransaction;
+            }
+            set
+            {
+                _prevTransaction = value;
+                if (value != null)
+                {
+                    if (PrevTxOutIndex < value.GetOutputs().Count())
+                        PrevOutput = value.GetOutputs().ElementAt(PrevTxOutIndex);
+                    else
+                        PrevOutput = null;
+                }
+                else
+                    PrevOutput = null;
+            }
+        }
+
+        private TxOutputBase _prevOutput;
+        public TxOutputBase PrevOutput
+        {
+            get
+            {
+                return _prevOutput;
+            }
+            private set
+            {
+                _prevOutput = value;
+                if (value != null)
+                    Amount = value.Amount;
+                else
+                    Amount = null;
+            }
+        }
+
+        public ulong? Amount { get; private set; }
 
         protected BlockchainCryptoFactory _factory;
 
@@ -69,16 +109,10 @@ namespace Zergatul.Cryptocurrency
 
         public bool Verify()
         {
-            if (PrevTransaction == null)
+            if (PrevOutput == null)
                 return false;
 
-            if (PrevTxOutIndex >= PrevTransaction.GetOutputs().Count())
-                return false;
-
-            var prevOutput = PrevTransaction.GetOutputs().ElementAt(PrevTxOutIndex);
-            var prevOutScript = prevOutput.Script;
-
-            if (prevOutScript == null)
+            if (PrevOutput.Script == null)
                 return false;
 
             if (Script == null)
@@ -87,7 +121,7 @@ namespace Zergatul.Cryptocurrency
             if (Script.Code.Any(o => o.Data == null))
                 return false;
 
-            return prevOutScript.Run(this);
+            return PrevOutput.Script.Run(this);
         }
 
         private const int SIGHASH_ALL = 0x00000001;
@@ -111,8 +145,7 @@ namespace Zergatul.Cryptocurrency
                 else if ((hashType & SIGHASH_ALL) != 0)
                 {
                     List<byte> txCopy = new List<byte>();
-
-                    txCopy.AddRange(BitHelper.GetBytes(Transaction.Version, ByteOrder.LittleEndian));
+                    Transaction.SerializeHeader(txCopy);
 
                     txCopy.AddRange(VarLengthInt.Serialize(Transaction.GetInputs().Count()));
                     foreach (var input in Transaction.GetInputs())

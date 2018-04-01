@@ -2,7 +2,7 @@
 {
     public class TxOutput : TxOutputBase
     {
-        public decimal AmountZEC => 1m * Amount / 100000000;
+        public decimal AmountZEC => 1m * Amount / _factory.Multiplier;
 
         public TxOutput()
             : base(BlockchainCryptoFactory.Zcash)

@@ -8,6 +8,8 @@ namespace Zergatul.Cryptocurrency.BitcoinGold
 {
     public class BitcoinGoldFactory : BlockchainCryptoFactory
     {
+        public override ulong Multiplier => 100000000;
+
         public override BlockBase GetBlock() => null;
         public override TransactionBase GetTransaction() => null;
         public override Cryptocurrency.P2PKHAddressBase GetP2PKHAddress() => new P2PKHAddress();

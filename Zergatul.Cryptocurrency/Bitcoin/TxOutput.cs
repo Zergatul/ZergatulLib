@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zergatul.Cryptocurrency.Bitcoin
+﻿namespace Zergatul.Cryptocurrency.Bitcoin
 {
     public class TxOutput : TxOutputBase
     {
@@ -12,11 +6,11 @@ namespace Zergatul.Cryptocurrency.Bitcoin
         {
             get
             {
-                return 1m * Amount / 100000000;
+                return 1m * Amount / _factory.Multiplier;
             }
             set
             {
-                Amount = (ulong)(value * 100000000);
+                Amount = (ulong)(value * _factory.Multiplier);
             }
         }
 

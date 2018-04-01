@@ -13,7 +13,7 @@ namespace Zergatul.Cryptocurrency.Tests.Zcash
         private static ITransactionRepository<Transaction> _repository;
 
         [TestMethod]
-        public void Parse200000()
+        public void Zcash_Blk_Parse200000()
         {
             var block = Block.FromHex(File.ReadAllText("Zcash/Block-200000.txt"));
 
@@ -53,6 +53,7 @@ namespace Zergatul.Cryptocurrency.Tests.Zcash
             Assert.IsTrue(tx.Outputs[1].Address.Value == "t1ctyPqmnxK28kFKVSNVY5aJ2VXerEfLxwC");
 
             Assert.IsTrue(tx.Verify(_repository));
+            Assert.IsTrue(tx.FeeZEC == 0.00017088m);
 
             #endregion
 
@@ -67,6 +68,7 @@ namespace Zergatul.Cryptocurrency.Tests.Zcash
             Assert.IsTrue(tx.Inputs[3].Address.Value == "t1VhnvAS5Q6fGPH3QmbhqBGbYvGo1qk1kz7");
             Assert.IsTrue(tx.Outputs[0].Address.Value == "t1c5N8e2Z9r9at4bb5rz88WaTyAaDzfyWno");
             Assert.IsTrue(tx.Outputs[1].Address.Value == "t1fWioxSZGxqwhUS5WNTfgqhvs9jD2uKnxJ");
+            //Assert.IsTrue(tx.FeeZEC == 0.0001m);
 
             #endregion
         }

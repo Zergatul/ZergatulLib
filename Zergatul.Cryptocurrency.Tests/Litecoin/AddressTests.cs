@@ -7,7 +7,7 @@ namespace Zergatul.Cryptocurrency.Tests.Litecoin
     public class AddressTests
     {
         [TestMethod]
-        public void P2PKHTests()
+        public void Litecoin_Addr_P2PKHTests()
         {
             var addr = new P2PKHAddress();
 
@@ -44,7 +44,7 @@ namespace Zergatul.Cryptocurrency.Tests.Litecoin
         }
 
         [TestMethod]
-        public void P2SHTests()
+        public void Litecoin_Addr_P2SHTests()
         {
             var addr = new P2SHAddress();
 

@@ -149,7 +149,7 @@ namespace Zergatul.Cryptocurrency.Tests.Bitcoin
         }
 
         [TestMethod]
-        public void Parse497401()
+        public void Bitcoin_Blk_Parse497401()
         {
             var block = Block.FromHex(File.ReadAllText("Bitcoin/Block-497401.txt"));
 
