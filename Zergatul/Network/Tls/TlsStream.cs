@@ -131,31 +131,56 @@ namespace Zergatul.Network.Tls
             State = ConnectionState.Start;
             _serverHost = host;
 
+            GenerateRandom();
+            ClientSequenceNum = 0;
+            ServerSequenceNum = 0;
+
+            MessageFlow flow = null;
+
             switch (this.SecurityParameters.Version)
             {
                 case ProtocolVersion.Tls12:
-
-                    GenerateRandom();
-
-                    WriteHandshakeMessage(GenerateClientHello());
-
-                    ReadRecordMessage(ConnectionState.ServerHelloDone);
-
-                    WriteHandshakeMessage(GenerateClientKeyExchange());
-
-                    WriteChangeCipherSpec();
-
-                    ClientSequenceNum = 0;
-                    ServerSequenceNum = 0;
-
-                    WriteHandshakeMessage(GenerateFinished());
-
-                    ReadRecordMessage(ConnectionState.ServerFinished);
-
+                    flow = Tls12Flow;
                     break;
                 case ProtocolVersion.Tls13:
-                    break;
+                    throw new NotImplementedException();
+                default:
+                    throw new InvalidOperationException();
             }
+
+            ClearMessageBuffer();
+            while (flow.State != ConnectionState.ApplicationData)
+            {
+                var possible = flow.Flows.Where(f => f.Condition(this)).ToArray();
+                if (possible.Length == 0)
+                    throw new InvalidOperationException("Cannot find next state");
+                if (possible.Length > 1)
+                    throw new InvalidOperationException("There are multiple states");
+                flow = possible[0].Next;
+
+                if (flow.IsClient)
+                    flow.Write(this);
+                if (flow.IsServer)
+                {
+                    ClearMessageBuffer();
+                    flow.Read(this);
+                }
+            }
+
+
+            WriteHandshakeMessage(GenerateClientHello());
+
+            ReadRecordMessage(ConnectionState.ServerHelloDone);
+
+            WriteHandshakeMessage(GenerateClientKeyExchange());
+
+            WriteChangeCipherSpec();
+
+
+
+            WriteHandshakeMessage(GenerateFinished());
+
+            ReadRecordMessage(ConnectionState.ServerFinished);
         }
 
         public void AuthenticateAsServer(string host, X509Certificate certificate = null)

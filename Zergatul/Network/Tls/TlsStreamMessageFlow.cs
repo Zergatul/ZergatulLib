@@ -9,6 +9,10 @@ namespace Zergatul.Network.Tls
         {
             public ConnectionState State;
             public MessageFlowCondition[] Flows;
+            public bool IsServer;
+            public bool IsClient;
+            public Action<TlsStream> Read;
+            public Action<TlsStream> Write;
         }
 
         private class MessageFlowCondition
@@ -25,6 +29,8 @@ namespace Zergatul.Network.Tls
             {
                 this._tls = tls;
             }
+
+            #region Conditions
 
             public bool IsServerCertificateAfterServerHelloValid()
             {
@@ -121,6 +127,17 @@ namespace Zergatul.Network.Tls
             {
                 return _tls._reuseSession;
             }
+
+            #endregion
+
+            #region Actions
+
+            public void WriteClientHello()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateClientHello());
+            }
+
+            #endregion
         }
 
         static readonly MessageFlow Tls12Flow;
@@ -128,21 +145,97 @@ namespace Zergatul.Network.Tls
         static MessageFlow InitTls12Flow()
         {
             var dict = new Dictionary<ConnectionState, MessageFlow>();
-            dict.Add(ConnectionState.Start, new MessageFlow { State = ConnectionState.Start });
-            dict.Add(ConnectionState.ClientHello, new MessageFlow { State = ConnectionState.ClientHello });
-            dict.Add(ConnectionState.ServerHello, new MessageFlow { State = ConnectionState.ServerHello });
-            dict.Add(ConnectionState.ServerCertificate, new MessageFlow { State = ConnectionState.ServerCertificate });
-            dict.Add(ConnectionState.ServerKeyExchange, new MessageFlow { State = ConnectionState.ServerKeyExchange });
-            dict.Add(ConnectionState.CertificateRequest, new MessageFlow { State = ConnectionState.CertificateRequest });
-            dict.Add(ConnectionState.ServerHelloDone, new MessageFlow { State = ConnectionState.ServerHelloDone });
-            dict.Add(ConnectionState.ClientCertificate, new MessageFlow { State = ConnectionState.ClientCertificate });
-            dict.Add(ConnectionState.ClientKeyExchange, new MessageFlow { State = ConnectionState.ClientKeyExchange });
-            dict.Add(ConnectionState.ClientChangeCipherSpec, new MessageFlow { State = ConnectionState.ClientChangeCipherSpec });
-            dict.Add(ConnectionState.ClientFinished, new MessageFlow { State = ConnectionState.ClientFinished });
-            dict.Add(ConnectionState.ServerChangeCipherSpec, new MessageFlow { State = ConnectionState.ServerChangeCipherSpec });
-            dict.Add(ConnectionState.ServerFinished, new MessageFlow { State = ConnectionState.ServerFinished });
-            dict.Add(ConnectionState.ApplicationData, new MessageFlow { State = ConnectionState.ApplicationData });
-            dict.Add(ConnectionState.Closed, new MessageFlow { State = ConnectionState.Closed });
+            dict.Add(ConnectionState.Start, new MessageFlow
+            {
+                State = ConnectionState.Start,
+                IsClient = false,
+                IsServer = false
+            });
+            dict.Add(ConnectionState.ClientHello, new MessageFlow
+            {
+                State = ConnectionState.ClientHello,
+                IsClient = true,
+                IsServer = false,
+                Write = tls => tls._flows.WriteClientHello()
+            });
+            dict.Add(ConnectionState.ServerHello, new MessageFlow
+            {
+                State = ConnectionState.ServerHello,
+                IsClient = false,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.ServerCertificate, new MessageFlow
+            {
+                State = ConnectionState.ServerCertificate,
+                IsClient = false,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.ServerKeyExchange, new MessageFlow
+            {
+                State = ConnectionState.ServerKeyExchange,
+                IsClient = false,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.CertificateRequest, new MessageFlow
+            {
+                State = ConnectionState.CertificateRequest,
+                IsClient = false,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.ServerHelloDone, new MessageFlow
+            {
+                State = ConnectionState.ServerHelloDone,
+                IsClient = false,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.ClientCertificate, new MessageFlow
+            {
+                State = ConnectionState.ClientCertificate,
+                IsClient = true,
+                IsServer = false
+            });
+            dict.Add(ConnectionState.ClientKeyExchange, new MessageFlow
+            {
+                State = ConnectionState.ClientKeyExchange,
+                IsClient = true,
+                IsServer = false
+            });
+            dict.Add(ConnectionState.ClientChangeCipherSpec, new MessageFlow
+            {
+                State = ConnectionState.ClientChangeCipherSpec,
+                IsClient = true,
+                IsServer = false
+            });
+            dict.Add(ConnectionState.ClientFinished, new MessageFlow
+            {
+                State = ConnectionState.ClientFinished,
+                IsClient = true,
+                IsServer = false
+            });
+            dict.Add(ConnectionState.ServerChangeCipherSpec, new MessageFlow
+            {
+                State = ConnectionState.ServerChangeCipherSpec,
+                IsClient = false,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.ServerFinished, new MessageFlow
+            {
+                State = ConnectionState.ServerFinished,
+                IsClient = false,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.ApplicationData, new MessageFlow
+            {
+                State = ConnectionState.ApplicationData,
+                IsClient = true,
+                IsServer = true
+            });
+            dict.Add(ConnectionState.Closed, new MessageFlow
+            {
+                State = ConnectionState.Closed,
+                IsClient = true,
+                IsServer = true
+            });
 
             dict[ConnectionState.Start].Flows = new[]
             {
