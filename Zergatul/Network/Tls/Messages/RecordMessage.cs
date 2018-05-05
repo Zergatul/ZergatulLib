@@ -35,41 +35,44 @@ namespace Zergatul.Network.Tls.Messages
 
         public ContentType RecordType;
         public ProtocolVersion Version;
-        public List<ContentMessage> ContentMessages = new List<ContentMessage>();
+
+        public List<ContentMessage> ContentMessages;
 
         private TlsStream _tlsStream;
-
-        public delegate void ContentMessageEventHandler(object sender, ContentMessageEventArgs e);
-        public event ContentMessageEventHandler OnContentMessage;
+        private ReadCounter _counter;
+        private BinaryReader _decodedReader;
 
         public RecordMessage(TlsStream tlsStream)
         {
             this._tlsStream = tlsStream;
         }
 
-        public void Read(BinaryReader reader)
+        public ContentMessage ReadNext(BinaryReader reader)
         {
             if (_tlsStream.ReadEncrypted)
-                ReadEncrypted(reader);
+                return ReadEncrypted(reader);
             else
-                ReadRaw(reader);
+                return ReadRaw(reader);
         }
 
-        private void ReadRaw(BinaryReader reader)
+        private ContentMessage ReadRaw(BinaryReader reader)
         {
-            RecordType = (ContentType)reader.ReadByte();
-            Version = (ProtocolVersion)reader.ReadShort();
+            if (_counter == null)
+            {
+                RecordType = (ContentType)reader.ReadByte();
+                Version = (ProtocolVersion)reader.ReadShort();
 
-            ushort length = reader.ReadShort();
-            if (length > PlaintextLimit)
-                throw new RecordOverflowException();
+                ushort length = reader.ReadShort();
+                if (length > PlaintextLimit)
+                    throw new RecordOverflowException();
 
-            var counter = reader.StartCounter(length);
+                _counter = reader.StartCounter(length);
 
-            if (RecordType == ContentType.Handshake)
-                reader.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
+                if (RecordType == ContentType.Handshake)
+                    reader.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
+            }
 
-            while (counter.CanRead)
+            if (_counter.CanRead)
             {
                 ContentMessage message;
                 switch (RecordType)
@@ -88,39 +91,48 @@ namespace Zergatul.Network.Tls.Messages
                 }
 
                 message.Read(reader);
-                ContentMessages.Add(message);
-                OnContentMessage?.Invoke(this, new ContentMessageEventArgs(message, true, _tlsStream.Role == Role.Client));
-            }
 
-            if (RecordType == ContentType.Handshake)
-                reader.StopTracking();
+                if (!_counter.CanRead)
+                {
+                    if (RecordType == ContentType.Handshake)
+                        reader.StopTracking();
+                    _counter = null;
+                }
+
+                return message;
+            }
+            else
+                throw new InvalidOperationException();
         }
 
-        private void ReadEncrypted(BinaryReader reader)
+        private ContentMessage ReadEncrypted(BinaryReader reader)
         {
-            RecordType = (ContentType)reader.ReadByte();
-            Version = (ProtocolVersion)reader.ReadShort();
+            if (_counter == null)
+            {
+                RecordType = (ContentType)reader.ReadByte();
+                Version = (ProtocolVersion)reader.ReadShort();
 
-            ushort length = reader.ReadShort();
-            if (length > CiphertextLimit)
-                throw new RecordOverflowException();
+                ushort length = reader.ReadShort();
+                if (length > CiphertextLimit)
+                    throw new RecordOverflowException();
 
-            var data = reader.ReadBytes(length);
+                var data = reader.ReadBytes(length);
 
-            var plaintext = _tlsStream.SelectedCipher.SymmetricCipher.Decrypt(RecordType, Version, _tlsStream.DecodingSequenceNum, data);
-            if (plaintext.Length > PlaintextLimit)
-                throw new RecordOverflowException();
+                var plaintext = _tlsStream.SelectedCipher.SymmetricCipher.Decrypt(RecordType, Version, _tlsStream.DecodingSequenceNum, data);
+                if (plaintext.Length > PlaintextLimit)
+                    throw new RecordOverflowException();
 
-            _tlsStream.IncDecodingSequenceNum();
+                _tlsStream.IncDecodingSequenceNum();
 
-            var decodedReader = new BinaryReader(plaintext);
-            var counter = decodedReader.StartCounter(plaintext.Length);
-            decodedReader.SetReadLimit(plaintext.Length);
+                _decodedReader = new BinaryReader(plaintext);
+                _counter = _decodedReader.StartCounter(plaintext.Length);
+                _decodedReader.SetReadLimit(plaintext.Length);
 
-            if (RecordType == ContentType.Handshake)
-                decodedReader.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
+                if (RecordType == ContentType.Handshake)
+                    _decodedReader.StartTracking(_tlsStream.SecurityParameters.HandshakeData);
+            }
 
-            while (counter.CanRead)
+            if (_counter.CanRead)
             {
                 ContentMessage message;
                 switch (RecordType)
@@ -141,13 +153,19 @@ namespace Zergatul.Network.Tls.Messages
                         throw new NotImplementedException();
                 }
 
-                message.Read(decodedReader);
-                ContentMessages.Add(message);
-                OnContentMessage?.Invoke(this, new ContentMessageEventArgs(message, true, _tlsStream.Role == Role.Client));
-            }
+                message.Read(_decodedReader);
 
-            if (RecordType == ContentType.Handshake)
-                decodedReader.StopTracking();
+                if (!_counter.CanRead)
+                {
+                    if (RecordType == ContentType.Handshake)
+                        _decodedReader.StopTracking();
+                    _counter = null;
+                }
+
+                return message;
+            }
+            else
+                throw new InvalidOperationException();
         }
 
         public void Write(Stream stream)
@@ -156,9 +174,6 @@ namespace Zergatul.Network.Tls.Messages
                 WriteEncrypted(stream);
             else
                 WriteRaw(stream);
-
-            foreach (var message in ContentMessages)
-                OnContentMessage?.Invoke(this, new ContentMessageEventArgs(message, false, _tlsStream.Role == Role.Server));
         }
 
         private void WriteRaw(Stream stream)

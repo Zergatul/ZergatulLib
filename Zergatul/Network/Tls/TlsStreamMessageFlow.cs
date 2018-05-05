@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Zergatul.Network.Tls.Messages;
 
 namespace Zergatul.Network.Tls
 {
@@ -11,7 +12,7 @@ namespace Zergatul.Network.Tls
             public MessageFlowCondition[] Flows;
             public bool IsServer;
             public bool IsClient;
-            public Action<TlsStream> Read;
+            public Func<TlsStream, ContentMessage, bool> Read;
             public Action<TlsStream> Write;
         }
 
@@ -72,7 +73,16 @@ namespace Zergatul.Network.Tls
             {
                 if (_tls._reuseSession)
                     return false;
+                if (_tls.Role == Role.Server)
+                    return false;
                 return !IsServerKeyExchangeAfterServerCertificateValid();
+            }
+
+            public bool IsServerHelloDoneAfterServerCertificateValid()
+            {
+                if (_tls._reuseSession)
+                    return false;
+                return !_tls.SelectedCipher.KeyExchange.ShouldSendServerKeyExchange();
             }
 
             public bool IsClientCertificateAfterServerHelloDoneValid()
@@ -132,10 +142,170 @@ namespace Zergatul.Network.Tls
 
             #region Actions
 
+            #region Write
+
             public void WriteClientHello()
             {
                 _tls.WriteHandshakeMessageBuffered(_tls.GenerateClientHello());
             }
+
+            public void WriteServerHello()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateServerHello());
+            }
+
+            public void WriteServerCertificate()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateCertificate(_tls._serverCertificate));
+            }
+
+            public void WriteServerKeyExchange()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateServerKeyExchange());
+            }
+
+            public void WriteServerHelloDone()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateServerHelloDone());
+            }
+
+            public void WriteClientKeyExchange()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateClientKeyExchange());
+            }
+
+            public void WriteClientChangeCipherSpec()
+            {
+                _tls.WriteChangeCipherSpec();
+                _tls.OnClientChangeCipherSpec();
+            }
+
+            public void WriteClientFinished()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateFinished());
+            }
+
+            public void WriteServerChangeCipherSpec()
+            {
+                _tls.WriteChangeCipherSpec();
+                _tls.OnServerChangeCipherSpec();
+            }
+
+            public void WriteServerFinished()
+            {
+                _tls.WriteHandshakeMessageBuffered(_tls.GenerateFinished());
+            }
+
+            #endregion
+
+            #region Read
+
+            public bool ReadClientHello(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as ClientHello;
+                if (message == null)
+                    return false;
+
+                _tls.OnClientHello(message);
+                return true;
+            }
+
+            public bool ReadServerHello(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as ServerHello;
+                if (message == null)
+                    return false;
+
+                _tls.OnServerHello(message);
+                return true;
+            }
+
+            public bool ReadServerCertificate(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as Certificate;
+                if (message == null)
+                    return false;
+
+                _tls.OnServerCertificate(message);
+                return true;
+            }
+
+            public bool ReadServerKeyExchange(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as ServerKeyExchange;
+                if (message == null)
+                    return false;
+
+                _tls.OnServerKeyExchange(message);
+                return true;
+            }
+
+            public bool ReadCertificateRequest(ContentMessage cm)
+            {
+                return false;
+            }
+
+            public bool ReadServerServerHelloDone(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as ServerHelloDone;
+                if (message == null)
+                    return false;
+
+                _tls.OnServerHelloDone(message);
+                return true;
+            }
+
+            public bool ReadClientKeyExchange(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as ClientKeyExchange;
+                if (message == null)
+                    return false;
+
+                _tls.OnClientKeyExchange(message);
+                return true;
+            }
+
+            public bool ReadClientChangeCipherSpec(ContentMessage cm)
+            {
+                var message = cm as ChangeCipherSpec;
+                if (message == null)
+                    return false;
+
+                _tls.OnClientChangeCipherSpec();
+                return true;
+            }
+
+            public bool ReadClientFinished(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as Finished;
+                if (message == null)
+                    return false;
+
+                _tls.OnClientFinished(message, true);
+                return true;
+            }
+
+            public bool ReadServerChangeCipherSpec(ContentMessage cm)
+            {
+                var message = cm as ChangeCipherSpec;
+                if (message == null)
+                    return false;
+
+                _tls.OnServerChangeCipherSpec();
+                return true;
+            }
+
+            public bool ReadServerFinished(ContentMessage cm)
+            {
+                var message = (cm as HandshakeMessage)?.Body as Finished;
+                if (message == null)
+                    return false;
+
+                _tls.OnServerFinished(message, true);
+                return true;
+            }
+
+            #endregion
 
             #endregion
         }
@@ -156,37 +326,47 @@ namespace Zergatul.Network.Tls
                 State = ConnectionState.ClientHello,
                 IsClient = true,
                 IsServer = false,
+                Read = (tls, cm) => tls._flows.ReadClientHello(cm),
                 Write = tls => tls._flows.WriteClientHello()
             });
             dict.Add(ConnectionState.ServerHello, new MessageFlow
             {
                 State = ConnectionState.ServerHello,
                 IsClient = false,
-                IsServer = true
+                IsServer = true,
+                Read = (tls, cm) => tls._flows.ReadServerHello(cm),
+                Write = tls => tls._flows.WriteServerHello(),
             });
             dict.Add(ConnectionState.ServerCertificate, new MessageFlow
             {
                 State = ConnectionState.ServerCertificate,
                 IsClient = false,
-                IsServer = true
+                IsServer = true,
+                Read = (tls, cm) => tls._flows.ReadServerCertificate(cm),
+                Write = tls => tls._flows.WriteServerCertificate(),
             });
             dict.Add(ConnectionState.ServerKeyExchange, new MessageFlow
             {
                 State = ConnectionState.ServerKeyExchange,
                 IsClient = false,
-                IsServer = true
+                IsServer = true,
+                Read = (tls, cm) => tls._flows.ReadServerKeyExchange(cm),
+                Write = tls => tls._flows.WriteServerKeyExchange(),
             });
             dict.Add(ConnectionState.CertificateRequest, new MessageFlow
             {
                 State = ConnectionState.CertificateRequest,
                 IsClient = false,
-                IsServer = true
+                IsServer = true,
+                Read = (tls, cm) => tls._flows.ReadCertificateRequest(cm),
             });
             dict.Add(ConnectionState.ServerHelloDone, new MessageFlow
             {
                 State = ConnectionState.ServerHelloDone,
                 IsClient = false,
-                IsServer = true
+                IsServer = true,
+                Read = (tls, cm) => tls._flows.ReadServerServerHelloDone(cm),
+                Write = tls => tls._flows.WriteServerHelloDone(),
             });
             dict.Add(ConnectionState.ClientCertificate, new MessageFlow
             {
@@ -198,31 +378,47 @@ namespace Zergatul.Network.Tls
             {
                 State = ConnectionState.ClientKeyExchange,
                 IsClient = true,
+                IsServer = false,
+                Read = (tls, cm) => tls._flows.ReadClientKeyExchange(cm),
+                Write = tls => tls._flows.WriteClientKeyExchange()
+            });
+            dict.Add(ConnectionState.CertificateVerify, new MessageFlow
+            {
+                State = ConnectionState.CertificateVerify,
+                IsClient = true,
                 IsServer = false
             });
             dict.Add(ConnectionState.ClientChangeCipherSpec, new MessageFlow
             {
                 State = ConnectionState.ClientChangeCipherSpec,
                 IsClient = true,
-                IsServer = false
+                IsServer = false,
+                Read = (tls, cm) => tls._flows.ReadClientChangeCipherSpec(cm),
+                Write = tls => tls._flows.WriteClientChangeCipherSpec()
             });
             dict.Add(ConnectionState.ClientFinished, new MessageFlow
             {
                 State = ConnectionState.ClientFinished,
                 IsClient = true,
-                IsServer = false
+                IsServer = false,
+                Read = (tls, cm) => tls._flows.ReadClientFinished(cm),
+                Write = tls => tls._flows.WriteClientFinished()
             });
             dict.Add(ConnectionState.ServerChangeCipherSpec, new MessageFlow
             {
                 State = ConnectionState.ServerChangeCipherSpec,
                 IsClient = false,
-                IsServer = true
+                IsServer = true,
+                Read = (tls, cm) => tls._flows.ReadServerChangeCipherSpec(cm),
+                Write = tls => tls._flows.WriteServerChangeCipherSpec()
             });
             dict.Add(ConnectionState.ServerFinished, new MessageFlow
             {
                 State = ConnectionState.ServerFinished,
                 IsClient = false,
-                IsServer = true
+                IsServer = true,
+                Read = (tls, cm) => tls._flows.ReadServerFinished(cm),
+                Write = tls => tls._flows.WriteServerFinished()
             });
             dict.Add(ConnectionState.ApplicationData, new MessageFlow
             {
@@ -288,13 +484,18 @@ namespace Zergatul.Network.Tls
                     Next = dict[ConnectionState.CertificateRequest],
                     Condition = tls => tls._flows.IsCertificateRequestAfterServercertificateValid()
                 },
+                new MessageFlowCondition
+                {
+                    Next = dict[ConnectionState.ServerHelloDone],
+                    Condition = tls => tls._flows.IsServerHelloDoneAfterServerCertificateValid()
+                }
             };
             dict[ConnectionState.ServerKeyExchange].Flows = new[]
             {
                 new MessageFlowCondition
                 {
                     Next = dict[ConnectionState.CertificateRequest],
-                    Condition = tls => true
+                    Condition = tls => false
                 },
                 new MessageFlowCondition
                 {

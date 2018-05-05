@@ -62,6 +62,7 @@ namespace Zergatul.Network.Tls
     // * refactor dhe_psk, and ecdhe_psk to use single code
     // * tls sessions?
     // * client certificates
+    // * RecordMessage change to RecordMessageStream, it can read and write content messages, automatically releases write buffer and so on
     public partial class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }
@@ -80,7 +81,8 @@ namespace Zergatul.Network.Tls
 
         private CipherSuite[] _clientCipherSuites;
 
-        private List<ContentMessage> _messageBuffer;
+        private List<ContentMessage> _messageWriteBuffer = new List<ContentMessage>();
+        private RecordMessage _messageReadBuffer;
 
         private string _serverHost;
 
@@ -88,6 +90,8 @@ namespace Zergatul.Network.Tls
         internal ulong ClientSequenceNum;
         internal ulong ServerSequenceNum;
 
+        private X509Certificate _clientCertificate;
+        private X509Certificate _serverCertificate;
         private TlsExtension[] _clientExtensions;
         private TlsExtension[] _serverExtensions;
         private TlsStreamSession _clientSession;
@@ -113,6 +117,8 @@ namespace Zergatul.Network.Tls
             this._random = random ?? new DefaultSecureRandom();
 
             this._utils = new TlsUtils(this._random);
+
+            this._messageReadBuffer = new RecordMessage(this);
 
             this.SecurityParameters = new SecurityParameters();
             this.SecurityParameters.Version = version;
@@ -149,91 +155,133 @@ namespace Zergatul.Network.Tls
             }
 
             ClearMessageBuffer();
-            while (flow.State != ConnectionState.ApplicationData)
+            while (true)
             {
                 var possible = flow.Flows.Where(f => f.Condition(this)).ToArray();
                 if (possible.Length == 0)
                     throw new InvalidOperationException("Cannot find next state");
-                if (possible.Length > 1)
-                    throw new InvalidOperationException("There are multiple states");
-                flow = possible[0].Next;
 
-                if (flow.IsClient)
-                    flow.Write(this);
-                if (flow.IsServer)
+                if (possible.Any(f => f.Next.State == ConnectionState.ApplicationData))
+                    break;
+
+                int clientFlows = possible.Count(f => f.Next.IsClient);
+                int serverFlows = possible.Count(f => f.Next.IsServer);
+
+                if (clientFlows > 0 && serverFlows > 0)
+                    throw new InvalidOperationException("Invalid flows");
+                if (clientFlows > 1)
+                    throw new InvalidOperationException("2 or more client flows");
+
+                if (clientFlows > 0)
                 {
-                    ClearMessageBuffer();
-                    flow.Read(this);
+                    flow = possible[0].Next;
+                    flow.Write(this);
+                }
+                if (serverFlows > 0)
+                {
+                    ReleaseMessageWriteBuffer();
+                    var cm = NextMessage();
+                    bool change = false;
+                    foreach (var pf in possible)
+                        if (pf.Next.Read(this, cm))
+                        {
+                            flow = pf.Next;
+                            change = true;
+                            break;
+                        }
+
+                    if (!change)
+                    {
+                        WriteAlertUnexpectedMessage();
+                        throw new TlsStreamException("Unexpected message");
+                    }
                 }
             }
 
-
-            WriteHandshakeMessage(GenerateClientHello());
-
-            ReadRecordMessage(ConnectionState.ServerHelloDone);
-
-            WriteHandshakeMessage(GenerateClientKeyExchange());
-
-            WriteChangeCipherSpec();
-
-
-
-            WriteHandshakeMessage(GenerateFinished());
-
-            ReadRecordMessage(ConnectionState.ServerFinished);
+            ReleaseMessageWriteBuffer();
         }
 
         public void AuthenticateAsServer(string host, X509Certificate certificate = null)
         {
-            Role = Role.Server;
-            State = ConnectionState.Start;
-
             if (certificate != null && !certificate.HasPrivateKey)
                 throw new TlsStreamException("Certificate with private key is required for server authentification");
 
+            Role = Role.Server;
+            State = ConnectionState.Start;
+            _serverCertificate = certificate;
+
             GenerateRandom();
-
-            ReadRecordMessage(ConnectionState.ClientHello);
-
-            ClearMessageBuffer();
-            WriteHandshakeMessageBuffered(GenerateServerHello());
-            if (ShouldSendServerCertificate())
-                WriteHandshakeMessageBuffered(GenerateCertificate(certificate));
-            if (ShouldSendServerKeyExchange())
-                WriteHandshakeMessageBuffered(GenerateServerKeyExchange(certificate));
-            WriteHandshakeMessageBuffered(GenerateServerHelloDone());
-            ReleaseMessageBuffer();
-
             ClientSequenceNum = 0;
             ServerSequenceNum = 0;
 
-            ReadRecordMessage(ConnectionState.ClientFinished);
+            MessageFlow flow = null;
 
-            WriteChangeCipherSpec();
+            switch (this.SecurityParameters.Version)
+            {
+                case ProtocolVersion.Tls12:
+                    flow = Tls12Flow;
+                    break;
+                case ProtocolVersion.Tls13:
+                    throw new NotImplementedException();
+                default:
+                    throw new InvalidOperationException();
+            }
 
-            WriteHandshakeMessage(GenerateFinished());
+            ClearMessageBuffer();
+            while (true)
+            {
+                var possible = flow.Flows.Where(f => f.Condition(this)).ToArray();
+                if (possible.Length == 0)
+                    throw new InvalidOperationException("Cannot find next state");
+
+                if (possible.Any(f => f.Next.State == ConnectionState.ApplicationData))
+                    break;
+
+                int clientFlows = possible.Count(f => f.Next.IsClient);
+                int serverFlows = possible.Count(f => f.Next.IsServer);
+
+                if (clientFlows > 0 && serverFlows > 0)
+                    throw new InvalidOperationException("Invalid flows");
+                if (serverFlows > 1)
+                    throw new InvalidOperationException("2 or more server flows");
+
+                if (serverFlows > 0)
+                {
+                    flow = possible[0].Next;
+                    flow.Write(this);
+                }
+                if (clientFlows > 0)
+                {
+                    ReleaseMessageWriteBuffer();
+                    var cm = NextMessage();
+                    bool change = false;
+                    foreach (var pf in possible)
+                        if (pf.Next.Read(this, cm))
+                        {
+                            flow = pf.Next;
+                            change = true;
+                            break;
+                        }
+
+                    if (!change)
+                    {
+                        WriteAlertUnexpectedMessage();
+                        throw new TlsStreamException("Unexpected message");
+                    }
+                }
+            }
+
+            ReleaseMessageWriteBuffer();
         }
 
         #region Private methods
 
-        private void ReadRecordMessage(ConnectionState waitFor)
+        private ContentMessage NextMessage()
         {
-            while (State != waitFor)
-            {
-                ReadSingleRecordMessage(true);
-            }
-        }
-
-        private RecordMessage ReadSingleRecordMessage(bool force)
-        {
-            if (!force && !_reader.IsDataAvailable())
-                return null;
-
-            var message = new RecordMessage(this);
-            message.OnContentMessage += OnContentMessage;
+            ContentMessage message;
             try
             {
-                message.Read(_reader);
+                message = _messageReadBuffer.ReadNext(_reader);
             }
             catch (RecordOverflowException)
             {
@@ -250,17 +298,17 @@ namespace Zergatul.Network.Tls
                 WriteAlertBadRecordMAC();
                 throw;
             }
-            if (message.Version != ProtocolVersion.Tls12)
+            if (_messageReadBuffer.Version != ProtocolVersion.Tls12)
             {
                 WriteAlertProtocolVersion();
                 throw new TlsStreamException("Only TLS 1.2 is supported");
             }
+
             return message;
         }
 
         private void WriteRecordMessage(RecordMessage message)
         {
-            message.OnContentMessage += OnContentMessage;
             message.Write(_innerStream);
         }
 
@@ -276,31 +324,35 @@ namespace Zergatul.Network.Tls
 
         private void ClearMessageBuffer()
         {
-            if (_messageBuffer != null)
-                _messageBuffer.Clear();
-            else
-                _messageBuffer = new List<ContentMessage>();
+            _messageWriteBuffer.Clear();
         }
 
         private void WriteHandshakeMessageBuffered(HandshakeMessage message)
         {
-            _messageBuffer.Add(message);
+            _messageWriteBuffer.Add(message);
             OnContentMessage(this, new ContentMessageEventArgs(message, false, Role == Role.Server));
         }
 
-        private void ReleaseMessageBuffer()
+        private void ReleaseMessageWriteBuffer()
         {
-            var message = new RecordMessage(this)
+            if (_messageWriteBuffer.Count > 0)
             {
-                RecordType = ContentType.Handshake,
-                Version = ProtocolVersion.Tls12,
-                ContentMessages = _messageBuffer
-            };
-            message.Write(_innerStream);
+                var message = new RecordMessage(this)
+                {
+                    RecordType = ContentType.Handshake,
+                    Version = ProtocolVersion.Tls12,
+                    ContentMessages = _messageWriteBuffer
+                };
+                message.Write(_innerStream);
+
+                ClearMessageBuffer();
+            }
         }
 
         private void WriteChangeCipherSpec()
         {
+            ReleaseMessageWriteBuffer();
+
             WriteRecordMessage(new RecordMessage(this)
             {
                 RecordType = ContentType.ChangeCipherSpec,
@@ -497,7 +549,7 @@ namespace Zergatul.Network.Tls
             };
         }
 
-        private HandshakeMessage GenerateServerKeyExchange(X509Certificate certificate)
+        private HandshakeMessage GenerateServerKeyExchange()
         {
             return new HandshakeMessage(this)
             {
@@ -599,12 +651,6 @@ namespace Zergatul.Network.Tls
 
         private void OnClientHello(ClientHello message)
         {
-            if (State != ConnectionState.Start)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ClientHello message");
-            }
-
             SecurityParameters.ClientRandom = message.Random;
             _clientCipherSuites = message.CipherSuites;
 
@@ -615,19 +661,21 @@ namespace Zergatul.Network.Tls
 
         private void OnServerHello(ServerHello message)
         {
-            if (State != ConnectionState.ClientHello)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ServerHello message");
-            }
-
             this.NegotiatedCipherSuite = message.CipherSuite;
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
             SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
             SecurityParameters.ServerRandom = message.Random.ToArray();
 
-            TlsStreamSessions.Instance.AddSession(_serverHost, message.SessionID);
+            if (Role == Role.Client)
+            {
+                if (Settings.ReuseSessions)
+                {
+                    _serverSession = TlsStreamSessions.Instance.AddSession(_serverHost, message.SessionID);
+                    if (ByteArray.Equals(_clientSession?.ID, _serverSession?.ID))
+                        _reuseSession = true;
+                }
+            }
 
             this._serverExtensions = message.Extensions.ToArray();
 
@@ -638,12 +686,6 @@ namespace Zergatul.Network.Tls
 
         private void OnServerCertificate(Certificate message)
         {
-            if (State != ConnectionState.ServerHello)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected Certificate message");
-            }
-
             var tree = X509Tree.Build(message.Certificates, new WindowsRootCertificateStore());
 
             SecurityParameters.ServerCertificate = tree.Leaves.First();
@@ -673,15 +715,6 @@ namespace Zergatul.Network.Tls
 
         private void OnServerKeyExchange(ServerKeyExchange message)
         {
-            if (State == ConnectionState.ServerHello && CanBeSkipped(SelectedCipher.KeyExchange.ServerCertificateMessage))
-                State = ConnectionState.ServerCertificate;
-
-            if (State != ConnectionState.ServerCertificate)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ServerKeyExchange message");
-            }
-
             State = ConnectionState.ServerKeyExchange;
         }
 
@@ -692,34 +725,16 @@ namespace Zergatul.Network.Tls
             if (State == ConnectionState.ServerCertificate && CanBeSkipped(SelectedCipher.KeyExchange.ServerKeyExchangeMessage))
                 State = ConnectionState.ServerKeyExchange;
 
-            if (State != ConnectionState.ServerKeyExchange)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ServerHelloDone message");
-            }
-
             State = ConnectionState.ServerHelloDone;
         }
 
         private void OnClientCertificate(Certificate message)
         {
-            if (State != ConnectionState.ServerHelloDone)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected Certificate message");
-            }
-
             State = ConnectionState.ClientCertificate;
         }
 
         private void OnClientKeyExchange(ClientKeyExchange message)
         {
-            if (State != ConnectionState.ServerHelloDone)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ClientKeyExchange message");
-            }
-
             SelectedCipher.CalculateMasterSecret();
             SelectedCipher.GenerateKeyMaterial();
 
@@ -728,12 +743,6 @@ namespace Zergatul.Network.Tls
 
         private void OnClientChangeCipherSpec()
         {
-            if (State != ConnectionState.ClientKeyExchange)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ChangeCipherSpec message");
-            }
-
             if (Role == Role.Client)
                 WriteEncrypted = true;
             if (Role == Role.Server)
@@ -746,12 +755,6 @@ namespace Zergatul.Network.Tls
 
         private void OnClientFinished(Finished message, bool validate)
         {
-            if (State != ConnectionState.ClientChangeCipherSpec)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected Finished message");
-            }
-
             if (validate)
             {
                 if (!SelectedCipher.VerifyFinished(message))
@@ -766,12 +769,6 @@ namespace Zergatul.Network.Tls
 
         private void OnServerChangeCipherSpec()
         {
-            if (State != ConnectionState.ClientFinished)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ChangeCipherSpec message");
-            }
-
             if (Role == Role.Client)
                 ReadEncrypted = true;
             if (Role == Role.Server)
@@ -784,12 +781,6 @@ namespace Zergatul.Network.Tls
 
         private void OnServerFinished(Finished message, bool validate)
         {
-            if (State != ConnectionState.ServerChangeCipherSpec)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected Finished message");
-            }
-
             if (validate)
             {
                 if (!SelectedCipher.VerifyFinished(message))
@@ -801,12 +792,6 @@ namespace Zergatul.Network.Tls
 
         private void OnApplicationData(ApplicationData message)
         {
-            if (State != ConnectionState.ServerFinished && State != ConnectionState.ApplicationData)
-            {
-                WriteAlertUnexpectedMessage();
-                throw new TlsStreamException("Unexpected ApplicationData message");
-            }
-
             State = ConnectionState.ApplicationData;
         }
 
@@ -940,16 +925,14 @@ namespace Zergatul.Network.Tls
         {
             if (count > _readBuffer.Count && State != ConnectionState.Closed)
             {
-                var message = ReadSingleRecordMessage(false);
-                if (message != null)
-                    foreach (var cm in message.ContentMessages)
-                    {
-                        if (cm is ApplicationData)
-                        {
-                            var appData = cm as ApplicationData;
-                            _readBuffer.AddRange(appData.Data);
-                        }
-                    }
+                var message = _messageReadBuffer.ReadNext(_reader);
+                if (message is ApplicationData)
+                {
+                    var appData = message as ApplicationData;
+                    _readBuffer.AddRange(appData.Data);
+                }
+                if (message is Alert)
+                    OnAlert(message as Alert, true);
             }
 
             if (count > _readBuffer.Count)
@@ -988,7 +971,8 @@ namespace Zergatul.Network.Tls
             if (State != ConnectionState.Closed)
             {
                 WriteAlertCloseNotify();
-                ReadRecordMessage(ConnectionState.Closed);
+                //TODO!!!
+                //ReadRecordMessage(ConnectionState.Closed);
             }
         }
 

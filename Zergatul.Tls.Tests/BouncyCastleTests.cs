@@ -39,7 +39,7 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_DH_Anon_WITH_RC4_128_MD5);
+            TestServer(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
         }
 
         [TestMethod]

@@ -41,6 +41,9 @@ namespace Zergatul.Network.Tls
 
         public TlsStreamSession AddSession(string host, byte[] id)
         {
+            if (host == null)
+                return null;
+
             var session = new TlsStreamSession(id);
             if (_sessions.ContainsKey(host))
                 _sessions[host] = session;

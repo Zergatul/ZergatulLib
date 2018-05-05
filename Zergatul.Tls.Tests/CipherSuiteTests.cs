@@ -2038,6 +2038,96 @@ namespace Zergatul.Tls.Tests
                 ServerCertificateValidationOverride = c => true
             };
 
+            var dual = new DualPeer();
+
+            byte[] response = null;
+            var serverThread = new Thread(() =>
+            {
+                X509Certificate cert;
+                if (cipher.ToString().Contains("TLS_PSK_") || cipher.ToString().Contains("TLS_DHE_PSK_") || cipher.ToString().Contains("TLS_ECDHE_PSK_"))
+                    cert = null;
+                else if (cipher.ToString().StartsWith("TLS_DH_"))
+                    cert = GetDHCert();
+                else if (cipher.ToString().Contains("ECDSA") || cipher.ToString().Contains("_ECDH_"))
+                    cert = GetECDSACert();
+                else if (cipher.ToString().Contains("RSA"))
+                    cert = GetRSACert();
+                else if (cipher.ToString().Contains("DSS"))
+                    cert = GetDSSCert();
+                else
+                    throw new NotImplementedException();
+
+                var tlsServer = new TlsStream(dual.Peer1);
+                tlsServer.Settings = tlsSettings;
+                tlsServer.AuthenticateAsServer("localhost", cert);
+                tlsServer.Write(Encoding.ASCII.GetBytes(MessageToSend));
+                response = new byte[MessageResponse.Length];
+                tlsServer.Read(response, 0, response.Length);
+                tlsServer.Close();
+            });
+            serverThread.Start();
+
+            byte[] buffer = null;
+            var tlsClient = new TlsStream(dual.Peer2);
+            tlsClient.Settings = tlsSettings;
+            tlsClient.AuthenticateAsClient("localhost");
+
+            buffer = new byte[MessageToSend.Length];
+            tlsClient.Read(buffer, 0, buffer.Length);
+
+            tlsClient.Write(Encoding.ASCII.GetBytes(MessageResponse));
+            tlsClient.Close();
+
+            serverThread.Join();
+
+            Assert.IsTrue(Encoding.ASCII.GetString(buffer) == MessageToSend);
+            Assert.IsTrue(Encoding.ASCII.GetString(response) == MessageResponse);
+        }
+
+        private static void TestCipherSuiteNetworkStream(CipherSuite cipher)
+        {
+            var rnd = new DefaultRandom();
+            string pskHint = "My secret key!";
+            string pskId = "super-secret-key";
+            var psk = new PreSharedKey
+            {
+                Identity = Encoding.ASCII.GetBytes(pskId),
+                Secret = new byte[64]
+            };
+            rnd.GetBytes(psk.Secret);
+
+            var tlsSettings = new TlsStreamSettings
+            {
+                CipherSuites = new CipherSuite[]
+                {
+                    cipher
+                },
+                SupportedCurves = new NamedGroup[]
+                {
+                    NamedGroup.secp256r1,
+                    NamedGroup.secp384r1,
+                    NamedGroup.secp521r1
+                },
+                PSKIdentityHint = Encoding.ASCII.GetBytes(pskHint),
+                GetPSKByHint = (hint) =>
+                {
+                    string hintStr = Encoding.ASCII.GetString(hint);
+                    if (hintStr == pskHint)
+                        return psk;
+                    else
+                        throw new InvalidOperationException();
+                },
+                GetPSKByIdentity = (id) =>
+                {
+                    string idStr = Encoding.ASCII.GetString(id);
+                    if (idStr == pskId)
+                        return psk;
+                    else
+                        throw new InvalidOperationException();
+                },
+                ServerCertificateValidationOverride = c => true
+            };
+
             var evt = new ManualResetEvent(false);
 
             byte[] response = null;

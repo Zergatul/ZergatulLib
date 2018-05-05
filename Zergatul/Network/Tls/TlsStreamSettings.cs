@@ -37,7 +37,7 @@ namespace Zergatul.Network.Tls
 
         public static TlsStreamSettings Default = new TlsStreamSettings
         {
-            SupportExtendedMasterSecret = true,
+            SupportExtendedMasterSecret = false,
             ReuseSessions = true,
             DHParameters = DiffieHellmanParameters.Group14,
             CipherSuites = new CipherSuite[]
