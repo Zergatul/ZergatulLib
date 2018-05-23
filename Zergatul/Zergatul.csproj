@@ -307,6 +307,8 @@
     <Compile Include="Network\Tls\CCMCipher.cs" />
     <Compile Include="Network\Tls\ChaCha20Poly1305Cipher.cs" />
     <Compile Include="Network\Tls\CipherSuiteResolver.cs" />
+    <Compile Include="Network\Tls\ConnectionInfo.cs" />
+    <Compile Include="Network\Tls\ConnectionState.cs" />
     <Compile Include="Network\Tls\DHAnonKeyExchange.cs" />
     <Compile Include="Network\Tls\ECDHEPSKKeyExchange.cs" />
     <Compile Include="Network\Tls\DHEPSKKeyExchange.cs" />
@@ -338,7 +340,6 @@
     <Compile Include="Network\Tls\CipherType.cs" />
     <Compile Include="Network\Tls\Messages\ClientHello.cs" />
     <Compile Include="Network\Tls\Messages\ClientKeyExchange.cs" />
-    <Compile Include="Network\Tls\ConnectionState.cs" />
     <Compile Include="Network\Tls\Messages\ContentMessage.cs" />
     <Compile Include="Network\Tls\Messages\ContentMessageReadEventArgs.cs" />
     <Compile Include="Network\Tls\Messages\ContentType.cs" />

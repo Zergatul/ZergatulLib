@@ -9,6 +9,7 @@ using System.Net;
 using System.Text;
 using Zergatul.Cryptography.Certificate;
 using System.Diagnostics;
+using System.Collections;
 
 namespace Zergatul.Tls.Tests
 {
@@ -39,7 +40,7 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void TestOne()
         {
-            TestServer(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
+            TestServer(CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384);
         }
 
         [TestMethod]
@@ -351,6 +352,13 @@ namespace Zergatul.Tls.Tests
             public override int[] GetCipherSuites()
             {
                 return _suites.Select(cs => (int)cs).ToArray();
+            }
+
+            public override IDictionary GetClientExtensions()
+            {
+                var dict = base.GetClientExtensions();
+                Org.BouncyCastle.Crypto.Tls.TlsExtensionsUtilities.AddExtendedMasterSecretExtension(dict);
+                return dict;
             }
         }
 

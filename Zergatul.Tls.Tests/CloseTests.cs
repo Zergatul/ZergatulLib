@@ -46,8 +46,6 @@ namespace Zergatul.Tls.Tests
                         response = new byte[100];
                         tlsServerStream.Read(response);
                         tlsServerStream.Close();
-
-                        serverState = tlsServerStream.State;
                     }
                     finally
                     {
@@ -77,16 +75,16 @@ namespace Zergatul.Tls.Tests
                 tls.Close();
 
                 serverThread.Join();
-
-                clientState = tls.State;
             }
             finally
             {
                 client.Close();
             }
 
-            Assert.IsTrue(serverState == ConnectionState.Closed);
-            Assert.IsTrue(clientState == ConnectionState.Closed);
+            Assert.Fail();
+
+            //Assert.IsTrue(serverState == ConnectionState.Closed);
+            //Assert.IsTrue(clientState == ConnectionState.Closed);
         }
     }
 }

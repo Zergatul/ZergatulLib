@@ -48,6 +48,9 @@ namespace Zergatul.Network.Tls
     // AES-CCM Cipher Suites for Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc6655
 
+    // Transport Layer Security (TLS) Session Hash and Extended Master Secret Extension
+    // https://tools.ietf.org/html/rfc7627
+
     // ChaCha20-Poly1305 Cipher Suites for Transport Layer Security (TLS)
     // https://tools.ietf.org/html/rfc7905
 
@@ -66,14 +69,13 @@ namespace Zergatul.Network.Tls
     public partial class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }
-        public CipherSuite? NegotiatedCipherSuite { get; private set; }
+        public ConnectionInfo ConnectionInfo { get; private set; }
 
         private Stream _innerStream;
         private BinaryReader _reader;
         private TlsUtils _utils;
         private ISecureRandom _random;
 
-        internal ConnectionState State;
         internal CipherSuiteBuilder SelectedCipher;
         internal Role Role;
         internal bool WriteEncrypted;
@@ -89,6 +91,7 @@ namespace Zergatul.Network.Tls
         internal SecurityParameters SecurityParameters;
         internal ulong ClientSequenceNum;
         internal ulong ServerSequenceNum;
+        private bool _isClosed;
 
         private X509Certificate _clientCertificate;
         private X509Certificate _serverCertificate;
@@ -125,8 +128,7 @@ namespace Zergatul.Network.Tls
             this.SecurityParameters.HandshakeData = new List<byte>();
 
             this.Settings = TlsStreamSettings.Default;
-
-            this.State = ConnectionState.NoConnection;
+            this.ConnectionInfo = new ConnectionInfo();
 
             this._flows = new Flows(this);
         }
@@ -134,7 +136,6 @@ namespace Zergatul.Network.Tls
         public void AuthenticateAsClient(string host)
         {
             Role = Role.Client;
-            State = ConnectionState.Start;
             _serverHost = host;
 
             GenerateRandom();
@@ -207,7 +208,6 @@ namespace Zergatul.Network.Tls
                 throw new TlsStreamException("Certificate with private key is required for server authentification");
 
             Role = Role.Server;
-            State = ConnectionState.Start;
             _serverCertificate = certificate;
 
             GenerateRandom();
@@ -511,7 +511,7 @@ namespace Zergatul.Network.Tls
                     Data = new byte[] { 0 }
                 }
             };
-            if (_clientExtensions.OfType<ExtendedMasterSecret>().Count() > 1 && Settings.SupportExtendedMasterSecret)
+            if (_clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0 && Settings.SupportExtendedMasterSecret)
                 extensions.Add(new ExtendedMasterSecret());
 
             return new HandshakeMessage(this)
@@ -574,6 +574,10 @@ namespace Zergatul.Network.Tls
             bool clientExtMasterSecret = _clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             bool serverExtMasterSecret = _serverExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             SecurityParameters.ExtendedMasterSecret = clientExtMasterSecret && serverExtMasterSecret;
+
+            /* ConnectionInfo */
+            ConnectionInfo.ExtendedMasterSecret = SecurityParameters.ExtendedMasterSecret;
+            /* ConnectionInfo */
         }
 
         private bool CanBeSkipped(MessageInfo info)
@@ -656,12 +660,14 @@ namespace Zergatul.Network.Tls
 
             this._clientExtensions = message.Extensions;
 
-            State = ConnectionState.ClientHello;
+            /* ConnectionInfo */
+            ConnectionInfo.Client.OfferedExtendedMasterSecret = message.Extensions.OfType<ExtendedMasterSecret>().Any();
+            /* ConnectionInfo */
         }
 
         private void OnServerHello(ServerHello message)
         {
-            this.NegotiatedCipherSuite = message.CipherSuite;
+            ConnectionInfo.CipherSuite = message.CipherSuite;
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
             SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
@@ -681,7 +687,9 @@ namespace Zergatul.Network.Tls
 
             AnalyzeExtensions();
 
-            State = ConnectionState.ServerHello;
+            /* ConnectionInfo */
+            ConnectionInfo.Server.OfferedExtendedMasterSecret = message.Extensions.OfType<ExtendedMasterSecret>().Any();
+            /* ConnectionInfo */
         }
 
         private void OnServerCertificate(Certificate message)
@@ -709,36 +717,27 @@ namespace Zergatul.Network.Tls
                     throw new TlsStreamException("Certificate chain is not trusted");
                 }
             }
-
-            State = ConnectionState.ServerCertificate;
         }
 
         private void OnServerKeyExchange(ServerKeyExchange message)
         {
-            State = ConnectionState.ServerKeyExchange;
+
         }
 
         private void OnServerHelloDone(ServerHelloDone message)
         {
-            if (State == ConnectionState.ServerHello && CanBeSkipped(SelectedCipher.KeyExchange.ServerCertificateMessage))
-                State = ConnectionState.ServerCertificate;
-            if (State == ConnectionState.ServerCertificate && CanBeSkipped(SelectedCipher.KeyExchange.ServerKeyExchangeMessage))
-                State = ConnectionState.ServerKeyExchange;
 
-            State = ConnectionState.ServerHelloDone;
         }
 
         private void OnClientCertificate(Certificate message)
         {
-            State = ConnectionState.ClientCertificate;
+
         }
 
         private void OnClientKeyExchange(ClientKeyExchange message)
         {
             SelectedCipher.CalculateMasterSecret();
             SelectedCipher.GenerateKeyMaterial();
-
-            State = ConnectionState.ClientKeyExchange;
         }
 
         private void OnClientChangeCipherSpec()
@@ -749,8 +748,6 @@ namespace Zergatul.Network.Tls
                 ReadEncrypted = true;
 
             SecurityParameters.ClientFinishedHandshakeData = SecurityParameters.HandshakeData.ToArray();
-
-            State = ConnectionState.ClientChangeCipherSpec;
         }
 
         private void OnClientFinished(Finished message, bool validate)
@@ -763,8 +760,6 @@ namespace Zergatul.Network.Tls
                     throw new TlsStreamException("Invalid verify_data in Finished message");
                 }
             }
-
-            State = ConnectionState.ClientFinished;
         }
 
         private void OnServerChangeCipherSpec()
@@ -775,8 +770,6 @@ namespace Zergatul.Network.Tls
                 WriteEncrypted = true;
 
             SecurityParameters.ServerFinishedHandshakeData = SecurityParameters.HandshakeData.ToArray();
-
-            State = ConnectionState.ServerChangeCipherSpec;
         }
 
         private void OnServerFinished(Finished message, bool validate)
@@ -786,13 +779,11 @@ namespace Zergatul.Network.Tls
                 if (!SelectedCipher.VerifyFinished(message))
                     throw new TlsStreamException("Invalid verify_data in Finished message");
             }
-
-            State = ConnectionState.ServerFinished;
         }
 
         private void OnApplicationData(ApplicationData message)
         {
-            State = ConnectionState.ApplicationData;
+
         }
 
         private void OnAlert(Alert message, bool read)
@@ -803,14 +794,14 @@ namespace Zergatul.Network.Tls
             switch (message.Description)
             {
                 case AlertDescription.CloseNotify:
-                    if (State != ConnectionState.Closed)
+                    if (!_isClosed)
                         WriteAlertCloseNotify();
-                    State = ConnectionState.Closed;
+                    _isClosed = true;
                     return;
             }
 
             if (message.Level == AlertLevel.Fatal)
-                throw new TlsStreamException($"TLS Fatal error: {message.Description}. Current state: {State}");
+                throw new TlsStreamException($"TLS Fatal error: {message.Description}");
         }
 
         #endregion
@@ -923,7 +914,7 @@ namespace Zergatul.Network.Tls
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (count > _readBuffer.Count && State != ConnectionState.Closed)
+            if (count > _readBuffer.Count && !_isClosed)
             {
                 var message = _messageReadBuffer.ReadNext(_reader);
                 if (message is ApplicationData)
@@ -968,7 +959,7 @@ namespace Zergatul.Network.Tls
 
         public override void Close()
         {
-            if (State != ConnectionState.Closed)
+            if (!_isClosed)
             {
                 WriteAlertCloseNotify();
                 //TODO!!!

@@ -45,13 +45,16 @@ namespace Zergatul.Network.Tls.Messages
 
             ushort extensionLength = reader.ReadShort();
             var counter = reader.StartCounter(extensionLength);
+            var extensions = new List<TlsExtension>();
             while (counter.CanRead)
             {
-                var ext = new TlsExtension();
-                ext.Type = (ExtensionType)reader.ReadShort();
+                var type = (ExtensionType)reader.ReadShort();
+                var ext = TlsExtension.Resolve(type);
                 ushort extLength = reader.ReadShort();
                 ext.Data = reader.ReadBytes(extLength);
+                extensions.Add(ext);
             }
+            Extensions = extensions.ToArray();
         }
 
         public override void WriteTo(BinaryWriter writer)
