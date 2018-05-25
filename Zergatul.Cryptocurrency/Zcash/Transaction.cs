@@ -6,12 +6,13 @@ namespace Zergatul.Cryptocurrency.Zcash
 {
     public class Transaction : TransactionBase<TxInput, TxOutput>
     {
+        public decimal? FeeZEC => Fee == null ? 0 : 1m * Fee.Value / BlockchainCryptoFactory.Zcash.Multiplier;
+
         public override void Parse(byte[] data, ref int index)
         {
             int start = index;
 
-            Version = BitHelper.ToUInt32(data, index, ByteOrder.LittleEndian);
-            index += 4;
+            ParseHeader(data, ref index);
 
             int inputsCount = VarLengthInt.ParseInt32(data, ref index);
             ParseInputs(data, ref index, inputsCount);

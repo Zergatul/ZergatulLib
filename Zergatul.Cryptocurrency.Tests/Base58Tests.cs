@@ -1,14 +1,13 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Zergatul.Cryptocurrency.Bitcoin;
 
-namespace Zergatul.Cryptocurrency.Tests.Bitcoin
+namespace Zergatul.Cryptocurrency.Tests
 {
     [TestClass]
     public class Base58Tests
     {
         [TestMethod]
-        public void ZeroTests()
+        public void Base58_ZeroTests()
         {
             Assert.IsTrue(Base58Encoding.Encode(new byte[] { 0 }, new byte[20]) == "1111111111111111111114oLvT2");
             Assert.IsTrue(ByteArray.Equals(new byte[21], Base58Encoding.Decode("1111111111111111111114oLvT2")));

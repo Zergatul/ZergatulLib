@@ -2,6 +2,8 @@
 {
     public class VergeFactory : BlockchainCryptoFactory
     {
+        public override ulong Multiplier => 1000000;
+
         public override BlockBase GetBlock() => null;
         public override TransactionBase GetTransaction() => new Transaction();
         public override P2PKHAddressBase GetP2PKHAddress() => new P2PKHAddress();

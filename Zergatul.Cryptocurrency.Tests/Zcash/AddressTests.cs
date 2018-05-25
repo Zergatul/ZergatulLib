@@ -8,7 +8,7 @@ namespace Zergatul.Cryptocurrency.Tests.Zcash
     public class AddressTests
     {
         [TestMethod]
-        public void P2PKHTests()
+        public void Zcash_Addr_P2PKHTests()
         {
             var addr = new P2PKHAddress();
 
@@ -23,8 +23,6 @@ namespace Zergatul.Cryptocurrency.Tests.Zcash
 
             addr.FromPublicKeyHash(BitHelper.HexToBytes("66073d46510637a4cc8267cac493f768ee578b56"));
             Assert.IsTrue(addr.Value == "t1TB5buEfBHR2sBX2PWPrZyuZyab5qN9ktL");
-
-            // 
         }
     }
 }

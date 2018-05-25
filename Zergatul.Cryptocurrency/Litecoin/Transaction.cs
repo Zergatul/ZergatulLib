@@ -8,6 +8,14 @@ namespace Zergatul.Cryptocurrency.Litecoin
 {
     public class Transaction : TransactionBase
     {
+        public override long? Fee
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public override IEnumerable<TxInputBase> GetInputs()
         {
             throw new NotImplementedException();

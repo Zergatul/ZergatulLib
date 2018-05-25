@@ -133,6 +133,23 @@ namespace Zergatul
             return true;
         }
 
+        public static bool Contains(byte[] array1, byte[] array2)
+        {
+            for (int i = 0; i <= array1.Length - array1.Length; i++)
+            {
+                bool contains = true;
+                for (int j = 0; j < array2.Length; j++)
+                    if (array1[i + j] != array2[j])
+                    {
+                        contains = false;
+                        break;
+                    }
+                if (contains)
+                    return true;
+            }
+            return false;
+        }
+
         public static bool IsZero(byte[] array)
         {
             for (int i = 0; i < array.Length; i++)

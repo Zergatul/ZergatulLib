@@ -12,7 +12,7 @@ namespace Zergatul.Network.Smtp
 {
     public class SmtpConnection
     {
-        private static readonly string _endOfMailData = Constants.TelnetEndOfLine + "." + Constants.TelnetEndOfLine;
+        private static readonly byte[] _endOfMailData = Encoding.ASCII.GetBytes(Constants.TelnetEndOfLine + "." + Constants.TelnetEndOfLine);
 
         #region Private fields
 
@@ -164,7 +164,7 @@ namespace Zergatul.Network.Smtp
                 throw new SmtpException();
         }
 
-        public void Data(string mail)
+        public void Data(byte[] mail)
         {
             SetupCommandTimeout();
 
@@ -172,11 +172,10 @@ namespace Zergatul.Network.Smtp
             if (reply.Code != SmtpReplyCode.StartInput)
                 throw new SmtpException();
 
-            if (mail.Contains(_endOfMailData))
+            if (ByteArray.Contains(mail, _endOfMailData))
                 throw new SmtpException("Mail data cannot contain terminator");
 
-            mail += _endOfMailData;
-            byte[] buffer = Encoding.UTF8.GetBytes(mail);
+            byte[] buffer = ByteArray.Concat(mail, _endOfMailData);
             _stream.Write(buffer, 0, buffer.Length);
 
             reply = _reader.ReadServerReply();

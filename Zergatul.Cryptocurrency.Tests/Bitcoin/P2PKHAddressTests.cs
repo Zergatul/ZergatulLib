@@ -8,7 +8,7 @@ namespace Zergatul.Cryptocurrency.Tests
     public class P2PKHAddressTests
     {
         [TestMethod]
-        public void FromPublicKeyTest()
+        public void Bitcoin_Addr_FromPublicKeyTest()
         {
             var dict = new Dictionary<string, string>
             {
@@ -36,7 +36,7 @@ namespace Zergatul.Cryptocurrency.Tests
         }
 
         [TestMethod]
-        public void FromPublicKeyHashTest()
+        public void Bitcoin_Addr_FromPublicKeyHashTest()
         {
             var dict = new Dictionary<string, string>
             {
@@ -53,7 +53,7 @@ namespace Zergatul.Cryptocurrency.Tests
         }
 
         [TestMethod]
-        public void WIFImportTest()
+        public void Bitcoin_Addr_WIFImportTest()
         {
             var addr = new P2PKHAddress();
             addr.FromWIF("5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ");
