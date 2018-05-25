@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="BitcoinGold\AddressTests.cs" />
     <Compile Include="Bitcoin\P2PKHAddressTests.cs" />
+    <Compile Include="Ethereum\AddressTests.cs" />
     <Compile Include="ScriptTests.cs" />
     <Compile Include="Bitcoin\TransactionTests.cs" />
     <Compile Include="Base58Tests.cs" />

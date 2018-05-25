@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Network;
 
 namespace Zergatul.Cryptography.Hash
 {
@@ -195,6 +196,23 @@ namespace Zergatul.Cryptography.Hash
 
                 A[0] ^= RC[i];
             }
+        }
+    }
+
+    public class Keccak256 : Keccak
+    {
+        public override OID OID
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public Keccak256()
+            : base(512, 1, 256)
+        {
+
         }
     }
 }
