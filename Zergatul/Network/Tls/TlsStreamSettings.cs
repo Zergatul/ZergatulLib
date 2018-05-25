@@ -12,9 +12,12 @@ namespace Zergatul.Network.Tls
         public DiffieHellmanParameters DHParameters;
         public bool ReuseSessions;
 
+        public Func<byte[]> GetRandom;
+
         public byte[] PSKIdentityHint;
         public Func<byte[], PreSharedKey> GetPSKByHint;
         public Func<byte[], PreSharedKey> GetPSKByIdentity;
+
         public Func<X509Certificate, bool> ServerCertificateValidationOverride;
         public bool RequestClientCertificate;
         public Func<X509Certificate, bool> ClientCertificateValidate;

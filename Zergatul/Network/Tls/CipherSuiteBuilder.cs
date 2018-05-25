@@ -71,7 +71,7 @@ namespace Zergatul.Network.Tls
             // The master secret is always exactly 48 bytes in length.
             if (SecurityParameters.ExtendedMasterSecret)
             {
-                var sessionHash = Hash(SecurityParameters.HandshakeData.ToArray());
+                var sessionHash = Hash(SecurityParameters.HandshakeBuffer.ToArray());
                 SecurityParameters.MasterSecret = PseudoRandomFunction(
                     KeyExchange.PreMasterSecret,
                     "extended master secret",
@@ -144,7 +144,7 @@ namespace Zergatul.Network.Tls
 
         #region Private/Protected methods
 
-        protected virtual byte[] Hash(byte[] data)
+        public virtual byte[] Hash(byte[] data)
         {
             PRFHash.Reset();
             PRFHash.Update(data);
@@ -204,8 +204,8 @@ namespace Zergatul.Network.Tls
                 MUST be at least 12 bytes.
             */
             string label = role == Role.Client ? "client finished" : "server finished";
-            byte[] data = role == Role.Client ? SecurityParameters.ClientFinishedHandshakeData : SecurityParameters.ServerFinishedHandshakeData;
-            return PseudoRandomFunction(SecurityParameters.MasterSecret, label, Hash(data), 12);
+            byte[] hash = role == Role.Client ? SecurityParameters.ClientFinishedHash : SecurityParameters.ServerFinishedHash;
+            return PseudoRandomFunction(SecurityParameters.MasterSecret, label, hash, 12);
         }
 
         #endregion

@@ -3,6 +3,8 @@
     public class ConnectionInfo
     {
         public CipherSuite? CipherSuite { get; internal set; }
+        public byte[] MasterSecret { get; internal set; }
+        public bool? ReuseSession { get; internal set; }
         public bool? ExtendedMasterSecret { get; internal set; }
 
         public ConnectionClientInfo Client { get; private set; } = new ConnectionClientInfo();
@@ -16,11 +18,13 @@
         public class ConnectionClientInfo
         {
             public bool? OfferedExtendedMasterSecret { get; internal set; }
+            public byte[] FinishedMessageHash { get; internal set; }
         }
 
         public class ConnectionServerInfo
         {
             public bool? OfferedExtendedMasterSecret { get; internal set; }
+            public byte[] FinishedMessageHash { get; internal set; }
         }
     }
 }

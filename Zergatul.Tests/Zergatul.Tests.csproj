@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="BitHelperTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StaticRandom.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">

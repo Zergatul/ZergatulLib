@@ -9,6 +9,7 @@ namespace Zergatul.Network.Tls
     public class TlsStreamSession
     {
         public byte[] ID { get; private set; }
+        public byte[] MasterSecret { get; set; }
 
         public TlsStreamSession(byte[] id)
         {

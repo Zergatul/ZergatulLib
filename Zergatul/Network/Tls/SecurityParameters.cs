@@ -29,9 +29,9 @@ namespace Zergatul.Network.Tls
         public X509Certificate ServerCertificate;
         public bool CertificateRequested;
 
-        public List<byte> HandshakeData;
-        public byte[] ClientFinishedHandshakeData;
-        public byte[] ServerFinishedHandshakeData;
+        public List<byte> HandshakeBuffer;
+        public byte[] ClientFinishedHash;
+        public byte[] ServerFinishedHash;
 
         public bool ExtendedMasterSecret;
     }
