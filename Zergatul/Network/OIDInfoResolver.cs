@@ -71,7 +71,7 @@ namespace Zergatul.Network
 
         private static Dictionary<OID, IEllipticCurve> _curves = new Dictionary<OID, IEllipticCurve>
         {
-            [OID.ISO.MemberBody.US.ANSI_X962.Curves.Prime.Prime256v1] = Math.EllipticCurves.PrimeField.EllipticCurve.secp256r1,
+            [OID.ISO.MemberBody.US.ANSI_X962.Curves.Prime.prime256v1] = Math.EllipticCurves.PrimeField.EllipticCurve.secp256r1,
             [OID.ISO.IdentifiedOrganization.Certicom.Curve.secp384r1] = Math.EllipticCurves.PrimeField.EllipticCurve.secp384r1,
             [OID.ISO.IdentifiedOrganization.Certicom.Curve.secp521r1] = Math.EllipticCurves.PrimeField.EllipticCurve.secp521r1,
         };

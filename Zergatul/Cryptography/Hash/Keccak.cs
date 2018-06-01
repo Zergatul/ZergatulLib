@@ -201,13 +201,7 @@ namespace Zergatul.Cryptography.Hash
 
     public class Keccak256 : Keccak
     {
-        public override OID OID
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public override OID OID => null;
 
         public Keccak256()
             : base(512, 1, 256)
