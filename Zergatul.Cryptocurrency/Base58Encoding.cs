@@ -21,9 +21,17 @@ namespace Zergatul.Cryptocurrency
             Array.Copy(data, 0, bytes, version.Length, data.Length);
             Array.Copy(hash, 0, bytes, version.Length + data.Length, 4);
 
-            var bigint = new BigInteger(bytes, ByteOrder.BigEndian);
+            return EncodeRaw(bytes, symbols);
+        }
+
+        public static string EncodeRaw(byte[] data, char[] symbols = null)
+        {
+            if (symbols == null)
+                symbols = DefaultSymbols;
+
+            var bigint = new BigInteger(data, ByteOrder.BigEndian);
             string result = bigint.ToString(58, symbols);
-            for (int i = 0; i < bytes.Length && bytes[i] == 0; i++)
+            for (int i = 0; i < data.Length && data[i] == 0; i++)
                 result = symbols[0] + result;
             return result;
         }
