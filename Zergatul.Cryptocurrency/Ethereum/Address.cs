@@ -20,6 +20,16 @@ namespace Zergatul.Cryptocurrency.Ethereum
             FromPublicKey(ToPublicKey());
         }
 
+        public void FromPrivateKey(byte[] key)
+        {
+            if (key.Length != 32)
+                throw new InvalidOperationException();
+
+            FromPrivateKey(new Secp256k1PrivateKey(key));
+        }
+
+        public void FromPrivateKey(string hex) => FromPrivateKey(BitHelper.HexToBytes(hex));
+
         public void FromPublicKey(byte[] pubkeyData)
         {
             var keccak = new Keccak256();

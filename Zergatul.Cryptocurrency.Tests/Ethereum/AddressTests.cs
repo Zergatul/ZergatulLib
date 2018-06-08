@@ -33,7 +33,7 @@ namespace Zergatul.Cryptocurrency.Tests.Ethereum
             foreach (var kv in map)
             {
                 var addr = new Address();
-                addr.FromPrivateKey(new Secp256k1PrivateKey(BitHelper.HexToBytes(kv.Key)));
+                addr.FromPrivateKey(kv.Key);
                 Assert.IsTrue(addr.Value == kv.Value);
             }
         }

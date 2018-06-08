@@ -12,5 +12,25 @@ namespace Zergatul.Math.Elliptic
     public class Char2Curve : Curve<Char2Point>
     {
         public byte[] f { get; protected set; }
+
+        public override Char2Point Double(Char2Point point)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Char2Point Multiplication(byte[] value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Char2Point Multiplication(Char2Point point, byte[] value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Char2Point Sum(Char2Point point1, Char2Point point2)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

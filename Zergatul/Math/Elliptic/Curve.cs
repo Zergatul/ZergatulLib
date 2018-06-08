@@ -270,6 +270,8 @@ namespace Zergatul.Math.Elliptic
         public byte[] B { get; protected set; }
         public byte[] Order { get; protected set; }
 
+        public int BitSize { get; protected set; }
+
         #endregion
     }
 
@@ -279,8 +281,24 @@ namespace Zergatul.Math.Elliptic
 
         public T G { get; protected set; }
 
+        /// <summary>
+        /// point1 + point2
+        /// </summary>
+        public abstract T Sum(T point1, T point2);
+
+        /// <summary>
+        /// value * G
+        /// </summary>
         public abstract T Multiplication(byte[] value);
+
+        /// <summary>
+        /// value * point
+        /// </summary>
         public abstract T Multiplication(T point, byte[] value);
+
+        /// <summary>
+        /// 2 * point
+        /// </summary>
         public abstract T Double(T point);
 
         #endregion
