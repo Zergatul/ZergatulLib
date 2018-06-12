@@ -55,6 +55,7 @@
     <Compile Include="BitcoinGold\AddressTests.cs" />
     <Compile Include="Bitcoin\P2PKHAddressTests.cs" />
     <Compile Include="Ethereum\AddressTests.cs" />
+    <Compile Include="Ethereum\RdlTests.cs" />
     <Compile Include="Ethereum\TransactionTests.cs" />
     <Compile Include="ScriptTests.cs" />
     <Compile Include="Bitcoin\TransactionTests.cs" />

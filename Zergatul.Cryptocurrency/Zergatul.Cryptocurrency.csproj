@@ -58,6 +58,7 @@
     <Compile Include="BlockchainCryptoFactory.cs" />
     <Compile Include="BlockParseException.cs" />
     <Compile Include="Ethereum\Address.cs" />
+    <Compile Include="Ethereum\RdlEncoding.cs" />
     <Compile Include="Ethereum\Transaction.cs" />
     <Compile Include="P2PKAddressBase.cs" />
     <Compile Include="Litecoin\LitecoinFactory.cs" />
