@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace Zergatul.Cryptocurrency.Ethereum
 {
-    public class RdlEncoding
+    public class Rlp
     {
-        public static byte[] Encode(RdlItem rdl)
+        public static byte[] Encode(RlpItem rdl)
         {
             var result = new List<byte>();
 
@@ -45,7 +45,7 @@ namespace Zergatul.Cryptocurrency.Ethereum
             return result.ToArray();
         }
 
-        public static RdlItem Decode(byte[] data)
+        public static RlpItem Decode(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -73,41 +73,111 @@ namespace Zergatul.Cryptocurrency.Ethereum
             result.AddRange(lenBytes.Skip(4 - len));
         }
 
-        private static RdlItem DecodeOne(byte[] data, ref int index)
+        private static int DecodeLength(byte[] data, int index, int length)
+        {
+            if (length > 4)
+                throw new NotImplementedException();
+
+            int result = 0;
+            for (int i = 0; i < length; i++)
+                result = (result << 8) | data[index + i];
+
+            return result;
+        }
+
+        private static RlpItem DecodeOne(byte[] data, ref int index)
         {
             if (data[index] < 0x80)
             {
-                var item = new RdlItem
+                var item = new RlpItem
                 {
                     String = new[] { data[index] }
                 };
                 index++;
                 return item;
             }
-            else if (data[index] <= 0xB7)
+            else if (data[index] <= 0xBF)
             {
-                int length = data[index] - 0x80;
-                index++;
-                var item = new RdlItem
+                int length;
+                if (data[index] <= 0xB7)
+                {
+                    length = data[index++] - 0x80;
+                }
+                else
+                {
+                    int encLength = data[index++] - 0xB7;
+                    length = DecodeLength(data, index, encLength);
+                    index += encLength;
+                }
+
+                var item = new RlpItem
                 {
                     String = ByteArray.SubArray(data, index, length)
                 };
                 index += length;
                 return item;
             }
-            else if (data[index] <= 0xBF)
-            {
-
-            }
             else
-                throw new NotImplementedException();
+            {
+                int length;
+                if (data[index] <= 0xF7)
+                {
+                    length = data[index++] - 0xC0;
+                }
+                else
+                {
+                    int encLength = data[index++] - 0xF7;
+                    length = DecodeLength(data, index, encLength);
+                    index += encLength;
+                }
+                int end = index + length;
+                var list = new List<RlpItem>();
+                while (index < end)
+                    list.Add(DecodeOne(data, ref index));
+                if (index != end)
+                    throw new InvalidOperationException();
+                return new RlpItem
+                {
+                    Items = list.ToArray()
+                };
+            }
+
+            throw new InvalidOperationException();
         }
     }
 
-    public class RdlItem
+    public class RlpItem
     {
         public byte[] String { get; set; }
-        public RdlItem[] Items { get; set; }
+        public RlpItem[] Items { get; set; }
+
+        public RlpItem()
+        {
+
+        }
+
+        public RlpItem(int value)
+        {
+            int index = 0;
+            byte[] data = BitHelper.GetBytes(value, ByteOrder.BigEndian);
+            while (index < data.Length && data[index] == 0)
+                index++;
+            String = ByteArray.SubArray(data, index, data.Length - index);
+        }
+
+        public RlpItem(long value)
+        {
+            int index = 0;
+            byte[] data = BitHelper.GetBytes(value, ByteOrder.BigEndian);
+            while (index < data.Length && data[index] == 0)
+                index++;
+            String = ByteArray.SubArray(data, index, data.Length - index);
+        }
+
+        public RlpItem(byte[] @string)
+        {
+            String = @string ?? new byte[0];
+        }
 
         public void SanityCheck()
         {

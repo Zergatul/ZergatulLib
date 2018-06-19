@@ -39,6 +39,16 @@ namespace Zergatul.Cryptocurrency.Ethereum
             Hash = ByteArray.SubArray(Hash, 12, 20);
         }
 
+        public void Parse(string value)
+        {
+            if (value == null)
+                throw new ArgumentNullException();
+            if (value.Length != 42 || !value.StartsWith("0x"))
+                throw new InvalidOperationException();
+
+            Hash = BitHelper.HexToBytes(value.Substring(2));
+        }
+
         public byte[] ToPublicKey()
         {
             if (PrivateKey == null)
