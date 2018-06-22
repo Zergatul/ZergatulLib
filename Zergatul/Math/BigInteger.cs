@@ -8,7 +8,7 @@ namespace Zergatul.Math
 {
 #if !UseOpenSSL
 
-    public class BigInteger : IComparable<BigInteger>, IComparable<int>, IEquatable<BigInteger>, IEquatable<int>
+    public class BigInteger : IComparable<BigInteger>, IComparable<long>, IComparable<int>, IEquatable<BigInteger>, IEquatable<int>
     {
         private static IRandom _random = new DefaultRandom();
 
@@ -566,6 +566,9 @@ namespace Zergatul.Math
 
         public static BigInteger ModularInverse(BigInteger value, BigInteger modulus)
         {
+            if (value.IsZero)
+                return null;
+
             if (modulus._sign != 1)
                 throw new ArithmeticException("Modulus must be positive number");
             if (modulus == 1)
@@ -586,6 +589,8 @@ namespace Zergatul.Math
 
         public static BigInteger ModularDivision(BigInteger dividend, BigInteger divisor, BigInteger modulus)
         {
+            if (divisor.IsZero)
+                return null;
             if (dividend < 0)
                 dividend += modulus;
             if (divisor < 0)
@@ -935,6 +940,46 @@ namespace Zergatul.Math
 
         #endregion
 
+        #region IComparable<long>
+
+        public int CompareTo(long other)
+        {
+            if (IsZero)
+                return (0L).CompareTo(other);
+
+            if (_sign < 0 && other >= 0)
+                return -1;
+            if (_sign > 0 && other <= 0)
+                return 1;
+
+            if (_wordsLength > 2)
+                return other > 0 ? 1 : -1;
+
+            if (_wordsLength == 1)
+                return (_sign * (long)_words[0]).CompareTo(other);
+
+            int compare;
+            if (other == long.MinValue)
+            {
+                compare = _words[1].CompareTo(uint.MaxValue);
+                if (compare != 0)
+                    return -compare;
+                return -_words[0].CompareTo(uint.MaxValue);
+            }
+            else
+            {
+                int sign = other > 0 ? 1 : -1;
+                if (sign < 0)
+                    other = -other;
+                compare = ((long)_words[1]).CompareTo(other >> 32);
+                if (compare != 0)
+                    return sign * compare;
+                return sign * ((long)_words[0]).CompareTo(other & 0xFFFFFFFF);
+            }
+        }
+
+        #endregion
+
         #region IComparable<int>
 
         public int CompareTo(int other)
@@ -1013,6 +1058,16 @@ namespace Zergatul.Math
         }
 
         public static bool operator <(BigInteger left, int right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+
+        public static bool operator >(BigInteger left, long right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+
+        public static bool operator <(BigInteger left, long right)
         {
             return left.CompareTo(right) < 0;
         }
@@ -1102,6 +1157,26 @@ namespace Zergatul.Math
             if (value.IsZero)
                 return 0;
             return (int)(value._words[0] * value._sign);
+        }
+
+        public static explicit operator long(BigInteger value)
+        {
+            if (value < long.MinValue || value > long.MaxValue)
+                throw new ArgumentOutOfRangeException();
+
+            switch (value._wordsLength)
+            {
+                case 0:
+                    return 0;
+                case 1:
+                    return checked(value._words[0] * value._sign);
+                case 2:
+                    if (value._sign == -1 && value._words[0] == uint.MaxValue && value._words[1] == uint.MaxValue)
+                        return long.MinValue;
+                    return checked(value._sign * (((long)value._words[1] << 32) | value._words[0]));
+                default:
+                    throw new InvalidOperationException();
+            }
         }
 
         #endregion

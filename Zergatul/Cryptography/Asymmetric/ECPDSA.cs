@@ -97,44 +97,38 @@ namespace Zergatul.Cryptography.Asymmetric
             return new Tuple<byte, BigInteger, BigInteger>(0, r, s);
         }
 
-        public byte[] RecoverPublicKey(byte[] hash, byte v, byte[] r, byte[] s)
+        public ECPoint RecoverPublicKey(byte[] hash, byte v, byte[] r, byte[] s)
         {
             var curve = Parameters.Curve;
             BigInteger ri = new BigInteger(r, ByteOrder.BigEndian);
             BigInteger si = new BigInteger(s, ByteOrder.BigEndian);
-            for (int j = 0; j < curve.h; j++)
-            {
-                BigInteger x = ri + j * curve.n;
-                byte prefix;
-                switch (v)
-                {
-                    case 0x1B:
-                        prefix = 0x02;
-                        break;
-                    case 0x1C:
-                        prefix = 0x03;
-                        break;
-                    case 0x1D:
-                        x += curve.n;
-                        prefix = 0x02;
-                        break;
-                    case 0x1E:
-                        x += curve.n;
-                        prefix = 0x03;
-                        break;
-                    default:
-                        throw new InvalidOperationException();
-                }
-                byte[] publicKey = ByteArray.Concat(new byte[] { 0x02 }, x.ToBytes(ByteOrder.BigEndian, (curve.BitSize + 7) / 8));
-                ECPoint R = ECPoint.FromBytes(publicKey, curve);
-                //var zero = curve.n * point;
-                //check zero
-                BigInteger e = TruncateH(new BigInteger(hash, ByteOrder.BigEndian), hash.Length);
-                ECPoint q = BigInteger.ModularInverse(ri, curve.n) * (si * R - curve.GeneratorMultiplication(e));
-                return publicKey;
-            }
+            int recId = GetRecId(v);
 
-            throw new InvalidOperationException();
+            BigInteger x = ri + (recId / 2) * curve.n;
+            if (x >= curve.p)
+                throw new InvalidOperationException();
+
+            byte prefix = recId % 2 == 1 ? (byte)0x03 : (byte)0x02;
+            ECPoint R = ECPoint.FromBytes(ByteArray.Concat(new byte[] { prefix }, x.ToBytes(ByteOrder.BigEndian, (curve.BitSize + 7) / 8)), curve);
+
+            if ((curve.n * R) != ECPoint.Infinity)
+                throw new InvalidOperationException();
+
+            BigInteger e = TruncateH(new BigInteger(hash, ByteOrder.BigEndian), hash.Length);
+            BigInteger eInv = (curve.n - e) % curve.n;
+            BigInteger rInv = BigInteger.ModularInverse(ri, curve.n);
+            BigInteger sr = rInv * si % curve.n;
+            BigInteger er = rInv * eInv % curve.n;
+            ECPoint Q = er * curve.g + sr * R;
+
+            return Q;
+        }
+
+        private int GetRecId(byte v)
+        {
+            if (0x1B > v || v > 0x1E)
+                throw new ArgumentOutOfRangeException();
+            return v - 0x1B;
         }
 
         public override bool Verify(byte[] data, byte[] signature)
@@ -177,6 +171,30 @@ namespace Zergatul.Cryptography.Asymmetric
             var v = point.x % q;
 
             return v == r;
+        }
+
+        public bool VerifyHash(byte[] hash, byte[] r, byte[] s)
+        {
+            if (Parameters?.Curve == null)
+                throw new InvalidOperationException("Parameters.Curve is null");
+            if (PublicKey == null)
+                throw new InvalidOperationException("Public key is required for verification");
+
+            var h = new BigInteger(hash, ByteOrder.BigEndian);
+            h = TruncateH(h, hash.Length);
+
+            var curve = Parameters.Curve;
+            var R = new BigInteger(r, ByteOrder.BigEndian);
+            var S = new BigInteger(s, ByteOrder.BigEndian);
+            var q = curve.n;
+
+            var u1 = BigInteger.ModularInverse(S, q) * h % q;
+            var u2 = BigInteger.ModularInverse(S, q) * R % q;
+
+            var point = u1 * curve.g + u2 * PublicKey.Point;
+            var v = point.x % q;
+
+            return v == R;
         }
 
         private BigInteger TruncateH(BigInteger h, int length)

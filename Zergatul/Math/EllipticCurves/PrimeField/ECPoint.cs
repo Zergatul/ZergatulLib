@@ -116,9 +116,17 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
             BigInteger λ;
 
             if (p1 == p2)
+            {
+                if (p1.y.IsZero)
+                    return Infinity;
                 λ = BigInteger.ModularDivision(3 * p1.x * p1.x + curve.a, 2 * p1.y, curve.p);
+            }
             else
+            {
+                if (p1.x == p2.x)
+                    return Infinity;
                 λ = BigInteger.ModularDivision(p2.y - p1.y, p2.x - p1.x, curve.p);
+            }
 
             var x3 = (λ * λ - p1.x - p2.x) % curve.p;
             var y3 = (λ * (p1.x - x3) - p1.y) % curve.p;
@@ -182,6 +190,16 @@ namespace Zergatul.Math.EllipticCurves.PrimeField
         public static ECPoint operator *(BigInteger m, ECPoint p)
         {
             return Multiplication(p, m);
+        }
+
+        public static ECPoint operator -(ECPoint p)
+        {
+            return new ECPoint
+            {
+                x = p.x,
+                y = p.Curve.p - p.y,
+                Curve = p.Curve
+            };
         }
 
     #endregion
