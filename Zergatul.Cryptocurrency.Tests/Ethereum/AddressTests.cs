@@ -34,7 +34,7 @@ namespace Zergatul.Cryptocurrency.Tests.Ethereum
             {
                 var addr = new Address();
                 addr.FromPrivateKey(kv.Key);
-                Assert.IsTrue(addr.Value == kv.Value);
+                Assert.IsTrue(addr.Value.ToLower() == kv.Value);
             }
         }
     }

@@ -28,6 +28,7 @@ _ReSharper*/
 *.vssscc
 $tf*/
 packages/
+.vs/
 
 *.VC.db
 *.VC.opendb
