@@ -7,7 +7,7 @@ namespace Zergatul.Cryptocurrency.Tests.BitcoinGold
     public class AddressTests
     {
         [TestMethod]
-        public void ConvertTests()
+        public void BitcoinGold_Addr_ConvertTests()
         {
             var dict = new Dictionary<string, string>
             {

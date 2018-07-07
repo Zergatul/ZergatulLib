@@ -1,4 +1,6 @@
-﻿namespace Zergatul.Cryptocurrency.Verge
+﻿using System.Collections.Generic;
+
+namespace Zergatul.Cryptocurrency.Verge
 {
     public class TxInput : TxInputBase
     {

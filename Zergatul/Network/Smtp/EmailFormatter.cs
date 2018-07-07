@@ -28,7 +28,7 @@ namespace Zergatul.Network.Smtp
                 $"To: {to}{Environment.NewLine}" +
                 (string.IsNullOrEmpty(cc) ? "" : $"CC: {cc}{Environment.NewLine}") +
                 $"Mime-Version: 1.0;{Environment.NewLine}" +
-                $"Content-Type: text/html; charset=\"utf-8\";{Environment.NewLine}" +
+                $"Content-Type: text/html; charset=\"utf-8\"{Environment.NewLine}" +
                 Environment.NewLine +
                 body;
         }

@@ -13,16 +13,10 @@ namespace Zergatul.Cryptocurrency.Tests.Litecoin
     {
         private static ITransactionRepository<Transaction> _repository;
 
-        [TestMethod]
-        public void Parse1()
-        {
-
-        }
-
         [ClassInitialize]
         public static void Init(TestContext context)
         {
-            //_repository = new TestTransactionRepository();
+            _repository = new SimpleTransactionRepository<Transaction>("Litecoin/Transactions.txt");
         }
     }
 }

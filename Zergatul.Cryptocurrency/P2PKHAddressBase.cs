@@ -56,16 +56,23 @@ namespace Zergatul.Cryptocurrency
             FromPrivateKey(key);
         }
 
+        public byte[] ToPublicKey()
+        {
+            if (PrivateKey == null)
+                throw new InvalidOperationException();
+
+            var point = PrivateKey.ToECPoint();
+            if (PrivateKey.Compressed)
+                return point.ToCompressed();
+            else
+                return point.ToUncompressed();
+        }
+
         public void FromPrivateKey(Secp256k1PrivateKey key)
         {
-            var point = key.ToECPoint();
-
-            if (key.Compressed)
-                FromPublicKey(point.ToCompressed());
-            else
-                FromPublicKey(point.ToUncompressed());
-            IsCompressed = key.Compressed;
             PrivateKey = key;
+            FromPublicKey(ToPublicKey());
+            IsCompressed = key.Compressed;
         }
 
         public string ToWIF()

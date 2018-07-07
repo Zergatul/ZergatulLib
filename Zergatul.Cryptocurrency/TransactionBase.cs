@@ -33,13 +33,12 @@ namespace Zergatul.Cryptocurrency
         public abstract IEnumerable<TxInputBase> GetInputs();
         public abstract IEnumerable<TxOutputBase> GetOutputs();
 
+        public abstract long? Fee { get; }
+
         public bool IsCoinbase =>
             GetInputs().Count() == 1 &&
             ByteArray.IsZero(GetInputs().First().PrevTx) &&
             GetInputs().First().SequenceNo == uint.MaxValue;
-
-        protected byte[] _header;
-        protected byte[] _tail;
 
         public abstract void Parse(byte[] data, ref int index);
 
@@ -50,6 +49,17 @@ namespace Zergatul.Cryptocurrency
         }
 
         public void ParseHex(string hex) => Parse(BitHelper.HexToBytes(hex));
+
+        public virtual void ParseHeader(byte[] data, ref int index)
+        {
+            Version = BitHelper.ToUInt32(data, index, ByteOrder.LittleEndian);
+            index += 4;
+        }
+
+        public virtual void SerializeHeader(List<byte> buffer)
+        {
+            buffer.AddRange(BitHelper.GetBytes(Version, ByteOrder.LittleEndian));
+        }
 
         public bool Verify()
         {
@@ -71,6 +81,30 @@ namespace Zergatul.Cryptocurrency
 
         public override IEnumerable<TxInputBase> GetInputs() => Inputs;
         public override IEnumerable<TxOutputBase> GetOutputs() => Outputs;
+
+        public override long? Fee
+        {
+            get
+            {
+                if (Inputs != null && Outputs != null)
+                {
+                    ulong inputsSum = 0;
+                    for (int i = 0; i < Inputs.Count; i++)
+                        if (Inputs[i].Amount == null)
+                            return null;
+                        else
+                            inputsSum += Inputs[i].Amount.Value;
+
+                    ulong outputsSum = 0;
+                    for (int i = 0; i < Outputs.Count; i++)
+                        outputsSum += Outputs[i].Amount;
+
+                    return checked((long)inputsSum - (long)outputsSum);
+                }
+                else
+                    return null;
+            }
+        }
 
         protected void ParseInputs(byte[] data, ref int index, int count)
         {

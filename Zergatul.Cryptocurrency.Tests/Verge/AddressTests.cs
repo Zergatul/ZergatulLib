@@ -8,7 +8,7 @@ namespace Zergatul.Cryptocurrency.Tests.Verge
     public class AddressTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void Verge_Addr_Test1()
         {
             var p2pkh = new P2PKHAddress();
 
