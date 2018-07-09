@@ -60,6 +60,30 @@ namespace Zergatul.Cryptocurrency
             }
         }
 
+        public void CreateScript()
+        {
+            if (Address == null)
+                throw new InvalidOperationException();
+            if (Address is P2PKHAddressBase)
+            {
+                var p2pkh = Address as P2PKHAddressBase;
+                if (p2pkh.Hash?.Length != 20)
+                    throw new InvalidOperationException();
+
+                Script = new Script();
+                Script.Code = new ScriptCode();
+                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_DUP });
+                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_HASH160 });
+                Script.Code.Add(new ScriptOpcodes.Operator { Data = p2pkh.Hash });
+                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_EQUALVERIFY });
+                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_CHECKSIG });
+
+                ScriptRaw = Script.ToBytes();
+            }
+            else
+                throw new NotImplementedException();
+        }
+
         public void Serialize(List<byte> bytes)
         {
             bytes.AddRange(BitHelper.GetBytes(Amount, ByteOrder.LittleEndian));

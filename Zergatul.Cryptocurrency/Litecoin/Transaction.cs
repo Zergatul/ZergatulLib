@@ -30,5 +30,10 @@ namespace Zergatul.Cryptocurrency.Litecoin
         {
             throw new NotImplementedException();
         }
+
+        public override void Sign()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

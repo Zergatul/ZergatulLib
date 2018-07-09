@@ -78,6 +78,11 @@ namespace Zergatul.Cryptocurrency.Bitcoin
             RawOriginal = list.ToArray();
         }
 
+        public override void Sign()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public bool Verify(ITransactionRepository<Transaction> repository)
         {
             foreach (var input in Inputs)

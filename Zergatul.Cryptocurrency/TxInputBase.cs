@@ -107,6 +107,30 @@ namespace Zergatul.Cryptocurrency
             }
         }
 
+        public void Sign()
+        {
+            if (PrevTx?.Length != 32)
+                throw new InvalidOperationException();
+            if (Address is P2PKHAddressBase)
+            {
+                var p2pkh = Address as P2PKHAddressBase;
+                if (p2pkh.PrivateKey == null)
+                    throw new InvalidOperationException();
+
+                byte[] signHash = GetSigHash(SIGHASH_ALL);
+                byte[] signature = p2pkh.PrivateKey.Sign(signHash);
+
+                Script = new Script();
+                Script.Code = new ScriptCode();
+                Script.Code.Add(new ScriptOpcodes.Operator { Data = ByteArray.Concat(signature, new byte[] { 1 }) });
+                Script.Code.Add(new ScriptOpcodes.Operator { Data = p2pkh.ToPublicKey() });
+
+                ScriptRaw = Script.ToBytes();
+            }
+            else
+                throw new NotImplementedException();
+        }
+
         public bool Verify()
         {
             if (PrevOutput == null)
@@ -245,6 +269,15 @@ namespace Zergatul.Cryptocurrency
 
                 return dsha256.ComputeHash();
             }
+        }
+
+        public void Serialize(List<byte> buffer)
+        {
+            buffer.AddRange(PrevTx.Reverse());
+            buffer.AddRange(BitHelper.GetBytes(PrevTxOutIndex, ByteOrder.LittleEndian));
+            buffer.AddRange(VarLengthInt.Serialize(ScriptRaw.Length));
+            buffer.AddRange(ScriptRaw);
+            buffer.AddRange(BitHelper.GetBytes(SequenceNo, ByteOrder.LittleEndian));
         }
 
         public void SerializeWithoutScripts(List<byte> bytes)

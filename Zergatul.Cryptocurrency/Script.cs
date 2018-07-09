@@ -189,6 +189,34 @@ namespace Zergatul.Cryptocurrency
             else
                 return this;
         }
+
+        public byte[] ToBytes()
+        {
+            var list = new List<byte>();
+            foreach (var op in Code)
+            {
+                if (op.Data == null && op.Opcode == null)
+                    throw new InvalidOperationException();
+                if (op.Data != null && op.Opcode != null)
+                    throw new InvalidOperationException();
+
+                if (op.Opcode != null)
+                    list.Add((byte)op.Opcode.Value);
+
+                if (op.Data != null)
+                {
+                    if (op.Data.Length >= 1 && op.Data.Length <= 0x4B)
+                    {
+                        list.Add((byte)op.Data.Length);
+                        list.AddRange(op.Data);
+                    }
+                    else
+                        throw new NotImplementedException();
+                }
+            }
+
+            return list.ToArray();
+        }
     }
 
     [System.Diagnostics.DebuggerDisplay("{CodeStr}")]

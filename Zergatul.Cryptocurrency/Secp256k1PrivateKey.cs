@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography;
+using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math;
 using Zergatul.Math.EllipticCurves.PrimeField;
 
@@ -76,6 +78,15 @@ namespace Zergatul.Cryptocurrency
             var key = new Secp256k1PrivateKey(_data);
             key.Compressed = compressed;
             return key;
+        }
+
+        public byte[] Sign(byte[] hash)
+        {
+            var ecdsa = new ECPDSA();
+            ecdsa.Parameters = new ECPDSAParameters(Math.EllipticCurves.PrimeField.EllipticCurve.secp256k1);
+            ecdsa.Random = new DefaultSecureRandom();
+            ecdsa.PrivateKey = new ECPPrivateKey(_data);
+            return ecdsa.SignHash(hash);
         }
     }
 }

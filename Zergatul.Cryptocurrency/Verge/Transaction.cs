@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Zergatul.Cryptocurrency.Verge
@@ -8,6 +9,18 @@ namespace Zergatul.Cryptocurrency.Verge
         public uint Time { get; set; }
 
         public decimal? FeeXVG => Fee == null ? 0 : 1m * Fee.Value / BlockchainCryptoFactory.Verge.Multiplier;
+
+        public Transaction()
+            : base()
+        {
+
+        }
+
+        public Transaction(string hex)
+            : this()
+        {
+            ParseHex(hex);
+        }
 
         public override void Parse(byte[] data, ref int index)
         {
@@ -42,6 +55,38 @@ namespace Zergatul.Cryptocurrency.Verge
             buffer.AddRange(BitHelper.GetBytes(Time, ByteOrder.LittleEndian));
         }
 
+        public override void Sign()
+        {
+            if (Version == 0)
+                throw new InvalidOperationException();
+            if (Time == 0)
+                throw new InvalidOperationException();
+
+            if (Inputs == null || Inputs.Count == 0)
+                throw new InvalidOperationException();
+            if (Inputs.Any(i => i.PrevTx?.Length != 32))
+                throw new InvalidOperationException();
+            if (Inputs.Any(i => (i.Address as P2PKHAddress)?.PrivateKey == null))
+                throw new InvalidOperationException();
+            if (Inputs.Any(i => i.SequenceNo != uint.MaxValue))
+                throw new InvalidOperationException();
+            if (Inputs.Any(i => !ByteArray.Equals(i.PrevTx, i.PrevTransaction.ID)))
+                throw new InvalidOperationException();
+
+            if (Outputs == null || Outputs.Count == 0)
+                throw new InvalidOperationException();
+            if (Outputs.Any(o => (o.Address as P2PKHAddress)?.Hash == null))
+                throw new InvalidOperationException();
+            if (Outputs.Any(o => o.Amount == 0))
+                throw new InvalidOperationException();
+
+            foreach (var output in Outputs)
+                output.CreateScript();
+
+            foreach (var input in Inputs)
+                input.Sign();
+        }
+
         public bool Verify(ITransactionRepository<Transaction> repository)
         {
             foreach (var input in Inputs)
@@ -55,6 +100,21 @@ namespace Zergatul.Cryptocurrency.Verge
             }
 
             return Verify();
+        }
+
+        public byte[] ToBytes()
+        {
+            var buffer = new List<byte>();
+            SerializeHeader(buffer);
+            buffer.AddRange(VarLengthInt.Serialize(Inputs.Count));
+            foreach (var input in Inputs)
+                input.Serialize(buffer);
+            buffer.AddRange(VarLengthInt.Serialize(Outputs.Count));
+            foreach (var output in Outputs)
+                output.Serialize(buffer);
+            buffer.AddRange(BitHelper.GetBytes(LockTime, ByteOrder.LittleEndian));
+
+            return buffer.ToArray();
         }
     }
 }

@@ -26,6 +26,11 @@ namespace Zergatul.Cryptocurrency.Zcash
             RawOriginal = ByteArray.SubArray(data, start, index - start);
         }
 
+        public override void Sign()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public bool Verify(ITransactionRepository<Transaction> repository)
         {
             foreach (var input in Inputs)

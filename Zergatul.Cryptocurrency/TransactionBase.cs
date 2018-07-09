@@ -69,6 +69,8 @@ namespace Zergatul.Cryptocurrency
             return GetInputs().All(input => input.Verify());
         }
 
+        public abstract void Sign();
+
         public override string ToString() => IDString;
     }
 

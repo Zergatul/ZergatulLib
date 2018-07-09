@@ -12,5 +12,18 @@
         {
 
         }
+
+        public P2PKHAddress(string address)
+            : this()
+        {
+            Parse(address);
+        }
+
+        public static P2PKHAddress FromPrivateKey(byte[] data)
+        {
+            var addr = new P2PKHAddress();
+            addr.FromPrivateKey(new Secp256k1PrivateKey(data, true));
+            return addr;
+        }
     }
 }
