@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Zergatul.Security.DotNet;
 
 namespace Zergatul.Security
 {
     public class DotNetProvider : Provider
     {
         public override string Name => ".NET";
+
+        public DotNetProvider()
+        {
+            RegisterSecureRandom(SecureRandoms.Default, () => new DefaultSecureRandom());
+        }
     }
 }

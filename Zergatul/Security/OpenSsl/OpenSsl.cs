@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Zergatul
+namespace Zergatul.Security.OpenSsl
 {
-#if UseOpenSSL
-
-    internal static class OpenSSL
+    internal static class OpenSsl
     {
         private const string libcrypto = "libcrypto";
         private const string libssl = "libssl";
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public extern static IntPtr CRYPTO_malloc(int num, string file, int line);
-
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public extern static void CRYPTO_free(IntPtr p);
@@ -29,6 +26,31 @@ namespace Zergatul
             IntPtr ptr = _ERR_error_string(e, null);
             return Marshal.PtrToStringAnsi(ptr);
         }
+
+        #endregion
+
+        #region MD4
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MD4_CTX
+        {
+            public uint A, B, C, D;
+            public uint Nl, Nh;
+
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+            public uint[] data;
+
+            public uint num;
+        }
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void MD4_Init(IntPtr ctx);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void MD4_Update(IntPtr ctx, byte[] data, int len);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public extern static void MD4_Final(byte[] md, IntPtr ctx);
 
         #endregion
 
@@ -611,13 +633,11 @@ namespace Zergatul
 
         public OpenSSLException()
         {
-            this.Code = OpenSSL.ERR_get_error();
+            this.Code = OpenSsl.ERR_get_error();
             if (this.Code != 0)
             {
-                this.ErrorMessage = OpenSSL.ERR_error_string(this.Code);
+                this.ErrorMessage = OpenSsl.ERR_error_string(this.Code);
             }
         }
     }
-
-#endif
 }

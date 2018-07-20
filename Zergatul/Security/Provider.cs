@@ -11,7 +11,9 @@ namespace Zergatul.Security
         public abstract string Name { get; }
 
         protected delegate MessageDigest GetMessageDigestDelegate();
-        private Dictionary<string, GetMessageDigestDelegate> _messageDigests;
+        private Dictionary<string, GetMessageDigestDelegate> _messageDigests = new Dictionary<string, GetMessageDigestDelegate>();
+        protected delegate SecureRandom GetSecureRandomDelegate();
+        private Dictionary<string, GetSecureRandomDelegate> _secureRandoms = new Dictionary<string, GetSecureRandomDelegate>();
 
         protected void RegisterMessageDigest(string algorithm, GetMessageDigestDelegate getter)
         {
@@ -19,6 +21,14 @@ namespace Zergatul.Security
                 throw new ArgumentNullException(nameof(algorithm));
 
             _messageDigests.Add(algorithm.ToUpperInvariant(), getter);
+        }
+
+        protected void RegisterSecureRandom(string algorithm, GetSecureRandomDelegate getter)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            _secureRandoms.Add(algorithm.ToUpperInvariant(), getter);
         }
 
         public void UseAsDefault()
@@ -49,7 +59,7 @@ namespace Zergatul.Security
             _providers = new List<Provider>();
             Providers = _providers.AsReadOnly();
 
-            Register(new ZergatulProvider());
+            Register(new DefaultProvider());
             Register(new DotNetProvider());
             Register(new OpenSslProvider());
             Register(new BouncyCastleProvider());
@@ -60,6 +70,22 @@ namespace Zergatul.Security
             return _providers.SingleOrDefault(p => string.Equals(p.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
+        public MessageDigest GetMessageDigest(string algorithm)
+        {
+            GetMessageDigestDelegate getter;
+            if (_messageDigests.TryGetValue(algorithm.ToUpperInvariant(), out getter))
+                return getter();
+            return null;
+        }
+
+        public SecureRandom GetSecureRandom(string algorithm)
+        {
+            GetSecureRandomDelegate getter;
+            if (_secureRandoms.TryGetValue(algorithm.ToUpperInvariant(), out getter))
+                return getter();
+            return null;
+        }
+
         public static MessageDigest GetMessageDigestInstance(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
@@ -67,9 +93,24 @@ namespace Zergatul.Security
 
             for (int i = 0; i < _providers.Count; i++)
             {
-                GetMessageDigestDelegate getter;
-                if (_providers[0]._messageDigests.TryGetValue(algorithm.ToUpperInvariant(), out getter))
-                    return getter();
+                var md = _providers[i].GetMessageDigest(algorithm);
+                if (md != null)
+                    return md;
+            }
+
+            return null;
+        }
+
+        public static SecureRandom GetSecureRandomInstance(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            for (int i = 0; i < _providers.Count; i++)
+            {
+                var sr = _providers[i].GetSecureRandom(algorithm);
+                if (sr != null)
+                    return sr;
             }
 
             return null;
