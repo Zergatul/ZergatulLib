@@ -427,7 +427,10 @@
     <Compile Include="Security\Default\RIPEMD160.cs" />
     <Compile Include="Security\Default\RIPEMD128.cs" />
     <Compile Include="Security\DotNet\DefaultSecureRandom.cs" />
+    <Compile Include="Security\KDFParameters.cs" />
+    <Compile Include="Security\KeyDerivationFunction.cs" />
     <Compile Include="Security\OpenSsl\MD4.cs" />
+    <Compile Include="Security\OpenSsl\Scrypt.cs" />
     <Compile Include="Security\OpenSsl\SHA224.cs" />
     <Compile Include="Security\OpenSsl\SHA384.cs" />
     <Compile Include="Security\OpenSsl\RIPEMD160.cs" />
@@ -453,6 +456,8 @@
     <Compile Include="Security\OpenSsl\AbstractMessageDigest.cs" />
     <Compile Include="Security\OpenSsl\MD5.cs" />
     <Compile Include="Security\Provider.cs" />
+    <Compile Include="Security\ScryptBase.cs" />
+    <Compile Include="Security\ScryptParameters.cs" />
     <Compile Include="Security\SecureRandom.cs" />
     <Compile Include="Security\SecureRandoms.cs" />
     <Compile Include="StringHelper.cs" />

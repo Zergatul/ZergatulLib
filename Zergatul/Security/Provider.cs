@@ -10,10 +10,41 @@ namespace Zergatul.Security
 
         public abstract string Name { get; }
 
+        protected delegate KeyDerivationFunction GetKeyDerivationFunctionDelegate();
+        private Dictionary<string, GetKeyDerivationFunctionDelegate> _keyDerivationFunctions = new Dictionary<string, GetKeyDerivationFunctionDelegate>();
         protected delegate MessageDigest GetMessageDigestDelegate();
         private Dictionary<string, GetMessageDigestDelegate> _messageDigests = new Dictionary<string, GetMessageDigestDelegate>();
         protected delegate SecureRandom GetSecureRandomDelegate();
         private Dictionary<string, GetSecureRandomDelegate> _secureRandoms = new Dictionary<string, GetSecureRandomDelegate>();
+
+        public KeyDerivationFunction GetKeyDerivationFunction(string algorithm)
+        {
+            if (_keyDerivationFunctions.TryGetValue(algorithm.ToUpperInvariant(), out GetKeyDerivationFunctionDelegate getter))
+                return getter();
+            return null;
+        }
+
+        public MessageDigest GetMessageDigest(string algorithm)
+        {
+            if (_messageDigests.TryGetValue(algorithm.ToUpperInvariant(), out GetMessageDigestDelegate getter))
+                return getter();
+            return null;
+        }
+
+        public SecureRandom GetSecureRandom(string algorithm)
+        {
+            if (_secureRandoms.TryGetValue(algorithm.ToUpperInvariant(), out GetSecureRandomDelegate getter))
+                return getter();
+            return null;
+        }
+
+        protected void RegisterKeyDerivationFunction(string algorithm, GetKeyDerivationFunctionDelegate getter)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            _keyDerivationFunctions.Add(algorithm.ToUpperInvariant(), getter);
+        }
 
         protected void RegisterMessageDigest(string algorithm, GetMessageDigestDelegate getter)
         {
@@ -70,17 +101,18 @@ namespace Zergatul.Security
             return _providers.SingleOrDefault(p => string.Equals(p.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public MessageDigest GetMessageDigest(string algorithm)
+        public static KeyDerivationFunction GetKeyDerivationFunctionInstance(string algorithm)
         {
-            if (_messageDigests.TryGetValue(algorithm.ToUpperInvariant(), out GetMessageDigestDelegate getter))
-                return getter();
-            return null;
-        }
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
 
-        public SecureRandom GetSecureRandom(string algorithm)
-        {
-            if (_secureRandoms.TryGetValue(algorithm.ToUpperInvariant(), out GetSecureRandomDelegate getter))
-                return getter();
+            for (int i = 0; i < _providers.Count; i++)
+            {
+                var kdf = _providers[i].GetKeyDerivationFunction(algorithm);
+                if (kdf != null)
+                    return kdf;
+            }
+
             return null;
         }
 
