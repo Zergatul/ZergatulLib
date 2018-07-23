@@ -72,16 +72,14 @@ namespace Zergatul.Security
 
         public MessageDigest GetMessageDigest(string algorithm)
         {
-            GetMessageDigestDelegate getter;
-            if (_messageDigests.TryGetValue(algorithm.ToUpperInvariant(), out getter))
+            if (_messageDigests.TryGetValue(algorithm.ToUpperInvariant(), out GetMessageDigestDelegate getter))
                 return getter();
             return null;
         }
 
         public SecureRandom GetSecureRandom(string algorithm)
         {
-            GetSecureRandomDelegate getter;
-            if (_secureRandoms.TryGetValue(algorithm.ToUpperInvariant(), out getter))
+            if (_secureRandoms.TryGetValue(algorithm.ToUpperInvariant(), out GetSecureRandomDelegate getter))
                 return getter();
             return null;
         }
