@@ -153,45 +153,4 @@ namespace Zergatul.Cryptography.KDF
             return ((ulong)B[index - 1] << 32) | B[index];
         }
     }
-
-    /// <summary>
-    /// The scrypt Password-Based Key Derivation Function
-    /// <para>https://tools.ietf.org/html/rfc7914</para>
-    /// </summary>
-    public class ScryptOpenSsl
-    {
-        public ScryptOpenSsl()
-        {
-
-        }
-
-        /// <summary>
-        /// Derives key bytes
-        /// </summary>
-        /// <param name="password">Human-chosen password</param>
-        /// <param name="salt">Salt</param>
-        /// <param name="blockSize">Block size</param>
-        /// <param name="costParameter">CPU/Memory cost parameter, must be larger than 1, a power of 2 and less than 2^(128 * blockSize / 8)</param>
-        /// <param name="parallelizationParameter">Less than or equal to ((2^32-1) * 32) / (128 * blockSize)</param>
-        /// <param name="keyLength">Less than or equal to (2^32 - 1) * 32</param>
-        public byte[] DeriveKeyBytes(byte[] password, byte[] salt, int blockSize, ulong costParameter, int parallelizationParameter, long keyLength)
-        {
-            ulong N = costParameter;
-            ulong r = (ulong)blockSize;
-            ulong p = (ulong)parallelizationParameter;
-
-            byte[] key = new byte[keyLength];
-
-            int result = Security.OpenSsl.OpenSsl.EVP_PBE_scrypt(
-                password, password.Length,
-                salt, salt?.Length ?? 0,
-                N, r, p,
-                ulong.MaxValue,
-                key, key.Length);
-            if (result != 1)
-                throw new Security.OpenSsl.OpenSSLException();
-
-            return key;
-        }
-    }
 }

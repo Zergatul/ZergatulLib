@@ -8,6 +8,9 @@ namespace Zergatul.Security
 
         public DefaultProvider()
         {
+            RegisterKeyDerivationFunction(KeyDerivationFunctions.PBKDF2, () => new PBKDF2());
+            RegisterKeyDerivationFunction(KeyDerivationFunctions.Scrypt, () => new Scrypt());
+
             RegisterMessageDigest(MessageDigests.MD5, () => new MD5());
             RegisterMessageDigest(MessageDigests.SHA1, () => new SHA1());
             RegisterMessageDigest(MessageDigests.SHA224, () => new SHA224());

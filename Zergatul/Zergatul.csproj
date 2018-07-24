@@ -90,6 +90,7 @@
     <Compile Include="Cryptography\Asymmetric\EdDSAParameters.cs" />
     <Compile Include="Cryptography\Hash\SHA3.cs" />
     <Compile Include="Cryptography\Hash\SHAKE.cs" />
+    <Compile Include="Cryptography\KDF\Bcrypt.cs" />
     <Compile Include="Cryptography\KDF\PBKDF2.cs" />
     <Compile Include="Cryptography\KDF\Scrypt.cs" />
     <Compile Include="Cryptography\KDF\HKDF.cs" />
@@ -422,14 +423,18 @@
     <Compile Include="Network\Tls\TlsStreamSupportedCipherSuites.cs" />
     <Compile Include="Network\Tls\TlsUtils.cs" />
     <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
+    <Compile Include="Security\Default\PBKDF2.cs" />
     <Compile Include="Security\Default\RIPEMD320.cs" />
     <Compile Include="Security\Default\RIPEMD256.cs" />
     <Compile Include="Security\Default\RIPEMD160.cs" />
     <Compile Include="Security\Default\RIPEMD128.cs" />
+    <Compile Include="Security\Default\Scrypt.cs" />
     <Compile Include="Security\DotNet\DefaultSecureRandom.cs" />
     <Compile Include="Security\KDFParameters.cs" />
     <Compile Include="Security\KeyDerivationFunction.cs" />
+    <Compile Include="Security\KeyDerivationFunctions.cs" />
     <Compile Include="Security\OpenSsl\MD4.cs" />
+    <Compile Include="Security\OpenSsl\PBKDF2.cs" />
     <Compile Include="Security\OpenSsl\Scrypt.cs" />
     <Compile Include="Security\OpenSsl\SHA224.cs" />
     <Compile Include="Security\OpenSsl\SHA384.cs" />
@@ -455,6 +460,8 @@
     <Compile Include="Security\DefaultProvider.cs" />
     <Compile Include="Security\OpenSsl\AbstractMessageDigest.cs" />
     <Compile Include="Security\OpenSsl\MD5.cs" />
+    <Compile Include="Security\PBKDF2Base.cs" />
+    <Compile Include="Security\PBKDF2Parameters.cs" />
     <Compile Include="Security\Provider.cs" />
     <Compile Include="Security\ScryptBase.cs" />
     <Compile Include="Security\ScryptParameters.cs" />

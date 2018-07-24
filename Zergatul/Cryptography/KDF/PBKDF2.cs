@@ -20,6 +20,17 @@ namespace Zergatul.Cryptography.KDF
             this._hash = hash;
         }
 
+        public PBKDF2(string hashname)
+        {
+            switch (hashname)
+            {
+                case "SHA1": _hash = new SHA1(); break;
+                case "SHA256": _hash = new SHA256(); break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
         public byte[] DeriveKeyBytes(byte[] password, byte[] salt, int iterations, ulong keyLength)
         {
             uint hLength = checked((uint)_hash.HashSize);

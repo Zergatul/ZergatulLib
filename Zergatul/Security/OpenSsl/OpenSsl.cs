@@ -262,6 +262,36 @@ namespace Zergatul.Security.OpenSsl
             return EVP_PKEY_CTX_ctrl_uint64(ctx, -1, EVP_PKEY_OP_DERIVE, EVP_PKEY_CTRL_SCRYPT_P, p);
         }
 
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_sha1();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_sha224();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_sha256();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_sha384();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_sha512();
+
+        public static IntPtr EVPByName(string algorithm)
+        {
+            switch (algorithm)
+            {
+                case MessageDigests.SHA1: return EVP_sha1();
+                case MessageDigests.SHA224: return EVP_sha224();
+                case MessageDigests.SHA256: return EVP_sha256();
+                case MessageDigests.SHA384: return EVP_sha384();
+                case MessageDigests.SHA512: return EVP_sha512();
+                default:
+                    throw new NotSupportedException();
+
+            }
+        }
+
         #endregion
 
         #region BN_CTX
@@ -624,14 +654,25 @@ namespace Zergatul.Security.OpenSsl
         #endregion
 
         #endregion
+
+        #region PKCS5
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int PKCS5_PBKDF2_HMAC(
+            byte[] pass, int passlen,
+            byte[] salt, int saltlen,
+            int iter,
+            IntPtr digest, int keylen, byte[] @out);
+
+        #endregion
     }
 
-    public class OpenSSLException : Exception
+    public class OpenSslException : Exception
     {
         public ulong Code { get; private set; }
         public string ErrorMessage { get; private set; }
 
-        public OpenSSLException()
+        public OpenSslException()
         {
             this.Code = OpenSsl.ERR_get_error();
             if (this.Code != 0)
