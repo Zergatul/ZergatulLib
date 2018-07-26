@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -60,6 +61,20 @@ namespace Zergatul.Security.Tests.KeyDerivationFunction
                 "e286ed0298808c0b4bb4272ce947091b0da06bb530c4cbab3923e44ff48bbc25");
         }
 
+        [TestMethod]
+        public void VergeBlock2371624Test()
+        {
+            byte[] header =
+                BitHelper.GetBytes(2052, ByteOrder.LittleEndian)
+                .Concat(BitHelper.HexToBytes("76ade9efafe7538556635b76aea54d69f8fda80c84dc5240ef92f2c4e20eb1c8").Reverse())
+                .Concat(BitHelper.HexToBytes("c4e2672cd15661f5e2e899949b15a1a337c30e6a57f97bb9447419c0106169f6").Reverse())
+                .Concat(BitHelper.GetBytes(1532543943, ByteOrder.LittleEndian))
+                .Concat(BitHelper.HexToBytes("1b01703c").Reverse())
+                .Concat(BitHelper.GetBytes(463989813, ByteOrder.LittleEndian))
+                .ToArray();
+            TestBlock(header, 1024, 1, 1, "0000000000013df456086c73377b554e559e0b319fe0cba7d08772d54f15269c");
+        }
+
         private static void Test(string pwd, string salt, ulong N, int r, int p, string hex)
         {
             byte[] bytes1 = BitHelper.HexToBytes(hex.Replace(" ", ""));
@@ -78,6 +93,25 @@ namespace Zergatul.Security.Tests.KeyDerivationFunction
                 });
                 byte[] bytes2 = kdf.GetKeyBytes();
                 Assert.IsTrue(ByteArray.Equals(bytes1, bytes2));
+            };
+        }
+
+        private static void TestBlock(byte[] header, ulong N, int r, int p, string hash)
+        {
+            foreach (var provider in _providers)
+            {
+                var kdf = provider.GetKeyDerivationFunction(KeyDerivationFunctions.Scrypt);
+                kdf.Init(new ScryptParameters
+                {
+                    Password = header,
+                    Salt = header,
+                    N = N,
+                    r = r,
+                    p = p,
+                    KeyLength = 32
+                });
+                byte[] bytes = kdf.GetKeyBytes();
+                Assert.IsTrue(BitHelper.BytesToHex(bytes.Reverse().ToArray()) == hash);
             };
         }
     }

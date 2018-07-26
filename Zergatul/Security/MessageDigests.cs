@@ -14,5 +14,6 @@
         public const string RIPEMD160 = nameof(RIPEMD160);
         public const string RIPEMD256 = nameof(RIPEMD256);
         public const string RIPEMD320 = nameof(RIPEMD320);
+        public const string BLAKE2b = nameof(BLAKE2b);
     }
 }

@@ -21,6 +21,7 @@ namespace Zergatul.Security
             RegisterMessageDigest(MessageDigests.RIPEMD160, () => new RIPEMD160());
             RegisterMessageDigest(MessageDigests.RIPEMD256, () => new RIPEMD256());
             RegisterMessageDigest(MessageDigests.RIPEMD320, () => new RIPEMD320());
+            RegisterMessageDigest(MessageDigests.BLAKE2b, () => new BLAKE2b());
         }
     }
 }

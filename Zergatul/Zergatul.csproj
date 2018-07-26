@@ -88,6 +88,7 @@
     <Compile Include="Cryptography\Certificate\SimpleRootCertificateStore.cs" />
     <Compile Include="Cryptography\Certificate\X509ExtensionsCollection.cs" />
     <Compile Include="Cryptography\Asymmetric\EdDSAParameters.cs" />
+    <Compile Include="Cryptography\Hash\BLAKE2b.cs" />
     <Compile Include="Cryptography\Hash\SHA3.cs" />
     <Compile Include="Cryptography\Hash\SHAKE.cs" />
     <Compile Include="Cryptography\KDF\Bcrypt.cs" />
@@ -423,6 +424,8 @@
     <Compile Include="Network\Tls\TlsStreamSupportedCipherSuites.cs" />
     <Compile Include="Network\Tls\TlsUtils.cs" />
     <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
+    <Compile Include="Security\BLAKE2bParameters.cs" />
+    <Compile Include="Security\Default\BLAKE2b.cs" />
     <Compile Include="Security\Default\PBKDF2.cs" />
     <Compile Include="Security\Default\RIPEMD320.cs" />
     <Compile Include="Security\Default\RIPEMD256.cs" />
@@ -433,6 +436,8 @@
     <Compile Include="Security\KDFParameters.cs" />
     <Compile Include="Security\KeyDerivationFunction.cs" />
     <Compile Include="Security\KeyDerivationFunctions.cs" />
+    <Compile Include="Security\MDParameters.cs" />
+    <Compile Include="Security\MDState.cs" />
     <Compile Include="Security\OpenSsl\MD4.cs" />
     <Compile Include="Security\OpenSsl\PBKDF2.cs" />
     <Compile Include="Security\OpenSsl\Scrypt.cs" />

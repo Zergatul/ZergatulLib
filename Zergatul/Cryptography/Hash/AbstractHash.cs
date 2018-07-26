@@ -80,7 +80,7 @@ namespace Zergatul.Cryptography.Hash
             return InternalStateToBytes();
         }
 
-        private void ProcessBuffer()
+        protected virtual void ProcessBuffer()
         {
             while (_buffer.Count >= BlockSize)
             {
