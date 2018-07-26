@@ -64,6 +64,7 @@
     <Compile Include="MessageDigest\SHA256Tests.cs" />
     <Compile Include="MessageDigest\SHA1Tests.cs" />
     <Compile Include="MessageDigest\MD5Tests.cs" />
+    <Compile Include="MessageDigest\BLAKE2sTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -74,6 +75,20 @@
       <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
       <Name>Zergatul</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MessageDigest\BLAKE2b.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\BLAKE2s.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\BLAKE2bKey.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\BLAKE2sKey.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
