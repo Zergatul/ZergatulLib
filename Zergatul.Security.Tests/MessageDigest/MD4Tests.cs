@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Zergatul.Security.Tests
+namespace Zergatul.Security.Tests.MessageDigest
 {
     [TestClass]
     public class MD2Tests

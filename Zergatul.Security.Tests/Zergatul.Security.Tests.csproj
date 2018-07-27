@@ -52,6 +52,7 @@
     <Compile Include="Helper.cs" />
     <Compile Include="KeyDerivationFunction\ScryptTests.cs" />
     <Compile Include="KeyDerivationFunction\PBKDF2Tests.cs" />
+    <Compile Include="MessageDigest\Groestl512Tests.cs" />
     <Compile Include="MessageDigest\MD4Tests.cs" />
     <Compile Include="MessageDigest\RIPEMD320Tests.cs" />
     <Compile Include="MessageDigest\RIPEMD256Tests.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="MessageDigest\SHA1Tests.cs" />
     <Compile Include="MessageDigest\MD5Tests.cs" />
     <Compile Include="MessageDigest\BLAKE2sTests.cs" />
+    <Compile Include="MessageDigest\Groestl384Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

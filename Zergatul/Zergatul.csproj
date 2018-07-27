@@ -90,7 +90,7 @@
     <Compile Include="Cryptography\Asymmetric\EdDSAParameters.cs" />
     <Compile Include="Cryptography\Hash\BLAKE2s.cs" />
     <Compile Include="Cryptography\Hash\BLAKE2b.cs" />
-    <Compile Include="Cryptography\Hash\Groestl512.cs" />
+    <Compile Include="Cryptography\Hash\GroestlBig.cs" />
     <Compile Include="Cryptography\Hash\SHA3.cs" />
     <Compile Include="Cryptography\Hash\SHAKE.cs" />
     <Compile Include="Cryptography\KDF\Bcrypt.cs" />
@@ -429,6 +429,8 @@
     <Compile Include="Security\BLAKE2Parameters.cs" />
     <Compile Include="Security\Default\BLAKE2s.cs" />
     <Compile Include="Security\Default\BLAKE2b.cs" />
+    <Compile Include="Security\Default\Groestl384.cs" />
+    <Compile Include="Security\Default\Groestl512.cs" />
     <Compile Include="Security\Default\PBKDF2.cs" />
     <Compile Include="Security\Default\RIPEMD320.cs" />
     <Compile Include="Security\Default\RIPEMD256.cs" />

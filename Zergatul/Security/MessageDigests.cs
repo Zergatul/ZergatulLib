@@ -16,5 +16,7 @@
         public const string RIPEMD320 = nameof(RIPEMD320);
         public const string BLAKE2s = nameof(BLAKE2s);
         public const string BLAKE2b = nameof(BLAKE2b);
+        public const string Groestl384 = nameof(Groestl384);
+        public const string Groestl512 = nameof(Groestl512);
     }
 }
