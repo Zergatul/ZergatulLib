@@ -45,7 +45,7 @@ namespace Zergatul.Cryptography.Hash
             Init();
         }
 
-        public void Update(byte[] data)
+        public virtual void Update(byte[] data)
         {
             if (data == null)
                 return;
@@ -56,7 +56,7 @@ namespace Zergatul.Cryptography.Hash
             ProcessBuffer();
         }
 
-        public void Update(byte[] data, int index, int length)
+        public virtual void Update(byte[] data, int index, int length)
         {
             if (index + length > data.Length)
                 throw new InvalidOperationException();
@@ -66,6 +66,11 @@ namespace Zergatul.Cryptography.Hash
             _totalBytes += (ulong)length;
 
             ProcessBuffer();
+        }
+
+        public virtual void UpdateBits(byte[] data, int index, int bitLength)
+        {
+            throw new NotSupportedException();
         }
 
         public byte[] ComputeHash()
@@ -103,52 +108,4 @@ namespace Zergatul.Cryptography.Hash
                 throw new NotImplementedException();
         }
     }
-
-#if UseOpenSSL
-
-    public abstract class AbstractOpenSSLHash : AbstractHash
-    {
-        protected IntPtr _context;
-
-        protected override void Init()
-        {
-            if (_context == IntPtr.Zero)
-                this._context = OpenSSL.CRYPTO_malloc(GetContextSize(), null, 0);
-
-            ContextInit();
-        }
-
-        protected override void AddPadding()
-        {
-            if (_buffer.Count > 0)
-            {
-                ContextUpdate(_buffer.ToArray());
-                _buffer.Clear();
-            }
-        }
-
-        protected override void ProcessBlock()
-        {
-            ContextUpdate(_block);
-        }
-
-        protected override byte[] InternalStateToBytes()
-        {
-            byte[] digest = new byte[HashSize];
-            ContextFinal(digest);
-            return digest;
-        }
-
-        ~AbstractOpenSSLHash()
-        {
-            OpenSSL.CRYPTO_free(_context);
-        }
-
-        protected abstract int GetContextSize();
-        protected abstract void ContextInit();
-        protected abstract void ContextUpdate(byte[] data);
-        protected abstract void ContextFinal(byte[] digest);
-    }
-
-#endif
 }

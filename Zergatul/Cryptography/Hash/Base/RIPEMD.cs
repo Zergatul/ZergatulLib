@@ -1,22 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zergatul.Network;
 
-namespace Zergatul.Cryptography.Hash
+namespace Zergatul.Cryptography.Hash.Base
 {
     public abstract class RIPEMD : AbstractHash
     {
         public override int BlockSize => 64;
-        public override OID OID
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public override OID OID => null;
 
         protected static readonly byte[] r = new byte[]
         {

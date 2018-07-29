@@ -1,9 +1,9 @@
 ﻿using System;
 using Zergatul.Network;
 
-namespace Zergatul.Cryptography.Hash
+namespace Zergatul.Cryptography.Hash.Base
 {
-    public class GroestlBig : AbstractHash
+    public class Groestl_64Bit : AbstractHash
     {
         public override int BlockSize => 128;
         public override int HashSize => _hashSizeBytes;
@@ -625,7 +625,7 @@ namespace Zergatul.Cryptography.Hash
         private ulong[] state;
         private ulong _blockCount;
 
-        public GroestlBig(int hashSizeBytes = 64)
+        public Groestl_64Bit(int hashSizeBytes = 64)
             : base(true)
         {
             if (hashSizeBytes <= 0 || hashSizeBytes > 64)

@@ -18,5 +18,13 @@
         public const string BLAKE2b = nameof(BLAKE2b);
         public const string Groestl384 = nameof(Groestl384);
         public const string Groestl512 = nameof(Groestl512);
+        public const string BMW224 = nameof(BMW224);
+        public const string BMW256 = nameof(BMW256);
+        public const string BMW384 = nameof(BMW384);
+        public const string BMW512 = nameof(BMW512);
+        public const string Skein512_224 = "Skein512-224";
+        public const string Skein512_256 = "Skein512-256";
+        public const string Skein512_384 = "Skein512-384";
+        public const string Skein512_512 = "Skein512-512";
     }
 }

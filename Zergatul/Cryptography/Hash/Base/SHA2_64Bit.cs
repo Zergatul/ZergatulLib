@@ -1,7 +1,5 @@
-﻿namespace Zergatul.Cryptography.Hash
+﻿namespace Zergatul.Cryptography.Hash.Base
 {
-#if !UseOpenSSL
-
     public abstract class SHA2_64Bit : AbstractHash
     {
         public override int BlockSize => 128;
@@ -116,6 +114,4 @@
             return hash;
         }
     }
-
-#endif
 }

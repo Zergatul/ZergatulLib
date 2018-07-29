@@ -52,6 +52,13 @@
     <Compile Include="Helper.cs" />
     <Compile Include="KeyDerivationFunction\ScryptTests.cs" />
     <Compile Include="KeyDerivationFunction\PBKDF2Tests.cs" />
+    <Compile Include="MessageDigest\BMW224Tests.cs" />
+    <Compile Include="MessageDigest\BMW384Tests.cs" />
+    <Compile Include="MessageDigest\Skein224Tests.cs" />
+    <Compile Include="MessageDigest\Skein256Tests.cs" />
+    <Compile Include="MessageDigest\Skein384Tests.cs" />
+    <Compile Include="MessageDigest\Skein512Tests.cs" />
+    <Compile Include="MessageDigest\BMW512Tests.cs" />
     <Compile Include="MessageDigest\Groestl512Tests.cs" />
     <Compile Include="MessageDigest\MD4Tests.cs" />
     <Compile Include="MessageDigest\RIPEMD320Tests.cs" />
@@ -67,6 +74,7 @@
     <Compile Include="MessageDigest\MD5Tests.cs" />
     <Compile Include="MessageDigest\BLAKE2sTests.cs" />
     <Compile Include="MessageDigest\Groestl384Tests.cs" />
+    <Compile Include="MessageDigest\BMW256Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +97,33 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\BLAKE2sKey.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\BMW512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\BMW384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\BMW224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\BMW256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\NISTData.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\Skein224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\Skein256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\Skein384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\Skein512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
