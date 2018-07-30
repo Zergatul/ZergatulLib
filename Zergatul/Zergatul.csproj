@@ -256,6 +256,12 @@
     <Compile Include="Network\Asn1\VisibleString.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
     <Compile Include="Network\DefaultTlsProvider.cs" />
+    <Compile Include="Network\Http\HttpMethod.cs" />
+    <Compile Include="Network\Http\HttpResponseHeader.cs" />
+    <Compile Include="Network\Http\HttpRequestHeader.cs" />
+    <Compile Include="Network\Http\HttpRequestMessage.cs" />
+    <Compile Include="Network\Http\HttpResponseMessage.cs" />
+    <Compile Include="Network\Http\HttpVersion.cs" />
     <Compile Include="Network\ITlsProvider.cs" />
     <Compile Include="Network\Mail\MailAddress.cs" />
     <Compile Include="Network\Mail\MailAttachment.cs" />
@@ -438,6 +444,11 @@
     <Compile Include="Network\Tls\TlsStreamSupportedCipherSuites.cs" />
     <Compile Include="Network\Tls\TlsUtils.cs" />
     <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
+    <Compile Include="Network\WebSocket\Frame.cs" />
+    <Compile Include="Network\WebSocket\Message.cs" />
+    <Compile Include="Network\WebSocket\Opcode.cs" />
+    <Compile Include="Network\WebSocket\WSConnection.cs" />
+    <Compile Include="Network\WebSocket\WSConnectionState.cs" />
     <Compile Include="Security\BLAKE2Parameters.cs" />
     <Compile Include="Security\Default\BLAKE2s.cs" />
     <Compile Include="Security\Default\BLAKE2b.cs" />
