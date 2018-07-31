@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -80,6 +81,35 @@ namespace Zergatul.Security.Tests.MessageDigest
                     md.Update(data);
                 var digest = md.Digest();
                 Assert.IsTrue(BitHelper.BytesToHex(digest) == "988e111f2963f48c616b4971e0e7ed4bf04ae7d4b5a632b3ab3d9eaff0ab4db2dc430abccc3b6de33b1b826baf6d9329fabd6110cfa6d0d8ac2a35610fad1827");
+            }
+        }
+
+        [TestMethod]
+        public void DigibyteBlock7054279Test()
+        {
+            byte[] header =
+                // version
+                BitHelper.GetBytes(536872450, ByteOrder.LittleEndian)
+                // prev block
+                .Concat(BitHelper.HexToBytes("530b046e734f13660763ab68c373821cba031c2d14d991555ab3a9c17a06668f").Reverse())
+                // merkle
+                .Concat(BitHelper.HexToBytes("427e6a43de1cf6a214abcfee613c3b0cfb77948a5449b90a790bfe29d35b3f67").Reverse())
+                // time
+                .Concat(BitHelper.GetBytes(1533049087, ByteOrder.LittleEndian))
+                // bits
+                .Concat(BitHelper.HexToBytes("1a2d5671").Reverse())
+                // nonce
+                .Concat(BitHelper.GetBytes(3073187952, ByteOrder.LittleEndian))
+                .ToArray();
+
+            foreach (var provider in _providers)
+            {
+                var md = provider.GetMessageDigest(MessageDigests.Skein512_512);
+                var digest = md.Digest(header);
+                md = provider.GetMessageDigest(MessageDigests.SHA256);
+                digest = md.Digest(digest);
+                var hash = BitHelper.BytesToHex(digest.Reverse().ToArray());
+                Assert.IsTrue(hash == "000000000000123851cd59ff8bf4a86db7f6c29703d35adc7dd11312562e92e9");
             }
         }
     }

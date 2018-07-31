@@ -88,6 +88,7 @@
     <Compile Include="Cryptography\Certificate\SimpleRootCertificateStore.cs" />
     <Compile Include="Cryptography\Certificate\X509ExtensionsCollection.cs" />
     <Compile Include="Cryptography\Asymmetric\EdDSAParameters.cs" />
+    <Compile Include="Cryptography\Hash\Base\Luffa.cs" />
     <Compile Include="Cryptography\Hash\Base\SkeinParameters.cs" />
     <Compile Include="Cryptography\Hash\Base\SkeinTweak.cs" />
     <Compile Include="Cryptography\Hash\Base\Skein_512BitState.cs" />

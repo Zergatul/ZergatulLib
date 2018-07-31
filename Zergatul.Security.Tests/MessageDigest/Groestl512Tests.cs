@@ -70,5 +70,34 @@ namespace Zergatul.Security.Tests.MessageDigest
                 Assert.IsTrue(hash == "00000000000008bd05f110e25745edfe9f640776d65d29642b1c56745f543a72");
             }
         }
+
+        [TestMethod]
+        public void DigibyteBlock7054312Test()
+        {
+            byte[] header =
+                // version
+                BitHelper.GetBytes(536871938, ByteOrder.LittleEndian)
+                // prev block
+                .Concat(BitHelper.HexToBytes("b4e9feaddced86e4d5c2bec2afec4da03cc3c7cdaeede690fec89ee033fbee98").Reverse())
+                // merkle
+                .Concat(BitHelper.HexToBytes("73cedf213a8932e8f8175ef935baa9242cd75ffad68e3a580546897dfa43bc27").Reverse())
+                // time
+                .Concat(BitHelper.GetBytes(1533049525, ByteOrder.LittleEndian))
+                // bits
+                .Concat(BitHelper.HexToBytes("1a1b2a4e").Reverse())
+                // nonce
+                .Concat(BitHelper.GetBytes(793270297, ByteOrder.LittleEndian))
+                .ToArray();
+
+            foreach (var provider in _providers)
+            {
+                var md = provider.GetMessageDigest(MessageDigests.Groestl512);
+                var digest = md.Digest(header);
+                md = provider.GetMessageDigest(MessageDigests.SHA256);
+                digest = md.Digest(digest);
+                var hash = BitHelper.BytesToHex(digest.Reverse().ToArray());
+                Assert.IsTrue(hash == "0000000000000f6276a4ab87dce37338f0d4b0fe1d50cad5b0571f6c7feee2c7");
+            }
+        }
     }
 }
