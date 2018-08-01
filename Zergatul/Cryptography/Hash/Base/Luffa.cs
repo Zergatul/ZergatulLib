@@ -1,10 +1,13 @@
 ﻿using System;
+using Zergatul.Network;
 
 namespace Zergatul.Cryptography.Hash.Base
 {
-    public abstract class Luffa : AbstractHash
+    public class Luffa : AbstractHash
     {
         public override int BlockSize => 32;
+        public override int HashSize => 64;
+        public override OID OID => null;
 
         private static readonly uint[][] V = new uint[][]
         {
@@ -51,30 +54,96 @@ namespace Zergatul.Cryptography.Hash.Base
             0x2e48f1c126889ba7, 0xb923c7049a226e9d
         };
 
+        private static readonly ulong[] RCW230 = new ulong[]
+        {
+            0xb213afa5fc20d9d2, 0xc84ebe9534552e25,
+            0x4e608a227ad8818f, 0x56d858fe8438764a,
+            0x343b138fbb6de032, 0xd0ec4e3dedb780c8,
+            0x2ceb4882d9847356, 0xb3ad2208a2c78434
+        };
+
+        private static readonly ulong[] RCW234 = new ulong[]
+        {
+            0xe028c9bfe25e72c1, 0x44756f91e623bb72,
+            0x7e8fce325c58a4a4, 0x956548be1e38e2e7,
+            0xfe191be278e38b9d, 0x3cb226e527586719,
+            0x5944a28e36eda57f, 0xa1c4c355703aace7
+        };
+
+        private static readonly uint[] RC40 = new uint[]
+        {
+            0xf0d2e9e3, 0xac11d7fa, 0x1bcb66f2, 0x6f2d9bc9,
+            0x78602649, 0x8edae952, 0x3b6ba548, 0xedae9520
+        };
+
+        private static readonly uint[] RC44 = new uint[]
+        {
+            0x5090d577, 0x2d1925ab, 0xb46496ac, 0xd1925ab0,
+            0x29131ab6, 0x0fc053c3, 0x3f014f0c, 0xfc053c31
+        };
+
         private uint[][] v;
         private uint[] m;
 
-        protected Luffa()
+        public Luffa()
+            : base(true)
         {
             v = new uint[5][];
             for (int i = 0; i < 5; i++)
                 v[i] = new uint[8];
 
             m = new uint[8];
+
+            _block = new byte[BlockSize];
+            Init();
         }
 
         protected override void Init()
         {
             for (int i = 0; i < 5; i++)
-                Array.Copy(V, 0, v, 0, 8);
+                Array.Copy(V[i], 0, v[i], 0, 8);
         }
 
         protected override void ProcessBlock()
         {
-            BitHelper.ToUInt32Array(_block, ByteOrder.LittleEndian, m);
+            BitHelper.ToUInt32Array(_block, ByteOrder.BigEndian, m);
 
             MI5();
             P5();
+        }
+
+        protected override void AddPadding()
+        {
+            _buffer.Add(0x80);
+            while (_buffer.Count % BlockSize != 0)
+                _buffer.Add(0);
+        }
+
+        protected override byte[] InternalStateToBytes()
+        {
+            uint[] result = new uint[16];
+            for (int i = 0; i < 8; i++)
+                m[i] = 0;
+            for (int i = 1; i < 3; i++)
+            {
+                MI5();
+                P5();
+
+                switch (i)
+                {
+                    case 1:
+                        for (int j = 0; j < 8; j++)
+                            result[j] = v[0][j] ^ v[1][j] ^ v[2][j] ^ v[3][j] ^ v[4][j];
+                        break;
+                    case 2:
+                        for (int j = 0; j < 8; j++)
+                            result[8 + j] = v[0][j] ^ v[1][j] ^ v[2][j] ^ v[3][j] ^ v[4][j];
+                        break;
+
+                }
+            }
+
+            return BitHelper.ToByteArray(result, ByteOrder.BigEndian);
         }
 
         private void MI5()
@@ -125,10 +194,11 @@ namespace Zergatul.Cryptography.Hash.Base
 
         private void P5()
         {
-            ulong[] w = new ulong[8];
             Tweak5();
+
+            ulong[] w = new ulong[8];
             for (int i = 0; i < 8; i++)
-                w[i] = (ulong)v[0][i] | (v[1][i] << 32);
+                w[i] = v[0][i] | ((ulong)v[1][i] << 32);
             for (int r = 0; r < 8; r++)
             {
                 SUB_CRUMB_GEN_64(ref w[0], ref w[1], ref w[2], ref w[3]);
@@ -140,6 +210,64 @@ namespace Zergatul.Cryptography.Hash.Base
                 w[0] ^= RCW010[r];
                 w[4] ^= RCW014[r];
             }
+            for (int i = 0; i < 8; i++)
+            {
+                v[0][i] = (uint)w[i];
+                v[1][i] = (uint)(w[i] >> 32);
+            }
+
+            for (int i = 0; i < 8; i++)
+                w[i] = v[2][i] | ((ulong)v[3][i] << 32);
+            for (int r = 0; r < 8; r++)
+            {
+                SUB_CRUMB_GEN_64(ref w[0], ref w[1], ref w[2], ref w[3]);
+                SUB_CRUMB_GEN_64(ref w[5], ref w[6], ref w[7], ref w[4]);
+                MixWord64(ref w[0], ref w[4]);
+                MixWord64(ref w[1], ref w[5]);
+                MixWord64(ref w[2], ref w[6]);
+                MixWord64(ref w[3], ref w[7]);
+                w[0] ^= RCW230[r];
+                w[4] ^= RCW234[r];
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                v[2][i] = (uint)w[i];
+                v[3][i] = (uint)(w[i] >> 32);
+            }
+
+            for (int r = 0; r < 8; r++)
+            {
+                SUB_CRUMB_GEN_32(ref v[4][0], ref v[4][1], ref v[4][2], ref v[4][3]);
+                SUB_CRUMB_GEN_32(ref v[4][5], ref v[4][6], ref v[4][7], ref v[4][4]);
+                MixWord32(ref v[4][0], ref v[4][4]);
+                MixWord32(ref v[4][1], ref v[4][5]);
+                MixWord32(ref v[4][2], ref v[4][6]);
+                MixWord32(ref v[4][3], ref v[4][7]);
+                v[4][0] ^= RC40[r];
+                v[4][4] ^= RC44[r];
+            }
+        }
+
+        private void SUB_CRUMB_GEN_32(ref uint a0, ref uint a1, ref uint a2, ref uint a3)
+        {
+            uint tmp;
+            tmp = a0;
+            a0 |= a1;
+            a2 ^= a3;
+            a1 = ~a1;
+            a0 ^= a3;
+            a3 &= tmp;
+            a1 ^= a3;
+            a3 ^= a2;
+            a2 &= a0;
+            a0 = ~a0;
+            a2 ^= a1;
+            a1 |= a3;
+            tmp ^= a1;
+            a3 ^= a2;
+            a2 &= a1;
+            a1 ^= a0;
+            a0 = tmp;
         }
 
         private void SUB_CRUMB_GEN_64(ref ulong a0, ref ulong a1, ref ulong a2, ref ulong a3)
@@ -164,6 +292,15 @@ namespace Zergatul.Cryptography.Hash.Base
             a0 = tmp;
         }
 
+        private void MixWord32(ref uint u, ref uint v)
+        {
+            v ^= u;
+            u = BitHelper.RotateLeft(u,  2) ^ v;
+            v = BitHelper.RotateLeft(v, 14) ^ u;
+            u = BitHelper.RotateLeft(u, 10) ^ v;
+            v = BitHelper.RotateLeft(v, 1);
+        }
+
         private void MixWord64(ref ulong u, ref ulong v)
         {
             uint ul, uh, vl, vh;
@@ -180,8 +317,8 @@ namespace Zergatul.Cryptography.Hash.Base
             vh = BitHelper.RotateLeft(vh, 14) ^ uh;
             uh = BitHelper.RotateLeft(uh, 10) ^ vh;
             vh = BitHelper.RotateLeft(vh,  1);
-            u = (ulong)ul | (uh << 32);
-            v = (ulong)vl | (vh << 32);
+            u = ul | ((ulong)uh << 32);
+            v = vl | ((ulong)vh << 32);
         }
 
         private void Tweak5()

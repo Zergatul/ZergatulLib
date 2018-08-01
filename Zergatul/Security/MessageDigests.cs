@@ -26,5 +26,6 @@
         public const string Skein512_256 = "Skein512-256";
         public const string Skein512_384 = "Skein512-384";
         public const string Skein512_512 = "Skein512-512";
+        public const string Luffa512 = nameof(Luffa512);
     }
 }

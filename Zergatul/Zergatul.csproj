@@ -88,10 +88,12 @@
     <Compile Include="Cryptography\Certificate\SimpleRootCertificateStore.cs" />
     <Compile Include="Cryptography\Certificate\X509ExtensionsCollection.cs" />
     <Compile Include="Cryptography\Asymmetric\EdDSAParameters.cs" />
+    <Compile Include="Cryptography\Hash\Base\CubeHash.cs" />
     <Compile Include="Cryptography\Hash\Base\Luffa.cs" />
     <Compile Include="Cryptography\Hash\Base\SkeinParameters.cs" />
     <Compile Include="Cryptography\Hash\Base\SkeinTweak.cs" />
     <Compile Include="Cryptography\Hash\Base\Skein_512BitState.cs" />
+    <Compile Include="Cryptography\Hash\Luffa512.cs" />
     <Compile Include="Cryptography\Hash\Skein512.cs" />
     <Compile Include="Cryptography\Hash\BMW384.cs" />
     <Compile Include="Cryptography\Hash\BMW512.cs" />
@@ -455,6 +457,7 @@
     <Compile Include="Security\Default\BLAKE2b.cs" />
     <Compile Include="Security\Default\BMW.cs" />
     <Compile Include="Security\Default\Groestl.cs" />
+    <Compile Include="Security\Default\Luffa.cs" />
     <Compile Include="Security\Default\PBKDF2.cs" />
     <Compile Include="Security\Default\RIPEMD.cs" />
     <Compile Include="Security\Default\Scrypt.cs" />

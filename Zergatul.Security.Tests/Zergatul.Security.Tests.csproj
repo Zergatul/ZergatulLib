@@ -57,6 +57,7 @@
     <Compile Include="MessageDigest\Skein224Tests.cs" />
     <Compile Include="MessageDigest\Skein256Tests.cs" />
     <Compile Include="MessageDigest\Skein384Tests.cs" />
+    <Compile Include="MessageDigest\Luffa512Tests.cs" />
     <Compile Include="MessageDigest\Skein512Tests.cs" />
     <Compile Include="MessageDigest\BMW512Tests.cs" />
     <Compile Include="MessageDigest\Groestl512Tests.cs" />
@@ -111,6 +112,15 @@
     <Content Include="MessageDigest\BMW256.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="MessageDigest\Luffa224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\Luffa256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\Luffa384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="MessageDigest\NISTData.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -121,6 +131,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\Skein384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\Luffa512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\Skein512.txt">

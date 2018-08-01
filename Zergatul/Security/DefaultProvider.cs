@@ -33,6 +33,7 @@ namespace Zergatul.Security
             RegisterMessageDigest(MessageDigests.Skein512_256, () => new Skein512_256());
             RegisterMessageDigest(MessageDigests.Skein512_384, () => new Skein512_384());
             RegisterMessageDigest(MessageDigests.Skein512_512, () => new Skein512_512());
+            RegisterMessageDigest(MessageDigests.Luffa512, () => new Luffa512());
         }
     }
 }
