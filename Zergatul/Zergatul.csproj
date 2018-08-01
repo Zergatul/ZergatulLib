@@ -93,6 +93,10 @@
     <Compile Include="Cryptography\Hash\Base\SkeinParameters.cs" />
     <Compile Include="Cryptography\Hash\Base\SkeinTweak.cs" />
     <Compile Include="Cryptography\Hash\Base\Skein_512BitState.cs" />
+    <Compile Include="Cryptography\Hash\CubeHash384.cs" />
+    <Compile Include="Cryptography\Hash\CubeHash224.cs" />
+    <Compile Include="Cryptography\Hash\CubeHash256.cs" />
+    <Compile Include="Cryptography\Hash\CubeHash512.cs" />
     <Compile Include="Cryptography\Hash\Luffa512.cs" />
     <Compile Include="Cryptography\Hash\Skein512.cs" />
     <Compile Include="Cryptography\Hash\BMW384.cs" />
@@ -457,6 +461,7 @@
     <Compile Include="Security\Default\BLAKE2b.cs" />
     <Compile Include="Security\Default\BMW.cs" />
     <Compile Include="Security\Default\Groestl.cs" />
+    <Compile Include="Security\Default\CubeHash.cs" />
     <Compile Include="Security\Default\Luffa.cs" />
     <Compile Include="Security\Default\PBKDF2.cs" />
     <Compile Include="Security\Default\RIPEMD.cs" />

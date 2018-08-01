@@ -54,6 +54,10 @@
     <Compile Include="KeyDerivationFunction\PBKDF2Tests.cs" />
     <Compile Include="MessageDigest\BMW224Tests.cs" />
     <Compile Include="MessageDigest\BMW384Tests.cs" />
+    <Compile Include="MessageDigest\CubeHash224Tests.cs" />
+    <Compile Include="MessageDigest\CubeHash256Tests.cs" />
+    <Compile Include="MessageDigest\CubeHash384Tests.cs" />
+    <Compile Include="MessageDigest\CubeHash512Tests.cs" />
     <Compile Include="MessageDigest\Skein224Tests.cs" />
     <Compile Include="MessageDigest\Skein256Tests.cs" />
     <Compile Include="MessageDigest\Skein384Tests.cs" />

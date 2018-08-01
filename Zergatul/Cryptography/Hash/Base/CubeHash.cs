@@ -12,7 +12,7 @@ namespace Zergatul.Cryptography.Hash.Base
         private int _hashSize;
         private int _initRounds, _blockRounds, _finRounds;
 
-        private uint[] state = new uint[32];
+        protected uint[] state = new uint[32];
 
         /// <summary>
         /// ctor
@@ -37,47 +37,14 @@ namespace Zergatul.Cryptography.Hash.Base
 
         protected override void Init()
         {
-            //state[0] = (uint)_hashSize;
-            //state[1] = (uint)_blockSize;
-            //state[2] = (uint)_blockRounds;
-            //for (int i = 3; i < 32; i++)
-            //    state[i] = 0;
+            state[0] = (uint)_hashSize;
+            state[1] = (uint)_blockSize;
+            state[2] = (uint)_blockRounds;
+            for (int i = 3; i < 32; i++)
+                state[i] = 0;
 
-            //for (int i = 0; i < _initRounds; i++)
-            //    Round();
-
-            state[0x00] = 0x2AEA2A61;
-            state[0x01] = 0x50F494D4;
-            state[0x02] = 0x2D538B8B;
-            state[0x03] = 0x4167D83E;
-            state[0x04] = 0x3FEE2313;
-            state[0x05] = 0xC701CF8C;
-            state[0x06] = 0xCC39968E;
-            state[0x07] = 0x50AC5695;
-            state[0x08] = 0x4D42C787;
-            state[0x09] = 0xA647A8B3;
-            state[0x0A] = 0x97CF0BEF;
-            state[0x0B] = 0x825B4537;
-            state[0x0C] = 0xEEF864D2;
-            state[0x0D] = 0xF22090C4;
-            state[0x0E] = 0xD0E5CD33;
-            state[0x0F] = 0xA23911AE;
-            state[0x10] = 0xFCD398D9;
-            state[0x11] = 0x148FE485;
-            state[0x12] = 0x1B017BEF;
-            state[0x13] = 0xB6444532;
-            state[0x14] = 0x6A536159;
-            state[0x15] = 0x2FF5781C;
-            state[0x16] = 0x91FA7934;
-            state[0x17] = 0x0DBADEA9;
-            state[0x18] = 0xD65C8A2B;
-            state[0x19] = 0xA5A70E75;
-            state[0x1A] = 0xB1C62456;
-            state[0x1B] = 0xBC796576;
-            state[0x1C] = 0x1921C8F7;
-            state[0x1D] = 0xE7989AF1;
-            state[0x1E] = 0x7795D246;
-            state[0x1F] = 0xD43E3B44;
+            for (int i = 0; i < _initRounds; i++)
+                Round();
         }
 
         protected override void ProcessBlock()
@@ -133,7 +100,7 @@ namespace Zergatul.Cryptography.Hash.Base
             // Swap x[1jk0m] with x[1jk1m], for each (j,k,m)
             for (int i = 0; i < 8; i++)
             {
-                int i1 = 0x10 | ((i & 6) << 2) | (i & 1);
+                int i1 = 0x10 | ((i & 6) << 1) | (i & 1);
                 int i2 = i1 | 2;
                 uint buf = state[i1];
                 state[i1] = state[i2];

@@ -27,5 +27,9 @@
         public const string Skein512_384 = "Skein512-384";
         public const string Skein512_512 = "Skein512-512";
         public const string Luffa512 = nameof(Luffa512);
+        public const string CubeHash224 = nameof(CubeHash224);
+        public const string CubeHash256 = nameof(CubeHash256);
+        public const string CubeHash384 = nameof(CubeHash384);
+        public const string CubeHash512 = nameof(CubeHash512);
     }
 }

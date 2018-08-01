@@ -34,6 +34,10 @@ namespace Zergatul.Security
             RegisterMessageDigest(MessageDigests.Skein512_384, () => new Skein512_384());
             RegisterMessageDigest(MessageDigests.Skein512_512, () => new Skein512_512());
             RegisterMessageDigest(MessageDigests.Luffa512, () => new Luffa512());
+            RegisterMessageDigest(MessageDigests.CubeHash224, () => new CubeHash224());
+            RegisterMessageDigest(MessageDigests.CubeHash256, () => new CubeHash256());
+            RegisterMessageDigest(MessageDigests.CubeHash384, () => new CubeHash384());
+            RegisterMessageDigest(MessageDigests.CubeHash512, () => new CubeHash512());
         }
     }
 }
