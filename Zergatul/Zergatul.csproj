@@ -457,6 +457,7 @@
     <Compile Include="Network\WebSocket\WSConnection.cs" />
     <Compile Include="Network\WebSocket\WSConnectionState.cs" />
     <Compile Include="Security\BLAKE2Parameters.cs" />
+    <Compile Include="Security\CubeHashParameters.cs" />
     <Compile Include="Security\Default\BLAKE2s.cs" />
     <Compile Include="Security\Default\BLAKE2b.cs" />
     <Compile Include="Security\Default\BMW.cs" />

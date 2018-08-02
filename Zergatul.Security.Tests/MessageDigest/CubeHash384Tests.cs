@@ -48,11 +48,11 @@ namespace Zergatul.Security.Tests.MessageDigest
                 list.AddRange(BitHelper.HexToBytes(line));
             byte[] data = list.ToArray();
 
-            string[] digests = File.ReadAllLines("MessageDigest/Luffa512.txt");
+            string[] digests = File.ReadAllLines("MessageDigest/CubeHash384.txt");
 
             foreach (var provider in _providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Luffa512);
+                var md = provider.GetMessageDigest(MessageDigests.CubeHash384);
 
                 int index = 0;
                 for (int i = 0; i < 2048; i++)

@@ -58,6 +58,7 @@
     <Compile Include="MessageDigest\CubeHash256Tests.cs" />
     <Compile Include="MessageDigest\CubeHash384Tests.cs" />
     <Compile Include="MessageDigest\CubeHash512Tests.cs" />
+    <Compile Include="MessageDigest\CubeHashTests.cs" />
     <Compile Include="MessageDigest\Skein224Tests.cs" />
     <Compile Include="MessageDigest\Skein256Tests.cs" />
     <Compile Include="MessageDigest\Skein384Tests.cs" />
@@ -114,6 +115,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\BMW256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\CubeHash512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\CubeHash384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\CubeHash256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\CubeHash224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\Luffa224.txt">

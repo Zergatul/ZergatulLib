@@ -26,17 +26,17 @@ namespace Zergatul.Security.Tests.MessageDigest
                 Assert.IsTrue(BitHelper.BytesToHex(digest) == "4a1d00bbcfcb5a9562fb981e7f7db3350fe2658639d948b9d57452c22328bb32f468b072208450bad5ee178271408be0b16e5633ac8a1e3cf9864cfbfc8e043a");
                 md.Reset();
 
-                //digest = md.Digest(Encoding.ASCII.GetBytes("The quick brown fox jumps over the lazy dog"));
-                //Assert.IsTrue(BitHelper.BytesToHex(digest) == "459e2280a7cdb0c721d8d9dbeb9ed339659dc9e7b158e9dd2d328d946cb21474dc9177edfc93602f1aadb31944c795c9b5df859a3dc6132d4f0a4c476aaf797f");
-                //md.Reset();
+                digest = md.Digest(Encoding.ASCII.GetBytes("The quick brown fox jumps over the lazy dog"));
+                Assert.IsTrue(BitHelper.BytesToHex(digest) == "bdba44a28cd16b774bdf3c9511def1a2baf39d4ef98b92c27cf5e37beb8990b7cdb6575dae1a548330780810618b8a5c351c1368904db7ebdf8857d596083a86");
+                md.Reset();
 
-                //digest = md.Digest(Encoding.ASCII.GetBytes("The quick brown fox jumps over the lazy dog."));
-                //Assert.IsTrue(BitHelper.BytesToHex(digest) == "8d023cb777de2059af5007032c253fe0148a35c0a98def536cf22d5af064d8279fc2c80f52fe2d08462beaa8011e30350618a01f4763dcd53d8a09afcac75c65");
-                //md.Reset();
+                digest = md.Digest(Encoding.ASCII.GetBytes("The quick brown fox jumps over the lazy dog."));
+                Assert.IsTrue(BitHelper.BytesToHex(digest) == "350b490152ec7d9e74583c760199261f622da5075d9c5fa5bf51b9f76412c93bcb0d423caac2a3ab70549222890a07e2e9d1770e1f2a7e1cfeeb1fd9860d5df6");
+                md.Reset();
 
-                //digest = md.Digest(Encoding.ASCII.GetBytes("abc"));
-                //Assert.IsTrue(BitHelper.BytesToHex(digest) == "f40245973e80d79d0f4b9b202ddd4505b81b8830501bea31612b5817aae387921dcefd808ca2c78020aff59345d6f91f0ee6b2eee113f0cbcf22b64381387e8a");
-                //md.Reset();
+                digest = md.Digest(Encoding.ASCII.GetBytes("abc"));
+                Assert.IsTrue(BitHelper.BytesToHex(digest) == "f63d6fa89ca9fe7ab2e171be52cf193f0c8ac9f62bad297032c1e7571046791a7e8964e5c8d91880d6f9c2a54176b05198901047438e05ac4ef38d45c0282673");
+                md.Reset();
             };
         }
 
@@ -48,11 +48,11 @@ namespace Zergatul.Security.Tests.MessageDigest
                 list.AddRange(BitHelper.HexToBytes(line));
             byte[] data = list.ToArray();
 
-            string[] digests = File.ReadAllLines("MessageDigest/Luffa512.txt");
+            string[] digests = File.ReadAllLines("MessageDigest/CubeHash512.txt");
 
             foreach (var provider in _providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Luffa512);
+                var md = provider.GetMessageDigest(MessageDigests.CubeHash512);
 
                 int index = 0;
                 for (int i = 0; i < 2048; i++)
