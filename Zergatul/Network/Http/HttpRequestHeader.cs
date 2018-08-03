@@ -14,6 +14,7 @@
         public const string Warning = "Warning";
 
         // Request
+        public const string AcceptEncoding = "Accept-Encoding";
         public const string Host = "Host";
 
         // Web Socket

@@ -263,7 +263,10 @@
     <Compile Include="Network\Asn1\VisibleString.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
     <Compile Include="Network\DefaultTlsProvider.cs" />
+    <Compile Include="Network\Http\HttpHeaderValue.cs" />
     <Compile Include="Network\Http\HttpMethod.cs" />
+    <Compile Include="Network\Http\HttpRequest.cs" />
+    <Compile Include="Network\Http\HttpResponse.cs" />
     <Compile Include="Network\Http\HttpResponseHeader.cs" />
     <Compile Include="Network\Http\HttpRequestHeader.cs" />
     <Compile Include="Network\Http\HttpRequestMessage.cs" />
