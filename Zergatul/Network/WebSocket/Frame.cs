@@ -35,7 +35,14 @@ namespace Zergatul.Network.WebSocket
                 length -= 2;
             }
             if (payload == 127)
-                throw new NotImplementedException();
+            {
+                if (length < 8)
+                    return null;
+                ulong payloadLong = BitHelper.ToUInt64(buffer, index, ByteOrder.BigEndian);
+                payload = checked((int)payloadLong);
+                index += 8;
+                length -= 8;
+            }
 
             byte[] mask = null;
             if (isMasked)

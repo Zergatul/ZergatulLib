@@ -7,25 +7,25 @@ using Zergatul.Security;
 
 namespace Zergatul.Network.WebSocket
 {
-    public class WSConnection
+    public class WebSocketClient
     {
-        public WSConnectionState State { get; private set; }
+        public ConnectionState State { get; private set; }
 
         private Uri _uri;
         private TcpClient _client;
         private Stream _stream;
         private byte[] _nonce;
-        private byte[] _buffer = new byte[65536];
+        private byte[] _buffer = new byte[1024 * 1024];
         private int _bufPosition = 0;
         private SecureRandom _random;
 
-        public WSConnection(string uri)
+        public WebSocketClient(string uri)
             : this(new Uri(uri))
         {
 
         }
 
-        public WSConnection(Uri uri)
+        public WebSocketClient(Uri uri)
         {
             if (uri == null)
                 throw new ArgumentNullException();
@@ -33,7 +33,7 @@ namespace Zergatul.Network.WebSocket
                 throw new ArgumentException();
 
             this._uri = uri;
-            this.State = WSConnectionState.Uninitialized;
+            this.State = ConnectionState.Uninitialized;
 
             this._nonce = new byte[16];
             this._random = Provider.GetSecureRandomInstance(SecureRandoms.Default);
@@ -41,7 +41,7 @@ namespace Zergatul.Network.WebSocket
 
         public void Open()
         {
-            this.State = WSConnectionState.Connecting;
+            this.State = ConnectionState.Connecting;
 
             _client = new TcpClient();
             _client.Connect(_uri.Host, _uri.Port);
@@ -86,7 +86,7 @@ namespace Zergatul.Network.WebSocket
             if (response.Headers[HttpResponseHeader.SecWebSocketAccept] != Convert.ToBase64String(digest))
                 throw new InvalidOperationException();
 
-            State = WSConnectionState.Connected;
+            State = ConnectionState.Connected;
         }
 
         public void SendText(string text)

@@ -270,6 +270,9 @@
     <Compile Include="Network\Http\HttpResponseMessage.cs" />
     <Compile Include="Network\Http\HttpVersion.cs" />
     <Compile Include="Network\ITlsProvider.cs" />
+    <Compile Include="Network\JsonRpc\JsonRpcClient.cs" />
+    <Compile Include="Network\JsonRpc\JsonRpcTransport.cs" />
+    <Compile Include="Network\JsonRpc\WebSocketTransport.cs" />
     <Compile Include="Network\Mail\MailAddress.cs" />
     <Compile Include="Network\Mail\MailAttachment.cs" />
     <Compile Include="Network\Mail\MailMessage.cs" />
@@ -454,8 +457,8 @@
     <Compile Include="Network\WebSocket\Frame.cs" />
     <Compile Include="Network\WebSocket\Message.cs" />
     <Compile Include="Network\WebSocket\Opcode.cs" />
-    <Compile Include="Network\WebSocket\WSConnection.cs" />
-    <Compile Include="Network\WebSocket\WSConnectionState.cs" />
+    <Compile Include="Network\WebSocket\WebSocketClient.cs" />
+    <Compile Include="Network\WebSocket\ConnectionState.cs" />
     <Compile Include="Security\BLAKE2Parameters.cs" />
     <Compile Include="Security\CubeHashParameters.cs" />
     <Compile Include="Security\Default\BLAKE2s.cs" />

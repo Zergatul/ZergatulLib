@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Network.WebSocket
 {
-    public enum WSConnectionState
+    public enum ConnectionState
     {
         Uninitialized,
         Connecting,
