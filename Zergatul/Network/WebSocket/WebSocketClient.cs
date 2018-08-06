@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
+using Zergatul.IO;
 using Zergatul.Network.Http;
 using Zergatul.Security;
 
@@ -14,6 +15,7 @@ namespace Zergatul.Network.WebSocket
         private Uri _uri;
         private TcpClient _client;
         private Stream _stream;
+        private GenericMessageReadStream _readStream;
         private byte[] _nonce;
         private byte[] _buffer = new byte[1024 * 1024];
         private int _bufPosition = 0;
@@ -57,6 +59,8 @@ namespace Zergatul.Network.WebSocket
                     _stream = tls;
                     break;
             }
+
+            _readStream = new GenericMessageReadStream(_stream);
 
             _random.GetNextBytes(_nonce);
             string key = Convert.ToBase64String(_nonce);
@@ -104,12 +108,8 @@ namespace Zergatul.Network.WebSocket
         {
             while (true)
             {
-                Frame frame;
-                int messageLength = 0;
-                while ((frame = Frame.Parse(_buffer, 0, _bufPosition, ref messageLength)) == null)
-                    ReadBuffer();
-
-                ShiftBuffer(messageLength);
+                Frame frame = new Frame();
+                frame.Read(_readStream, _buffer);
 
                 switch (frame.Opcode)
                 {
@@ -170,33 +170,6 @@ namespace Zergatul.Network.WebSocket
             ShiftBuffer(messageLength);
 
             return response;
-        }
-
-        private void ReadBuffer()
-        {
-            if (_buffer.Length - _bufPosition == 0)
-                throw new InvalidOperationException("Insufficient buffer");
-
-            int read = _stream.Read(_buffer, _bufPosition, _buffer.Length - _bufPosition);
-            if (read == 0)
-                throw new InvalidOperationException();
-            _bufPosition += read;
-        }
-
-        private void ShiftBuffer(int count)
-        {
-            if (count > _bufPosition)
-                throw new InvalidOperationException();
-            if (count == _bufPosition)
-            {
-                _bufPosition = 0;
-            }
-            else
-            {
-                for (int i = 0; i < _bufPosition - count; i++)
-                    _buffer[i] = _buffer[i + count];
-                _bufPosition -= count;
-            }
         }
     }
 }

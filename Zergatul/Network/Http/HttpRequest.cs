@@ -50,13 +50,20 @@ namespace Zergatul.Network.Http
 
         #endregion
 
-        private Stream _stream;
         private Uri _uri;
+        private KeepAliveConnectionProvider _connectionProvider;
         private HttpRequestMessage _reqMsg = new HttpRequestMessage();
 
         public HttpRequest(Uri uri)
+            : this(uri, DefaultKeepAliveConnectionProvider.Instance)
+        {
+            
+        }
+
+        public HttpRequest(Uri uri, KeepAliveConnectionProvider provider)
         {
             this._uri = uri;
+            this._connectionProvider = provider;
             SetDefaultHeaders();
         }
 
@@ -68,7 +75,11 @@ namespace Zergatul.Network.Http
 
         public HttpResponse GetResponse()
         {
-            _reqMsg.ToBytes();
+            if (_connectionProvider == null)
+                throw new NotImplementedException();
+            var connection = _connectionProvider.GetConnection(_uri);
+            byte[] requestBytes = _reqMsg.ToBytes();
+            connection.Stream.Write(requestBytes, 0, requestBytes.Length);
             return null;
         }
 

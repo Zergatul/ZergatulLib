@@ -116,6 +116,7 @@
     <Compile Include="Cryptography\KDF\PBKDF2.cs" />
     <Compile Include="Cryptography\KDF\Scrypt.cs" />
     <Compile Include="Cryptography\KDF\HKDF.cs" />
+    <Compile Include="IO\GenericMessageReadStream.cs" />
     <Compile Include="IO\LimitedStream.cs" />
     <Compile Include="Math\BigReal.cs" />
     <Compile Include="Math\EdwardsCurves\EdCurve.cs" />
@@ -263,6 +264,7 @@
     <Compile Include="Network\Asn1\VisibleString.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
     <Compile Include="Network\DefaultTlsProvider.cs" />
+    <Compile Include="Network\Http\DefaultKeepAliveConnectionProvider.cs" />
     <Compile Include="Network\Http\HttpHeaderValue.cs" />
     <Compile Include="Network\Http\HttpMethod.cs" />
     <Compile Include="Network\Http\HttpRequest.cs" />
@@ -272,6 +274,8 @@
     <Compile Include="Network\Http\HttpRequestMessage.cs" />
     <Compile Include="Network\Http\HttpResponseMessage.cs" />
     <Compile Include="Network\Http\HttpVersion.cs" />
+    <Compile Include="Network\Http\KeepAliveConnection.cs" />
+    <Compile Include="Network\Http\KeepAliveConnectionProvider.cs" />
     <Compile Include="Network\ITlsProvider.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcClient.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcTransport.cs" />
