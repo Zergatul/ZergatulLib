@@ -8,6 +8,12 @@ namespace Zergatul.Network.Http
     {
         #region Headers-related properties
 
+        public string Method
+        {
+            get => _reqMsg.Method;
+            set => _reqMsg.Method = value;
+        }
+
         public string AcceptEncoding
         {
             get
@@ -77,14 +83,20 @@ namespace Zergatul.Network.Http
         {
             if (_connectionProvider == null)
                 throw new NotImplementedException();
+
             var connection = _connectionProvider.GetConnection(_uri);
+
             byte[] requestBytes = _reqMsg.ToBytes();
             connection.Stream.Write(requestBytes, 0, requestBytes.Length);
-            return null;
+
+            return new HttpResponse(connection);
         }
 
         private void SetDefaultHeaders()
         {
+            Method = HttpMethod.Get;
+            _reqMsg.RequestUri = _uri.PathAndQuery;
+
             AcceptEncoding = "gzip";
             KeepAlive = true;
             Host = _uri.Host;

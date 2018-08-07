@@ -13,6 +13,10 @@
         public const string Via = "Via";
         public const string Warning = "Warning";
 
+        // Response
+        public const string ContentEncoding = "Content-Encoding";
+        public const string ContentLength = "Content-Length";
+
         // Web Socket
         public const string SecWebSocketAccept = "Sec-WebSocket-Accept";
     }

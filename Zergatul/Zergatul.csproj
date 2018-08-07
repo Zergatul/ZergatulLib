@@ -273,8 +273,9 @@
     <Compile Include="Network\Http\HttpRequestHeader.cs" />
     <Compile Include="Network\Http\HttpRequestMessage.cs" />
     <Compile Include="Network\Http\HttpResponseMessage.cs" />
+    <Compile Include="Network\Http\HttpResponseStream.cs" />
     <Compile Include="Network\Http\HttpVersion.cs" />
-    <Compile Include="Network\Http\KeepAliveConnection.cs" />
+    <Compile Include="Network\Http\HttpConnection.cs" />
     <Compile Include="Network\Http\KeepAliveConnectionProvider.cs" />
     <Compile Include="Network\ITlsProvider.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcClient.cs" />

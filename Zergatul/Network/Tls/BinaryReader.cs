@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +64,8 @@ namespace Zergatul.Network.Tls
                 while (true)
                 {
                     totalRead += _stream.Read(_buffer, totalRead, count - totalRead);
+                    if (totalRead == 0)
+                        throw new EndOfStreamException();
                     if (totalRead == count)
                         break;
                 }

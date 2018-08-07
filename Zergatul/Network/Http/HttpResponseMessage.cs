@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using Zergatul.IO;
 
 namespace Zergatul.Network.Http
 {
@@ -13,42 +14,52 @@ namespace Zergatul.Network.Http
         public string Version { get; set; }
         public int StatusCode { get; set; }
         public string ReasonPhrase { get; set; }
-        public Dictionary<string, string> Headers { get; private set; } = new Dictionary<string, string>();
 
-        public static HttpResponseMessage Parse(byte[] buffer, int length, ref int messageLength)
+        private Dictionary<string, string> _headers = new Dictionary<string, string>();
+
+        public string this[string header]
         {
-            if (length == 0)
-                return null;
+            get
+            {
+                if (_headers.TryGetValue(header, out string value))
+                    return value;
+                else
+                    return null;
+            }
+            set
+            {
+                _headers[header] = value;
+            }
+        }
 
-            int offset = 0;
-            byte[] eol = Encoding.ASCII.GetBytes(Constants.TelnetEndOfLine);
+        public void Read(GenericMessageReadStream stream, byte[] buffer)
+        {
+            int length = 0;
+            int index = 0;
 
-            int index = ByteArray.IndexOf(buffer, offset, length, eol);
-            if (index == -1)
-                return null;
+            int eolIndex;
+            while ((eolIndex = ByteArray.IndexOf(buffer, index, length, Constants.TelnetEndOfLineBytes)) == -1)
+                stream.IncrementalRead(buffer, ref length);
 
-            var result = new HttpResponseMessage();
-            result.ParseStatusLine(Encoding.ASCII.GetString(buffer, offset, index - offset));
-            length -= index - offset - eol.Length;
-            offset = index + eol.Length;
+            ParseStatusLine(Encoding.ASCII.GetString(buffer, index, eolIndex - index));
+            index = eolIndex + 2;
+
             while (true)
             {
-                index = ByteArray.IndexOf(buffer, offset, length, eol);
-                if (index == -1)
-                    return null;
-                if (index == offset)
+                while ((eolIndex = ByteArray.IndexOf(buffer, index, length, Constants.TelnetEndOfLineBytes)) == -1)
+                    stream.IncrementalRead(buffer, ref length);
+                if (index == eolIndex)
                 {
-                    length -= index - offset - eol.Length;
-                    offset = index + eol.Length;
+                    index += 2;
                     break;
                 }
-                result.ParseHeader(Encoding.ASCII.GetString(buffer, offset, index - offset));
-                length -= index - offset - eol.Length;
-                offset = index + eol.Length;
+
+                ParseHeader(Encoding.ASCII.GetString(buffer, index, eolIndex - index));
+                index = eolIndex + 2;
             }
 
-            messageLength = offset;
-            return result;
+            if (index < length)
+                stream.SendBackBuffer(buffer, index, length - index);
         }
 
         private void ParseStatusLine(string line)
@@ -68,7 +79,7 @@ namespace Zergatul.Network.Http
             if (!match.Success)
                 throw new InvalidOperationException();
 
-            Headers.Add(match.Groups["header"].Value, match.Groups["value"].Value);
+            _headers.Add(match.Groups["header"].Value, match.Groups["value"].Value);
         }
     }
 }

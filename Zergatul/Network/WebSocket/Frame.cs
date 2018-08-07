@@ -28,45 +28,40 @@ namespace Zergatul.Network.WebSocket
             int index = 0;
 
             while (length - index < 2)
-                stream.IncrementalRead(buffer, index, ref length);
+                stream.IncrementalRead(buffer, ref length);
 
             Fin = (buffer[index] & 0x80) != 0;
             Opcode = (Opcode)(buffer[index] & 0x0F);
             index++;
-            length--;
             IsMasked = (buffer[index] & 0x80) != 0;
             int payload = buffer[index] & 0x7F;
             index++;
-            length--;
             if (payload == 126)
             {
                 while (length - index < 2)
-                    stream.IncrementalRead(buffer, index, ref length);
+                    stream.IncrementalRead(buffer, ref length);
                 payload = BitHelper.ToUInt16(buffer, index, ByteOrder.BigEndian);
                 index += 2;
-                length -= 2;
             }
             if (payload == 127)
             {
                 while (length - index < 8)
-                    stream.IncrementalRead(buffer, index, ref length);
+                    stream.IncrementalRead(buffer, ref length);
                 PayloadLength = BitHelper.ToUInt64(buffer, index, ByteOrder.BigEndian);
                 payload = checked((int)PayloadLength);
                 index += 8;
-                length -= 8;
             }
 
             if (IsMasked)
             {
                 while (length - index < 4)
-                    stream.IncrementalRead(buffer, index, ref length);
+                    stream.IncrementalRead(buffer, ref length);
                 MaskingKey = ByteArray.SubArray(buffer, index, 4);
                 index += 4;
-                length -= 4;
             }
 
             while (length - index < payload)
-                stream.IncrementalRead(buffer, index, ref length);
+                stream.IncrementalRead(buffer, ref length);
 
             ApplicationData = ByteArray.SubArray(buffer, index, payload);
             index += payload;

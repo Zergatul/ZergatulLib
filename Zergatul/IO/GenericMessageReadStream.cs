@@ -14,8 +14,10 @@ namespace Zergatul.IO
             this._innerStream = innerStream;
         }
 
-        public void IncrementalRead(byte[] buffer, int index, ref int length)
+        public void IncrementalRead(byte[] buffer, ref int length)
         {
+            int index = length;
+
             if (buffer.Length - index <= 0)
                 throw new InvalidOperationException("Buffer too small");
 

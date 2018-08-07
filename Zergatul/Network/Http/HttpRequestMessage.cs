@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Zergatul.Network.Http
@@ -13,6 +14,9 @@ namespace Zergatul.Network.Http
 
         public byte[] ToBytes()
         {
+            if (Method == null)
+                throw new InvalidOperationException();
+
             List<byte> buffer = new List<byte>();
             buffer.AddRange(Encoding.ASCII.GetBytes($"{Method} {RequestUri} {Version} {Constants.TelnetEndOfLine}"));
             foreach (var kv in Headers)

@@ -18,7 +18,6 @@ namespace Zergatul.Network.WebSocket
         private GenericMessageReadStream _readStream;
         private byte[] _nonce;
         private byte[] _buffer = new byte[1024 * 1024];
-        private int _bufPosition = 0;
         private SecureRandom _random;
 
         public WebSocketClient(string uri)
@@ -77,17 +76,18 @@ namespace Zergatul.Network.WebSocket
             byte[] buffer = request.ToBytes();
             _stream.Write(buffer, 0, buffer.Length);
 
-            var response = ReadResponse();
+            var response = new HttpResponseMessage();
+            response.Read(_readStream, _buffer);
             if (response.StatusCode != 101)
                 throw new InvalidOperationException();
-            if (!string.Equals(response.Headers[HttpResponseHeader.Connection], "Upgrade", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(response[HttpResponseHeader.Connection], "Upgrade", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException();
-            if (!string.Equals(response.Headers[HttpResponseHeader.Upgrade], "websocket", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(response[HttpResponseHeader.Upgrade], "websocket", StringComparison.OrdinalIgnoreCase))
                 throw new InvalidOperationException();
 
             var md = Provider.GetMessageDigestInstance(MessageDigests.SHA1);
             byte[] digest = md.Digest(Encoding.ASCII.GetBytes(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"));
-            if (response.Headers[HttpResponseHeader.SecWebSocketAccept] != Convert.ToBase64String(digest))
+            if (response[HttpResponseHeader.SecWebSocketAccept] != Convert.ToBase64String(digest))
                 throw new InvalidOperationException();
 
             State = ConnectionState.Connected;
@@ -158,18 +158,6 @@ namespace Zergatul.Network.WebSocket
 
             byte[] data = frame.ToBytes();
             _stream.Write(data, 0, data.Length);
-        }
-
-        private HttpResponseMessage ReadResponse()
-        {
-            int messageLength = 0;
-            HttpResponseMessage response;
-            while ((response = HttpResponseMessage.Parse(_buffer, _bufPosition, ref messageLength)) == null)
-                ReadBuffer();
-
-            ShiftBuffer(messageLength);
-
-            return response;
         }
     }
 }
