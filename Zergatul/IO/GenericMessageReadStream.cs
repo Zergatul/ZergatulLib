@@ -34,7 +34,16 @@ namespace Zergatul.IO
             if (offset < 0 || count < 0 || offset + count > buffer.Length)
                 throw new ArgumentOutOfRangeException();
             if (_buffer != null)
-                throw new NotImplementedException();
+            {
+                if (_bufferIndex >= count)
+                {
+                    _bufferIndex -= count;
+                    Array.Copy(buffer, offset, _buffer, _bufferIndex, count);
+                    return;
+                }
+                else
+                    throw new NotImplementedException();
+            }
             _bufferIndex = 0;
             if (count == 0)
             {

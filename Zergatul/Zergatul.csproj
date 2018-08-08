@@ -264,6 +264,7 @@
     <Compile Include="Network\Asn1\VisibleString.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
     <Compile Include="Network\DefaultTlsProvider.cs" />
+    <Compile Include="Network\Http\ChunkedEncodingException.cs" />
     <Compile Include="Network\Http\DefaultKeepAliveConnectionProvider.cs" />
     <Compile Include="Network\Http\HttpHeaderValue.cs" />
     <Compile Include="Network\Http\HttpMethod.cs" />
@@ -274,6 +275,7 @@
     <Compile Include="Network\Http\HttpRequestMessage.cs" />
     <Compile Include="Network\Http\HttpResponseMessage.cs" />
     <Compile Include="Network\Http\HttpResponseStream.cs" />
+    <Compile Include="Network\Http\HttpStatusCode.cs" />
     <Compile Include="Network\Http\HttpVersion.cs" />
     <Compile Include="Network\Http\HttpConnection.cs" />
     <Compile Include="Network\Http\KeepAliveConnectionProvider.cs" />

@@ -18,9 +18,10 @@ namespace Zergatul.Network.Http
                 throw new InvalidOperationException();
 
             List<byte> buffer = new List<byte>();
-            buffer.AddRange(Encoding.ASCII.GetBytes($"{Method} {RequestUri} {Version} {Constants.TelnetEndOfLine}"));
+            buffer.AddRange(Encoding.ASCII.GetBytes($"{Method} {RequestUri} {Version}{Constants.TelnetEndOfLine}"));
             foreach (var kv in Headers)
-                buffer.AddRange(Encoding.ASCII.GetBytes($"{kv.Key}: {kv.Value}{Constants.TelnetEndOfLine}"));
+                if (!string.IsNullOrEmpty(kv.Value))
+                    buffer.AddRange(Encoding.ASCII.GetBytes($"{kv.Key}: {kv.Value}{Constants.TelnetEndOfLine}"));
             buffer.AddRange(Encoding.ASCII.GetBytes(Constants.TelnetEndOfLine));
             if (Body != null)
                 buffer.AddRange(Body);

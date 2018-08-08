@@ -16,6 +16,9 @@
         // Response
         public const string ContentEncoding = "Content-Encoding";
         public const string ContentLength = "Content-Length";
+        public const string ContentType = "Content-Type";
+        public const string KeepAlive = "Keep-Alive";
+        public const string Server = "Server";
 
         // Web Socket
         public const string SecWebSocketAccept = "Sec-WebSocket-Accept";

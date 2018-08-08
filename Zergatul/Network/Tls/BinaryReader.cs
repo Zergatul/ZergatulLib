@@ -55,6 +55,9 @@ namespace Zergatul.Network.Tls
 
         private void FillBuffer(int count)
         {
+            if (count == 0)
+                return;
+
             if (count > _buffer.Length)
                 _buffer = new byte[count];
 

@@ -10,7 +10,7 @@ namespace Zergatul.Network.Http
     {
         public static KeepAliveConnectionProvider Instance { get; private set; } = new DefaultKeepAliveConnectionProvider();
 
-        private List<KeepAliveConnection> _connections = new List<KeepAliveConnection>();
+        private List<DefaultHttpConnection> _connections = new List<DefaultHttpConnection>();
 
         private DefaultKeepAliveConnectionProvider()
         {
@@ -24,10 +24,24 @@ namespace Zergatul.Network.Http
             lock (_connections)
                 for (int i = 0; i < _connections.Count; i++)
                 {
+                    // remove timeout connection
+                    if (_connections[i].Timeout > 0)
+                        if (_connections[i].Timer.ElapsedMilliseconds >= _connections[i].Timeout * 1000)
+                        {
+                            for (int j = i; j < _connections.Count - 1; j++)
+                                _connections[j] = _connections[j + 1];
+                            _connections.RemoveAt(_connections.Count - 1);
+                            i--;
+                            continue;
+                        }
+
                     if (_connections[i].Host != host)
                         continue;
                     if (!_connections[i].InUse)
-                        return new DefaultHttpConnection(_connections[i], _connections);
+                    {
+                        _connections[i].InUse = true;
+                        return _connections[i];
+                    }
                 }
 
             var client = new TcpClient();
@@ -47,15 +61,14 @@ namespace Zergatul.Network.Http
                     throw new InvalidOperationException();
             }
 
-            var connection = new KeepAliveConnection
+            var connection = new DefaultHttpConnection(stream, _connections)
             {
-                Host = host,
-                Stream = stream
+                Host = host
             };
             lock (_connections)
             {
                 _connections.Add(connection);
-                return new DefaultHttpConnection(connection, _connections);
+                return connection;
             }
         }
 
@@ -63,38 +76,32 @@ namespace Zergatul.Network.Http
         {
             public override Stream Stream => _stream;
 
+            public string Host;
+            public volatile bool InUse;
+
             private Stream _stream;
-            private KeepAliveConnection _connection;
-            private List<KeepAliveConnection> _connections;
+            private List<DefaultHttpConnection> _connections;
 
-            public DefaultHttpConnection(KeepAliveConnection connection, List<KeepAliveConnection> connections)
+            public DefaultHttpConnection(Stream stream, List<DefaultHttpConnection> connections)
             {
-                connection.InUse = true;
+                this.InUse = true;
 
-                this._stream = connection.Stream;
-                this._connection = connection;
+                this._stream = stream;
                 this._connections = connections;
             }
 
             public override void Close()
             {
                 lock (_connections)
-                    _connection.InUse = false;
+                    InUse = false;
             }
 
             public override void CloseUnderlyingStream()
             {
                 _stream.Dispose();
                 lock (_connections)
-                    _connections.Remove(_connection);
+                    _connections.Remove(this);
             }
-        }
-
-        private class KeepAliveConnection
-        {
-            public string Host;
-            public Stream Stream;
-            public volatile bool InUse;
         }
     }
 }

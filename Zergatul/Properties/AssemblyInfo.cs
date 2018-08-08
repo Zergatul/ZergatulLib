@@ -36,6 +36,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: InternalsVisibleTo("Test")]
-[assembly: InternalsVisibleTo("Zergatul.Math.Tests")]
 [assembly: InternalsVisibleTo("Zergatul.Cryptography.Tests")]
+[assembly: InternalsVisibleTo("Zergatul.Math.Tests")]
+[assembly: InternalsVisibleTo("Zergatul.Network.Tests")]
 [assembly: InternalsVisibleTo("Zergatul.Tls.Tests")]

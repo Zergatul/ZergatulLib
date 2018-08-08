@@ -21,14 +21,18 @@ namespace Zergatul.Network.Http
         {
             get
             {
-                if (_headers.TryGetValue(header, out string value))
+                if (_headers.TryGetValue(header.ToLower(), out string value))
                     return value;
                 else
                     return null;
             }
             set
             {
-                _headers[header] = value;
+                header = header.ToLower();
+                if (_headers.ContainsKey(header))
+                    _headers[header] = value;
+                else
+                    _headers.Add(header, value);
             }
         }
 
@@ -79,7 +83,7 @@ namespace Zergatul.Network.Http
             if (!match.Success)
                 throw new InvalidOperationException();
 
-            _headers.Add(match.Groups["header"].Value, match.Groups["value"].Value);
+            this[match.Groups["header"].Value] = match.Groups["value"].Value;
         }
     }
 }
