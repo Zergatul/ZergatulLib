@@ -803,7 +803,9 @@ namespace Zergatul.Network.Tls
 
         #endregion
 
-        private List<byte> _readBuffer = new List<byte>();
+        private byte[] _readBuffer;
+        private int _readBufferOffset;
+        private int _readBufferLength;
 
         public override void Flush()
         {
@@ -812,23 +814,41 @@ namespace Zergatul.Network.Tls
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (count > _readBuffer.Count && !_isClosed)
+            if (_readBuffer == null)
+            {
+                _readBuffer = new byte[RecordMessageStream.PlaintextLimit];
+                _readBufferOffset = 0;
+                _readBufferLength = 0;
+            }
+
+            if (_readBufferOffset >= _readBufferLength && !_isClosed)
             {
                 var message = _messageStream.ReadMessage();
                 if (message is ApplicationData)
                 {
                     var appData = message as ApplicationData;
-                    _readBuffer.AddRange(appData.Data);
-                }
-                if (message is Alert)
+                    Array.Copy(appData.Data, 0, _readBuffer, 0, appData.Data.Length);
+                    _readBufferOffset = 0;
+                    _readBufferLength = appData.Data.Length;
+                } else if (message is Alert)
                     OnAlert(message as Alert, true);
+                else
+                    throw new InvalidOperationException();
             }
 
-            if (count > _readBuffer.Count)
-                count = _readBuffer.Count;
-            for (int i = 0; i < count; i++)
-                buffer[offset + i] = _readBuffer[i];
-            _readBuffer.RemoveRange(0, count);
+            if (_readBufferOffset >= _readBufferLength)
+            {
+                _readBufferOffset = 0;
+                _readBufferLength = 0;
+            }
+
+            if (count > _readBufferLength - _readBufferOffset)
+                count = _readBufferLength - _readBufferOffset;
+            if (count == 0)
+                return 0;
+
+            Array.Copy(_readBuffer, _readBufferOffset, buffer, offset, count);
+            _readBufferOffset += count;
 
             return count;
         }
