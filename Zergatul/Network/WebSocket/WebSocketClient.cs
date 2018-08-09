@@ -44,8 +44,7 @@ namespace Zergatul.Network.WebSocket
         {
             this.State = ConnectionState.Connecting;
 
-            _client = new TcpClient();
-            _client.Connect(_uri.Host, _uri.Port);
+            _client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port);
 
             switch (_uri.Scheme)
             {
@@ -140,6 +139,12 @@ namespace Zergatul.Network.WebSocket
 
         public void Close()
         {
+            SendFrame(new Frame
+            {
+                Fin = true,
+                Opcode = Opcode.Close,
+                IsMasked = true
+            });
             _stream.Close();
             _client.Close();
         }

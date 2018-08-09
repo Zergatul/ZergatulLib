@@ -54,7 +54,7 @@ namespace Zergatul.Network.Proxy
         {
             if (ResolveDnsLocally)
             {
-                var addresses = Dns.GetHostAddresses(hostname);
+                var addresses = global::System.Net.Dns.GetHostAddresses(hostname);
                 return CreateConnection(addresses[0], port, tcp);
             }
 

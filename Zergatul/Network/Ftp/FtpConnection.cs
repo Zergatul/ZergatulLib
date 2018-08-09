@@ -156,7 +156,7 @@ namespace Zergatul.Network.Ftp
                 _tcpClient = CreateProxyConnection(host, port);
             else
             {
-                var ipHE = Dns.GetHostEntry(host);
+                var ipHE = global::System.Net.Dns.GetHostEntry(host);
                 this._address = null;
                 if (PreferIPv4)
                 {
@@ -376,11 +376,11 @@ namespace Zergatul.Network.Ftp
                 _dataConnectionIPEndPoint = new IPEndPoint(_address, port);
             else
             {
-                var ipv4 = Dns.GetHostEntry(_host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
+                var ipv4 = global::System.Net.Dns.GetHostEntry(_host).AddressList.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork);
                 if (ipv4 != null)
                     _dataConnectionIPEndPoint = new IPEndPoint(ipv4, port);
                 else
-                    _dataConnectionIPEndPoint = new IPEndPoint(Dns.GetHostEntry(_host).AddressList[0], port);
+                    _dataConnectionIPEndPoint = new IPEndPoint(global::System.Net.Dns.GetHostEntry(_host).AddressList[0], port);
             }
             _passive = true;
         }
@@ -849,7 +849,7 @@ namespace Zergatul.Network.Ftp
             else
             {
                 if (_resolvedHost == null)
-                    _resolvedHost = Dns.GetHostEntry(_host).AddressList[0];
+                    _resolvedHost = global::System.Net.Dns.GetHostEntry(_host).AddressList[0];
                 return Proxy.CreateConnection(_resolvedHost, port);
             }
         }

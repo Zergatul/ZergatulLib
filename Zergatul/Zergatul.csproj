@@ -264,6 +264,9 @@
     <Compile Include="Network\Asn1\VisibleString.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
     <Compile Include="Network\DefaultTlsProvider.cs" />
+    <Compile Include="Network\Dns\DefaultDnsProvider.cs" />
+    <Compile Include="Network\Dns\DnsProvider.cs" />
+    <Compile Include="Network\Dns\StaticDnsProvider.cs" />
     <Compile Include="Network\Http\ChunkedEncodingException.cs" />
     <Compile Include="Network\Http\DefaultKeepAliveConnectionProvider.cs" />
     <Compile Include="Network\Http\HttpHeaderValue.cs" />
@@ -362,6 +365,7 @@
     <Compile Include="Network\Smtp\SmtpReplyCode.cs" />
     <Compile Include="Network\Smtp\SmtpServerReply.cs" />
     <Compile Include="Network\TcpClientHelper.cs" />
+    <Compile Include="Network\TcpConnector.cs" />
     <Compile Include="Network\TimeoutException.cs" />
     <Compile Include="Network\Tls\AbstractTlsSignature.cs" />
     <Compile Include="Network\Tls\AbstractTlsSymmetricCipher.cs" />
