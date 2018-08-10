@@ -44,8 +44,7 @@ namespace Zergatul.Network.Http
                     }
                 }
 
-            var client = new TcpClient();
-            client.Connect(uri.Host, uri.Port);
+            var client = TcpConnector.GetTcpClient(uri.Host, uri.Port);
             Stream stream;
             switch (uri.Scheme)
             {
