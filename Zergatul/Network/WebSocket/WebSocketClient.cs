@@ -19,6 +19,7 @@ namespace Zergatul.Network.WebSocket
         private byte[] _nonce;
         private byte[] _buffer = new byte[1024 * 1024];
         private SecureRandom _random;
+        private object _writeSyncObject = new object();
 
         public WebSocketClient(string uri)
             : this(new Uri(uri))
@@ -162,7 +163,8 @@ namespace Zergatul.Network.WebSocket
                     frame.ApplicationData[i] ^= frame.MaskingKey[i & 0x03];
 
             byte[] data = frame.ToBytes();
-            _stream.Write(data, 0, data.Length);
+            lock (_writeSyncObject)
+                _stream.Write(data, 0, data.Length);
         }
     }
 }
