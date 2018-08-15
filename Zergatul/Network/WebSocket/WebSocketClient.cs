@@ -104,6 +104,17 @@ namespace Zergatul.Network.WebSocket
             });
         }
 
+        public void SendBinary(byte[] data)
+        {
+            SendFrame(new Frame
+            {
+                Fin = true,
+                IsMasked = true,
+                Opcode = Opcode.Binary,
+                ApplicationData = data
+            });
+        }
+
         public Message ReadNextMessage()
         {
             while (true)
