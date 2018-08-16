@@ -16,11 +16,11 @@ namespace Zergatul.Network.Http
         {
             get
             {
-                return _reqMsg.Headers[HttpRequestHeader.AcceptEncoding];
+                return _reqMsg.GetHeader(HttpRequestHeader.AcceptEncoding);
             }
             set
             {
-                _reqMsg.Headers[HttpRequestHeader.AcceptEncoding] = value;
+                _reqMsg.SetHeader(HttpRequestHeader.AcceptEncoding, value);
             }
         }
 
@@ -28,15 +28,16 @@ namespace Zergatul.Network.Http
         {
             get
             {
-                if (string.Equals(_reqMsg.Headers[HttpRequestHeader.Connection], HttpHeaderValue.KeepAlive, StringComparison.OrdinalIgnoreCase))
+                string connection = _reqMsg.GetHeader(HttpRequestHeader.Connection);
+                if (string.Equals(connection, HttpHeaderValue.KeepAlive, StringComparison.OrdinalIgnoreCase))
                     return true;
-                if (string.Equals(_reqMsg.Headers[HttpRequestHeader.Connection], HttpHeaderValue.Close, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(connection, HttpHeaderValue.Close, StringComparison.OrdinalIgnoreCase))
                     return false;
                 throw new InvalidOperationException();
             }
             set
             {
-                _reqMsg.Headers[HttpRequestHeader.Connection] = value ? HttpHeaderValue.KeepAlive : HttpHeaderValue.Close;
+                _reqMsg.SetHeader(HttpRequestHeader.Connection, value ? HttpHeaderValue.KeepAlive : HttpHeaderValue.Close);
             }
         }
 
@@ -44,15 +45,27 @@ namespace Zergatul.Network.Http
         {
             get
             {
-                return _reqMsg.Headers[HttpRequestHeader.Host];
+                return _reqMsg.GetHeader(HttpRequestHeader.Host);
             }
             set
             {
-                _reqMsg.Headers[HttpRequestHeader.Host] = value;
+                _reqMsg.SetHeader(HttpRequestHeader.Host, value);
             }
         }
 
         #endregion
+
+        public string this[string header]
+        {
+            get
+            {
+                return _reqMsg.GetHeader(header);
+            }
+            set
+            {
+                _reqMsg.SetHeader(header, value);
+            }
+        }
 
         private Uri _uri;
         private KeepAliveConnectionProvider _connectionProvider;

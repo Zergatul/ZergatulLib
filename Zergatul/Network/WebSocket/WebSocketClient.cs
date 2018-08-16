@@ -67,11 +67,11 @@ namespace Zergatul.Network.WebSocket
             var request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
             request.RequestUri = _uri.PathAndQuery;
-            request.Headers[HttpRequestHeader.Host] = _uri.Host + (_uri.IsDefaultPort ? "" : ":" + _uri.Port);
-            request.Headers[HttpRequestHeader.Connection] = "Upgrade";
-            request.Headers[HttpRequestHeader.Upgrade] = "websocket";
-            request.Headers[HttpRequestHeader.SecWebSocketKey] = key;
-            request.Headers[HttpRequestHeader.SecWebSocketVersion] = "13";
+            request.SetHeader(HttpRequestHeader.Host, _uri.Host + (_uri.IsDefaultPort ? "" : ":" + _uri.Port));
+            request.SetHeader(HttpRequestHeader.Connection, "Upgrade");
+            request.SetHeader(HttpRequestHeader.Upgrade, "websocket");
+            request.SetHeader(HttpRequestHeader.SecWebSocketKey, key);
+            request.SetHeader(HttpRequestHeader.SecWebSocketVersion, "13");
 
             byte[] buffer = request.ToBytes();
             _stream.Write(buffer, 0, buffer.Length);
