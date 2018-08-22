@@ -63,7 +63,9 @@ namespace Zergatul.Cryptocurrency.Ethereum
                     return null;
             }
         }
-        
+
+        public bool IsEIP155 { get; set; }
+        public int? ChainId { get; set; }
 
         public byte[] Raw
         {
@@ -119,6 +121,17 @@ namespace Zergatul.Cryptocurrency.Ethereum
             r = rdl.Items[7].String;
             s = rdl.Items[8].String;
 
+            if (27 <= v && v <= 28)
+            {
+                IsEIP155 = false;
+                ChainId = null;
+            }
+            else if (v >= 37)
+            {
+                IsEIP155 = true;
+                ChainId = (v - 35) / 2;
+            }
+
             ECPDSA ecdsa = new ECPDSA();
             ecdsa.Parameters = new ECPDSAParameters(EllipticCurve.secp256k1);
             PublicKey = ecdsa.RecoverPublicKey(GetSignHash(), v, r, s);
@@ -128,18 +141,41 @@ namespace Zergatul.Cryptocurrency.Ethereum
 
         public byte[] GetSignHash()
         {
-            byte[] unsignedTx = Rlp.Encode(new RlpItem
+            byte[] unsignedTx;
+            if (IsEIP155)
             {
-                Items = new[]
+                unsignedTx = Rlp.Encode(new RlpItem
                 {
-                    new RlpItem(Nonce),
-                    new RlpItem(GasPrice),
-                    new RlpItem(GasLimit),
-                    new RlpItem(To.Hash),
-                    new RlpItem(ValueWei),
-                    new RlpItem(Data)
-                }
-            });
+                    Items = new[]
+                    {
+                        new RlpItem(Nonce),
+                        new RlpItem(GasPrice),
+                        new RlpItem(GasLimit),
+                        new RlpItem(To.Hash),
+                        new RlpItem(ValueWei),
+                        new RlpItem(Data),
+                        new RlpItem(ChainId.Value),
+                        new RlpItem(0),
+                        new RlpItem(0)
+                    }
+                });
+            }
+            else
+            {
+                unsignedTx = Rlp.Encode(new RlpItem
+                {
+                    Items = new[]
+                    {
+                        new RlpItem(Nonce),
+                        new RlpItem(GasPrice),
+                        new RlpItem(GasLimit),
+                        new RlpItem(To.Hash),
+                        new RlpItem(ValueWei),
+                        new RlpItem(Data)
+                    }
+                });
+            }
+
             var keccak = new Keccak256();
             keccak.Update(unsignedTx);
             return keccak.ComputeHash();

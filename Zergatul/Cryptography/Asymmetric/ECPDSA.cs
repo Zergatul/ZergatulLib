@@ -126,9 +126,12 @@ namespace Zergatul.Cryptography.Asymmetric
 
         private int GetRecId(byte v)
         {
-            if (0x1B > v || v > 0x1E)
-                throw new ArgumentOutOfRangeException();
-            return v - 0x1B;
+            if (0x1B <= v && v <= 0x1E)
+                return v - 0x1B;
+            if (37 <= v && v <= 38)
+                return v - 37;
+
+            throw new ArgumentOutOfRangeException();
         }
 
         public override bool Verify(byte[] data, byte[] signature)
