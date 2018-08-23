@@ -4,6 +4,10 @@ using Zergatul.Cryptocurrency.Ethereum;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math.EllipticCurves.PrimeField;
+using Zergatul.Math;
+using Zergatul.Security;
+using System.Text;
+using Zergatul.Tests;
 
 namespace Zergatul.Cryptocurrency.Tests.Ethereum
 {
@@ -73,6 +77,58 @@ namespace Zergatul.Cryptocurrency.Tests.Ethereum
 
             tx.r[15] ^= 1;
             Assert.IsFalse(tx.VerifySignature());
+        }
+
+        [TestMethod]
+        public void Test4()
+        {
+            var tx = new Transaction();
+            tx.IsEIP155 = true;
+            tx.ChainId = Chain.Ropsten;
+            tx.ParseHex("f86f830c1d7784b2d05e008304cb2694e09b30a039465ebc7dff8cc4846e7f6830ff8691880de0b6b3a7640000801ba07831e4d97f314b00d8f22e72bd97e2217cce0126d0465ea053f0b3e5f679e43da0372e483df14c74825a4a3a7aa923899eeed56d25842e4921d8acfef070662d5f");
+
+            Assert.IsTrue(tx.Nonce == 793975);
+            Assert.IsTrue(tx.GasPrice == 3000000000);
+            Assert.IsTrue(tx.GasLimit == 314150);
+            Assert.IsTrue(tx.To.Value == "0xe09b30a039465EBc7dFF8cC4846E7F6830FF8691");
+            Assert.IsTrue(tx.ValueEther == 1);
+            Assert.IsTrue(tx.Data.Length == 0);
+            Assert.IsTrue(tx.From.Value == "0x687422eEA2cB73B5d3e242bA5456b782919AFc85");
+            Assert.IsTrue(tx.IdString == "0x6a71183f673364d2e0c655331c58c5ee6c758cf438018e68bc2fe0fe2eeaa116");
+
+            Assert.IsTrue(tx.VerifySignature());
+
+            // test high S
+            var s = new BigInteger(tx.s, ByteOrder.BigEndian);
+            tx.s = (EllipticCurve.secp256k1.n - s).ToBytes(ByteOrder.BigEndian);
+
+            Assert.IsFalse(tx.VerifySignature());
+        }
+
+        [TestMethod]
+        public void Test5()
+        {
+            var tx = new Transaction();
+            tx.IsEIP155 = true;
+            tx.ChainId = Chain.Ropsten;
+
+            tx.Nonce = 0;
+            tx.GasPrice = 5000000000;
+            tx.GasLimit = 21000;
+            tx.To = new Address();
+            tx.To.Parse("0xDa7227a2f8D181bBaa633a28A9dD65663D9B38c3");
+            tx.ValueEther = 0.000001m;
+
+            using (StaticRandomTestProvider.Use(null))
+            {
+                tx.Sign(GetKey());
+            }
+        }
+
+        private byte[] GetKey()
+        {
+            var sha256 = MessageDigest.GetInstance(MessageDigests.SHA256);
+            return sha256.Digest(Encoding.ASCII.GetBytes("my-testnet-eth"));
         }
     }
 }

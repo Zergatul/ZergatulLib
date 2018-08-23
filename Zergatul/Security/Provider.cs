@@ -165,6 +165,14 @@ namespace Zergatul.Security
             _providers.Insert(index, provider);
         }
 
+        public static void Unregister(int index)
+        {
+            if (_providers.Count < index)
+                throw new ArgumentException();
+
+            _providers.RemoveAt(0);
+        }
+
         public static void UnregisterAll()
         {
             _providers.Clear();

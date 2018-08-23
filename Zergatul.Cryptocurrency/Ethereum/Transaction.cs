@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptography;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Math;
@@ -65,7 +66,7 @@ namespace Zergatul.Cryptocurrency.Ethereum
         }
 
         public bool IsEIP155 { get; set; }
-        public int? ChainId { get; set; }
+        public Chain? ChainId { get; set; }
 
         public byte[] Raw
         {
@@ -92,6 +93,8 @@ namespace Zergatul.Cryptocurrency.Ethereum
         }
 
         public ECPoint PublicKey { get; private set; }
+
+        public bool IsSigned => v != 0 && r != null && s != null;
 
         public void ParseHex(string hex) => Parse(BitHelper.HexToBytes(hex));
 
@@ -129,12 +132,13 @@ namespace Zergatul.Cryptocurrency.Ethereum
             else if (v >= 37)
             {
                 IsEIP155 = true;
-                ChainId = (v - 35) / 2;
+                if (ChainId == null)
+                    throw new InvalidOperationException();
             }
 
             ECPDSA ecdsa = new ECPDSA();
             ecdsa.Parameters = new ECPDSAParameters(EllipticCurve.secp256k1);
-            PublicKey = ecdsa.RecoverPublicKey(GetSignHash(), v, r, s);
+            PublicKey = ecdsa.RecoverPublicKey(GetSignHash(), GetRecId(), r, s);
             From = new Address();
             From.FromPublicKey(PublicKey);
         }
@@ -154,7 +158,7 @@ namespace Zergatul.Cryptocurrency.Ethereum
                         new RlpItem(To.Hash),
                         new RlpItem(ValueWei),
                         new RlpItem(Data),
-                        new RlpItem(ChainId.Value),
+                        new RlpItem((int)ChainId.Value),
                         new RlpItem(0),
                         new RlpItem(0)
                     }
@@ -181,6 +185,30 @@ namespace Zergatul.Cryptocurrency.Ethereum
             return keccak.ComputeHash();
         }
 
+        public void Sign(byte[] key)
+        {
+            if (key.Length != 32)
+                throw new ArgumentException();
+            if (IsEIP155 && ChainId == null)
+                throw new InvalidOperationException();
+
+            ECPDSA ecdsa = new ECPDSA();
+            ecdsa.Parameters = new ECPDSAParameters(EllipticCurve.secp256k1);
+            ecdsa.Parameters.LowS = true;
+            ecdsa.Random = new DefaultSecureRandom();
+            ecdsa.PrivateKey = new ECPPrivateKey(key);
+            ecdsa.SignHashWithRecovery(GetSignHash(), out byte v, out BigInteger r, out BigInteger s);
+
+            if (v >= 2)
+                throw new InvalidOperationException();
+            if (IsEIP155)
+                this.v = (byte)(35 + (int)ChainId * 2 + v);
+            else
+                this.v = (byte)(27 + v);
+            this.r = r.ToBytes(ByteOrder.BigEndian);
+            this.s = s.ToBytes(ByteOrder.BigEndian);
+        }
+
         public bool VerifySignature()
         {
             if (!IsSigned)
@@ -191,10 +219,24 @@ namespace Zergatul.Cryptocurrency.Ethereum
             ECPDSA ecdsa = new ECPDSA();
             ecdsa.Parameters = new ECPDSAParameters(EllipticCurve.secp256k1);
             ecdsa.PublicKey = new ECPPublicKey(PublicKey);
+            if ((s[0] & 0x80) != 0) // low S rule
+                return false;
             return ecdsa.VerifyHash(GetSignHash(), r, s);
         }
 
-        public bool IsSigned => v != 0 && r != null && s != null;
+        private byte GetRecId()
+        {
+            byte recId;
+            if (IsEIP155)
+                recId = checked((byte)(v - (int)ChainId * 2 - 35));
+            else
+                recId = checked((byte)(v - 27));
+
+            if (recId >= 2)
+                throw new InvalidOperationException();
+
+            return recId;
+        }
     }
 
     public class TransactionParseException : Exception

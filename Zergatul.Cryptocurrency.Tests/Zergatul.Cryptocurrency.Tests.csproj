@@ -78,6 +78,10 @@
       <Project>{6cb93460-a3cd-4985-8cdd-7ff4ca26b7dd}</Project>
       <Name>Zergatul.Cryptocurrency</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Zergatul.Tests\Zergatul.Tests.csproj">
+      <Project>{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}</Project>
+      <Name>Zergatul.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">
       <Project>{70DCFA02-0D6B-4220-8E1C-F1B8BA158FAC}</Project>
       <Name>Zergatul</Name>

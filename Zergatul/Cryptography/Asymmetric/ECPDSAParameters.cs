@@ -11,6 +11,7 @@ namespace Zergatul.Cryptography.Asymmetric
     public class ECPDSAParameters : ECPParameters
     {
         public AbstractHash Hash { get; set; }
+        public bool LowS { get; set; }
 
         public ECPDSAParameters(EllipticCurve curve)
             : base(curve)
