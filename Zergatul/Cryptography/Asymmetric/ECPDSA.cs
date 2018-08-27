@@ -17,7 +17,10 @@ namespace Zergatul.Cryptography.Asymmetric
                 throw new InvalidOperationException("Parameters.Curve is null");
 
             var curve = Parameters.Curve;
-            PrivateKey = new ECPPrivateKey(BigInteger.Random(BigInteger.One, curve.n, Random));
+            do
+            {
+                PrivateKey = new ECPPrivateKey(BigInteger.Random(curve.n, Random));
+            } while (PrivateKey.Value.IsZero);
             PublicKey = new ECPPublicKey(PrivateKey.Value * curve.g);
         }
 
@@ -52,7 +55,9 @@ namespace Zergatul.Cryptography.Asymmetric
 
             CalculateK:
             // k from [1..q - 1]
-            var k = BigInteger.Random(BigInteger.One, q, Random);
+            var k = BigInteger.Random(q, Random);
+            if (k.IsZero)
+                goto CalculateK;
 
             var point = k * curve.g;
             var r = point.x % q;
@@ -82,7 +87,9 @@ namespace Zergatul.Cryptography.Asymmetric
 
             CalculateK:
             // k from [1..q - 1]
-            var k = BigInteger.Random(BigInteger.One, q, Random);
+            var k = BigInteger.Random(q, Random);
+            if (k.IsZero)
+                goto CalculateK;
 
             var point = k * curve.g;
             r = point.x % q;

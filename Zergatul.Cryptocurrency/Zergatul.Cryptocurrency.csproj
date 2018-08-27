@@ -93,6 +93,7 @@
     <Compile Include="P2P\InvVect.cs" />
     <Compile Include="P2P\PingMessage.cs" />
     <Compile Include="P2P\PongMessage.cs" />
+    <Compile Include="SecureRandomWrapper.cs" />
     <Compile Include="SimpleTransactionRepository.cs" />
     <Compile Include="TxInputBase.cs" />
     <Compile Include="TxOutputBase.cs" />

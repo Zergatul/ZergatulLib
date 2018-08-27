@@ -68,7 +68,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             s = s.Replace(" ", "").ToLower();
 
             var ecdsa1 = new ECPDSA();
-            ecdsa1.Random = new StaticRandom(Dec(BitHelper.HexToBytes(private_key)));
+            ecdsa1.Random = new StaticRandom(BitHelper.HexToBytes(private_key));
             ecdsa1.Parameters = new ECPDSAParameters(curve);
             ecdsa1.Parameters.Hash = hash;
             ecdsa1.GenerateKeyPair(0);
@@ -77,7 +77,7 @@ namespace Zergatul.Cryptography.Tests.Asymmetric
             Assert.IsTrue(BitHelper.BytesToHex(ecdsa1.PublicKey.Point.x.ToBytes(ByteOrder.BigEndian, len)) == pubkey_x);
             Assert.IsTrue(BitHelper.BytesToHex(ecdsa1.PublicKey.Point.y.ToBytes(ByteOrder.BigEndian, len)) == pubkey_y);
 
-            ecdsa1.Random = new StaticRandom(Dec(BitHelper.HexToBytes(k)));
+            ecdsa1.Random = new StaticRandom(BitHelper.HexToBytes(k));
             byte[] signature = ecdsa1.Sign(System.Text.Encoding.ASCII.GetBytes(plain));
             var ed = ECDSASignatureValue.Parse(Asn1Element.ReadFrom(signature));
             Assert.IsTrue(ed.r == new BigInteger(BitHelper.HexToBytes(r), ByteOrder.BigEndian));

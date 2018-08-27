@@ -12,6 +12,8 @@ namespace Zergatul.Tests
             RegisterSecureRandom(SecureRandoms.Default, () => new StaticSecureRandom(data));
         }
 
+        public static IDisposable Use(string hex) => Use(BitHelper.HexToBytes(hex));
+
         public static IDisposable Use(byte[] data)
         {
             Register(new StaticRandomTestProvider(data), 0);

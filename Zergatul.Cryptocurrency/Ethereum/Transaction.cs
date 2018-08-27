@@ -92,9 +92,17 @@ namespace Zergatul.Cryptocurrency.Ethereum
             }
         }
 
+        public string RawString => BitHelper.BytesToHex(Raw);
+
         public ECPoint PublicKey { get; private set; }
 
         public bool IsSigned => v != 0 && r != null && s != null;
+
+        public Transaction()
+        {
+            IsEIP155 = true;
+            ChainId = Chain.MainNet;
+        }
 
         public void ParseHex(string hex) => Parse(BitHelper.HexToBytes(hex));
 
@@ -195,7 +203,7 @@ namespace Zergatul.Cryptocurrency.Ethereum
             ECPDSA ecdsa = new ECPDSA();
             ecdsa.Parameters = new ECPDSAParameters(EllipticCurve.secp256k1);
             ecdsa.Parameters.LowS = true;
-            ecdsa.Random = new DefaultSecureRandom();
+            ecdsa.Random = new SecureRandomWrapper();
             ecdsa.PrivateKey = new ECPPrivateKey(key);
             ecdsa.SignHashWithRecovery(GetSignHash(), out byte v, out BigInteger r, out BigInteger s);
 
