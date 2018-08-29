@@ -12,9 +12,22 @@ namespace Zergatul.Network.WebSocket
     {
         public ConnectionState State { get; private set; }
 
+        public string this[string header]
+        {
+            get
+            {
+                return _httpRequestMessage.GetHeader(header);
+            }
+            set
+            {
+                _httpRequestMessage.SetHeader(header, value);
+            }
+        }
+
         private Uri _uri;
         private TcpClient _client;
         private Stream _stream;
+        private HttpRequestMessage _httpRequestMessage;
         private GenericMessageReadStream _readStream;
         private byte[] _nonce;
         private byte[] _buffer = new byte[1024 * 1024];
@@ -39,6 +52,8 @@ namespace Zergatul.Network.WebSocket
 
             this._nonce = new byte[16];
             this._random = Provider.GetSecureRandomInstance(SecureRandoms.Default);
+
+            InitHttpRequestMessage();
         }
 
         public void Open()
@@ -63,32 +78,36 @@ namespace Zergatul.Network.WebSocket
 
             _random.GetNextBytes(_nonce);
             string key = Convert.ToBase64String(_nonce);
+            _httpRequestMessage.SetHeader(HttpRequestHeaders.SecWebSocketKey, key);
 
-            var request = new HttpRequestMessage();
-            request.Method = HttpMethod.Get;
-            request.RequestUri = _uri.PathAndQuery;
-            request.SetHeader(HttpRequestHeader.Host, _uri.Host + (_uri.IsDefaultPort ? "" : ":" + _uri.Port));
-            request.SetHeader(HttpRequestHeader.Connection, "Upgrade");
-            request.SetHeader(HttpRequestHeader.Upgrade, "websocket");
-            request.SetHeader(HttpRequestHeader.SecWebSocketKey, key);
-            request.SetHeader(HttpRequestHeader.SecWebSocketVersion, "13");
-
-            byte[] buffer = request.ToBytes();
+            byte[] buffer = _httpRequestMessage.ToBytes();
             _stream.Write(buffer, 0, buffer.Length);
 
             var response = new HttpResponseMessage();
             response.Read(_readStream, _buffer);
-            if (response.StatusCode != 101)
-                throw new InvalidOperationException();
-            if (!string.Equals(response[HttpResponseHeader.Connection], "Upgrade", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException();
-            if (!string.Equals(response[HttpResponseHeader.Upgrade], "websocket", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException();
+
+            string error = null;
+            if (error == null && response.StatusCode != 101)
+                error = "Invalid status code: " + response.StatusCode;
+            if (error == null && !string.Equals(response[HttpResponseHeaders.Connection], "Upgrade", StringComparison.OrdinalIgnoreCase))
+                error = "Invalid Connection header";
+            if (error == null && !string.Equals(response[HttpResponseHeaders.Upgrade], "websocket", StringComparison.OrdinalIgnoreCase))
+                error = "Invalid upgrade header";
 
             var md = Provider.GetMessageDigestInstance(MessageDigests.SHA1);
             byte[] digest = md.Digest(Encoding.ASCII.GetBytes(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"));
-            if (response[HttpResponseHeader.SecWebSocketAccept] != Convert.ToBase64String(digest))
-                throw new InvalidOperationException();
+            if (error == null && response[HttpResponseHeaders.SecWebSocketAccept] != Convert.ToBase64String(digest))
+                error = "Invalid Sec-WebSocket-Accept header";
+
+            if (error != null)
+            {
+                var ex = new InvalidOperationException(error);
+                string msg;
+                using (var sr = new StreamReader(_readStream))
+                    msg = sr.ReadToEnd();
+                ex.Data.Add("Response", msg);
+                throw ex;
+            }
 
             State = ConnectionState.Connected;
         }
@@ -159,6 +178,17 @@ namespace Zergatul.Network.WebSocket
             });
             _stream.Close();
             _client.Close();
+        }
+
+        private void InitHttpRequestMessage()
+        {
+            _httpRequestMessage = new HttpRequestMessage();
+            _httpRequestMessage.Method = HttpMethod.Get;
+            _httpRequestMessage.RequestUri = _uri.PathAndQuery;
+            _httpRequestMessage.SetHeader(HttpRequestHeaders.Host, _uri.Host + (_uri.IsDefaultPort ? "" : ":" + _uri.Port));
+            _httpRequestMessage.SetHeader(HttpRequestHeaders.Connection, "Upgrade");
+            _httpRequestMessage.SetHeader(HttpRequestHeaders.Upgrade, "websocket");
+            _httpRequestMessage.SetHeader(HttpRequestHeaders.SecWebSocketVersion, "13");
         }
 
         private void SendFrame(Frame frame)

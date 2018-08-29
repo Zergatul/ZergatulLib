@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
@@ -29,6 +30,8 @@ namespace Zergatul.Network.Http
             Init();
         }
 
+        public IReadOnlyList<string> AllHeaders() => _message.AllHeaders();
+
         private void Init()
         {
             _readStream = new GenericMessageReadStream(_connection.Stream);
@@ -36,7 +39,7 @@ namespace Zergatul.Network.Http
             _message = new HttpResponseMessage();
             _message.Read(_readStream, _buffer);
 
-            string keepAlive = _message[HttpResponseHeader.KeepAlive];
+            string keepAlive = _message[HttpResponseHeaders.KeepAlive];
             int timeout = 0;
             if (keepAlive != null)
             {
@@ -65,11 +68,11 @@ namespace Zergatul.Network.Http
             }
 
             long length = -1;
-            string contentLength = _message[HttpResponseHeader.ContentLength];
+            string contentLength = _message[HttpResponseHeaders.ContentLength];
             if (contentLength != null)
                 length = long.Parse(contentLength);
             bool chunked = false;
-            string transferEncoding = _message[HttpResponseHeader.TransferEncoding];
+            string transferEncoding = _message[HttpResponseHeaders.TransferEncoding];
             if (transferEncoding != null)
             {
                 if (transferEncoding.IndexOf(',') >= 0)
@@ -82,7 +85,7 @@ namespace Zergatul.Network.Http
             }
             _httpResponseStream = new HttpResponseStream(_readStream, chunked, length);
             Stream = _httpResponseStream;
-            if (string.Equals(_message[HttpResponseHeader.ContentEncoding], HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(_message[HttpResponseHeaders.ContentEncoding], HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
                 Stream = new GZipStream(Stream, CompressionMode.Decompress, true);
         }
 
@@ -99,7 +102,7 @@ namespace Zergatul.Network.Http
             if (disposing)
             {
                 _httpResponseStream.ReadToEnd();
-                if (string.Equals(_message[HttpResponseHeader.Connection], HttpHeaderValue.KeepAlive, StringComparison.InvariantCultureIgnoreCase))
+                if (string.Equals(_message[HttpResponseHeaders.Connection], HttpHeaderValue.KeepAlive, StringComparison.InvariantCultureIgnoreCase))
                     _connection.Close();
                 else
                     _connection.CloseUnderlyingStream();

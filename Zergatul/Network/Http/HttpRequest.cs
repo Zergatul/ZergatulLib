@@ -16,11 +16,11 @@ namespace Zergatul.Network.Http
         {
             get
             {
-                return _reqMsg.GetHeader(HttpRequestHeader.AcceptEncoding);
+                return _reqMsg.GetHeader(HttpRequestHeaders.AcceptEncoding);
             }
             set
             {
-                _reqMsg.SetHeader(HttpRequestHeader.AcceptEncoding, value);
+                _reqMsg.SetHeader(HttpRequestHeaders.AcceptEncoding, value);
             }
         }
 
@@ -28,7 +28,7 @@ namespace Zergatul.Network.Http
         {
             get
             {
-                string connection = _reqMsg.GetHeader(HttpRequestHeader.Connection);
+                string connection = _reqMsg.GetHeader(HttpRequestHeaders.Connection);
                 if (string.Equals(connection, HttpHeaderValue.KeepAlive, StringComparison.OrdinalIgnoreCase))
                     return true;
                 if (string.Equals(connection, HttpHeaderValue.Close, StringComparison.OrdinalIgnoreCase))
@@ -37,7 +37,7 @@ namespace Zergatul.Network.Http
             }
             set
             {
-                _reqMsg.SetHeader(HttpRequestHeader.Connection, value ? HttpHeaderValue.KeepAlive : HttpHeaderValue.Close);
+                _reqMsg.SetHeader(HttpRequestHeaders.Connection, value ? HttpHeaderValue.KeepAlive : HttpHeaderValue.Close);
             }
         }
 
@@ -45,11 +45,11 @@ namespace Zergatul.Network.Http
         {
             get
             {
-                return _reqMsg.GetHeader(HttpRequestHeader.Host);
+                return _reqMsg.GetHeader(HttpRequestHeaders.Host);
             }
             set
             {
-                _reqMsg.SetHeader(HttpRequestHeader.Host, value);
+                _reqMsg.SetHeader(HttpRequestHeaders.Host, value);
             }
         }
 

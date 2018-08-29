@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Network.Http
 {
-    public static class HttpResponseHeader
+    public static class HttpRequestHeaders
     {
         // General
         public const string CacheControl = "Cache-Control";
@@ -13,14 +13,20 @@
         public const string Via = "Via";
         public const string Warning = "Warning";
 
-        // Response
-        public const string ContentEncoding = "Content-Encoding";
-        public const string ContentLength = "Content-Length";
+        // Request
+        public const string Accept = "Accept";
+        public const string AcceptEncoding = "Accept-Encoding";
         public const string ContentType = "Content-Type";
-        public const string KeepAlive = "Keep-Alive";
-        public const string Server = "Server";
+        public const string Cookie = "Cookie";
+        public const string Host = "Host";
+        public const string Origin = "Origin";
+        public const string UserAgent = "User-Agent";
+
+        // X
+        public const string XRequestedWith = "X-Requested-With";
 
         // Web Socket
-        public const string SecWebSocketAccept = "Sec-WebSocket-Accept";
+        public const string SecWebSocketKey = "Sec-WebSocket-Key";
+        public const string SecWebSocketVersion = "Sec-WebSocket-Version";
     }
 }

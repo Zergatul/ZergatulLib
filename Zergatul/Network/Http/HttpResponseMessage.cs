@@ -16,6 +16,7 @@ namespace Zergatul.Network.Http
         public string ReasonPhrase { get; set; }
 
         private Dictionary<string, string> _headers = new Dictionary<string, string>();
+        private List<string> _orderedHeaders = new List<string>();
 
         public string this[string header]
         {
@@ -28,13 +29,26 @@ namespace Zergatul.Network.Http
             }
             set
             {
-                header = header.ToLower();
-                if (_headers.ContainsKey(header))
+                string lower = header.ToLower();
+                if (_headers.ContainsKey(lower))
+                {
                     _headers[header] = value;
+
+                    int index = _orderedHeaders.FindIndex(h => string.Equals(h, lower, StringComparison.InvariantCultureIgnoreCase));
+                    if (index == -1)
+                        throw new InvalidOperationException();
+                    _orderedHeaders.RemoveAt(index);
+                    _orderedHeaders.Add(header);
+                }
                 else
-                    _headers.Add(header, value);
+                {
+                    _headers.Add(lower, value);
+                    _orderedHeaders.Add(header);
+                }
             }
         }
+
+        public IReadOnlyList<string> AllHeaders() => _orderedHeaders;
 
         public void Read(GenericMessageReadStream stream, byte[] buffer)
         {

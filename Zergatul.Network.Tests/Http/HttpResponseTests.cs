@@ -20,11 +20,11 @@ namespace Zergatul.Network.Tests.Http
             Assert.IsTrue(response.Status == HttpStatusCode.BadRequest);
             Assert.IsTrue(response.ReasonPhase == "Bad Request");
 
-            Assert.IsTrue(response[HttpResponseHeader.Server] == "nginx");
-            Assert.IsTrue(response[HttpResponseHeader.Date] == "Wed, 08 Aug 2018 15:04:01 GMT");
-            Assert.IsTrue(response[HttpResponseHeader.ContentType] == "text/html; charset=utf-8");
-            Assert.IsTrue(response[HttpResponseHeader.TransferEncoding] == "chunked");
-            Assert.IsTrue(response[HttpResponseHeader.Connection] == "close");
+            Assert.IsTrue(response[HttpResponseHeaders.Server] == "nginx");
+            Assert.IsTrue(response[HttpResponseHeaders.Date] == "Wed, 08 Aug 2018 15:04:01 GMT");
+            Assert.IsTrue(response[HttpResponseHeaders.ContentType] == "text/html; charset=utf-8");
+            Assert.IsTrue(response[HttpResponseHeaders.TransferEncoding] == "chunked");
+            Assert.IsTrue(response[HttpResponseHeaders.Connection] == "close");
 
             string html = new StreamReader(response.Stream, Encoding.UTF8).ReadToEnd();
             Assert.IsTrue(html ==
@@ -51,11 +51,11 @@ namespace Zergatul.Network.Tests.Http
             Assert.IsTrue(response.Status == HttpStatusCode.OK);
             Assert.IsTrue(response.ReasonPhase == "OK");
 
-            Assert.IsTrue(response[HttpResponseHeader.Server] == "nginx");
-            Assert.IsTrue(response[HttpResponseHeader.Date] == "Wed, 08 Aug 2018 15:50:58 GMT");
-            Assert.IsTrue(response[HttpResponseHeader.ContentType] == "text/html;charset=UTF-8");
-            Assert.IsTrue(response[HttpResponseHeader.TransferEncoding] == "chunked");
-            Assert.IsTrue(response[HttpResponseHeader.Connection] == "close");
+            Assert.IsTrue(response[HttpResponseHeaders.Server] == "nginx");
+            Assert.IsTrue(response[HttpResponseHeaders.Date] == "Wed, 08 Aug 2018 15:50:58 GMT");
+            Assert.IsTrue(response[HttpResponseHeaders.ContentType] == "text/html;charset=UTF-8");
+            Assert.IsTrue(response[HttpResponseHeaders.TransferEncoding] == "chunked");
+            Assert.IsTrue(response[HttpResponseHeaders.Connection] == "close");
             Assert.IsTrue(response["X-Cached"] == "HIT");
 
             string html = new StreamReader(response.Stream, Encoding.UTF8).ReadToEnd();
