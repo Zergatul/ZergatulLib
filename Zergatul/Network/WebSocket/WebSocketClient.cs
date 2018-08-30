@@ -60,7 +60,7 @@ namespace Zergatul.Network.WebSocket
         {
             this.State = ConnectionState.Connecting;
 
-            _client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port);
+            _client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port, null);
 
             switch (_uri.Scheme)
             {

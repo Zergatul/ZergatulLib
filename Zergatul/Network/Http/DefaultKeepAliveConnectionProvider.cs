@@ -17,7 +17,7 @@ namespace Zergatul.Network.Http
 
         }
 
-        public override HttpConnection GetConnection(Uri uri)
+        public override HttpConnection GetConnection(Uri uri, Proxy.ProxyBase proxy)
         {
             string host = uri.Host.ToLower();
 
@@ -37,6 +37,8 @@ namespace Zergatul.Network.Http
 
                     if (_connections[i].Host != host)
                         continue;
+                    if (proxy != null && !proxy.Equals(_connections[i].Proxy))
+                        continue;
                     if (!_connections[i].InUse)
                     {
                         _connections[i].InUse = true;
@@ -44,7 +46,7 @@ namespace Zergatul.Network.Http
                     }
                 }
 
-            var client = TcpConnector.GetTcpClient(uri.Host, uri.Port);
+            var client = TcpConnector.GetTcpClient(uri.Host, uri.Port, proxy);
             Stream stream;
             switch (uri.Scheme)
             {
@@ -62,7 +64,8 @@ namespace Zergatul.Network.Http
 
             var connection = new DefaultHttpConnection(stream, _connections)
             {
-                Host = host
+                Host = host,
+                Proxy = proxy
             };
             lock (_connections)
             {
@@ -76,6 +79,7 @@ namespace Zergatul.Network.Http
             public override Stream Stream => _stream;
 
             public string Host;
+            public Proxy.ProxyBase Proxy;
             public volatile bool InUse;
 
             private Stream _stream;

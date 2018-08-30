@@ -4,12 +4,20 @@ namespace Zergatul.Network.Http
 {
     public class HttpRequest
     {
+        public Proxy.ProxyBase Proxy { get; set; }
+
         #region Headers-related properties
 
         public string Method
         {
             get => _reqMsg.Method;
             set => _reqMsg.Method = value;
+        }
+
+        public string Version
+        {
+            get => _reqMsg.Version;
+            set => _reqMsg.Version = value;
         }
 
         public string AcceptEncoding
@@ -95,7 +103,7 @@ namespace Zergatul.Network.Http
             if (_connectionProvider == null)
                 throw new NotImplementedException();
 
-            var connection = _connectionProvider.GetConnection(_uri);
+            var connection = _connectionProvider.GetConnection(_uri, Proxy);
 
             byte[] requestBytes = _reqMsg.ToBytes();
             connection.Stream.Write(requestBytes, 0, requestBytes.Length);

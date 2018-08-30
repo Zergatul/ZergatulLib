@@ -5,18 +5,25 @@ namespace Zergatul.Network
 {
     internal static class TcpConnector
     {
-        public static TcpClient GetTcpClient(string host, int port)
+        public static TcpClient GetTcpClient(string host, int port, Proxy.ProxyBase proxy)
         {
-            var client = new TcpClient();
-            if (DnsProvider.Instance != null)
+            if (proxy == null)
             {
-                var entry = DnsProvider.Instance.Resolve(host);
-                client.Connect(entry.AddressList[0], port);
+                var client = new TcpClient();
+                if (DnsProvider.Instance != null)
+                {
+                    var entry = DnsProvider.Instance.Resolve(host);
+                    client.Connect(entry.AddressList[0], port);
+                }
+                else
+                    client.Connect(host, port);
+
+                return client;
             }
             else
-                client.Connect(host, port);
-
-            return client;
+            {
+                return proxy.CreateConnection(host, port);
+            }
         }
     }
 }
