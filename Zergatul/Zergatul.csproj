@@ -116,6 +116,9 @@
     <Compile Include="Cryptography\KDF\PBKDF2.cs" />
     <Compile Include="Cryptography\KDF\Scrypt.cs" />
     <Compile Include="Cryptography\KDF\HKDF.cs" />
+    <Compile Include="IO\BitReader.cs" />
+    <Compile Include="IO\Compression\BrotliStream.cs" />
+    <Compile Include="IO\Compression\BrotliStreamException.cs" />
     <Compile Include="IO\GenericMessageReadStream.cs" />
     <Compile Include="IO\LimitedStream.cs" />
     <Compile Include="Math\BigReal.cs" />
