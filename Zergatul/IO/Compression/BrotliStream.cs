@@ -39,6 +39,16 @@ namespace Zergatul.IO.Compression
             1, 1, 2, 2, 3, 3,  4,  4,
             5, 5, 6, 7, 8, 9, 10, 24
         };
+        private static readonly int[] BlockCountCodeOffset = new[]
+        {
+              1,   5,   9,  13,  17,  25,  33,  41,   49,   65,   81,   97,   113,
+            145, 177, 209, 241, 305, 369, 497, 753, 1265, 2289, 4337, 8433, 16625
+        };
+        private static readonly int[] BlockCountCodeBits = new[]
+        {
+            2, 2, 2, 2, 3, 3, 3, 3,  4,  4,  4,  4,  5,
+            5, 5, 5, 6, 6, 7, 8, 9, 10, 11, 12, 13, 24
+        };
         private static readonly int[] LookupTable0 = new[]
         {
             0,  0,  0,  0,  0,  0,  0,  0,  0,  4,  4,  0,  0,  4,  0,  0,
@@ -241,6 +251,7 @@ namespace Zergatul.IO.Compression
                 {
                     _blocks[i].BlockTypeTree = ReadHuffmanTree(_blocks[i].nBlTypes + 2);
                     _blocks[i].BlockLenTree = ReadHuffmanTree(BlockCountAlphabetSize);
+                    _blocks[i].bLen = ReadBlockLength(_blocks[i].BlockLenTree);
                 }
                 else
                 {
@@ -431,7 +442,7 @@ namespace Zergatul.IO.Compression
             if (prefixCodeType == 1)
                 return ReadSimplePrefixCodes(alphabetSize);
             else
-                return ReadCompressPrefixCodes(prefixCodeType, alphabetSize);
+                return ReadComplexPrefixCodes(prefixCodeType, alphabetSize);
         }
 
         private Tree ReadSimplePrefixCodes(int alphabetSize)
@@ -520,7 +531,7 @@ namespace Zergatul.IO.Compression
             }
         }
 
-        private Tree ReadCompressPrefixCodes(int hSkip, int alphabetSize)
+        private Tree ReadComplexPrefixCodes(int hSkip, int alphabetSize)
         {
             int[] codeLengthCodeLengths = new int[18]; // TODO why 18?
             int space = 32;
@@ -575,19 +586,27 @@ namespace Zergatul.IO.Compression
             var tree = BuildTree(codeLengthCodeLengths);
             int symbolCount = 0;
             int[] codeLength = new int[alphabetSize];
-            space = 32678;
+            space = 0x8000;
             while (symbolCount < alphabetSize && space > 0)
             {
                 int codeLen = ReadHuffmanValue(tree);
                 codeLength[symbolCount] = codeLen;
                 symbolCount++;
-                if (codeLen != 0)
+                if (codeLen < 16)
                 {
-                    space -= 32678 >> codeLen;
+                    if (codeLen != 0)
+                    {
+                        space -= 0x8000 >> codeLen;
+                    }
                 }
+                else
+                    throw new NotImplementedException();
             }
 
-            return null;
+            if (space != 0)
+                throw new BrotliStreamException();
+
+            return BuildTree(codeLength);
         }
 
         private int ReadHuffmanValue(Tree tree)
@@ -779,6 +798,12 @@ namespace Zergatul.IO.Compression
             }
 
             tree.Value = value;
+        }
+
+        private int ReadBlockLength(Tree tree)
+        {
+            int code = ReadHuffmanValue(tree);
+            return BlockCountCodeOffset[code] + _reader.ReadBits(BlockCountCodeBits[code]);
         }
 
         #region Stream overrides
