@@ -271,18 +271,8 @@ namespace Zergatul.IO.Compression
             for (int i = 0; i < _cMode.Length; i++)
                 _cMode[i] = (ContextMode)_reader.ReadBits(2);
 
-            // read only literal and distance trees
-            for (int i = 0; i < 3; i += 2)
-            {
-                _blocks[i].nTrees = ReadVariableLength256Code();
-                _blocks[i].cMap = new int[_blocks[i].nBlTypes];
-                if (_blocks[i].nTrees >= 2)
-                    throw new NotImplementedException();
-                else
-                {
-                    // fill with zeros
-                }
-            }
+            ReadContextMap(_literalBlock, _literalBlock.nBlTypes << 6);
+            ReadContextMap(_distanceBlock, _distanceBlock.nBlTypes << 2);
 
             // read prefix codes
             for (int i = 0; i < 3; i++)
@@ -804,6 +794,70 @@ namespace Zergatul.IO.Compression
         {
             int code = ReadHuffmanValue(tree);
             return BlockCountCodeOffset[code] + _reader.ReadBits(BlockCountCodeBits[code]);
+        }
+
+        private void ReadContextMap(Block block, int size)
+        {
+            block.nTrees = ReadVariableLength256Code();
+            block.cMap = new int[size];
+            if (block.nTrees >= 2)
+            {
+                int rleMax = _reader.ReadBits(1);
+                if (rleMax == 1)
+                    rleMax = 1 + _reader.ReadBits(4);
+                var tree = ReadHuffmanTree(block.nTrees + rleMax);
+
+                int index = 0;
+                while (index < size)
+                {
+                    int code = ReadHuffmanValue(tree);
+                    if (code == 0)
+                    {
+                        block.cMap[index] = 0;
+                        index++;
+                        continue;
+                    }
+                    if (code <= rleMax)
+                    {
+                        int count = (1 << code) + _reader.ReadBits(code);
+                        if (index + count > size)
+                            throw new BrotliStreamException();
+                        while (count > 0)
+                        {
+                            block.cMap[index] = 0;
+                            index++;
+                            count--;
+                        }
+                    }
+                    else
+                    {
+                        block.cMap[index] = code - rleMax;
+                        index++;
+                    }
+                }
+                bool imtf = _reader.ReadBits(1) == 1;
+                if (imtf)
+                    InverseMoveToFrontTransform(block.cMap);
+            }
+        }
+
+        private void InverseMoveToFrontTransform(int[] map)
+        {
+            int[] mtf = new int[256];
+            for (int i = 0; i < 256; i++)
+                mtf[i] = i;
+            for (int i = 0; i < map.Length; i++)
+            {
+                int index = map[i];
+                int value = mtf[index];
+                map[i] = value;
+                while (index > 0)
+                {
+                    mtf[index] = mtf[index - 1];
+                    index--;
+                }
+                mtf[0] = value;
+            }
         }
 
         #region Stream overrides
