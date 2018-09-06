@@ -236,8 +236,7 @@ namespace Zergatul.IO.Compression
             };
             _insertCopyBlock = new Block
             {
-                AlphabetSize = InsertCopyAlphabetSize,
-                nTrees = 1
+                AlphabetSize = InsertCopyAlphabetSize
             };
             _distanceBlock = new Block();
             _blocks[0] = _literalBlock;
@@ -273,6 +272,7 @@ namespace Zergatul.IO.Compression
 
             ReadContextMap(_literalBlock, _literalBlock.nBlTypes << 6);
             ReadContextMap(_distanceBlock, _distanceBlock.nBlTypes << 2);
+            _insertCopyBlock.nTrees = _insertCopyBlock.nBlTypes;
 
             // read prefix codes
             for (int i = 0; i < 3; i++)
@@ -577,20 +577,74 @@ namespace Zergatul.IO.Compression
             int symbolCount = 0;
             int[] codeLength = new int[alphabetSize];
             space = 0x8000;
+            int prevCodeLength = 8;
+            int prevRepeatCount16 = 0;
+            int prevRepeatCount17 = 0;
             while (symbolCount < alphabetSize && space > 0)
             {
                 int codeLen = ReadHuffmanValue(tree);
-                codeLength[symbolCount] = codeLen;
-                symbolCount++;
                 if (codeLen < 16)
                 {
+                    codeLength[symbolCount] = codeLen;
+                    symbolCount++;
+                    prevRepeatCount16 = prevRepeatCount17 = 0;
                     if (codeLen != 0)
                     {
                         space -= 0x8000 >> codeLen;
+                        prevCodeLength = codeLen;
                     }
                 }
                 else
-                    throw new NotImplementedException();
+                {
+                    int repeatValue;
+                    int repeatCount;
+                    if (codeLen == 16)
+                    {
+                        repeatValue = prevCodeLength;
+                        repeatCount = 3 + _reader.ReadBits(2);
+                        prevRepeatCount17 = 0;
+                        if (prevRepeatCount16 == 0)
+                        {
+                            prevRepeatCount16 = repeatCount;
+                        }
+                        else
+                        {
+                            int buf = repeatCount;
+                            repeatCount += ((prevRepeatCount16 - 2) << 2) - prevRepeatCount16;
+                            prevRepeatCount16 = buf;
+                        }
+                    }
+                    else if (codeLen == 17)
+                    {
+                        repeatValue = 0;
+                        repeatCount = 3 + _reader.ReadBits(3);
+                        prevRepeatCount16 = 0;
+                        if (prevRepeatCount17 == 0)
+                        {
+                            prevRepeatCount17 = repeatCount;
+                        }
+                        else
+                        {
+                            int buf = repeatCount;
+                            repeatCount += ((prevRepeatCount17 - 2) << 3) - prevRepeatCount17;
+                            prevRepeatCount17 = buf;
+                        }
+                    }
+                    else
+                        throw new BrotliStreamException();
+
+                    if (symbolCount + repeatCount > alphabetSize)
+                        throw new BrotliStreamException();
+
+                    for (int i = 0; i < repeatCount; i++)
+                    {
+                        codeLength[symbolCount] = repeatValue;
+                        symbolCount++;
+                    }
+
+                    if (repeatValue != 0)
+                        space -= repeatCount << (15 - repeatValue);
+                }
             }
 
             if (space != 0)
