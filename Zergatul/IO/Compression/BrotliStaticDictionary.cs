@@ -3863,5 +3863,184 @@ namespace Zergatul.IO.Compression
         {
             0, 0, 0, 0, 1024, 1024, 2048, 2048, 1024, 1024, 1024, 1024, 1024, 512, 512, 256, 128, 128, 256, 128, 128, 64, 64, 32, 32
         };
+
+        private static readonly byte[] Empty = new byte[0];
+        private static readonly byte[] Space = new byte[] { 0x20 };
+        private static readonly byte[] QuotationMark = new byte[] { 0x22 };
+        private static readonly byte[] Apostrophe = new byte[] { 0x27 };
+        private static readonly byte[] LeftParenthesis = new byte[] { 0x28 };
+        private static readonly byte[] Comma = new byte[] { 0x2C };
+        private static readonly byte[] Dot = new byte[] { 0x2E };
+        private static readonly byte[] CommaSpace = new byte[] { 0x2C, 0x20 };
+        private static readonly byte[] DotSpace = new byte[] { 0x2E, 0x20 };
+        private static readonly byte[] EqualQuot = new byte[] { 0x3D, 0x22 };
+        private static readonly byte[] EqualApostrophe = new byte[] { 0x3D, 0x27 };
+        private static readonly byte[] QuotGreaterThan = new byte[] { 0x22, 0x3e };
+        private static readonly byte[] Of = new byte[] { 0x20, 0x6f, 0x66, 0x20 };
+        private static readonly byte[] The = new byte[] { 0x20, 0x74, 0x68, 0x65, 0x20 };
+
+        public static readonly Transform[] Transforms = new Transform[121]
+        {
+            new Transform(Empty, TransformType.Identity, Empty),
+            new Transform(Empty, TransformType.Identity, Space),
+            new Transform(Space, TransformType.Identity, Space),
+            new Transform(Empty, TransformType.OmitFirst1, Empty),
+            new Transform(Empty, TransformType.FermentFirst, Space),
+            new Transform(Empty, TransformType.Identity, The),
+            new Transform(Space, TransformType.Identity, Empty),
+            new Transform(new byte[] { 0x73, 0x20 }, TransformType.Identity, Space),
+            new Transform(Empty, TransformType.Identity, Of),
+            new Transform(Empty, TransformType.FermentFirst, Empty),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x61, 0x6e, 0x64, 0x20 }),
+            new Transform(Empty, TransformType.OmitFirst2, Empty),
+            new Transform(Empty, TransformType.OmitLast1, Empty),
+            new Transform(CommaSpace, TransformType.Identity, Space),
+            new Transform(Empty, TransformType.Identity, CommaSpace),
+            new Transform(Space, TransformType.FermentFirst, Space),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x69, 0x6e, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x74, 0x6f, 0x20 }),
+            new Transform(new byte[] { 0x65, 0x20 }, TransformType.Identity, Space),
+            new Transform(Empty, TransformType.Identity, QuotationMark),
+            new Transform(Empty, TransformType.Identity, Dot),
+            new Transform(Empty, TransformType.Identity, QuotGreaterThan),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0xa }),
+            new Transform(Empty, TransformType.OmitLast3, Empty),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x5d }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x66, 0x6f, 0x72, 0x20 }),
+            new Transform(Empty, TransformType.OmitFirst3, Empty),
+            new Transform(Empty, TransformType.OmitLast2, Empty),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x61, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x74, 0x68, 0x61, 0x74, 0x20 }),
+            new Transform(Space, TransformType.FermentFirst, Empty),
+            new Transform(Empty, TransformType.Identity, DotSpace),
+            new Transform(Dot, TransformType.Identity, Empty),
+            new Transform(Space, TransformType.Identity, CommaSpace),
+            new Transform(Empty, TransformType.OmitFirst4, Empty),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x77, 0x69, 0x74, 0x68, 0x20 }),
+            new Transform(Empty, TransformType.Identity, Apostrophe),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x66, 0x72, 0x6f, 0x6d, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x62, 0x79, 0x20 }),
+            new Transform(Empty, TransformType.OmitFirst5, Empty),
+            new Transform(Empty, TransformType.OmitFirst6, Empty),
+            new Transform(The, TransformType.Identity, Empty),
+            new Transform(Empty, TransformType.OmitLast4, Empty),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x2e, 0x20, 0x54, 0x68, 0x65, 0x20 }),
+            new Transform(Empty, TransformType.FermentAll, Empty),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x6f, 0x6e, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x61, 0x73, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x69, 0x73, 0x20 }),
+            new Transform(Empty, TransformType.OmitLast7, Empty),
+            new Transform(Empty, TransformType.OmitLast1, new byte[] { 0x69, 0x6e, 0x67, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x0a, 0x09 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x3a }),
+            new Transform(Space, TransformType.Identity, DotSpace),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x65, 0x64, 0x20 }),
+            new Transform(Empty, TransformType.OmitFirst9, Empty),
+            new Transform(Empty, TransformType.OmitFirst7, Empty),
+            new Transform(Empty, TransformType.OmitLast6, Empty),
+            new Transform(Empty, TransformType.Identity, LeftParenthesis),
+            new Transform(Empty, TransformType.FermentFirst, CommaSpace),
+            new Transform(Empty, TransformType.OmitLast8, Empty),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x61, 0x74, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x6c, 0x79, 0x20 }),
+            new Transform(The, TransformType.Identity, Of),
+            new Transform(Empty, TransformType.OmitLast5, Empty),
+            new Transform(Empty, TransformType.OmitLast9, Empty),
+            new Transform(Space, TransformType.FermentFirst, CommaSpace),
+            new Transform(Empty, TransformType.FermentFirst, QuotationMark),
+            new Transform(Dot, TransformType.Identity, LeftParenthesis),
+            new Transform(Empty, TransformType.FermentAll, Space),
+            new Transform(Empty, TransformType.FermentFirst, QuotGreaterThan),
+            new Transform(Empty, TransformType.Identity, EqualQuot),
+            new Transform(Space, TransformType.Identity, Dot),
+            new Transform(new byte[] { 0x2e, 0x63, 0x6f, 0x6d, 0x2f }, TransformType.Identity, Empty),
+            new Transform(The, TransformType.Identity, new byte[] { 0x20, 0x6f, 0x66, 0x20, 0x74, 0x68, 0x65, 0x20 }),
+            new Transform(Empty, TransformType.FermentFirst, Apostrophe),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x2e, 0x20, 0x54, 0x68, 0x69, 0x73, 0x20 }),
+            new Transform(Empty, TransformType.Identity, Comma),
+            new Transform(Dot, TransformType.Identity, Space),
+            new Transform(Empty, TransformType.FermentFirst, LeftParenthesis),
+            new Transform(Empty, TransformType.FermentFirst, Dot),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x20, 0x6e, 0x6f, 0x74, 0x20 }),
+            new Transform(Space, TransformType.Identity, EqualQuot),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x65, 0x72, 0x20 }),
+            new Transform(Space, TransformType.FermentAll, Space),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x61, 0x6c, 0x20 }),
+            new Transform(Space, TransformType.FermentAll, Empty),
+            new Transform(Empty, TransformType.Identity, EqualApostrophe),
+            new Transform(Empty, TransformType.FermentAll, QuotationMark),
+            new Transform(Empty, TransformType.FermentFirst, DotSpace),
+            new Transform(Space, TransformType.Identity, LeftParenthesis),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x66, 0x75, 0x6c, 0x20 }),
+            new Transform(Space, TransformType.FermentFirst, DotSpace),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x69, 0x76, 0x65, 0x20 }),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x6c, 0x65, 0x73, 0x73, 0x20 }),
+            new Transform(Empty, TransformType.FermentAll, Apostrophe),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x65, 0x73, 0x74, 0x20 }),
+            new Transform(Space, TransformType.FermentFirst, Dot),
+            new Transform(Empty, TransformType.FermentAll, QuotGreaterThan),
+            new Transform(Space, TransformType.Identity, EqualApostrophe),
+            new Transform(Empty, TransformType.FermentFirst, Comma),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x69, 0x7a, 0x65, 0x20 }),
+            new Transform(Empty, TransformType.FermentAll, Dot),
+            new Transform(new byte[] { 0xc2, 0xa0 }, TransformType.Identity, Empty),
+            new Transform(Space, TransformType.Identity, Comma),
+            new Transform(Empty, TransformType.FermentFirst, EqualQuot),
+            new Transform(Empty, TransformType.FermentAll, EqualQuot),
+            new Transform(Empty, TransformType.Identity, new byte[] { 0x6f, 0x75, 0x73, 0x20 }),
+            new Transform(Empty, TransformType.FermentAll, CommaSpace),
+            new Transform(Empty, TransformType.FermentFirst, EqualApostrophe),
+            new Transform(Space, TransformType.FermentFirst, Comma),
+            new Transform(Space, TransformType.FermentAll, EqualQuot),
+            new Transform(Space, TransformType.FermentAll, CommaSpace),
+            new Transform(Empty, TransformType.FermentAll, Comma),
+            new Transform(Empty, TransformType.FermentAll, LeftParenthesis),
+            new Transform(Empty, TransformType.FermentAll, DotSpace),
+            new Transform(Space, TransformType.FermentAll, Dot),
+            new Transform(Empty, TransformType.FermentAll, EqualApostrophe),
+            new Transform(Space, TransformType.FermentAll, DotSpace),
+            new Transform(Space, TransformType.FermentFirst, EqualQuot),
+            new Transform(Space, TransformType.FermentAll, EqualApostrophe),
+            new Transform(Space, TransformType.FermentFirst, EqualApostrophe),
+        };
+
+        internal enum TransformType
+        {
+            Identity,
+            FermentFirst,
+            FermentAll,
+            OmitFirst1,
+            OmitFirst2,
+            OmitFirst3,
+            OmitFirst4,
+            OmitFirst5,
+            OmitFirst6,
+            OmitFirst7,
+            OmitFirst8,
+            OmitFirst9,
+            OmitLast1,
+            OmitLast2,
+            OmitLast3,
+            OmitLast4,
+            OmitLast5,
+            OmitLast6,
+            OmitLast7,
+            OmitLast8,
+            OmitLast9,
+        };
+
+        internal struct Transform
+        {
+            public byte[] Prefix;
+            public TransformType Type;
+            public byte[] Suffix;
+
+            public Transform(byte[] prefix, TransformType type, byte[] suffix)
+            {
+                this.Prefix = prefix;
+                this.Type = type;
+                this.Suffix = suffix;
+            }
+        }
     }
 }

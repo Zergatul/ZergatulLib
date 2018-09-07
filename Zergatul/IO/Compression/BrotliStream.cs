@@ -137,6 +137,7 @@ namespace Zergatul.IO.Compression
         private int _insertLength;
         private int _copyLength;
         private int _distance;
+        private int _maxDistance;
         private int _p1, _p2;
 
         public BrotliStream(Stream stream, CompressionMode mode)
@@ -227,9 +228,6 @@ namespace Zergatul.IO.Compression
                 }
             }
 
-            // Literals - 0
-            // Inser-and-Copy - 1
-            // Distance - 2
             _literalBlock = new Block
             {
                 AlphabetSize = LiteralAlphabetSize
@@ -361,19 +359,11 @@ namespace Zergatul.IO.Compression
                     else
                         throw new NotImplementedException();
 
-                    int maxDistance = System.Math.Min(_bufferOffset, _maxBackwardDistance);
-                    if (_distance > maxDistance)
+                    _maxDistance = System.Math.Min(_bufferOffset, _maxBackwardDistance);
+                    if (_distance > _maxDistance)
                     {
-                        if (_copyLength < 4 || _copyLength > 24)
-                            throw new BrotliStreamException();
-
-                        int wordId = _distance - maxDistance - 1;
-                        index = wordId % BrotliStaticDictionary.NWords[_copyLength];
-                        int copyFromIndex = BrotliStaticDictionary.DOffset[_copyLength] + index * _copyLength;
-                        int transformId = wordId >> BrotliStaticDictionary.NDBits[_copyLength];
-
-                        if (transformId > 120)
-                            throw new BrotliStreamException();
+                        _state = State.Transform;
+                        return;
                     }
                     else
                     {
@@ -409,6 +399,27 @@ namespace Zergatul.IO.Compression
             }
             else
                 _state = State.MainLoop;
+        }
+
+        private void ProcessStaticDictionaryTransform()
+        {
+            if (_state != State.Transform)
+                throw new InvalidOperationException();
+
+            if (_copyLength < 4 || _copyLength > 24)
+                throw new BrotliStreamException();
+
+            int wordId = _distance - _maxDistance - 1;
+            int index = wordId % BrotliStaticDictionary.NWords[_copyLength];
+            int dictOffset = BrotliStaticDictionary.DOffset[_copyLength] + index * _copyLength;
+            int transformId = wordId >> BrotliStaticDictionary.NDBits[_copyLength];
+
+            if (transformId > 120)
+                throw new BrotliStreamException();
+
+            Transform(transformId, dictOffset);
+
+            _state = State.MainLoop;
         }
 
         private int DecodeWBits()
@@ -934,6 +945,28 @@ namespace Zergatul.IO.Compression
             }
         }
 
+        private void Transform(int id, int offset)
+        {
+            var transform = BrotliStaticDictionary.Transforms[id];
+
+            for (int i = 0; i < transform.Suffix.Length; i++)
+                AddLiteral(transform.Suffix[i]);
+
+            switch (transform.Type)
+            {
+                case BrotliStaticDictionary.TransformType.Identity:
+                    for (int i = 0; i < _copyLength; i++)
+                        AddLiteral(BrotliStaticDictionary.Dict[offset + i]);
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
+
+            for (int i = 0; i < transform.Prefix.Length; i++)
+                AddLiteral(transform.Prefix[i]);
+        }
+
         #region Stream overrides
 
         public override bool CanRead => throw new NotImplementedException();
@@ -996,6 +1029,10 @@ namespace Zergatul.IO.Compression
                     case State.Copy:
                         ProcessCopy();
                         break;
+
+                    case State.Transform:
+                        ProcessStaticDictionaryTransform();
+                        break;
                 }
             }
 
@@ -1019,6 +1056,7 @@ namespace Zergatul.IO.Compression
             MainLoop,
             InsertLoop,
             Copy,
+            Transform,
             Finished
         }
 
