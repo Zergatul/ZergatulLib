@@ -346,7 +346,9 @@ namespace Zergatul.IO.Compression
                         throw new NotImplementedException();
                     _distanceBlock.bLen--;
 
-                    _distanceCode = ReadHuffmanValue(_distanceBlock.Trees[0]); // TODO
+                    int cidd = _copyLength > 4 ? 3 : _copyLength - 2;
+                    int index = (_distanceBlock.bType << 2) + cidd;
+                    _distanceCode = ReadHuffmanValue(_distanceBlock.Trees[_distanceBlock.cMap[index]]);
                     if (_distanceCode >= SpecialDistanceSymbols + _nDirect)
                     {
                         int nDistBits = 1 + ((_distanceCode - _nDirect - SpecialDistanceSymbols) >> (_nPostfix + 1));
@@ -355,10 +357,28 @@ namespace Zergatul.IO.Compression
                         int offset = ((2 + (hcode & 1)) << nDistBits) - 4;
                         int dextra = _reader.ReadBits(nDistBits);
                         _distance = ((offset + dextra) << _nPostfix) + lcode + _nDirect + 1;
-                        AddDistance();
                     }
                     else
                         throw new NotImplementedException();
+
+                    int maxDistance = System.Math.Min(_bufferOffset, _maxBackwardDistance);
+                    if (_distance > maxDistance)
+                    {
+                        if (_copyLength < 4 || _copyLength > 24)
+                            throw new BrotliStreamException();
+
+                        int wordId = _distance - maxDistance - 1;
+                        index = wordId % BrotliStaticDictionary.NWords[_copyLength];
+                        int copyFromIndex = BrotliStaticDictionary.DOffset[_copyLength] + index * _copyLength;
+                        int transformId = wordId >> BrotliStaticDictionary.NDBits[_copyLength];
+
+                        if (transformId > 120)
+                            throw new BrotliStreamException();
+                    }
+                    else
+                    {
+                        AddDistance();
+                    }
                 }
 
                 _state = State.Copy;
