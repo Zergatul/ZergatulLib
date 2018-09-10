@@ -29,6 +29,12 @@ namespace Zergatul.Tests
         }
 
         [TestMethod]
+        public void TestQuickFoxRepeated()
+        {
+            TestFile("quickfox_repeated");
+        }
+
+        [TestMethod]
         public void TestZeros()
         {
             TestFile("zeros");
@@ -38,6 +44,72 @@ namespace Zergatul.Tests
         public void TestAlice29()
         {
             TestFile("alice29");
+        }
+
+        [TestMethod]
+        public void TestAsyoulik()
+        {
+            TestFile("asyoulik");
+        }
+
+        [TestMethod]
+        public void TestBackward65536()
+        {
+            TestFile("backward65536");
+        }
+
+        [TestMethod]
+        public void TestCompressedFile()
+        {
+            TestFile("compressed_file");
+        }
+
+        [TestMethod]
+        public void TestCompressedRepeated()
+        {
+            TestFile("compressed_repeated");
+        }
+
+        [TestMethod]
+        public void TestLcet10()
+        {
+            TestFile("lcet10");
+        }
+
+        [TestMethod]
+        public void TestMapsdatazrh()
+        {
+            TestFile("mapsdatazrh");
+        }
+
+        [TestMethod]
+        public void TestMonkey()
+        {
+            TestFile("monkey");
+        }
+
+        [TestMethod]
+        public void TestPlrabn12()
+        {
+            TestFile("plrabn12");
+        }
+
+        [TestMethod]
+        public void TestRandomOrg10k()
+        {
+            TestFile("random_org_10k.bin");
+        }
+
+        [TestMethod]
+        public void TestUkkonooa()
+        {
+            TestFile("ukkonooa");
+        }
+
+        [TestMethod]
+        public void TestXyzzy()
+        {
+            TestFile("xyzzy");
         }
 
         private static void TestFile(string filename)

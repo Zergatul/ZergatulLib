@@ -126,7 +126,7 @@ namespace Zergatul.IO.Compression
         private int _nPostfix;
         private int _nDirect;
         private int _postfixMask;
-        private int _r1, _r2, _r3, _r4;
+        private int _d1, _d2, _d3, _d4;
         private Block[] _blocks;
         private Block _literalBlock;
         private Block _insertCopyBlock;
@@ -167,10 +167,10 @@ namespace Zergatul.IO.Compression
             _p1 = 0;
             _p2 = 0;
 
-            _r1 = 4;
-            _r2 = 11;
-            _r3 = 15;
-            _r4 = 16;
+            _d1 = 4;
+            _d2 = 11;
+            _d3 = 15;
+            _d4 = 16;
 
             _state = State.BlockStart;
         }
@@ -220,7 +220,7 @@ namespace Zergatul.IO.Compression
                     if (_reader.ReadTillByteBoundary() != 0)
                         throw new BrotliStreamException();
 
-                    for (int i = 0; i < _mLen; i++)
+                    while (_mLen > 0)
                         AddLiteral(_reader.ReadBits(8));
 
                     _state = State.BlockStart;
@@ -248,7 +248,9 @@ namespace Zergatul.IO.Compression
                 {
                     _blocks[i].BlockTypeTree = ReadHuffmanTree(_blocks[i].nBlTypes + 2);
                     _blocks[i].BlockLenTree = ReadHuffmanTree(BlockCountAlphabetSize);
-                    _blocks[i].bLen = ReadBlockLength(_blocks[i].BlockLenTree);
+                    _blocks[i].PrevBlockType = 1;
+                    _blocks[i].bType = 0;
+                    ReadBlockLength(_blocks[i]);
                 }
                 else
                 {
@@ -290,12 +292,13 @@ namespace Zergatul.IO.Compression
 
             if (_insertCopyBlock.bLen == 0)
             {
-                throw new NotImplementedException();
+                ReadBlockType(_insertCopyBlock);
+                ReadBlockLength(_insertCopyBlock);
             }
-
             _insertCopyBlock.bLen--;
+
             int insertCode, copyCode;
-            DecodeInsertCopyLengthCode(ReadHuffmanValue(_insertCopyBlock.Trees[0]), out insertCode, out copyCode, out _distanceCode);
+            DecodeInsertCopyLengthCode(ReadHuffmanValue(_insertCopyBlock.Trees[_insertCopyBlock.bType]), out insertCode, out copyCode, out _distanceCode);
             _insertLength = InsertLengthCodeOffset[insertCode] + _reader.ReadBits(InsertLengthCodeBits[insertCode]);
             _copyLength = CopyLengthCodeOffset[copyCode] + _reader.ReadBits(CopyLengthCodeBits[copyCode]);
 
@@ -311,16 +314,16 @@ namespace Zergatul.IO.Compression
             {
                 if (_literalBlock.bLen == 0)
                 {
-                    throw new NotImplementedException();
+                    ReadBlockType(_literalBlock);
+                    ReadBlockLength(_literalBlock);
                 }
                 _literalBlock.bLen--;
 
-                int cidl = 0; // GetContextId(_cMode[_literalBlock.bType]); TODO
-                int literal = ReadHuffmanValue(_literalBlock.Trees[64 * _literalBlock.bType + cidl]);
+                int cidl = GetContextId(_cMode[_literalBlock.bType]);
+                int literal = ReadHuffmanValue(_literalBlock.Trees[_literalBlock.cMap[64 * _literalBlock.bType + cidl]]);
                 AddLiteral(literal);
 
                 _insertLength--;
-                _mLen--;
             }
 
             if (_insertLength == 0)
@@ -336,12 +339,15 @@ namespace Zergatul.IO.Compression
 
                 if (_distanceCode == 0)
                 {
-                    _distance = _r1;
+                    _distance = _d1;
                 }
                 else
                 {
                     if (_distanceBlock.bLen == 0)
-                        throw new NotImplementedException();
+                    {
+                        ReadBlockType(_distanceBlock);
+                        ReadBlockLength(_distanceBlock);
+                    }
                     _distanceBlock.bLen--;
 
                     int cidd = _copyLength > 4 ? 3 : _copyLength - 2;
@@ -357,9 +363,31 @@ namespace Zergatul.IO.Compression
                         _distance = ((offset + dextra) << _nPostfix) + lcode + _nDirect + 1;
                     }
                     else
-                        throw new NotImplementedException();
+                    {
+                        switch (_distanceCode)
+                        {
+                            case 0: _distance = _d1; break;
+                            case 1: _distance = _d2; break;
+                            case 2: _distance = _d3; break;
+                            case 3: _distance = _d4; break;
+                            case 4: _distance = _d1 - 1; break;
+                            case 5: _distance = _d1 + 1; break;
+                            case 6: _distance = _d1 - 2; break;
+                            case 7: _distance = _d1 + 2; break;
+                            case 8: _distance = _d1 - 3; break;
+                            case 9: _distance = _d1 + 3; break;
+                            case 10: _distance = _d2 - 1; break;
+                            case 11: _distance = _d2 + 1; break;
+                            case 12: _distance = _d2 - 2; break;
+                            case 13: _distance = _d2 + 2; break;
+                            case 14: _distance = _d2 - 3; break;
+                            case 15: _distance = _d2 + 3; break;
+                            default:
+                                throw new InvalidOperationException();
+                        }
+                    }
 
-                    _maxDistance = System.Math.Min(_bufferOffset, _maxBackwardDistance);
+                    _maxDistance = System.Math.Min(_bufferLength, _maxBackwardDistance);
                     if (_distance > _maxDistance)
                     {
                         _state = State.Transform;
@@ -384,8 +412,6 @@ namespace Zergatul.IO.Compression
             {
                 for (int i = 0; i < _copyLength; i++)
                     AddLiteral(_buffer[_bufferLength - _distance]);
-
-                _mLen -= _copyLength;
             }
             else
                 throw new NotImplementedException();
@@ -540,8 +566,8 @@ namespace Zergatul.IO.Compression
                                 Zero = new Tree { Value = symbols[1] },
                                 One = new Tree
                                 {
-                                    Zero = new Tree { Value = symbols[2] },
-                                    One = new Tree { Value = symbols[3] }
+                                    Zero = new Tree { Value = symbols[3] },
+                                    One = new Tree { Value = symbols[2] }
                                 }
                             }
                         };
@@ -640,9 +666,8 @@ namespace Zergatul.IO.Compression
                         }
                         else
                         {
-                            int buf = repeatCount;
                             repeatCount += ((prevRepeatCount16 - 2) << 2) - prevRepeatCount16;
-                            prevRepeatCount16 = buf;
+                            prevRepeatCount16 += repeatCount;
                         }
                     }
                     else if (codeLen == 17)
@@ -656,9 +681,8 @@ namespace Zergatul.IO.Compression
                         }
                         else
                         {
-                            int buf = repeatCount;
                             repeatCount += ((prevRepeatCount17 - 2) << 3) - prevRepeatCount17;
-                            prevRepeatCount17 = buf;
+                            prevRepeatCount17 += repeatCount;
                         }
                     }
                     else
@@ -808,14 +832,15 @@ namespace Zergatul.IO.Compression
 
             _buffer[_bufferLength] = (byte)value;
             _bufferLength++;
+            _mLen--;
         }
 
         private void AddDistance()
         {
-            _r4 = _r3;
-            _r3 = _r2;
-            _r2 = _r1;
-            _r1 = _distance;
+            _d4 = _d3;
+            _d3 = _d2;
+            _d2 = _d1;
+            _d1 = _distance;
         }
 
         private Tree BuildTree(int[] lengths)
@@ -830,6 +855,17 @@ namespace Zergatul.IO.Compression
             int[] blCount = new int[maxLen + 1];
             for (int i = 0; i < lengths.Length; i++)
                 blCount[lengths[i]]++;
+
+            if (maxLen == 1 && blCount[1] == 1)
+            {
+                for (int i = 0; i < lengths.Length; i++)
+                    if (lengths[i] == 1)
+                    {
+                        tree.Value = i;
+                        break;
+                    }
+                return tree;
+            }
 
             int code = 0;
             blCount[0] = 0;
@@ -875,10 +911,25 @@ namespace Zergatul.IO.Compression
             tree.Value = value;
         }
 
-        private int ReadBlockLength(Tree tree)
+        private void ReadBlockType(Block block)
         {
-            int code = ReadHuffmanValue(tree);
-            return BlockCountCodeOffset[code] + _reader.ReadBits(BlockCountCodeBits[code]);
+            int code = ReadHuffmanValue(block.BlockTypeTree);
+            int newBlockType;
+            if (code == 0)
+                newBlockType = block.PrevBlockType;
+            else if (code == 1)
+                newBlockType = (block.bType + 1) % block.nBlTypes;
+            else
+                newBlockType = code - 2;
+
+            block.PrevBlockType = block.bType;
+            block.bType = newBlockType;
+        }
+
+        private void ReadBlockLength(Block block)
+        {
+            int code = ReadHuffmanValue(block.BlockLenTree);
+            block.bLen = BlockCountCodeOffset[code] + _reader.ReadBits(BlockCountCodeBits[code]);
         }
 
         private void ReadContextMap(Block block, int size)
@@ -1098,6 +1149,7 @@ namespace Zergatul.IO.Compression
             /// Block type
             /// </summary>
             public int bType;
+            public int PrevBlockType;
 
             public int nTrees;
 

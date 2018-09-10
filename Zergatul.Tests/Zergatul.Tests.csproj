@@ -107,7 +107,7 @@
     <None Include="BrotliTestCases\alice29.compressed">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="BrotliTestCases\asyoulik.txt.compressed">
+    <None Include="BrotliTestCases\asyoulik.compressed">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="BrotliTestCases\backward65536">
@@ -128,7 +128,7 @@
     <None Include="BrotliTestCases\compressed_repeated.compressed">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="BrotliTestCases\lcet10.txt.compressed">
+    <None Include="BrotliTestCases\lcet10.compressed">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="BrotliTestCases\mapsdatazrh">
@@ -140,7 +140,7 @@
     <None Include="BrotliTestCases\monkey.compressed">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="BrotliTestCases\plrabn12.txt.compressed">
+    <None Include="BrotliTestCases\plrabn12.compressed">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="BrotliTestCases\quickfox.compressed">
