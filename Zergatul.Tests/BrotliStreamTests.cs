@@ -11,6 +11,12 @@ namespace Zergatul.Tests
     public class BrotliStreamTests
     {
         [TestMethod]
+        public void TestEmpty()
+        {
+            TestFile("empty");
+        }
+
+        [TestMethod]
         public void Test10x10y()
         {
             TestFile("10x10y");

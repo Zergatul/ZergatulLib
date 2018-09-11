@@ -395,7 +395,8 @@ namespace Zergatul.IO.Compression
                     }
                     else
                     {
-                        AddDistance();
+                        if (_distanceCode != 0)
+                            AddDistance();
                     }
                 }
 
@@ -521,6 +522,7 @@ namespace Zergatul.IO.Compression
                     return new Tree { Value = symbols[0] };
 
                 case 2:
+                    Sort(symbols, 0, 2);
                     return new Tree
                     {
                         Zero = new Tree { Value = symbols[0] },
@@ -528,6 +530,7 @@ namespace Zergatul.IO.Compression
                     };
 
                 case 3:
+                    Sort(symbols, 1, 2);
                     return new Tree
                     {
                         Zero = new Tree { Value = symbols[0] },
@@ -542,6 +545,7 @@ namespace Zergatul.IO.Compression
                     // tree-select
                     if (_reader.ReadBits(1) == 0)
                     {
+                        Sort(symbols, 0, 4);
                         return new Tree
                         {
                             Zero = new Tree
@@ -558,6 +562,7 @@ namespace Zergatul.IO.Compression
                     }
                     else
                     {
+                        Sort(symbols, 2, 2);
                         return new Tree
                         {
                             Zero = new Tree { Value = symbols[0] },
@@ -566,8 +571,8 @@ namespace Zergatul.IO.Compression
                                 Zero = new Tree { Value = symbols[1] },
                                 One = new Tree
                                 {
-                                    Zero = new Tree { Value = symbols[3] },
-                                    One = new Tree { Value = symbols[2] }
+                                    Zero = new Tree { Value = symbols[2] },
+                                    One = new Tree { Value = symbols[3] }
                                 }
                             }
                         };
@@ -578,9 +583,46 @@ namespace Zergatul.IO.Compression
             }
         }
 
+        private void Sort(int[] array, int from, int length)
+        {
+            if (length == 2)
+            {
+                if (array[from] > array[from + 1])
+                {
+                    int buf = array[from];
+                    array[from] = array[from + 1];
+                    array[from + 1] = buf;
+                }
+                return;
+            }
+
+            if (length == 4)
+            {
+                int min, index;
+                for (int i = 0; i < 3; i++)
+                {
+                    index = from + i;
+                    min = array[index];
+                    for (int j = from + i + 1; j < from + 4; j++)
+                        if (array[j] < min)
+                        {
+                            index = j;
+                            min = array[j];
+                        }
+
+                    if (index != from + i)
+                    {
+                        int buf = array[from + i];
+                        array[from + i] = min;
+                        array[index] = buf;
+                    }
+                }
+            }
+        }
+
         private Tree ReadComplexPrefixCodes(int hSkip, int alphabetSize)
         {
-            int[] codeLengthCodeLengths = new int[18]; // TODO why 18?
+            int[] codeLengthCodeLengths = new int[18];
             int space = 32;
             int nonZeroCodes = 0;
             for (int i = hSkip; i < 18; i++)
