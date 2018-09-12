@@ -1045,6 +1045,7 @@ namespace Zergatul.IO.Compression
             for (int i = 0; i < transform.Suffix.Length; i++)
                 AddLiteral(transform.Suffix[i]);
 
+            int k;
             switch (transform.Type)
             {
                 case BrotliStaticDictionary.TransformType.Identity:
@@ -1052,11 +1053,42 @@ namespace Zergatul.IO.Compression
                         AddLiteral(BrotliStaticDictionary.Dict[offset + i]);
                     break;
 
-                case BrotliStaticDictionary.TransformType.OmitLast9:
+                case BrotliStaticDictionary.TransformType.FermentFirst:
                     throw new NotImplementedException();
 
-                default:
+                case BrotliStaticDictionary.TransformType.FermentAll:
                     throw new NotImplementedException();
+
+                case BrotliStaticDictionary.TransformType.OmitFirst1:
+                case BrotliStaticDictionary.TransformType.OmitFirst2:
+                case BrotliStaticDictionary.TransformType.OmitFirst3:
+                case BrotliStaticDictionary.TransformType.OmitFirst4:
+                case BrotliStaticDictionary.TransformType.OmitFirst5:
+                case BrotliStaticDictionary.TransformType.OmitFirst6:
+                case BrotliStaticDictionary.TransformType.OmitFirst7:
+                case BrotliStaticDictionary.TransformType.OmitFirst8:
+                case BrotliStaticDictionary.TransformType.OmitFirst9:
+                    k = transform.Type - BrotliStaticDictionary.TransformType.OmitFirst1 + 1;
+                    for (int i = k; i < _copyLength; i++)
+                        AddLiteral(BrotliStaticDictionary.Dict[offset + i]);
+                    break;
+
+                case BrotliStaticDictionary.TransformType.OmitLast1:
+                case BrotliStaticDictionary.TransformType.OmitLast2:
+                case BrotliStaticDictionary.TransformType.OmitLast3:
+                case BrotliStaticDictionary.TransformType.OmitLast4:
+                case BrotliStaticDictionary.TransformType.OmitLast5:
+                case BrotliStaticDictionary.TransformType.OmitLast6:
+                case BrotliStaticDictionary.TransformType.OmitLast7:
+                case BrotliStaticDictionary.TransformType.OmitLast8:
+                case BrotliStaticDictionary.TransformType.OmitLast9:
+                    k = transform.Type - BrotliStaticDictionary.TransformType.OmitLast1 + 1;
+                    for (int i = 0; i < _copyLength - k; i++)
+                        AddLiteral(BrotliStaticDictionary.Dict[offset + i]);
+                    break;
+
+                default:
+                    throw new InvalidOperationException();
             }
 
             for (int i = 0; i < transform.Prefix.Length; i++)
@@ -1171,16 +1203,6 @@ namespace Zergatul.IO.Compression
         private class Block
         {
             public int nBlTypes;
-
-            /// <summary>
-            /// Prefix code for block types
-            /// </summary>
-            public int hTreeBType;
-
-            /// <summary>
-            /// Prefix code for block counts
-            /// </summary>
-            public int hTreeBLen;
 
             /// <summary>
             /// Block count

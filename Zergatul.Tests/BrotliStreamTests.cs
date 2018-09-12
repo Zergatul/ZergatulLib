@@ -133,7 +133,17 @@ namespace Zergatul.Tests
             string rawFile = File.Exists($"BrotliTestCases/{filename}.txt") ?
                 $"BrotliTestCases/{filename}.txt" :
                 $"BrotliTestCases/{filename}";
-            Assert.IsTrue(ByteArray.Equals(decompressed.ToArray(), File.ReadAllBytes(rawFile)));
+
+            byte[] rawBytes = File.ReadAllBytes(rawFile);
+            byte[] decomprs = decompressed.ToArray();
+            int len = System.Math.Min(rawBytes.Length, decomprs.Length);
+            for (int i = 0; i < len; i++)
+            {
+                if (rawBytes[i] != decomprs[i])
+                    Assert.Fail("Data mismatch on index " + i);
+            }
+            if (rawBytes.Length != decomprs.Length)
+                Assert.Fail("Data length mismatch");
         }
     }
 }
