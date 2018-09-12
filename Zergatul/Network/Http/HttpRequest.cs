@@ -116,11 +116,9 @@ namespace Zergatul.Network.Http
             Method = HttpMethod.Get;
             _reqMsg.RequestUri = _uri.PathAndQuery;
 
-            AcceptEncoding = "gzip";
+            AcceptEncoding = "gzip, br";
             KeepAlive = true;
             Host = _uri.Host;
         }
-
-
     }
 }

@@ -1052,6 +1052,9 @@ namespace Zergatul.IO.Compression
                         AddLiteral(BrotliStaticDictionary.Dict[offset + i]);
                     break;
 
+                case BrotliStaticDictionary.TransformType.OmitLast9:
+                    throw new NotImplementedException();
+
                 default:
                     throw new NotImplementedException();
             }
@@ -1062,19 +1065,16 @@ namespace Zergatul.IO.Compression
 
         #region Stream overrides
 
-        public override bool CanRead => throw new NotImplementedException();
-
-        public override bool CanSeek => throw new NotImplementedException();
-
-        public override bool CanWrite => throw new NotImplementedException();
-
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
         public override long Length => throw new NotImplementedException();
 
         public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public override void Flush()
         {
-            throw new NotImplementedException();
+            
         }
 
         public override long Seek(long offset, SeekOrigin origin)

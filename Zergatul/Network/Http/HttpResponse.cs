@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 using Zergatul.IO;
+using Zergatul.IO.Compression;
 
 namespace Zergatul.Network.Http
 {
@@ -85,8 +86,16 @@ namespace Zergatul.Network.Http
             }
             _httpResponseStream = new HttpResponseStream(_readStream, chunked, length);
             Stream = _httpResponseStream;
-            if (string.Equals(_message[HttpResponseHeaders.ContentEncoding], HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
-                Stream = new GZipStream(Stream, CompressionMode.Decompress, true);
+            string contentEncoding = _message[HttpResponseHeaders.ContentEncoding];
+            if (contentEncoding != null)
+            {
+                if (string.Equals(contentEncoding, HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
+                    Stream = new GZipStream(Stream, CompressionMode.Decompress, true);
+                else if (string.Equals(contentEncoding, HttpHeaderValue.Brotli, StringComparison.OrdinalIgnoreCase))
+                    Stream = new BrotliStream(Stream, CompressionMode.Decompress);
+                else
+                    throw new InvalidOperationException("Unsupported content encoding: " + contentEncoding);
+            }
         }
 
         public void Dispose()
