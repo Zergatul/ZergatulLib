@@ -18,14 +18,14 @@ namespace Zergatul.Network.Http
         public string ReasonPhase => _message.ReasonPhrase;
         public string this[string header] => _message[header];
 
-        private HttpConnection _connection;
+        private Http1Connection _connection;
         private GenericMessageReadStream _readStream;
         private HttpResponseMessage _message;
         private byte[] _buffer = new byte[1024 * 1024];
         private HttpResponseStream _httpResponseStream;
         private bool _disposed = false;
 
-        public HttpResponse(HttpConnection connection)
+        public HttpResponse(Http1Connection connection)
         {
             this._connection = connection;
             Init();

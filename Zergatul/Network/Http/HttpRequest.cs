@@ -76,16 +76,16 @@ namespace Zergatul.Network.Http
         }
 
         private Uri _uri;
-        private KeepAliveConnectionProvider _connectionProvider;
+        private Http1KeepAliveConnectionProvider _connectionProvider;
         private HttpRequestMessage _reqMsg = new HttpRequestMessage();
 
         public HttpRequest(Uri uri)
-            : this(uri, DefaultKeepAliveConnectionProvider.Instance)
+            : this(uri, DefaultHttp1KeepAliveConnectionProvider.Instance)
         {
             
         }
 
-        public HttpRequest(Uri uri, KeepAliveConnectionProvider provider)
+        public HttpRequest(Uri uri, Http1KeepAliveConnectionProvider provider)
         {
             this._uri = uri;
             this._connectionProvider = provider;

@@ -65,7 +65,7 @@ namespace Zergatul.Network.Tests.Http
             response.Dispose();
         }
 
-        private class TestHttpConnection : HttpConnection
+        private class TestHttpConnection : Http1Connection
         {
             public override Stream Stream => _stream;
 

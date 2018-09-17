@@ -6,18 +6,18 @@ using Zergatul.Network.Tls;
 
 namespace Zergatul.Network.Http
 {
-    public class DefaultKeepAliveConnectionProvider : KeepAliveConnectionProvider
+    public class DefaultHttp1KeepAliveConnectionProvider : Http1KeepAliveConnectionProvider
     {
-        public static KeepAliveConnectionProvider Instance { get; private set; } = new DefaultKeepAliveConnectionProvider();
+        public static Http1KeepAliveConnectionProvider Instance { get; private set; } = new DefaultHttp1KeepAliveConnectionProvider();
 
         private List<DefaultHttpConnection> _connections = new List<DefaultHttpConnection>();
 
-        private DefaultKeepAliveConnectionProvider()
+        private DefaultHttp1KeepAliveConnectionProvider()
         {
 
         }
 
-        public override HttpConnection GetConnection(Uri uri, Proxy.ProxyBase proxy)
+        public override Http1Connection GetConnection(Uri uri, Proxy.ProxyBase proxy)
         {
             string host = uri.Host.ToLower();
 
@@ -74,7 +74,7 @@ namespace Zergatul.Network.Http
             }
         }
 
-        private class DefaultHttpConnection : HttpConnection
+        private class DefaultHttpConnection : Http1Connection
         {
             public override Stream Stream => _stream;
 
