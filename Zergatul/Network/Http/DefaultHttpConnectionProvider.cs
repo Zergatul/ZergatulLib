@@ -1,22 +1,121 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network.Proxy;
+using Zergatul.Network.Tls;
 
 namespace Zergatul.Network.Http
 {
     public class DefaultHttpConnectionProvider : HttpConnectionProvider
     {
+        public DefaultHttpConnectionProvider Instance { get; private set; } = new DefaultHttpConnectionProvider();
+
+        private List<DefaultHttpConnection> _http1Connections = new List<DefaultHttpConnection>();
+
+        private DefaultHttpConnectionProvider()
+        {
+
+        }
+
         public override Http1Connection GetHttp1Connection(Uri uri, ProxyBase proxy)
         {
-            throw new NotImplementedException();
+            string host = uri.Host.ToLower();
+
+            lock (_http1Connections)
+                for (int i = 0; i < _http1Connections.Count; i++)
+                {
+                    // remove timed out connection
+                    if (_http1Connections[i].Timeout > 0)
+                        if (_http1Connections[i].Timer.ElapsedMilliseconds >= _http1Connections[i].Timeout * 1000)
+                        {
+                            _http1Connections[i].Stream.Dispose();
+                            for (int j = i; j < _http1Connections.Count - 1; j++)
+                                _http1Connections[j] = _http1Connections[j + 1];
+                            _http1Connections.RemoveAt(_http1Connections.Count - 1);
+                            i--;
+                            continue;
+                        }
+
+                    if (_http1Connections[i].Host != host)
+                        continue;
+                    if (proxy != null && !proxy.Equals(_http1Connections[i].Proxy))
+                        continue;
+                    if (!_http1Connections[i].InUse)
+                    {
+                        _http1Connections[i].InUse = true;
+                        return _http1Connections[i];
+                    }
+                }
+
+            var client = TcpConnector.GetTcpClient(uri.Host, uri.Port, proxy);
+            Stream stream;
+            switch (uri.Scheme)
+            {
+                case "http":
+                    stream = client.GetStream();
+                    break;
+                case "https":
+                    var tls = new TlsStream(client.GetStream());
+                    tls.AuthenticateAsClient(uri.Host);
+                    stream = tls;
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
+            var connection = new DefaultHttpConnection(stream, _http1Connections);
+            connection.Host = host;
+            connection.Proxy = proxy;
+            lock (_http1Connections)
+            {
+                _http1Connections.Add(connection);
+                return connection;
+            }
         }
 
         public override Http2Connection GetHttp2Connection(Uri uri, ProxyBase proxy)
         {
             throw new NotImplementedException();
         }
+
+        #region Nested classes
+
+        private class DefaultHttpConnection : Http1Connection
+        {
+            public override Stream Stream => _stream;
+
+            public string Host;
+            public ProxyBase Proxy;
+            public volatile bool InUse;
+
+            private Stream _stream;
+            private List<DefaultHttpConnection> _connections;
+
+            public DefaultHttpConnection(Stream stream, List<DefaultHttpConnection> connections)
+            {
+                this.InUse = true;
+
+                this._stream = stream;
+                this._connections = connections;
+            }
+
+            public override void Close()
+            {
+                lock (_connections)
+                    InUse = false;
+            }
+
+            public override void CloseUnderlyingStream()
+            {
+                _stream.Dispose();
+                lock (_connections)
+                    _connections.Remove(this);
+            }
+        }
+
+        #endregion
     }
 }
