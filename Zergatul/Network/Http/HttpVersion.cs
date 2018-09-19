@@ -1,8 +1,9 @@
 ﻿namespace Zergatul.Network.Http
 {
-    public static class HttpVersion
+    public enum HttpVersion
     {
-        public const string V11 = "HTTP/1.1";
-        public const string V20 = "HTTP/2.0";
+        V1_0,
+        V1_1,
+        V2
     }
 }

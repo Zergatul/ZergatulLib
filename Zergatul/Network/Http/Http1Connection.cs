@@ -3,9 +3,8 @@ using System.IO;
 
 namespace Zergatul.Network.Http
 {
-    public abstract class Http1Connection
+    public abstract class Http1Connection : HttpConnection
     {
-        public abstract Stream Stream { get; }
         public Stopwatch Timer { get; set; }
         public int Timeout { get; set; }
 

@@ -18,14 +18,14 @@ namespace Zergatul.Network.Http
         public string ReasonPhase => _message.ReasonPhrase;
         public string this[string header] => _message[header];
 
-        private Http1Connection _connection;
+        private HttpConnection _connection;
         private GenericMessageReadStream _readStream;
         private HttpResponseMessage _message;
         private byte[] _buffer = new byte[1024 * 1024];
         private HttpResponseStream _httpResponseStream;
         private bool _disposed = false;
 
-        public HttpResponse(Http1Connection connection)
+        public HttpResponse(HttpConnection connection)
         {
             this._connection = connection;
             Init();
@@ -57,15 +57,20 @@ namespace Zergatul.Network.Http
                     }
                 }
             }
-            if (timeout != 0)
+
+            var http1Connection = _connection as Http1Connection;
+            if (http1Connection != null)
             {
-                _connection.Timer.Restart();
-                _connection.Timeout = timeout;
-            }
-            else
-            {
-                _connection.Timer.Reset();
-                _connection.Timeout = 0;
+                if (timeout != 0)
+                {
+                    http1Connection.Timer.Restart();
+                    http1Connection.Timeout = timeout;
+                }
+                else
+                {
+                    http1Connection.Timer.Reset();
+                    http1Connection.Timeout = 0;
+                }
             }
 
             long length = -1;
@@ -108,19 +113,24 @@ namespace Zergatul.Network.Http
         {
             if (_disposed)
                 return;
+            var http1Connection = _connection as Http1Connection;
             if (disposing)
             {
                 _httpResponseStream.ReadToEnd();
-                if (string.Equals(_message[HttpResponseHeaders.Connection], HttpHeaderValue.KeepAlive, StringComparison.InvariantCultureIgnoreCase))
-                    _connection.Close();
-                else
-                    _connection.CloseUnderlyingStream();
+                if (http1Connection != null)
+                {
+                    if (string.Equals(_message[HttpResponseHeaders.Connection], HttpHeaderValue.KeepAlive, StringComparison.InvariantCultureIgnoreCase))
+                        http1Connection.Close();
+                    else
+                        http1Connection.CloseUnderlyingStream();
+                }
                 _disposed = true;
             }
             else
             {
                 // if dispose wasn't called, we will not keep this connection for keep-alive reuse
-                _connection.CloseUnderlyingStream();
+                if (http1Connection != null)
+                    http1Connection.CloseUnderlyingStream();
                 _disposed = true;
             }
         }

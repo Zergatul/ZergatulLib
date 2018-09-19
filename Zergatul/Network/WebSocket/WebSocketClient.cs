@@ -80,8 +80,7 @@ namespace Zergatul.Network.WebSocket
             string key = Convert.ToBase64String(_nonce);
             _httpRequestMessage.SetHeader(HttpRequestHeaders.SecWebSocketKey, key);
 
-            byte[] buffer = _httpRequestMessage.ToBytes();
-            _stream.Write(buffer, 0, buffer.Length);
+            _httpRequestMessage.Write(_stream, 0x10000);
 
             var response = new HttpResponseMessage();
             response.Read(_readStream, _buffer);

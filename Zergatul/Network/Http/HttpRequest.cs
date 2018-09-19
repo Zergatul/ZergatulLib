@@ -14,7 +14,7 @@ namespace Zergatul.Network.Http
             set => _reqMsg.Method = value;
         }
 
-        public string Version
+        public HttpVersion Version
         {
             get => _reqMsg.Version;
             set => _reqMsg.Version = value;
@@ -76,26 +76,34 @@ namespace Zergatul.Network.Http
         }
 
         private Uri _uri;
-        private Http1KeepAliveConnectionProvider _connectionProvider;
-        private HttpRequestMessage _reqMsg = new HttpRequestMessage();
+        private HttpConnectionProvider _connectionProvider;
+        private HttpRequestMessage _reqMsg;
 
-        public HttpRequest(Uri uri)
-            : this(uri, DefaultHttp1KeepAliveConnectionProvider.Instance)
+        public HttpRequest(string uri)
+            : this(new Uri(uri), HttpVersion.V1_1)
+        {
+
+        }
+
+        public HttpRequest(Uri uri, HttpVersion version)
+            : this(uri, version, DefaultHttpConnectionProvider.Instance)
         {
             
         }
 
-        public HttpRequest(Uri uri, Http1KeepAliveConnectionProvider provider)
+        public HttpRequest(string uri, HttpVersion version)
+            : this(new Uri(uri), version)
+        {
+
+        }
+
+        public HttpRequest(Uri uri, HttpVersion version, HttpConnectionProvider provider)
         {
             this._uri = uri;
             this._connectionProvider = provider;
+            this._reqMsg = new HttpRequestMessage();
+            this._reqMsg.Version = version;
             SetDefaultHeaders();
-        }
-
-        public HttpRequest(string uri)
-            : this(new Uri(uri))
-        {
-
         }
 
         public HttpResponse GetResponse()
@@ -103,10 +111,23 @@ namespace Zergatul.Network.Http
             if (_connectionProvider == null)
                 throw new NotImplementedException();
 
-            var connection = _connectionProvider.GetConnection(_uri, Proxy);
+            HttpConnection connection;
+            switch (Version)
+            {
+                case HttpVersion.V1_0:
+                case HttpVersion.V1_1:
+                    connection = _connectionProvider.GetHttp1Connection(_uri, Proxy);
+                    break;
 
-            byte[] requestBytes = _reqMsg.ToBytes();
-            connection.Stream.Write(requestBytes, 0, requestBytes.Length);
+                case HttpVersion.V2:
+                    connection = _connectionProvider.GetHttp2Connection(_uri, Proxy);
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Unknown HTTP version");
+            }
+
+            _reqMsg.Write(connection);
 
             return new HttpResponse(connection);
         }
@@ -115,10 +136,16 @@ namespace Zergatul.Network.Http
         {
             Method = HttpMethod.Get;
             _reqMsg.RequestUri = _uri.PathAndQuery;
-
-            AcceptEncoding = "gzip, br";
-            KeepAlive = true;
             Host = _uri.Host;
+
+            switch (Version)
+            {
+                case HttpVersion.V1_0:
+                case HttpVersion.V1_1:
+                    AcceptEncoding = "gzip, br";
+                    KeepAlive = true;
+                    break;
+            }
         }
     }
 }

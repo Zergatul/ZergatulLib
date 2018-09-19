@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Network.Http
 {
-    public class Http2Connection
+    public abstract class Http2Connection : HttpConnection
     {
         #region Static members
 

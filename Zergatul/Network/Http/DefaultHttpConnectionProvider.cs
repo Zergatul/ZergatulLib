@@ -11,7 +11,7 @@ namespace Zergatul.Network.Http
 {
     public class DefaultHttpConnectionProvider : HttpConnectionProvider
     {
-        public DefaultHttpConnectionProvider Instance { get; private set; } = new DefaultHttpConnectionProvider();
+        public static DefaultHttpConnectionProvider Instance { get; private set; } = new DefaultHttpConnectionProvider();
 
         private List<DefaultHttpConnection> _http1Connections = new List<DefaultHttpConnection>();
 
@@ -66,9 +66,7 @@ namespace Zergatul.Network.Http
                     throw new InvalidOperationException();
             }
 
-            var connection = new DefaultHttpConnection(stream, _http1Connections);
-            connection.Host = host;
-            connection.Proxy = proxy;
+            var connection = new DefaultHttpConnection(stream, host, proxy, _http1Connections);
             lock (_http1Connections)
             {
                 _http1Connections.Add(connection);
@@ -85,21 +83,35 @@ namespace Zergatul.Network.Http
 
         private class DefaultHttpConnection : Http1Connection
         {
-            public override Stream Stream => _stream;
-
             public string Host;
             public ProxyBase Proxy;
             public volatile bool InUse;
 
-            private Stream _stream;
             private List<DefaultHttpConnection> _connections;
 
-            public DefaultHttpConnection(Stream stream, List<DefaultHttpConnection> connections)
+            public DefaultHttpConnection(Stream stream, string host, Proxy.ProxyBase proxy, List<DefaultHttpConnection> connections)
             {
+                this.Stream = stream;
+                this.Host = host;
+                this.Proxy = proxy;
                 this.InUse = true;
 
-                this._stream = stream;
                 this._connections = connections;
+            }
+
+            public override void WriteHeader(byte[] data)
+            {
+                Stream.Write(data, 0, data.Length);
+            }
+
+            public override void WriteBody(byte[] data)
+            {
+                Stream.Write(data, 0, data.Length);
+            }
+
+            public override void WriteBody(Stream stream)
+            {
+                throw new NotImplementedException();
             }
 
             public override void Close()
@@ -110,7 +122,7 @@ namespace Zergatul.Network.Http
 
             public override void CloseUnderlyingStream()
             {
-                _stream.Dispose();
+                Stream.Dispose();
                 lock (_connections)
                     _connections.Remove(this);
             }
