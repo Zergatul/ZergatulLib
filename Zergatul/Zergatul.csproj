@@ -273,6 +273,7 @@
     <Compile Include="Network\Dns\StaticDnsProvider.cs" />
     <Compile Include="Network\Http\ChunkedEncodingException.cs" />
     <Compile Include="Network\Http\DefaultHttpConnectionProvider.cs" />
+    <Compile Include="Network\Http\Http2Client.cs" />
     <Compile Include="Network\Http\Http2Connection.cs" />
     <Compile Include="Network\Http\HttpConnection.cs" />
     <Compile Include="Network\Http\HttpConnectionProvider.cs" />
