@@ -6,6 +6,7 @@
         public byte[] MasterSecret { get; internal set; }
         public bool? ReuseSession { get; internal set; }
         public bool? ExtendedMasterSecret { get; internal set; }
+        public string ApplicationLevelProtocolName { get; internal set; }
 
         public ConnectionClientInfo Client { get; private set; } = new ConnectionClientInfo();
         public ConnectionServerInfo Server { get; private set; } = new ConnectionServerInfo();

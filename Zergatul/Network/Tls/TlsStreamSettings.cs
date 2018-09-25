@@ -14,6 +14,8 @@ namespace Zergatul.Network.Tls
 
         public Func<byte[]> GetRandom;
 
+        public Extensions.TlsExtension[] Extensions;
+
         public byte[] PSKIdentityHint;
         public Func<byte[], PreSharedKey> GetPSKByHint;
         public Func<byte[], PreSharedKey> GetPSKByIdentity;
@@ -31,6 +33,9 @@ namespace Zergatul.Network.Tls
 
             if (SupportedCurves != null)
                 result.SupportedCurves = (NamedGroup[])SupportedCurves.Clone();
+
+            if (Extensions != null)
+                result.Extensions = (Extensions.TlsExtension[])Extensions.Clone();
 
             if (PSKIdentityHint != null)
                 result.PSKIdentityHint = (byte[])PSKIdentityHint.Clone();

@@ -408,6 +408,8 @@ namespace Zergatul.Network.Tls
             if (Settings.SupportedCurves?.Length > 0)
                 extensions.Add(new SupportedGroups(Settings.SupportedCurves));
             extensions.Add(new SupportedPointFormats(ECPointFormat.Uncompressed));
+            if (Settings.Extensions != null)
+                extensions.AddRange(Settings.Extensions);
 
             if (Settings.ReuseSessions)
                 _clientSession = TlsStreamSessions.Instance[_serverHost];
@@ -505,6 +507,23 @@ namespace Zergatul.Network.Tls
             bool clientExtMasterSecret = _clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             bool serverExtMasterSecret = _serverExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             SecurityParameters.ExtendedMasterSecret = clientExtMasterSecret && serverExtMasterSecret;
+
+            // Application-Layer Protocol Negotiation
+            var clientAlpn = _clientExtensions.OfType<ApplicationLayerProtocolNegotiationExtension>().SingleOrDefault();
+            var serverAlpn = _serverExtensions.OfType<ApplicationLayerProtocolNegotiationExtension>().SingleOrDefault();
+            if (clientAlpn != null ^ serverAlpn != null)
+                throw new TlsStreamException("Application-Layer Protocol Negotiation extension issue");
+
+            if (clientAlpn != null && serverAlpn != null)
+            {
+                if (serverAlpn.ProtocolNames.Length != 1)
+                    throw new TlsStreamException("Server ALPN invalid protocols count");
+
+                if (!clientAlpn.ProtocolNames.Contains(serverAlpn.ProtocolNames[0]))
+                    throw new TlsStreamException("Server proposed ALPN not in client list");
+
+                ConnectionInfo.ApplicationLevelProtocolName = serverAlpn.ProtocolNames[0];
+            }
 
             /* ConnectionInfo */
             ConnectionInfo.ExtendedMasterSecret = SecurityParameters.ExtendedMasterSecret;

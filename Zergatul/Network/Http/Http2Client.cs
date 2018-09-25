@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.IO;
+using Zergatul.Network.Http.Frames;
 using Zergatul.Network.Tls;
 
 namespace Zergatul.Network.Http
@@ -44,6 +46,9 @@ namespace Zergatul.Network.Http
                     break;
                 case "https":
                     var tls = new TlsStream(client.GetStream());
+                    var alpnExtension = new Tls.Extensions.ApplicationLayerProtocolNegotiationExtension();
+                    alpnExtension.ProtocolNames = new[] { "h2" };
+                    tls.Settings.Extensions = new Tls.Extensions.TlsExtension[] { alpnExtension };
                     tls.AuthenticateAsClient(uri.Host);
                     _stream = new BufferedStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
                     break;
@@ -78,7 +83,7 @@ namespace Zergatul.Network.Http
         private void Init()
         {
             _stream.Write(ClientPreface, 0, ClientPreface.Length);
-            //SendFrame(FrameType.SETTINGS, 0, null);
+            SendFrame(FrameType.SETTINGS, 0, null);
             _stream.Flush();
 
             ReadFrame(out FrameType type, out uint id, out byte[] payload);
@@ -108,7 +113,7 @@ namespace Zergatul.Network.Http
         private void ReadFrame(out FrameType type, out uint id, out byte[] payload)
         {
             byte[] header = new byte[9];
-            ReadArray(header);
+            StreamHelper.ReadArray(_stream, header);
             if (header[0] != 0)
                 throw new InvalidOperationException("Frame too big");
             int length = (header[1] << 8) | header[2];
@@ -123,29 +128,8 @@ namespace Zergatul.Network.Http
             else
             {
                 payload = new byte[length];
-                ReadArray(payload);
+                StreamHelper.ReadArray(_stream, payload);
             }
         }
-
-        private void ReadArray(byte[] data)
-        {
-            int index = 0;
-            while (index < data.Length)
-            {
-                int read = _stream.Read(data, index, data.Length - index);
-                if (read == 0)
-                    throw new EndOfStreamException();
-                index += read;
-            }
-        }
-
-        #region Nested classes
-
-        private enum FrameType
-        {
-            SETTINGS = 0x04
-        }
-
-        #endregion
     }
 }

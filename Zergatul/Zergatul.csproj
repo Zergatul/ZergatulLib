@@ -122,6 +122,7 @@
     <Compile Include="IO\Compression\BrotliStreamException.cs" />
     <Compile Include="IO\GenericMessageReadStream.cs" />
     <Compile Include="IO\LimitedStream.cs" />
+    <Compile Include="IO\StreamHelper.cs" />
     <Compile Include="Math\BigReal.cs" />
     <Compile Include="Math\EdwardsCurves\EdCurve.cs" />
     <Compile Include="Math\EdwardsCurves\EdPoint.cs" />
@@ -273,6 +274,9 @@
     <Compile Include="Network\Dns\StaticDnsProvider.cs" />
     <Compile Include="Network\Http\ChunkedEncodingException.cs" />
     <Compile Include="Network\Http\DefaultHttpConnectionProvider.cs" />
+    <Compile Include="Network\Http\Frames\Data.cs" />
+    <Compile Include="Network\Http\Frames\Frame.cs" />
+    <Compile Include="Network\Http\Frames\FrameType.cs" />
     <Compile Include="Network\Http\Http2Client.cs" />
     <Compile Include="Network\Http\Http2Connection.cs" />
     <Compile Include="Network\Http\HttpConnection.cs" />
@@ -391,6 +395,7 @@
     <Compile Include="Network\Tls\DSSSignature.cs" />
     <Compile Include="Network\Tls\ECDHERoutine.cs" />
     <Compile Include="Network\Tls\ECDHKeyExchange.cs" />
+    <Compile Include="Network\Tls\Extensions\ApplicationLayerProtocolNegotiationExtension.cs" />
     <Compile Include="Network\Tls\Extensions\Padding.cs" />
     <Compile Include="Network\Tls\GCMCipher.cs" />
     <Compile Include="Network\Tls\HMACCBCCipher.cs" />
@@ -431,7 +436,6 @@
     <Compile Include="Network\Tls\Extensions\SupportedGroups.cs" />
     <Compile Include="Network\Tls\Extensions\SupportedPointFormats.cs" />
     <Compile Include="Network\Tls\Extensions\TlsExtension.cs" />
-    <Compile Include="Network\Tls\Extensions\TlsExtensionFactory.cs" />
     <Compile Include="Network\Tls\Messages\Finished.cs" />
     <Compile Include="Network\Tls\GenericAEADCiphertext.cs" />
     <Compile Include="Network\Tls\GenericBlockCiphertext.cs" />
