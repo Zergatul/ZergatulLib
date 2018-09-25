@@ -9,6 +9,5 @@ namespace Zergatul.Network.Http
     public abstract class HttpConnectionProvider
     {
         public abstract Http1Connection GetHttp1Connection(Uri uri, Proxy.ProxyBase proxy);
-        public abstract Http2Connection GetHttp2Connection(Uri uri, Proxy.ProxyBase proxy);
     }
 }

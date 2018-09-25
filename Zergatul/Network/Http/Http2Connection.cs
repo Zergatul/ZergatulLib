@@ -75,26 +75,5 @@ namespace Zergatul.Network.Http
                 ReadArray(payload);
             }
         }
-
-        private void ReadArray(byte[] data)
-        {
-            int index = 0;
-            while (index < data.Length)
-            {
-                int read = _stream.Read(data, index, data.Length - index);
-                if (read == 0)
-                    throw new EndOfStreamException();
-                index += read;
-            }
-        }
-
-        #region Nested classes
-
-        private enum FrameType
-        {
-            SETTINGS = 0x04
-        }
-
-        #endregion
     }
 }
