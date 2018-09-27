@@ -62,6 +62,7 @@ namespace Zergatul.Network.Http.Frames
             switch (type)
             {
                 case FrameType.DATA: frame = new Data(); break;
+                case FrameType.SETTINGS: frame = new Settings(); break;
                 default:
                     throw new NotImplementedException();
             }

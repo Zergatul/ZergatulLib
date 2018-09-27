@@ -117,6 +117,7 @@
     <Compile Include="Cryptography\KDF\Scrypt.cs" />
     <Compile Include="Cryptography\KDF\HKDF.cs" />
     <Compile Include="IO\BitReader.cs" />
+    <Compile Include="IO\BufferedWriteStream.cs" />
     <Compile Include="IO\Compression\BrotliStaticDictionary.cs" />
     <Compile Include="IO\Compression\BrotliStream.cs" />
     <Compile Include="IO\Compression\BrotliStreamException.cs" />

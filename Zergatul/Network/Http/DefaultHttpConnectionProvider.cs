@@ -74,11 +74,6 @@ namespace Zergatul.Network.Http
             }
         }
 
-        public override Http2Connection GetHttp2Connection(Uri uri, ProxyBase proxy)
-        {
-            throw new NotImplementedException();
-        }
-
         #region Nested classes
 
         private class DefaultHttpConnection : Http1Connection

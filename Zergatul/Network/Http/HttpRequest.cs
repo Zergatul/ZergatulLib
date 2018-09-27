@@ -119,10 +119,6 @@ namespace Zergatul.Network.Http
                     connection = _connectionProvider.GetHttp1Connection(_uri, Proxy);
                     break;
 
-                case HttpVersion.V2:
-                    connection = _connectionProvider.GetHttp2Connection(_uri, Proxy);
-                    break;
-
                 default:
                     throw new InvalidOperationException("Unknown HTTP version");
             }
