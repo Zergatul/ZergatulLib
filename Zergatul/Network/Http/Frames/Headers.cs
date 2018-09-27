@@ -9,7 +9,7 @@ namespace Zergatul.Network.Http.Frames
 {
     class Headers : Frame
     {
-        public override void Read(Stream stream, int length)
+        public override void ReadPayload(Stream stream, int length)
         {
             throw new NotImplementedException();
         }

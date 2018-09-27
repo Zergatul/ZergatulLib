@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Network.Http.Frames
 {
-    internal enum FrameType
+    public enum FrameType
     {
         DATA = 0x00,
         HEADERS = 0x01,

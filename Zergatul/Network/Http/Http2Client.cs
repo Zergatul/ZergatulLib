@@ -10,6 +10,8 @@ using Zergatul.Network.Tls;
 
 namespace Zergatul.Network.Http
 {
+    // TODO
+    // implement settings timeout https://tools.ietf.org/html/rfc7540#section-6.5.3
     public class Http2Client : IDisposable
     {
         #region Static members
@@ -24,6 +26,8 @@ namespace Zergatul.Network.Http
 
         private bool _disposed;
         private Stream _stream;
+        private Http2Connection _connection;
+        private bool _isClosed;
 
         public Http2Client(string uri)
             : this(new Uri(uri), null)
@@ -73,7 +77,10 @@ namespace Zergatul.Network.Http
                 return;
 
             if (disposing)
-                _stream.Dispose();
+            {
+                if (!_isClosed)
+                    SendGoAway(ErrorCode.NO_ERROR);
+            }
 
             _disposed = true;
         }
@@ -82,54 +89,90 @@ namespace Zergatul.Network.Http
 
         private void Init()
         {
-            _stream.Write(ClientPreface, 0, ClientPreface.Length);
-            SendFrame(FrameType.SETTINGS, 0, null);
-            _stream.Flush();
+            _connection = new Http2Connection(_stream);
+            _connection.Open();
+            _connection.SendFrame(new Settings());
+            _connection.Flush();
 
-            ReadFrame(out FrameType type, out uint id, out byte[] payload);
-            if (type != FrameType.SETTINGS)
-                throw new InvalidOperationException();
-        }
-
-        private void SendFrame(FrameType type, uint id, byte[] payload)
-        {
-            if ((id & 0x80000000) != 0)
-                throw new InvalidOperationException("High bit should be 0");
-            int length = payload?.Length ?? 0;
-            if (length > 0x4000)
-                throw new InvalidOperationException("Frame too big");
-
-            byte[] header = new byte[9];
-            header[1] = (byte)(length >> 8);
-            header[2] = (byte)(length & 0xFF);
-            header[3] = (byte)type;
-            BitHelper.GetBytes(id, ByteOrder.BigEndian, header, 5);
-
-            _stream.Write(header, 0, 9);
-            if (length > 0)
-                _stream.Write(payload, 0, length);
-        }
-
-        private void ReadFrame(out FrameType type, out uint id, out byte[] payload)
-        {
-            byte[] header = new byte[9];
-            StreamHelper.ReadArray(_stream, header);
-            if (header[0] != 0)
-                throw new InvalidOperationException("Frame too big");
-            int length = (header[1] << 8) | header[2];
-            type = (FrameType)header[3];
-            if (header[4] != 0)
-                throw new InvalidOperationException("Flags should be zero");
-            id = BitHelper.ToUInt32(header, 5, ByteOrder.BigEndian);
-            id &= 0x7FFFFFFF;
-
-            if (length == 0)
-                payload = null;
-            else
+            var frame = _connection.ReadFrame();
+            if (frame.Type != FrameType.SETTINGS)
             {
-                payload = new byte[length];
-                StreamHelper.ReadArray(_stream, payload);
+                SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                return;
             }
+
+            var settings = (Settings)frame;
+            if (settings.ACK)
+            {
+                SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                return;
+            }
+            ApplySettings(settings);
+
+            _connection.SendFrame(new Settings
+            {
+                ACK = true
+            });
+            _connection.Flush();
+
+            frame = _connection.ReadFrame();
+            if (frame.Type != FrameType.SETTINGS)
+            {
+                SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                return;
+            }
+
+            settings = (Settings)frame;
+            if (!settings.ACK)
+            {
+                SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                return;
+            }
+        }
+
+        private void ApplySettings(Settings frame)
+        {
+            if (frame == null)
+                throw new ArgumentNullException(nameof(frame));
+
+            foreach (var kv in frame.Parameters)
+                switch (kv.Key)
+                {
+                    case SettingParameter.SETTINGS_HEADER_TABLE_SIZE:
+                        _connection.PeerSettings.HeaderTableSize = kv.Value;
+                        break;
+
+                    case SettingParameter.SETTINGS_ENABLE_PUSH:
+                        _connection.PeerSettings.EnablePush = kv.Value == 1 ? true : false;
+                        break;
+
+                    case SettingParameter.SETTINGS_MAX_CONCURRENT_STREAMS:
+                        _connection.PeerSettings.MaxConcurrentStreams = kv.Value;
+                        break;
+
+                    case SettingParameter.SETTINGS_INITIAL_WINDOW_SIZE:
+                        _connection.PeerSettings.InitialWindowSize = kv.Value;
+                        break;
+
+                    case SettingParameter.SETTINGS_MAX_FRAME_SIZE:
+                        _connection.PeerSettings.MaxFrameSize = kv.Value;
+                        break;
+
+                    case SettingParameter.SETTINGS_MAX_HEADER_LIST_SIZE:
+                        _connection.PeerSettings.MaxHeaderListSize = kv.Value;
+                        break;
+                }
+        }
+
+        private void SendGoAway(ErrorCode errorCode)
+        {
+            _isClosed = true;
+            _connection.SendFrame(new GoAway
+            {
+                ErrorCode = errorCode
+            });
+            _connection.Flush();
+            _connection.Close();
         }
     }
 }

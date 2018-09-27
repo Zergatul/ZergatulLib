@@ -8,12 +8,43 @@ using Zergatul.IO;
 
 namespace Zergatul.Network.Http.Frames
 {
-    internal abstract class Frame
+    public abstract class Frame
     {
+        public abstract FrameType Type { get; }
         public byte Flags;
         public uint Id;
 
-        public abstract void Read(Stream stream, int length);
+        public bool ShouldSendGoAway;
+        public ErrorCode GoAwayErrorCode;
+
+        public abstract void ReadPayload(Stream stream, int length);
+        public abstract byte[] GetPayload();
+
+        public void Write(Stream stream)
+        {
+            if ((Id & 0x80000000) != 0)
+                throw new InvalidOperationException("High bit should be 0");
+            byte[] payload = GetPayload();
+            int length = payload?.Length ?? 0;
+            if (length > 0x4000)
+                throw new InvalidOperationException("Frame too big");
+
+            byte[] header = new byte[9];
+            header[1] = (byte)(length >> 8);
+            header[2] = (byte)(length & 0xFF);
+            header[3] = (byte)Type;
+            BitHelper.GetBytes(Id, ByteOrder.BigEndian, header, 5);
+
+            stream.Write(header, 0, 9);
+            if (length > 0)
+                stream.Write(payload, 0, length);
+        }
+
+        protected void GoAwayWith(ErrorCode errorCode)
+        {
+            ShouldSendGoAway = true;
+            GoAwayErrorCode = errorCode;
+        }
 
         public static Frame Read(Stream stream)
         {
@@ -37,7 +68,7 @@ namespace Zergatul.Network.Http.Frames
 
             frame.Flags = header[4];
             frame.Id = id;
-            frame.Read(stream, length);
+            frame.ReadPayload(stream, length);
 
             return frame;
         }

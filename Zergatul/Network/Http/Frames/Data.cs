@@ -5,13 +5,20 @@ namespace Zergatul.Network.Http.Frames
 {
     class Data : Frame
     {
-        private bool END_STREAM => (Flags & 0x01) != 0;
-        private bool PADDED => (Flags & 0x08) != 0;
+        public override FrameType Type => FrameType.DATA;
 
-        public override void Read(Stream stream, int length)
+        public bool END_STREAM => (Flags & 0x01) != 0;
+        public bool PADDED => (Flags & 0x08) != 0;
+
+        public override void ReadPayload(Stream stream, int length)
         {
             if (PADDED)
                 throw new NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        public override byte[] GetPayload()
+        {
             throw new NotImplementedException();
         }
     }
