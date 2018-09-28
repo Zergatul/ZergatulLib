@@ -28,7 +28,9 @@ namespace Zergatul.Network.Http.Frames
 
         public override byte[] GetPayload()
         {
-            throw new NotImplementedException();
+            byte[] payload = new byte[8];
+            BitHelper.GetBytes((uint)ErrorCode, ByteOrder.BigEndian, payload, 4);
+            return payload;
         }
     }
 }

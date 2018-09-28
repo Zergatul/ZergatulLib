@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Zergatul.IO
 {
@@ -41,8 +37,11 @@ namespace Zergatul.IO
             {
                 _stream.Write(_buffer, 0, _bufferPosition);
                 _stream.Flush();
+                _bufferPosition = 0;
             }
         }
+
+        public override long Length => _stream.Length;
 
         public override long Position
         {
@@ -52,20 +51,41 @@ namespace Zergatul.IO
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
 
+        public override long Seek(long offset, SeekOrigin origin) => _stream.Seek(offset, origin);
+
         public override void SetLength(long value) => _stream.SetLength(value);
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            EnsureBufferSize(count);
+            if (StreamHelper.ValidateWriteParameters(buffer, offset, count))
+                return;
 
-            throw new NotImplementedException();
+            IncreaseBufferIfNeeded(count);
+
+            while (count > 0)
+            {
+                int write = System.Math.Min(_buffer.Length - _bufferPosition, count);
+                Array.Copy(buffer, offset, _buffer, _bufferPosition, write);
+
+                _bufferPosition += write;
+                offset += write;
+                count -= write;
+
+                if (_bufferPosition == _buffer.Length)
+                {
+                    // release buffer
+                    _stream.Write(_buffer, 0, _bufferPosition);
+                    _stream.Flush();
+                    _bufferPosition = 0;
+                }
+            }
         }
 
         #endregion
 
         #region Private methods
 
-        private void EnsureBufferSize(int count)
+        private void IncreaseBufferIfNeeded(int count)
         {
             if (_buffer.Length == _bufferSize)
                 return;
@@ -74,7 +94,12 @@ namespace Zergatul.IO
             {
                 // extend buffer 2 times more
                 // but not greater than _bufferSize
-                int newLength = System.Math.Min(2 * _buffer.Length);
+                int newLength = System.Math.Max(2 * _buffer.Length, _bufferPosition + count);
+                newLength = System.Math.Min(newLength, _bufferSize);
+
+                byte[] newBuffer = new byte[newLength];
+                Array.Copy(_buffer, 0, newBuffer, 0, _bufferPosition);
+                _buffer = newBuffer;
             }
         }
 

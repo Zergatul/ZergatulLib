@@ -54,7 +54,7 @@ namespace Zergatul.Network.Http
                     alpnExtension.ProtocolNames = new[] { "h2" };
                     tls.Settings.Extensions = new Tls.Extensions.TlsExtension[] { alpnExtension };
                     tls.AuthenticateAsClient(uri.Host);
-                    _stream = new BufferedStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
+                    _stream = new BufferedWriteStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
                     break;
                 default:
                     throw new InvalidOperationException();
@@ -174,5 +174,20 @@ namespace Zergatul.Network.Http
             _connection.Flush();
             _connection.Close();
         }
+
+        #region Nested Classes
+
+        public enum StreamState
+        {
+            Idle,
+            ReservedLocal,
+            ReservedRemote,
+            Open,
+            HalfClosedLocal,
+            HalfClosedRemote,
+            Closed
+        }
+
+        #endregion
     }
 }
