@@ -174,20 +174,5 @@ namespace Zergatul.Network.Http
             _connection.Flush();
             _connection.Close();
         }
-
-        #region Nested Classes
-
-        public enum StreamState
-        {
-            Idle,
-            ReservedLocal,
-            ReservedRemote,
-            Open,
-            HalfClosedLocal,
-            HalfClosedRemote,
-            Closed
-        }
-
-        #endregion
     }
 }

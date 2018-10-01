@@ -18,8 +18,9 @@ namespace Zergatul.IO
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_totalRead + count > _limit)
-                throw new InvalidOperationException();
+            count = System.Math.Min(count, _limit - _totalRead);
+            if (count == 0)
+                return 0;
             int read = _stream.Read(buffer, offset, count);
             _totalRead += read;
             return read;

@@ -67,13 +67,26 @@ namespace Zergatul.Network.Tests.Http
 
         private class TestHttpConnection : Http1Connection
         {
-            public override Stream Stream => _stream;
-
             private Stream _stream;
 
             public TestHttpConnection(Stream stream)
             {
                 this._stream = stream;
+            }
+
+            public override void WriteBody(byte[] data)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void WriteBody(Stream stream)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void WriteHeader(byte[] data)
+            {
+                throw new NotImplementedException();
             }
 
             public override void Close()

@@ -70,6 +70,12 @@ namespace Zergatul.Network.Http.Frames
 
         public override void ReadPayload(Stream stream, int length)
         {
+            if (Id == 0)
+            {
+                GoAwayWith(ErrorCode.PROTOCOL_ERROR);
+                return;
+            }
+
             byte[] buffer = new byte[4];
 
             int padLength = 0;

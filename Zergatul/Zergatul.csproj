@@ -281,8 +281,12 @@
     <Compile Include="Network\Http\Frames\FrameType.cs" />
     <Compile Include="Network\Http\Frames\GoAway.cs" />
     <Compile Include="Network\Http\Frames\Headers.cs" />
+    <Compile Include="Network\Http\Frames\Http2FrameStream.cs" />
     <Compile Include="Network\Http\Frames\SettingParameter.cs" />
     <Compile Include="Network\Http\Frames\Settings.cs" />
+    <Compile Include="Network\Http\Header.cs" />
+    <Compile Include="Network\Http\Hpack.cs" />
+    <Compile Include="Network\Http\HpackDecodingException.cs" />
     <Compile Include="Network\Http\Http2Client.cs" />
     <Compile Include="Network\Http\Http2Connection.cs" />
     <Compile Include="Network\Http\Http2ConnectionSettings.cs" />
