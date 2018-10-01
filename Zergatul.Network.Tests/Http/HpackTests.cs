@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Network.Http;
@@ -9,7 +10,7 @@ namespace Zergatul.Network.Tests.Http
     public class HpackTests
     {
         [TestMethod]
-        public void RFC7541_C_2_4_Test()
+        public void RFC7541_C_2_4_DecodeTest()
         {
             var hpack = new Hpack(0);
             var headers = hpack.Decode(new MemoryStream(new byte[] { 0x82 }));
@@ -17,6 +18,21 @@ namespace Zergatul.Network.Tests.Http
             Assert.IsTrue(headers.Count == 1);
             Assert.IsTrue(headers[0].Name == ":method");
             Assert.IsTrue(headers[0].Value == "GET");
+
+            hpack = new Hpack(0);
+        }
+
+        [TestMethod]
+        public void RFC7541_C_2_4_EncodeTest()
+        {
+            var ms = new MemoryStream();
+            var hpack = new Hpack(0);
+            hpack.Encode(ms, new List<Header>
+            {
+                new Header(":method", "GET")
+            });
+
+            Assert.IsTrue(BitHelper.BytesToHex(ms.ToArray()) == "82");
         }
 
         [TestMethod]
@@ -69,7 +85,7 @@ namespace Zergatul.Network.Tests.Http
         }
 
         [TestMethod]
-        public void RFC7541_C_4_Test()
+        public void RFC7541_C_4_DecodeTest()
         {
             var hpack = new Hpack(0x1000);
 
@@ -114,6 +130,52 @@ namespace Zergatul.Network.Tests.Http
             Assert.IsTrue(headers[3].Value == "www.example.com");
             Assert.IsTrue(headers[4].Name == "custom-key");
             Assert.IsTrue(headers[4].Value == "custom-value");
+        }
+
+        [TestMethod]
+        public void RFC7541_C_4_EncodeTest()
+        {
+            var ms = new MemoryStream();
+            var hpack = new Hpack(0x1000);
+            hpack.Encode(ms, new List<Header>
+            {
+                new Header(":method", "GET"),
+                new Header(":scheme", "http"),
+                new Header(":path", "/"),
+                new Header(":authority", "www.example.com")
+            });
+
+            Assert.IsTrue(BitHelper.BytesToHex(ms.ToArray()) == "828684418cf1e3c2e5f23a6ba0ab90f4ff");
+
+            /*
+            hex = "828684be5886a8eb10649cbf";
+            headers = hpack.Decode(new MemoryStream(BitHelper.HexToBytes(hex)));
+            Assert.IsTrue(headers.Count == 5);
+            Assert.IsTrue(headers[0].Name == ":method");
+            Assert.IsTrue(headers[0].Value == "GET");
+            Assert.IsTrue(headers[1].Name == ":scheme");
+            Assert.IsTrue(headers[1].Value == "http");
+            Assert.IsTrue(headers[2].Name == ":path");
+            Assert.IsTrue(headers[2].Value == "/");
+            Assert.IsTrue(headers[3].Name == ":authority");
+            Assert.IsTrue(headers[3].Value == "www.example.com");
+            Assert.IsTrue(headers[4].Name == "cache-control");
+            Assert.IsTrue(headers[4].Value == "no-cache");
+
+            hex = "828785bf408825a849e95ba97d7f8925a849e95bb8e8b4bf";
+            headers = hpack.Decode(new MemoryStream(BitHelper.HexToBytes(hex)));
+
+            Assert.IsTrue(headers.Count == 5);
+            Assert.IsTrue(headers[0].Name == ":method");
+            Assert.IsTrue(headers[0].Value == "GET");
+            Assert.IsTrue(headers[1].Name == ":scheme");
+            Assert.IsTrue(headers[1].Value == "https");
+            Assert.IsTrue(headers[2].Name == ":path");
+            Assert.IsTrue(headers[2].Value == "/index.html");
+            Assert.IsTrue(headers[3].Name == ":authority");
+            Assert.IsTrue(headers[3].Value == "www.example.com");
+            Assert.IsTrue(headers[4].Name == "custom-key");
+            Assert.IsTrue(headers[4].Value == "custom-value");*/
         }
 
         [TestMethod]

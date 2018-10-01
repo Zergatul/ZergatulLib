@@ -147,7 +147,63 @@ namespace Zergatul.Network.Http
 
         public void Encode(Stream stream, List<Header> headers)
         {
+            foreach (var header in headers)
+            {
+                int nameIndex = -1;
+                int fullIndex = -1;
 
+                // search in static table
+                for (int i = 0; i < StaticTable.Length; i++)
+                {
+                    if (StaticTable[i].Name == header.Name)
+                    {
+                        if (nameIndex == -1)
+                            nameIndex = i;
+                        if (StaticTable[i].Value == header.Value)
+                        {
+                            fullIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                // search in dynamic table
+                if (fullIndex == -1)
+                {
+                    for (int i = 0; i < _dynamicTableCount; i++)
+                    {
+                        if (_dynamicTable[_dynamicTable.Count - i].Name == header.Name)
+                        {
+                            if (nameIndex == -1)
+                                nameIndex = StaticTable.Length + i;
+                            if (_dynamicTable[_dynamicTable.Count - i].Value == header.Value)
+                            {
+                                fullIndex = StaticTable.Length + i;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (fullIndex >= 0)
+                {
+                    // Indexed Header Field
+                    EncodeInteger(stream, 7, 0x80, fullIndex + 1);
+                    continue;
+                }
+
+                // Literal Header Field with Incremental Indexing
+                if (nameIndex >= 0)
+                {
+                    EncodeInteger(stream, 6, 0x40, nameIndex + 1);
+                }
+                else
+                {
+
+                }
+
+                throw new NotImplementedException();
+            }
         }
 
         public List<Header> Decode(Stream stream)
@@ -239,6 +295,18 @@ namespace Zergatul.Network.Http
             }
         }
 
+        private void EncodeInteger(Stream stream, int n, int high, int value)
+        {
+            if (value < (1 << n) - 1)
+            {
+                _buffer[0] = (byte)(high | value);
+                stream.Write(_buffer, 0, 1);
+                return;
+            }
+
+            throw new NotImplementedException();
+        }
+
         private int DecodeInteger(Stream stream, int n, int value)
         {
             if (value < (1 << n) - 1)
@@ -258,6 +326,17 @@ namespace Zergatul.Network.Http
                     throw new HpackDecodingException();
                 if ((octet & 0x80) == 0)
                     return (int)result;
+            }
+        }
+
+        private void EncodeString(Stream stream, string value)
+        {
+            byte[] huffman = new byte[value.Length];
+            int huffmanIndex = 0;
+            int huffmanBitIndex = 0;
+            for (int i = 0; i < value.Length; i++)
+            {
+
             }
         }
 
