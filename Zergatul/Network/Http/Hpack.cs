@@ -135,14 +135,10 @@ namespace Zergatul.Network.Http
         private List<Header> _dynamicTable;
         private int _dynamicTableCount;
 
-        private byte[] _buffer;
-
         public Hpack(int maxTableSize)
         {
             this._maxTableSize = maxTableSize;
             this._dynamicTable = new List<Header>();
-
-            this._buffer = new byte[1];
         }
 
         public void Encode(Stream stream, List<Header> headers)
@@ -172,11 +168,11 @@ namespace Zergatul.Network.Http
                 {
                     for (int i = 0; i < _dynamicTableCount; i++)
                     {
-                        if (_dynamicTable[_dynamicTable.Count - i].Name == header.Name)
+                        if (_dynamicTable[_dynamicTable.Count - i - 1].Name == header.Name)
                         {
                             if (nameIndex == -1)
                                 nameIndex = StaticTable.Length + i;
-                            if (_dynamicTable[_dynamicTable.Count - i].Value == header.Value)
+                            if (_dynamicTable[_dynamicTable.Count - i - 1].Value == header.Value)
                             {
                                 fullIndex = StaticTable.Length + i;
                                 break;
@@ -199,10 +195,13 @@ namespace Zergatul.Network.Http
                 }
                 else
                 {
-
+                    stream.WriteByte(0x40);
+                    EncodeString(stream, header.Name);
                 }
 
-                throw new NotImplementedException();
+                EncodeString(stream, header.Value);
+
+                AddToDynamicTable(header);
             }
         }
 
@@ -212,11 +211,10 @@ namespace Zergatul.Network.Http
 
             while (true)
             {
-                int read = stream.Read(_buffer, 0, 1);
-                if (read == 0)
+                int octet = stream.ReadByte();
+                if (octet == -1)
                     return headers;
 
-                int octet = _buffer[0];
                 if ((octet & 0x80) != 0)
                 {
                     // Indexed Header Field
@@ -299,8 +297,7 @@ namespace Zergatul.Network.Http
         {
             if (value < (1 << n) - 1)
             {
-                _buffer[0] = (byte)(high | value);
-                stream.Write(_buffer, 0, 1);
+                stream.WriteByte((byte)(high | value));
                 return;
             }
 
@@ -315,11 +312,10 @@ namespace Zergatul.Network.Http
             long result = value;
             while (true)
             {
-                int read = stream.Read(_buffer, 0, 1);
-                if (read == 0)
+                int octet = stream.ReadByte();
+                if (octet == -1)
                     throw new HpackDecodingException("Unexpected end of stream");
 
-                int octet = _buffer[0];
                 result += (octet & 0x7F) << n;
                 n += 8;
                 if (n > 32 || result > int.MaxValue)
@@ -331,22 +327,57 @@ namespace Zergatul.Network.Http
 
         private void EncodeString(Stream stream, string value)
         {
-            byte[] huffman = new byte[value.Length];
-            int huffmanIndex = 0;
-            int huffmanBitIndex = 0;
+            int huffmanLength = 0;
             for (int i = 0; i < value.Length; i++)
             {
+                if (value[i] >= 256)
+                    throw new HpackDecodingException("Non-ASCII character");
+                huffmanLength += HuffmanCodeLen[value[i]];
+            }
 
+            huffmanLength = (huffmanLength + 7) >> 3;
+            if (huffmanLength < value.Length)
+            {
+                // Use huffman
+                EncodeInteger(stream, 7, 0x80, huffmanLength);
+                long data = 0;
+                int bits = 0;
+                for (int i = 0; i < value.Length; i++)
+                {
+                    int len = HuffmanCodeLen[value[i]];
+                    data = (data << len) | (long)HuffmanCode[value[i]];
+                    bits += len;
+
+                    while (bits >= 8)
+                    {
+                        bits -= 8;
+                        stream.WriteByte((byte)(data >> bits));
+                        data &= (1 << bits) - 1;
+                    }
+                }
+                if (bits > 0)
+                {
+                    data = (data << (8 - bits)) | (0xFFL >> bits);
+                    stream.WriteByte((byte)data);
+                }
+            }
+            else
+            {
+                // Use raw
+                EncodeInteger(stream, 7, 0x00, value.Length);
+                for (int i = 0; i < value.Length; i++)
+                {
+                    stream.WriteByte((byte)value[i]);
+                }
             }
         }
 
         private string DecodeString(Stream stream)
         {
-            int read = stream.Read(_buffer, 0, 1);
-            if (read == 0)
+            int octet = stream.ReadByte();
+            if (octet == -1)
                 throw new HpackDecodingException("Unexpected end of stream");
 
-            int octet = _buffer[0];
             bool huffman = (octet & 0x80) != 0;
             int length = DecodeInteger(stream, 7, octet & 0x7F);
             if (huffman)
@@ -365,11 +396,11 @@ namespace Zergatul.Network.Http
                             if (totalRead >= length)
                                 goto endHuffman;
                             bufIndex = 8;
-                            read = stream.Read(_buffer, 0, 1);
-                            if (read == 0)
+                            octet = stream.ReadByte();
+                            if (octet == -1)
                                 throw new HpackDecodingException("Unexpected end of stream");
                             totalRead++;
-                            buffer = _buffer[0];
+                            buffer = octet;
                         }
                         bool bit = (buffer & 0x80) != 0;
                         buffer <<= 1;

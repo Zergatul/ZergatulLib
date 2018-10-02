@@ -51,6 +51,8 @@ namespace Zergatul.IO
 
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
 
+        public override int ReadByte() => _stream.ReadByte();
+
         public override long Seek(long offset, SeekOrigin origin) => _stream.Seek(offset, origin);
 
         public override void SetLength(long value) => _stream.SetLength(value);
@@ -71,14 +73,18 @@ namespace Zergatul.IO
                 offset += write;
                 count -= write;
 
-                if (_bufferPosition == _buffer.Length)
-                {
-                    // release buffer
-                    _stream.Write(_buffer, 0, _bufferPosition);
-                    _stream.Flush();
-                    _bufferPosition = 0;
-                }
+                ReleaseBufferIfNeeded();
             }
+        }
+
+        public override void WriteByte(byte value)
+        {
+            IncreaseBufferIfNeeded(1);
+
+            _buffer[_bufferPosition] = value;
+            _bufferPosition++;
+
+            ReleaseBufferIfNeeded();
         }
 
         #endregion
@@ -100,6 +106,16 @@ namespace Zergatul.IO
                 byte[] newBuffer = new byte[newLength];
                 Array.Copy(_buffer, 0, newBuffer, 0, _bufferPosition);
                 _buffer = newBuffer;
+            }
+        }
+
+        private void ReleaseBufferIfNeeded()
+        {
+            if (_bufferPosition == _buffer.Length)
+            {
+                _stream.Write(_buffer, 0, _bufferPosition);
+                _stream.Flush();
+                _bufferPosition = 0;
             }
         }
 
