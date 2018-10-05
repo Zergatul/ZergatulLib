@@ -124,7 +124,7 @@
     <Compile Include="IO\GenericMessageReadStream.cs" />
     <Compile Include="IO\LimitedStream.cs" />
     <Compile Include="IO\StreamHelper.cs" />
-    <Compile Include="Math\BigReal.cs" />
+    <Compile Include="Math\BigFloat.cs" />
     <Compile Include="Math\EdwardsCurves\EdCurve.cs" />
     <Compile Include="Math\EdwardsCurves\EdPoint.cs" />
     <Compile Include="Math\Elliptic\Char2Curve.cs" />

@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Zergatul.Math
 {
-    public class BigReal
+    public class BigFloat
     {
+        // representation:
+        // 0.[mantissa] * 2 ^ [exponent]
+        // mantissa - big endian
+        // exponent - little endian
+
         private uint[] _mantissa;
         private int _mantissaLength;
         private int _mantissaSign;
@@ -18,12 +19,20 @@ namespace Zergatul.Math
 
         private int _mantissaBits;
 
+        #region Public Properties
+
+        public bool IsZero => _mantissaSign == 0;
+
+        #endregion
+
         #region Constructors
 
-        public BigReal(double value, int mantissaBits)
+        public BigFloat(double value, int mantissaBits)
         {
             if (mantissaBits <= 0)
                 throw new ArgumentOutOfRangeException("mantissaBits should be >= 1");
+
+            this._mantissaBits = mantissaBits;
 
             long bits = BitConverter.DoubleToInt64Bits(value);
             bool negative = bits < 0;
@@ -39,8 +48,9 @@ namespace Zergatul.Math
 
             if (mantissa == 0)
             {
-                _mantissaLength = 0;
-                _exponentLength = 0;
+                this._mantissaSign = 0;
+                this._mantissaLength = 0;
+                this._exponentLength = 0;
             }
             else
             {
@@ -50,58 +60,57 @@ namespace Zergatul.Math
                     exponent++;
                 }
 
-                _mantissaSign = negative ? -1 : 1;
+                this._mantissaSign = negative ? -1 : 1;
                 if (mantissa > uint.MaxValue)
                 {
-                    _mantissa = new uint[] { (uint)(mantissa & 0xFFFFFFFF), (uint)(mantissa >> 32) };
-                    _mantissaLength = 2;
+                    throw new NotImplementedException();
+                    //this._mantissa = new uint[] { (uint)(mantissa & 0xFFFFFFFF), (uint)(mantissa >> 32) };
+                    //this._mantissaLength = 2;
                 }
                 else
                 {
-                    _mantissa = new uint[] { (uint)mantissa };
-                    _mantissaLength = 1;
-                }
+                    this._mantissa = new uint[] { (uint)mantissa };
+                    this._mantissaLength = 1;
 
-                while (mantissa > 0)
-                {
-                    mantissa >>= 1;
-                    exponent++;
-                }
+                    exponent += 32;
 
-                if (exponent == 0)
-                {
-                    _exponentLength = 0;
-                }
-                else
-                {
-                    if (exponent < 0)
+                    if (exponent == 0)
                     {
-                        _exponent = new uint[] { (uint)(-exponent) };
-                        _exponentLength = 1;
-                        _exponentSign = -1;
+                        this._exponentLength = 0;
+                        this._exponentSign = 0;
                     }
                     else
                     {
-                        _exponent = new uint[] { (uint)(exponent) };
-                        _exponentLength = 1;
-                        _exponentSign = 1;
+                        this._exponentLength = 1;
+                        if (exponent > 0)
+                        {
+                            this._exponent = new uint[] { (uint)exponent };
+                            this._exponentSign = 1;
+                        }
+                        else
+                        {
+                            this._exponent = new uint[] { (uint)(-exponent) };
+                            this._exponentSign = -1;
+                        }
                     }
                 }
 
                 TruncateMantissaBits();
             }
-
-            _mantissaBits = mantissaBits;
         }
 
         #endregion
 
         #region ToString
 
-        //public string ToExpString()
-        //{
-            
-        //}
+        public string ToExponentialString(int decimals, int radix = 10)
+        {
+            if (IsZero)
+                throw new NotImplementedException();
+
+            uint[] mantissa = new uint[_mantissaLength];
+            return "";
+        }
 
         //public string ToNormalString()
         //{
@@ -113,7 +122,9 @@ namespace Zergatul.Math
             if (_mantissaLength == 0)
                 return "0";
 
-            BigInteger mantissa = new BigInteger(_mantissa.Take(_mantissaLength).ToArray(), ByteOrder.LittleEndian);
+            uint[] buffer = new uint[_mantissaLength];
+            Array.Copy(_mantissa, buffer, _mantissaLength);
+            BigInteger mantissa = new BigInteger(buffer, ByteOrder.LittleEndian);
             BigInteger integerPart;
             BigInteger fractionalPart;
 

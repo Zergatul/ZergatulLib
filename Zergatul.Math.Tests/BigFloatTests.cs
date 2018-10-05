@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Zergatul.Math.Tests
 {
     [TestClass]
-    public class BigRealTests
+    public class BigFloatTests
     {
         [TestMethod]
         public void BigReal_Constructor_Double()
@@ -21,7 +21,7 @@ namespace Zergatul.Math.Tests
             //real = new BigReal(-4, 100);
             //Assert.IsTrue(real.ToString() == "-4");
 
-            var real = new BigReal(1000000, 100);
+            var real = new BigFloat(1000000, 100);
             Assert.IsTrue(real.ToString() == "1000000");
         }
     }
