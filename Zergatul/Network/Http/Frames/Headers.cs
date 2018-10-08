@@ -14,6 +14,9 @@ namespace Zergatul.Network.Http.Frames
 
         #region Flags
 
+        /// <summary>
+        /// When set, indicates that the header block is the last that the endpoint will send for the identified stream
+        /// </summary>
         public bool END_STREAM
         {
             get => (Flags & 0x01) != 0;
@@ -22,10 +25,13 @@ namespace Zergatul.Network.Http.Frames
                 if (value)
                     Flags |= 0x01;
                 else
-                    Flags &= 0xFE;
+                    Flags &= 0xFF ^ 0x01;
             }
         }
 
+        /// <summary>
+        /// When set, indicates that this frame contains an entire header block and is not followed by any CONTINUATION frames
+        /// </summary>
         public bool END_HEADERS
         {
             get => (Flags & 0x04) != 0;
@@ -34,7 +40,7 @@ namespace Zergatul.Network.Http.Frames
                 if (value)
                     Flags |= 0x04;
                 else
-                    Flags &= 0xFB;
+                    Flags &= 0xFF ^ 0x04;
             }
         }
 
@@ -46,7 +52,7 @@ namespace Zergatul.Network.Http.Frames
                 if (value)
                     Flags |= 0x08;
                 else
-                    Flags &= 0xF7;
+                    Flags &= 0xFF ^ 0x08;
             }
         }
 
@@ -58,7 +64,7 @@ namespace Zergatul.Network.Http.Frames
                 if (value)
                     Flags |= 0x20;
                 else
-                    Flags &= 0xDF;
+                    Flags &= 0xFF ^ 0x20;
             }
         }
 
@@ -67,6 +73,7 @@ namespace Zergatul.Network.Http.Frames
         public bool ExclusiveDependency;
         public uint DependencyStreamIdentifier;
         public int Weight;
+        public byte[] Data;
 
         public override void ReadPayload(Stream stream, int length)
         {
@@ -77,6 +84,8 @@ namespace Zergatul.Network.Http.Frames
             }
 
             byte[] buffer = new byte[4];
+
+            stream = new LimitedReadStream(stream, length);
 
             int padLength = 0;
             if (PADDED)
@@ -95,11 +104,14 @@ namespace Zergatul.Network.Http.Frames
                 StreamHelper.ReadArray(stream, buffer, 1);
                 Weight = buffer[0] + 1;
             }
+
+            Data = new byte[stream.Length];
+            StreamHelper.ReadArray(stream, Data);
         }
 
         public override byte[] GetPayload()
         {
-            throw new NotImplementedException();
+            return Data;
         }
     }
 }

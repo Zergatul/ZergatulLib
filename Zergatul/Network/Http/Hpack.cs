@@ -141,7 +141,7 @@ namespace Zergatul.Network.Http
             this._dynamicTable = new List<Header>();
         }
 
-        public void Encode(Stream stream, List<Header> headers)
+        public void Encode(Stream stream, IEnumerable<Header> headers)
         {
             foreach (var header in headers)
             {

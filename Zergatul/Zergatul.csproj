@@ -291,6 +291,8 @@
     <Compile Include="Network\Http\Http2Client.cs" />
     <Compile Include="Network\Http\Http2Connection.cs" />
     <Compile Include="Network\Http\Http2ConnectionSettings.cs" />
+    <Compile Include="Network\Http\Http2Request.cs" />
+    <Compile Include="Network\Http\Http2Response.cs" />
     <Compile Include="Network\Http\HttpConnection.cs" />
     <Compile Include="Network\Http\HttpConnectionProvider.cs" />
     <Compile Include="Network\Http\HttpHeaderValue.cs" />

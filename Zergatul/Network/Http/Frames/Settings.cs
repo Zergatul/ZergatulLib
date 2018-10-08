@@ -17,7 +17,7 @@ namespace Zergatul.Network.Http.Frames
                 if (value)
                     Flags |= 0x01;
                 else
-                    Flags &= 0xFE;
+                    Flags &= 0xFF ^ 0x01;
             }
         }
 

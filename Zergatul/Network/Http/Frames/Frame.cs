@@ -33,6 +33,7 @@ namespace Zergatul.Network.Http.Frames
             header[1] = (byte)(length >> 8);
             header[2] = (byte)(length & 0xFF);
             header[3] = (byte)Type;
+            header[4] = Flags;
             BitHelper.GetBytes(Id, ByteOrder.BigEndian, header, 5);
 
             stream.Write(header, 0, 9);

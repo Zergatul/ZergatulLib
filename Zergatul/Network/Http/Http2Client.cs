@@ -29,6 +29,12 @@ namespace Zergatul.Network.Http
         private Http2Connection _connection;
         private bool _isClosed;
 
+        private Hpack _clientHpack;
+        private Hpack _serverHpack;
+        private uint _streamIdCounter;
+
+        private List<Frame> _frameBuffer;
+
         public Http2Client(string uri)
             : this(new Uri(uri), null)
         {
@@ -60,8 +66,71 @@ namespace Zergatul.Network.Http
                     throw new InvalidOperationException();
             }
 
-            Init();
+            InitConnection();
+
+            _clientHpack = new Hpack((int)_connection.Settings.HeaderTableSize);
+            _serverHpack = new Hpack((int)_connection.PeerSettings.HeaderTableSize);
+
+            _frameBuffer = new List<Frame>();
+            _streamIdCounter = 1;
         }
+
+        #region Public methods
+
+        public Http2Response GetResponse(Http2Request request)
+        {
+            bool valid = !string.IsNullOrEmpty(request.Method);
+            if (valid)
+            {
+                if (request.Method != "CONNECT")
+                {
+                    valid &= !string.IsNullOrEmpty(request.Scheme);
+                    valid &= !string.IsNullOrEmpty(request.Path);
+                }
+            }
+
+            if (!valid)
+                throw new InvalidOperationException("Invalid headers");
+
+            uint streamId = _streamIdCounter;
+            _streamIdCounter += 2;
+            SendHeaders(streamId, request.Headers);
+            _stream.Flush();
+
+            return new Http2Response(this, streamId);
+        }
+
+        #endregion
+
+        #region Internal methods
+
+        internal Frame GetNextFrameForStream(uint streamId)
+        {
+            for (int i = 0; i < _frameBuffer.Count; i++)
+                if (_frameBuffer[i].Id == streamId)
+                {
+                    var bufferedFrame = _frameBuffer[i];
+                    _frameBuffer.RemoveAt(i);
+                    return bufferedFrame;
+                }
+
+            while (true)
+            {
+                var frame = _connection.ReadFrame();
+                if (frame.Id == streamId)
+                    return frame;
+                else
+                    _frameBuffer.Add(frame);
+            }
+        }
+
+        internal List<Header> DecodeHeaders(byte[] data)
+        {
+            using (var ms = new MemoryStream(data))
+                return _serverHpack.Decode(ms);
+        }
+
+        #endregion
 
         #region IDisposable
 
@@ -87,13 +156,18 @@ namespace Zergatul.Network.Http
 
         #endregion
 
-        private void Init()
+        #region Private methods
+
+        private void InitConnection()
         {
             _connection = new Http2Connection(_stream);
             _connection.Open();
+
+            // Send SETTINGS
             _connection.SendFrame(new Settings());
             _connection.Flush();
 
+            // Receive SETTINGS
             var frame = _connection.ReadFrame();
             if (frame.Type != FrameType.SETTINGS)
             {
@@ -109,12 +183,14 @@ namespace Zergatul.Network.Http
             }
             ApplySettings(settings);
 
+            // Send SETTINGS ACK
             _connection.SendFrame(new Settings
             {
                 ACK = true
             });
             _connection.Flush();
 
+            // Receive SETTINGS ACK
             frame = _connection.ReadFrame();
             if (frame.Type != FrameType.SETTINGS)
             {
@@ -164,6 +240,21 @@ namespace Zergatul.Network.Http
                 }
         }
 
+        private void SendHeaders(uint streamId, IEnumerable<Header> headers)
+        {
+            using (var ms = new MemoryStream())
+            {
+                _clientHpack.Encode(ms, headers);
+                _connection.SendFrame(new Headers
+                {
+                    END_HEADERS = true,
+                    END_STREAM = true,
+                    Id = streamId,
+                    Data = ms.ToArray()
+                });
+            }
+        }
+
         private void SendGoAway(ErrorCode errorCode)
         {
             _isClosed = true;
@@ -174,5 +265,7 @@ namespace Zergatul.Network.Http
             _connection.Flush();
             _connection.Close();
         }
+
+        #endregion
     }
 }
