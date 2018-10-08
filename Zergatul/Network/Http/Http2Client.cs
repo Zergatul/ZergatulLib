@@ -24,9 +24,28 @@ namespace Zergatul.Network.Http
 
         #endregion
 
+        #region Public properties
+
+        private bool _enablePush = true;
+        public bool EnablePush
+        {
+            get => _enablePush;
+            set
+            {
+                if (_isOpened)
+                    throw new NotImplementedException();
+                _enablePush = value;
+            }
+        }
+
+        #endregion
+
         private bool _disposed;
+        private Uri _uri;
+        private Proxy.ProxyBase _proxy;
         private Stream _stream;
         private Http2Connection _connection;
+        private bool _isOpened;
         private bool _isClosed;
 
         private Hpack _clientHpack;
@@ -48,20 +67,33 @@ namespace Zergatul.Network.Http
             if (uri.AbsolutePath != "/")
                 throw new ArgumentException(nameof(uri));
 
-            var client = TcpConnector.GetTcpClient(uri.Host, uri.Port, proxy);
-            switch (uri.Scheme)
+            this._uri = uri;
+            this._proxy = proxy;
+        }
+
+        #region Public methods
+
+        public void Open()
+        {
+            ThrowIfOpened();
+            ThrowIfClosed();
+
+            var client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port, _proxy);
+            switch (_uri.Scheme)
             {
                 case "http":
                     _stream = client.GetStream();
                     break;
+
                 case "https":
                     var tls = new TlsStream(client.GetStream());
                     var alpnExtension = new Tls.Extensions.ApplicationLayerProtocolNegotiationExtension();
                     alpnExtension.ProtocolNames = new[] { "h2" };
                     tls.Settings.Extensions = new Tls.Extensions.TlsExtension[] { alpnExtension };
-                    tls.AuthenticateAsClient(uri.Host);
+                    tls.AuthenticateAsClient(_uri.Host);
                     _stream = new BufferedWriteStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
                     break;
+
                 default:
                     throw new InvalidOperationException();
             }
@@ -73,12 +105,14 @@ namespace Zergatul.Network.Http
 
             _frameBuffer = new List<Frame>();
             _streamIdCounter = 1;
-        }
 
-        #region Public methods
+            _isOpened = true;
+        }
 
         public Http2Response GetResponse(Http2Request request)
         {
+            ThrowIfNotOpened();
+
             bool valid = !string.IsNullOrEmpty(request.Method);
             if (valid)
             {
@@ -147,7 +181,7 @@ namespace Zergatul.Network.Http
 
             if (disposing)
             {
-                if (!_isClosed)
+                if (_isOpened && !_isClosed)
                     SendGoAway(ErrorCode.NO_ERROR);
             }
 
@@ -158,13 +192,36 @@ namespace Zergatul.Network.Http
 
         #region Private methods
 
+        private void ThrowIfOpened()
+        {
+            if (_isOpened)
+                throw new InvalidOperationException();
+        }
+
+        private void ThrowIfNotOpened()
+        {
+            if (!_isOpened)
+                throw new InvalidOperationException();
+        }
+
+        private void ThrowIfClosed()
+        {
+            if (_isClosed)
+                throw new InvalidOperationException();
+        }
+
         private void InitConnection()
         {
             _connection = new Http2Connection(_stream);
             _connection.Open();
 
             // Send SETTINGS
-            _connection.SendFrame(new Settings());
+            var settings = new Settings();
+            settings.Parameters = new Dictionary<SettingParameter, uint>
+            {
+                [SettingParameter.SETTINGS_ENABLE_PUSH] = _enablePush ? 1U : 0U
+            };
+            _connection.SendFrame(settings);
             _connection.Flush();
 
             // Receive SETTINGS
@@ -175,7 +232,7 @@ namespace Zergatul.Network.Http
                 return;
             }
 
-            var settings = (Settings)frame;
+            settings = (Settings)frame;
             if (settings.ACK)
             {
                 SendGoAway(ErrorCode.PROTOCOL_ERROR);

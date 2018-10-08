@@ -272,5 +272,40 @@ namespace Zergatul.Network.Tests.Http
             Assert.IsTrue(headers[5].Value == "foo=ASDJKHQKBZXOQWEOPIUAXQWEOIU; max-age=3600; version=1");
             Assert.IsTrue(hpack.DynamicTableSize == 215);
         }
+
+        [TestMethod]
+        public void RealTest1()
+        {
+            var hpack = new Hpack(4096);
+
+            string hex = "188210011f278586b19272ff1f1091497ca589d34d1f649c7620a98386fc2b3d1f13a1fe5f038f10409424744ebc26df0bf2b6f4a165c2492c6f86e05b038db6d34d0bf91f299aa47e561cc58190b6cb800014fb50d5128b642eeb63be7a466a911f05012a109419085421621ea4d87a161d141fc2d495339e447f8cc5837fd63c10dffad7ab76ff109419085421621ea4d87a161d141fc2d3947216c47f012a109619085421621ea4d87a161d141fc2c4b0b216a498742384947420bf108f19085421621ea4d87a16a47e561cc58479c6800f108619085ad2b127a4bfaf6fd29c8d2267fa53898be2b3d895b91a44cff4a5f3f8aa8355d7e94dc3ee55af8d23108eaec3a4e43d1154598e930d263d5f0268321085a7d5761d27026832108725062d4988d5ff8979b5c42657101f5c42108a25062d498ac28e888d5f8979b5c42657101f5c42108b9a73a13120b677310b11ab8812e202e1644bb2ff10869a73a1311abf890bcd2ec817105f5c411082b1290237321083aed44f834d9697108ff2b0fa8e919964d83a9129eca4b27f8f7d4081f03ea014ae98e0a76f0d1f411f098aa47e561cc581a644007f1f1596df697e9403ea6a22541002f28066e005700d298b46ff1f1296d07abe9403ca6a22541002f2816ee005700d298b46ff1f0d84085f13bf";
+            var headers = hpack.Decode(new MemoryStream(BitHelper.HexToBytes(hex)));
+
+            Assert.IsTrue(headers.Count == 24);
+            Assert.IsTrue(headers[0].ToString() == ":status: 200");
+            Assert.IsTrue(headers[1].ToString() == "server: Apache");
+            Assert.IsTrue(headers[2].ToString() == "content-type: text/html;charset=UTF-8");
+            Assert.IsTrue(headers[3].ToString() == "etag: \"9068c20f1c727825919f58f136cdfb91:1506554442\"");
+            Assert.IsTrue(headers[4].ToString() == "strict-transport-security: max-age=31536000 ; includeSubDomains");
+            Assert.IsTrue(headers[5].ToString() == "access-control-allow-origin: *");
+            Assert.IsTrue(headers[6].ToString() == "access-control-allow-methods: GET,HEAD,POST");
+            Assert.IsTrue(headers[7].ToString() == "access-control-allow-headers: *");
+            Assert.IsTrue(headers[8].ToString() == "access-control-allow-credentials: false");
+            Assert.IsTrue(headers[9].ToString() == "access-control-max-age: 86400");
+            Assert.IsTrue(headers[10].ToString() == "accept-ch: DPR, Width, Viewport-Width, Downlink, Save-Data");
+            Assert.IsTrue(headers[11].ToString() == "protocol_negotiation: h2");
+            Assert.IsTrue(headers[12].ToString() == "myproto: h2");
+            Assert.IsTrue(headers[13].ToString() == "client_ip: 85.223.209.22");
+            Assert.IsTrue(headers[14].ToString() == "client_real_ip: 85.223.209.22");
+            Assert.IsTrue(headers[15].ToString() == "ghost_service_ip: 2.20.132.39");
+            Assert.IsTrue(headers[16].ToString() == "ghost_ip: 184.30.219.21");
+            Assert.IsTrue(headers[17].ToString() == "rtt: 72");
+            Assert.IsTrue(headers[18].ToString() == "push: true");
+            Assert.IsTrue(headers[19].ToString() == "x-akamai-transformed: 9 10909 0 pmb=mRUM,1");
+            Assert.IsTrue(headers[20].ToString() == "cache-control: max-age=43200");
+            Assert.IsTrue(headers[21].ToString() == "expires: Tue, 09 Oct 2018 03:02:04 GMT");
+            Assert.IsTrue(headers[22].ToString() == "date: Mon, 08 Oct 2018 15:02:04 GMT");
+            Assert.IsTrue(headers[23].ToString() == "content-length: 11927");
+        }
     }
 }

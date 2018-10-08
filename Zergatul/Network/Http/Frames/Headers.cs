@@ -85,13 +85,12 @@ namespace Zergatul.Network.Http.Frames
 
             byte[] buffer = new byte[4];
 
-            stream = new LimitedReadStream(stream, length);
-
             int padLength = 0;
             if (PADDED)
             {
                 StreamHelper.ReadArray(stream, buffer, 1);
                 padLength = buffer[0];
+                length--;
             }
 
             if (PRIORITY)
@@ -100,12 +99,14 @@ namespace Zergatul.Network.Http.Frames
                 DependencyStreamIdentifier = BitHelper.ToUInt32(buffer, ByteOrder.BigEndian);
                 ExclusiveDependency = (DependencyStreamIdentifier & 0x80000000) != 0;
                 DependencyStreamIdentifier &= 0x7FFFFFFF;
+                length -= 4;
 
                 StreamHelper.ReadArray(stream, buffer, 1);
                 Weight = buffer[0] + 1;
+                length--;
             }
 
-            Data = new byte[stream.Length];
+            Data = new byte[length];
             StreamHelper.ReadArray(stream, Data);
         }
 

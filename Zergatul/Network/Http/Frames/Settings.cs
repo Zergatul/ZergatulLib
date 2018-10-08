@@ -95,7 +95,16 @@ namespace Zergatul.Network.Http.Frames
             if (Parameters.Count == 0)
                 return null;
 
-            throw new NotImplementedException();
+            byte[] payload = new byte[Parameters.Count * 6];
+            int index = 0;
+            foreach (var kv in Parameters)
+            {
+                BitHelper.GetBytes((ushort)kv.Key, ByteOrder.BigEndian, payload, index);
+                index += 2;
+                BitHelper.GetBytes(kv.Value, ByteOrder.BigEndian, payload, index);
+                index += 4;
+            }
+            return payload;
         }
     }
 }

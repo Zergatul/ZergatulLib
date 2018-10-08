@@ -310,6 +310,7 @@ namespace Zergatul.Network.Http
                 return value;
 
             long result = value;
+            n = 0;
             while (true)
             {
                 int octet = stream.ReadByte();
@@ -317,7 +318,7 @@ namespace Zergatul.Network.Http
                     throw new HpackDecodingException("Unexpected end of stream");
 
                 result += (octet & 0x7F) << n;
-                n += 8;
+                n += 7;
                 if (n > 32 || result > int.MaxValue)
                     throw new HpackDecodingException();
                 if ((octet & 0x80) == 0)
