@@ -5,7 +5,7 @@ using Zergatul.IO;
 
 namespace Zergatul.Network.Http.Frames
 {
-    class Settings : Frame
+    class SettingsFrame : Frame
     {
         public override FrameType Type => FrameType.SETTINGS;
 

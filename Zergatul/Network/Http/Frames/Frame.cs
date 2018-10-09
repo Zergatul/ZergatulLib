@@ -8,6 +8,7 @@ using Zergatul.IO;
 
 namespace Zergatul.Network.Http.Frames
 {
+    // TODO: use exceptions instead ShouldSendGoAway
     public abstract class Frame
     {
         public abstract FrameType Type { get; }
@@ -62,9 +63,10 @@ namespace Zergatul.Network.Http.Frames
             Frame frame;
             switch (type)
             {
-                case FrameType.DATA: frame = new Data(); break;
-                case FrameType.HEADERS: frame = new Headers(); break;
-                case FrameType.SETTINGS: frame = new Settings(); break;
+                case FrameType.DATA: frame = new DataFrame(); break;
+                case FrameType.HEADERS: frame = new HeadersFrame(); break;
+                case FrameType.SETTINGS: frame = new SettingsFrame(); break;
+                case FrameType.WINDOW_UPDATE: frame = new WindowUpdateFrame(); break;
                 default:
                     throw new NotImplementedException();
             }

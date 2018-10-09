@@ -29,7 +29,7 @@ namespace Zergatul.IO
             }
         }
 
-        public static bool ValidateWriteParameters(byte[] buffer, int offset, int count)
+        public static bool ValidateReadWriteParameters(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));

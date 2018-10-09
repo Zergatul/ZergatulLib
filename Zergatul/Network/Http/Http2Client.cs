@@ -134,6 +134,22 @@ namespace Zergatul.Network.Http
             return new Http2Response(this, streamId);
         }
 
+        public Http2Response GetResponse(string path, IEnumerable<Header> headers)
+        {
+            var request = new Http2Request
+            {
+                Method = "GET",
+                Scheme = _uri.Scheme,
+                Authority = _uri.Host,
+                Path = path,
+            };
+            if (headers != null)
+                foreach (var header in headers)
+                    request[header.Name] = header.Value;
+
+            return GetResponse(request);
+        }
+
         #endregion
 
         #region Internal methods
@@ -154,7 +170,10 @@ namespace Zergatul.Network.Http
                 if (frame.Id == streamId)
                     return frame;
                 else
-                    _frameBuffer.Add(frame);
+                {
+                    if (!ProcessFrame(frame))
+                        _frameBuffer.Add(frame);
+                }
             }
         }
 
@@ -216,7 +235,7 @@ namespace Zergatul.Network.Http
             _connection.Open();
 
             // Send SETTINGS
-            var settings = new Settings();
+            var settings = new SettingsFrame();
             settings.Parameters = new Dictionary<SettingParameter, uint>
             {
                 [SettingParameter.SETTINGS_ENABLE_PUSH] = _enablePush ? 1U : 0U
@@ -232,7 +251,7 @@ namespace Zergatul.Network.Http
                 return;
             }
 
-            settings = (Settings)frame;
+            settings = (SettingsFrame)frame;
             if (settings.ACK)
             {
                 SendGoAway(ErrorCode.PROTOCOL_ERROR);
@@ -241,7 +260,7 @@ namespace Zergatul.Network.Http
             ApplySettings(settings);
 
             // Send SETTINGS ACK
-            _connection.SendFrame(new Settings
+            _connection.SendFrame(new SettingsFrame
             {
                 ACK = true
             });
@@ -255,7 +274,7 @@ namespace Zergatul.Network.Http
                 return;
             }
 
-            settings = (Settings)frame;
+            settings = (SettingsFrame)frame;
             if (!settings.ACK)
             {
                 SendGoAway(ErrorCode.PROTOCOL_ERROR);
@@ -263,7 +282,7 @@ namespace Zergatul.Network.Http
             }
         }
 
-        private void ApplySettings(Settings frame)
+        private void ApplySettings(SettingsFrame frame)
         {
             if (frame == null)
                 throw new ArgumentNullException(nameof(frame));
@@ -297,12 +316,27 @@ namespace Zergatul.Network.Http
                 }
         }
 
+        private bool ProcessFrame(Frame frame)
+        {
+            switch (frame)
+            {
+                case WindowUpdateFrame wndUpdFrame:
+                    if (wndUpdFrame.Id != 0)
+                        throw new NotImplementedException();
+                    _connection.PeerSettings.InitialWindowSize += wndUpdFrame.Increment;
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
         private void SendHeaders(uint streamId, IEnumerable<Header> headers)
         {
             using (var ms = new MemoryStream())
             {
                 _clientHpack.Encode(ms, headers);
-                _connection.SendFrame(new Headers
+                _connection.SendFrame(new HeadersFrame
                 {
                     END_HEADERS = true,
                     END_STREAM = true,
@@ -315,7 +349,7 @@ namespace Zergatul.Network.Http
         private void SendGoAway(ErrorCode errorCode)
         {
             _isClosed = true;
-            _connection.SendFrame(new GoAway
+            _connection.SendFrame(new GoAwayFrame
             {
                 ErrorCode = errorCode
             });

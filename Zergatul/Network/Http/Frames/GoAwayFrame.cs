@@ -4,7 +4,7 @@ using Zergatul.IO;
 
 namespace Zergatul.Network.Http.Frames
 {
-    class GoAway : Frame
+    class GoAwayFrame : Frame
     {
         public override FrameType Type => FrameType.GOAWAY;
 

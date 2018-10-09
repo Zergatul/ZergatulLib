@@ -8,7 +8,7 @@ using Zergatul.IO;
 
 namespace Zergatul.Network.Http.Frames
 {
-    class Headers : Frame
+    class HeadersFrame : Frame
     {
         public override FrameType Type => FrameType.HEADERS;
 

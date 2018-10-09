@@ -59,7 +59,7 @@ namespace Zergatul.IO
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (StreamHelper.ValidateWriteParameters(buffer, offset, count))
+            if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
                 return;
 
             IncreaseBufferIfNeeded(count);
