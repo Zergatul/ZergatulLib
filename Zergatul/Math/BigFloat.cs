@@ -95,7 +95,7 @@ namespace Zergatul.Math
                     }
                 }
 
-                TruncateMantissaBits();
+                Normalize();
             }
         }
 
@@ -154,9 +154,23 @@ namespace Zergatul.Math
 
         #region Private methods
 
-        private void TruncateMantissaBits()
+        private void Normalize()
         {
+            if (IsZero)
+                return;
 
+            int shift = 0;
+            uint high = _mantissa[0];
+            while ((high & 0x80000000U) == 0)
+            {
+                shift++;
+                high <<= 1;
+            }
+
+            if (shift > 0)
+            {
+
+            }
         }
 
         #endregion
