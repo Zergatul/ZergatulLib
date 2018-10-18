@@ -1,57 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zergatul.Network.Ftp
+﻿namespace Zergatul.Network.Ftp
 {
     public static class FtpCommands
     {
-        public static string USER = "USER";
-        public static string PASS = "PASS";
-        public static string ACCT = "ACCT";
-        public static string CWD = "CWD";
-        public static string CDUP = "CDUP";
-        public static string SMNT = "SMNT";
-        public static string QUIT = "QUIT";
-        public static string REIN = "REIN";
-        public static string PORT = "PORT";
-        public static string PASV = "PASV";
-        public static string TYPE = "TYPE";
-        public static string STRU = "STRU";
-        public static string MODE = "MODE";
-        public static string RETR = "RETR";
-        public static string STOR = "STOR";
-        public static string STOU = "STOU";
-        public static string APPE = "APPE";
-        public static string ALLO = "ALLO";
-        public static string REST = "REST";
-        public static string RNFR = "RNFR";
-        public static string RNTO = "RNTO";
-        public static string ABOR = "ABOR";
-        public static string DELE = "DELE";
-        public static string RMD = "RMD";
-        public static string MKD = "MKD";
-        public static string PWD = "PWD";
-        public static string LIST = "LIST";
-        public static string NLST = "NLST";
-        public static string SITE = "SITE";
-        public static string SYST = "SYST";
-        public static string STAT = "STAT";
-        public static string HELP = "HELP";
-        public static string NOOP = "NOOP";
+        public const string USER = "USER";
+        public const string PASS = "PASS";
+        public const string ACCT = "ACCT";
+        public const string CWD = "CWD";
+        public const string CDUP = "CDUP";
+        public const string SMNT = "SMNT";
+        public const string QUIT = "QUIT";
+        public const string REIN = "REIN";
+        public const string PORT = "PORT";
+        public const string PASV = "PASV";
+        public const string TYPE = "TYPE";
+        public const string STRU = "STRU";
+        public const string MODE = "MODE";
+        public const string RETR = "RETR";
+        public const string STOR = "STOR";
+        public const string STOU = "STOU";
+        public const string APPE = "APPE";
+        public const string ALLO = "ALLO";
+        public const string REST = "REST";
+        public const string RNFR = "RNFR";
+        public const string RNTO = "RNTO";
+        public const string ABOR = "ABOR";
+        public const string DELE = "DELE";
+        public const string RMD = "RMD";
+        public const string MKD = "MKD";
+        public const string PWD = "PWD";
+        public const string LIST = "LIST";
+        public const string NLST = "NLST";
+        public const string SITE = "SITE";
+        public const string SYST = "SYST";
+        public const string STAT = "STAT";
+        public const string HELP = "HELP";
+        public const string NOOP = "NOOP";
 
-        public static string EPRT = "EPRT";
-        public static string EPSV = "EPSV";
-        public static string FEAT = "FEAT";
-        public static string MLST = "MLST";
-        public static string MLSD= "MLSD";
+        public const string EPRT = "EPRT";
+        public const string EPSV = "EPSV";
+        public const string FEAT = "FEAT";
+        public const string OPTS = "OPTS";
+        public const string MLST = "MLST";
+        public const string MLSD = "MLSD";
 
-        public static string AUTH = "AUTH";
-        public static string PROT = "PROT";
-        public static string PBSZ = "PBSZ";
-        public static string CCC = "CCC";
+        public const string AUTH = "AUTH";
+        public const string PROT = "PROT";
+        public const string PBSZ = "PBSZ";
+        public const string CCC = "CCC";
         
     }
 }

@@ -273,6 +273,10 @@
     <Compile Include="Network\Dns\DefaultDnsProvider.cs" />
     <Compile Include="Network\Dns\DnsProvider.cs" />
     <Compile Include="Network\Dns\StaticDnsProvider.cs" />
+    <Compile Include="Network\Ftp\FtpControlStreamWriter.cs" />
+    <Compile Include="Network\Ftp\FtpServer.cs" />
+    <Compile Include="Network\Ftp\FtpServerConnection.cs" />
+    <Compile Include="Network\Ftp\IFtpFileSystemProvider.cs" />
     <Compile Include="Network\Http\ChunkedEncodingException.cs" />
     <Compile Include="Network\Http\DefaultHttpConnectionProvider.cs" />
     <Compile Include="Network\Http\EmptyReponseStream.cs" />
