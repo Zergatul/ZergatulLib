@@ -14,23 +14,31 @@ namespace Zergatul.Network.Ftp
         #region Public properties
 
         public string Greeting { get; set; } = "Zergatul FTP server";
+        public int PassivePortFrom { get; set; } = 50000;
+        public int PassivePortTo { get; set; } = 51000;
 
         #endregion
 
-        private IFtpFileSystemProvider _provider;
+        private IFtpFileSystemProvider _fileSystemProvider;
+
+        private IPEndPoint _localEP;
         private Socket _listener;
         private Thread _thread;
         private List<Client> _clients;
+        private HashSet<int> _occupiedPorts;
 
-        public FtpServer(IFtpFileSystemProvider provider)
+        public FtpServer(IFtpFileSystemProvider fileSystemProvider)
         {
-            this._provider = provider;
+            this._fileSystemProvider = fileSystemProvider;
 
             this._clients = new List<Client>();
+            this._occupiedPorts = new HashSet<int>();
         }
 
-        public void Start(EndPoint localEP)
+        public void Start(IPEndPoint localEP)
         {
+            _localEP = localEP;
+
             _listener = new Socket(SocketType.Stream, ProtocolType.Tcp);
             _listener.Bind(localEP);
             _listener.Listen(10);
@@ -91,40 +99,157 @@ namespace Zergatul.Network.Ftp
                         break;
 
                     case FtpCommands.PASS:
-                        if (client.State == ClientState.WaitPass)
-                        {
-                            client.Connection.WriteReply(FtpReplyCode.UserLoggedIn);
-                            client.State = ClientState.LoggedIn;
-                        }
-                        else
-                        {
-                            client.Connection.WriteReply(FtpReplyCode.BadSequence);
-                        }
+                        OnPass(client, param);
+                        break;
+
+                    case FtpCommands.PASV:
+                        OnPasv(client, param);
                         break;
 
                     case FtpCommands.PWD:
+                        OnPwd(client, param);
+                        break;
+
+                    case FtpCommands.RETR:
+                        OnRetr(client, param);
                         break;
 
                     case FtpCommands.SYST:
-                        client.Connection.WriteReply(FtpReplyCode.SystemType, "win64");
+                        OnSyst(client, param);
+                        break;
+
+                    case FtpCommands.TYPE:
+                        OnType(client, param);
                         break;
 
                     case FtpCommands.USER:
-                        if (client.State == ClientState.Greeting)
-                        {
-                            client.Connection.WriteReply(FtpReplyCode.UserNameOkayNeedPassword);
-                            client.State = ClientState.WaitPass;
-                        }
-                        else
-                        {
-                            client.Connection.WriteReply(FtpReplyCode.BadSequence);
-                        }
+                        OnUser(client, param);
                         break;
 
                     default:
                         throw new NotImplementedException();
                 }
             }
+        }
+
+        private void OnPass(Client client, string password)
+        {
+            if (client.State == ClientState.WaitPass)
+            {
+                client.Connection.WriteReply(FtpReplyCode.UserLoggedIn);
+                client.State = ClientState.LoggedIn;
+            }
+            else
+                WriteBadSequence(client);
+        }
+
+        private void OnPasv(Client client, string param)
+        {
+            if (client.State == ClientState.LoggedIn)
+            {
+                int port = -1;
+                lock (_occupiedPorts)
+                {
+                    for (int i = PassivePortFrom; i < PassivePortTo; i++)
+                        if (!_occupiedPorts.Contains(i))
+                        {
+                            port = i;
+                            _occupiedPorts.Add(port);
+                            break;
+                        }
+                }
+                if (port == -1)
+                    throw new InvalidOperationException();
+
+                if (client.PassiveListener != null)
+                    throw new InvalidOperationException();
+
+                client.PassivePort = port;
+                client.PassiveListener = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                client.PassiveListener.Bind(new IPEndPoint(_localEP.Address, port));
+                client.PassiveListener.Listen(1);
+
+                var localEndPoint = (IPEndPoint)client.Socket.LocalEndPoint;
+                var ip = localEndPoint.Address.GetAddressBytes();
+                string message = $"({ip[0]},{ip[1]},{ip[2]},{ip[3]},{port >> 8},{port & 0xFF})";
+                client.Connection.WriteReply(FtpReplyCode.EnteringPassiveMode, message);
+            }
+            else
+                WriteBadSequence(client);
+        }
+
+        private void OnPwd(Client client, string param)
+        {
+            if (param != null)
+                throw new InvalidOperationException();
+
+            if (client.State == ClientState.LoggedIn)
+                client.Connection.WriteReply(FtpReplyCode.PathnameCreated, _fileSystemProvider.GetCurrentDirectory());
+            else
+                WriteBadSequence(client);
+        }
+
+        private void OnRetr(Client client, string filename)
+        {
+            if (filename == null)
+                throw new InvalidOperationException();
+
+            if (client.State == ClientState.LoggedIn)
+            {
+                if (client.PassiveListener == null)
+                    throw new InvalidOperationException();
+
+                var fileStream = _fileSystemProvider.GetFileStream(filename);
+                if (fileStream == null)
+                    throw new InvalidOperationException();
+
+                try
+                {
+                    client.Connection.WriteReply(FtpReplyCode.FileStatusOkay);
+
+                    using (var socket = client.PassiveListener.Accept())
+                    using (var networkStream = new NetworkStream(socket))
+                        fileStream.CopyTo(networkStream);
+                }
+                finally
+                {
+                    fileStream.Close();
+                }
+
+                client.Connection.WriteReply(FtpReplyCode.ClosingDataConnection);
+
+                client.PassiveListener.Close();
+                lock (_occupiedPorts)
+                    _occupiedPorts.Remove(client.PassivePort);
+            }
+            else
+                WriteBadSequence(client);
+        }
+
+        private void OnSyst(Client client, string param)
+        {
+            client.Connection.WriteReply(FtpReplyCode.SystemType, "win64");
+        }
+
+        private void OnType(Client client, string param)
+        {
+            client.Connection.WriteReply(FtpReplyCode.CommandOkay);
+        }
+
+        private void OnUser(Client client, string user)
+        {
+            if (client.State == ClientState.Greeting)
+            {
+                client.Connection.WriteReply(FtpReplyCode.UserNameOkayNeedPassword);
+                client.State = ClientState.WaitPass;
+            }
+            else
+                WriteBadSequence(client);
+        }
+
+        private void WriteBadSequence(Client client)
+        {
+            client.Connection.WriteReply(FtpReplyCode.BadSequence);
         }
 
         #endregion
@@ -137,6 +262,8 @@ namespace Zergatul.Network.Ftp
             public FtpServerConnection Connection;
             public Thread Thread;
             public ClientState State;
+            public Socket PassiveListener;
+            public int PassivePort;
         }
 
         private enum ClientState
