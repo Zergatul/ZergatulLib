@@ -276,6 +276,8 @@
     <Compile Include="Network\Ftp\FtpControlStreamWriter.cs" />
     <Compile Include="Network\Ftp\FtpServer.cs" />
     <Compile Include="Network\Ftp\FtpServerConnection.cs" />
+    <Compile Include="Network\Ftp\FtpServerFeaturesReply.cs" />
+    <Compile Include="Network\Ftp\IFtpFile.cs" />
     <Compile Include="Network\Ftp\IFtpFileSystemProvider.cs" />
     <Compile Include="Network\Http\ChunkedEncodingException.cs" />
     <Compile Include="Network\Http\DefaultHttpConnectionProvider.cs" />

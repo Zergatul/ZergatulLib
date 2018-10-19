@@ -36,8 +36,11 @@
         public const string HELP = "HELP";
         public const string NOOP = "NOOP";
 
+        // RFC 2428
         public const string EPRT = "EPRT";
         public const string EPSV = "EPSV";
+
+        //
         public const string FEAT = "FEAT";
         public const string OPTS = "OPTS";
         public const string MLST = "MLST";
@@ -47,6 +50,8 @@
         public const string PROT = "PROT";
         public const string PBSZ = "PBSZ";
         public const string CCC = "CCC";
-        
+
+        // RFC 3659
+        public const string SIZE = "SIZE";
     }
 }

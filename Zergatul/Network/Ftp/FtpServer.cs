@@ -92,8 +92,16 @@ namespace Zergatul.Network.Ftp
             while (true)
             {
                 client.Connection.ReadNextCommand(out string command, out string param);
-                switch (command)
+                switch (command.ToUpper())
                 {
+                    case FtpCommands.EPSV:
+                        OnEpsv(client, param);
+                        break;
+
+                    case FtpCommands.FEAT:
+                        OnFeat(client, param);
+                        break;
+
                     case FtpCommands.OPTS:
                         client.Connection.WriteReply(FtpReplyCode.CommandOkay);
                         break;
@@ -114,6 +122,10 @@ namespace Zergatul.Network.Ftp
                         OnRetr(client, param);
                         break;
 
+                    case FtpCommands.SIZE:
+                        OnSize(client, param);
+                        break;
+
                     case FtpCommands.SYST:
                         OnSyst(client, param);
                         break;
@@ -130,6 +142,52 @@ namespace Zergatul.Network.Ftp
                         throw new NotImplementedException();
                 }
             }
+        }
+
+        private void OnEpsv(Client client, string param)
+        {
+            if (param != null)
+                throw new NotImplementedException();
+
+            if (client.State == ClientState.LoggedIn)
+            {
+                int port = -1;
+                lock (_occupiedPorts)
+                {
+                    for (int i = PassivePortFrom; i < PassivePortTo; i++)
+                        if (!_occupiedPorts.Contains(i))
+                        {
+                            port = i;
+                            _occupiedPorts.Add(port);
+                            break;
+                        }
+                }
+                if (port == -1)
+                    throw new InvalidOperationException();
+
+                if (client.PassiveListener != null)
+                    throw new InvalidOperationException();
+
+                client.PassivePort = port;
+                client.PassiveListener = new Socket(SocketType.Stream, ProtocolType.Tcp);
+                client.PassiveListener.Bind(new IPEndPoint(_localEP.Address, port));
+                client.PassiveListener.Listen(1);
+
+                var localEndPoint = (IPEndPoint)client.Socket.LocalEndPoint;
+                var ip = localEndPoint.Address.GetAddressBytes();
+                string message = $"Entering Extended Passive Mode (|||{port}|)";
+                client.Connection.WriteReply(FtpReplyCode.EnteringExtendedPassiveMode, message);
+            }
+            else
+                WriteBadSequence(client);
+        }
+
+        private void OnFeat(Client client, string param)
+        {
+            if (param != null)
+                throw new InvalidOperationException();
+
+            client.Connection.WriteFeatures(new[] { "SIZE", "MDTM", "REST STREAM" });
         }
 
         private void OnPass(Client client, string password)
@@ -199,7 +257,11 @@ namespace Zergatul.Network.Ftp
                 if (client.PassiveListener == null)
                     throw new InvalidOperationException();
 
-                var fileStream = _fileSystemProvider.GetFileStream(filename);
+                var file = _fileSystemProvider.GetFile(filename);
+                if (file == null)
+                    throw new NotImplementedException();
+
+                var fileStream = file.GetStream();
                 if (fileStream == null)
                     throw new InvalidOperationException();
 
@@ -221,6 +283,20 @@ namespace Zergatul.Network.Ftp
                 client.PassiveListener.Close();
                 lock (_occupiedPorts)
                     _occupiedPorts.Remove(client.PassivePort);
+            }
+            else
+                WriteBadSequence(client);
+        }
+
+        private void OnSize(Client client, string filename)
+        {
+            if (client.State == ClientState.LoggedIn)
+            {
+                var file = _fileSystemProvider.GetFile(filename);
+                if (file == null)
+                    throw new NotImplementedException();
+
+                client.Connection.WriteReply(FtpReplyCode.FileStatus, file.GetSize().ToString());
             }
             else
                 WriteBadSequence(client);

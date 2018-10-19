@@ -787,7 +787,7 @@ namespace Zergatul.Network.Ftp
         {
             CheckStateBeforeCommand();
 
-            FtpServerReply reply = SendCommand(FtpCommands.FEAT);
+            var reply = (FtpServerFeaturesReply)SendCommand(FtpCommands.FEAT, null, _controlStreamReader.ReadFeaturesReply);
             CheckReply(reply);
 
             return reply.Message;
@@ -914,14 +914,14 @@ namespace Zergatul.Network.Ftp
             }
         }
 
-        private FtpServerReply SendCommand(string command, string param = null)
+        private FtpServerReply SendCommand(string command, string param = null, Func<FtpServerReply> customReader = null)
         {
             string commandWithParam = command + (string.IsNullOrEmpty(param) ? "" : " " + param);
             var bytes = Encoding.ASCII.GetBytes(commandWithParam  + Constants.TelnetEndOfLine);
             if (Log != null)
                 Log.WriteLine(commandWithParam);
             CommandStream.Write(bytes, 0, bytes.Length);
-            FtpServerReply reply = _controlStreamReader.ReadServerReply();
+            FtpServerReply reply = customReader == null ? _controlStreamReader.ReadServerReply() : customReader();
             if (Log != null)
                 Log.WriteLine(reply.Message);
             return reply;

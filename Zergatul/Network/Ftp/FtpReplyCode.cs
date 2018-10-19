@@ -104,6 +104,8 @@ namespace Zergatul.Network.Ftp
         /// </summary>
         EnteringPassiveMode = 227,
 
+        EnteringExtendedPassiveMode = 229,
+
         /// <summary>
         /// User logged in, proceed.
         /// </summary>

@@ -23,6 +23,16 @@ namespace Zergatul.Network.Ftp
             _writer.WriteReply(new FtpServerReply(code, message));
         }
 
+        public void WriteFeatures(string[] features)
+        {
+            string message =
+                "211-Extensions supported:" + Constants.TelnetEndOfLine +
+                string.Join("", features.Select(f => " " + f + Constants.TelnetEndOfLine)) +
+                "211 END" + Constants.TelnetEndOfLine;
+            byte[] buffer = Encoding.ASCII.GetBytes(message);
+            _stream.Write(buffer, 0, buffer.Length);
+        }
+
         public void ReadNextCommand(out string command, out string param)
         {
             List<char> data = new List<char>();

@@ -5,6 +5,6 @@ namespace Zergatul.Network.Ftp
     public interface IFtpFileSystemProvider
     {
         string GetCurrentDirectory();
-        Stream GetFileStream(string filename);
+        IFtpFile GetFile(string filename);
     }
 }
