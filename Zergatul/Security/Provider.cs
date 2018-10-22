@@ -16,6 +16,8 @@ namespace Zergatul.Security
         private Dictionary<string, GetMessageDigestDelegate> _messageDigests = new Dictionary<string, GetMessageDigestDelegate>();
         protected delegate SecureRandom GetSecureRandomDelegate();
         private Dictionary<string, GetSecureRandomDelegate> _secureRandoms = new Dictionary<string, GetSecureRandomDelegate>();
+        protected delegate SymmetricCipher GetSymmetricCipherDelegate();
+        private Dictionary<string, GetSymmetricCipherDelegate> _symmetricCiphers = new Dictionary<string, GetSymmetricCipherDelegate>();
 
         public KeyDerivationFunction GetKeyDerivationFunction(string algorithm)
         {
@@ -34,6 +36,13 @@ namespace Zergatul.Security
         public SecureRandom GetSecureRandom(string algorithm)
         {
             if (_secureRandoms.TryGetValue(algorithm.ToUpperInvariant(), out GetSecureRandomDelegate getter))
+                return getter();
+            return null;
+        }
+
+        public SymmetricCipher GetSymmetricCipher(string algorithm)
+        {
+            if (_symmetricCiphers.TryGetValue(algorithm.ToUpperInvariant(), out GetSymmetricCipherDelegate getter))
                 return getter();
             return null;
         }
@@ -60,6 +69,14 @@ namespace Zergatul.Security
                 throw new ArgumentNullException(nameof(algorithm));
 
             _secureRandoms.Add(algorithm.ToUpperInvariant(), getter);
+        }
+
+        protected void RegisterSymmetricCipher(string algorithm, GetSymmetricCipherDelegate getter)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            _symmetricCiphers.Add(algorithm.ToUpperInvariant(), getter);
         }
 
         public void UseAsDefault()
@@ -141,6 +158,21 @@ namespace Zergatul.Security
                 var sr = _providers[i].GetSecureRandom(algorithm);
                 if (sr != null)
                     return sr;
+            }
+
+            return null;
+        }
+
+        public static SymmetricCipher GetSymmetricCipherInstance(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            for (int i = 0; i < _providers.Count; i++)
+            {
+                var sc = _providers[i].GetSymmetricCipher(algorithm);
+                if (sc != null)
+                    return sc;
             }
 
             return null;

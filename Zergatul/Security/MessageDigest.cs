@@ -34,9 +34,6 @@ namespace Zergatul.Security
 
         public abstract void Update(byte[] data, int offset, int length);
 
-        public static MessageDigest GetInstance(string algorithm)
-        {
-            return Provider.GetMessageDigestInstance(algorithm);
-        }
+        public static MessageDigest GetInstance(string algorithm) => Provider.GetMessageDigestInstance(algorithm);
     }
 }

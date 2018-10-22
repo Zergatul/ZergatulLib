@@ -19,6 +19,8 @@ namespace Zergatul.Security
             RegisterMessageDigest(MessageDigests.SHA384, () => new SHA384());
             RegisterMessageDigest(MessageDigests.SHA512, () => new SHA512());
             RegisterMessageDigest(MessageDigests.RIPEMD160, () => new RIPEMD160());
+
+            RegisterSymmetricCipher(SymmetricCiphers.AES, () => new AES());
         }
     }
 }

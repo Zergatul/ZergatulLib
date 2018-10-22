@@ -51,7 +51,7 @@ namespace Zergatul.Network.WebSocket
             this.State = ConnectionState.Uninitialized;
 
             this._nonce = new byte[16];
-            this._random = Provider.GetSecureRandomInstance(SecureRandoms.Default);
+            this._random = SecureRandom.GetInstance(SecureRandoms.Default);
 
             InitHttpRequestMessage();
         }
@@ -93,7 +93,7 @@ namespace Zergatul.Network.WebSocket
             if (error == null && !string.Equals(response[HttpResponseHeaders.Upgrade], "websocket", StringComparison.OrdinalIgnoreCase))
                 error = "Invalid upgrade header";
 
-            var md = Provider.GetMessageDigestInstance(MessageDigests.SHA1);
+            var md = MessageDigest.GetInstance(MessageDigests.SHA1);
             byte[] digest = md.Digest(Encoding.ASCII.GetBytes(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"));
             if (error == null && response[HttpResponseHeaders.SecWebSocketAccept] != Convert.ToBase64String(digest))
                 error = "Invalid Sec-WebSocket-Accept header";

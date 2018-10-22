@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -16,6 +17,7 @@ namespace Zergatul.Network.Ftp
         public string Greeting { get; set; } = "Zergatul FTP server";
         public int PassivePortFrom { get; set; } = 50000;
         public int PassivePortTo { get; set; } = 51000;
+        public TextWriter Log { get; set; }
 
         #endregion
 
@@ -75,6 +77,8 @@ namespace Zergatul.Network.Ftp
                 Socket = socket,
                 Connection = new FtpServerConnection(new NetworkStream(socket))
             };
+            if (Log != null)
+                client.Connection.Log = Log;
             lock (_clients)
                 _clients.Add(client);
 
@@ -91,9 +95,28 @@ namespace Zergatul.Network.Ftp
 
             while (true)
             {
-                client.Connection.ReadNextCommand(out string command, out string param);
+                string command, param;
+                try
+                {
+                    client.Connection.ReadNextCommand(out command, out param);
+                }
+                catch (IOException ex)
+                {
+                    if (Log != null)
+                    {
+                        Log.WriteLine(ex.Message);
+                        if (ex.InnerException != null)
+                            Log.WriteLine(ex.InnerException.Message);
+                    }
+                    break;
+                }
+
                 switch (command.ToUpper())
                 {
+                    case FtpCommands.ABOR:
+                        OnAbor(client, param);
+                        break;
+
                     case FtpCommands.EPSV:
                         OnEpsv(client, param);
                         break;
@@ -116,6 +139,10 @@ namespace Zergatul.Network.Ftp
 
                     case FtpCommands.PWD:
                         OnPwd(client, param);
+                        break;
+
+                    case FtpCommands.REST:
+                        OnRest(client, param);
                         break;
 
                     case FtpCommands.RETR:
@@ -144,8 +171,33 @@ namespace Zergatul.Network.Ftp
             }
         }
 
+        private void OnAbor(Client client, string param)
+        {
+            if (param != null)
+                throw new InvalidOperationException();
+
+            if (client.PassiveListener == null)
+            {
+                client.Connection.WriteReply(FtpReplyCode.ClosingDataConnection);
+            }
+            else
+            {
+                client.Connection.WriteReply(FtpReplyCode.ConnectionClosed);
+                CloseDataConnection(client);
+            }
+        }
+
         private void OnEpsv(Client client, string param)
         {
+            if (string.Equals(param, "ALL", StringComparison.InvariantCultureIgnoreCase))
+            {
+                // Upon receipt of an EPSV ALL command, the server MUST reject all data 
+                // connection setup commands other than EPSV(i.e., EPRT, PORT, PASV, et
+                // al.)
+                client.Connection.WriteReply(FtpReplyCode.CommandOkay);
+                return;
+            }
+
             if (param != null)
                 throw new NotImplementedException();
 
@@ -247,6 +299,20 @@ namespace Zergatul.Network.Ftp
                 WriteBadSequence(client);
         }
 
+        private void OnRest(Client client, string param)
+        {
+            if (!long.TryParse(param, out long position))
+                throw new InvalidOperationException();
+
+            if (client.State == ClientState.LoggedIn)
+            {
+                client.Connection.WriteReply(FtpReplyCode.RequestedFileActionPendingInformation);
+                client.RestartPosition = position;
+            }
+            else
+                WriteBadSequence(client);
+        }
+
         private void OnRetr(Client client, string filename)
         {
             if (filename == null)
@@ -256,33 +322,29 @@ namespace Zergatul.Network.Ftp
             {
                 if (client.PassiveListener == null)
                     throw new InvalidOperationException();
+                if (client.DataThread != null)
+                    throw new InvalidOperationException();
 
                 var file = _fileSystemProvider.GetFile(filename);
                 if (file == null)
                     throw new NotImplementedException();
 
-                var fileStream = file.GetStream();
-                if (fileStream == null)
+                var stream = file.GetStream();
+                if (stream == null)
                     throw new InvalidOperationException();
 
-                try
+                client.Connection.WriteReply(FtpReplyCode.FileStatusOkay);
+
+                client.DataThread = new Thread(() =>
                 {
-                    client.Connection.WriteReply(FtpReplyCode.FileStatusOkay);
-
-                    using (var socket = client.PassiveListener.Accept())
-                    using (var networkStream = new NetworkStream(socket))
-                        fileStream.CopyTo(networkStream);
-                }
-                finally
-                {
-                    fileStream.Close();
-                }
-
-                client.Connection.WriteReply(FtpReplyCode.ClosingDataConnection);
-
-                client.PassiveListener.Close();
-                lock (_occupiedPorts)
-                    _occupiedPorts.Remove(client.PassivePort);
+                    if (client.RestartPosition > 0)
+                    {
+                        stream.Position = client.RestartPosition;
+                        client.RestartPosition = 0;
+                    }
+                    WriteToDataConnection(client, stream);
+                });
+                client.DataThread.Start();
             }
             else
                 WriteBadSequence(client);
@@ -328,6 +390,45 @@ namespace Zergatul.Network.Ftp
             client.Connection.WriteReply(FtpReplyCode.BadSequence);
         }
 
+        private void WriteToDataConnection(Client client, Stream fileStream)
+        {
+            try
+            {
+                using (var socket = client.PassiveListener.Accept())
+                using (var networkStream = new NetworkStream(socket))
+                    fileStream.CopyTo(networkStream);
+            }
+            catch (IOException ex)
+            {
+                if (Log != null)
+                {
+                    Log.WriteLine(ex.Message);
+                    if (ex.InnerException != null)
+                        Log.WriteLine(ex.InnerException.Message);
+                }
+                return;
+            }
+            finally
+            {
+                fileStream.Close();
+            }
+
+            CloseDataConnection(client);
+        }
+
+        private void CloseDataConnection(Client client)
+        {
+            client.Connection.WriteReply(FtpReplyCode.ClosingDataConnection);
+
+            client.PassiveListener.Close();
+            client.PassiveListener = null;
+
+            lock (_occupiedPorts)
+                _occupiedPorts.Remove(client.PassivePort);
+
+            client.DataThread = null;
+        }
+
         #endregion
 
         #region Nested classes
@@ -338,8 +439,11 @@ namespace Zergatul.Network.Ftp
             public FtpServerConnection Connection;
             public Thread Thread;
             public ClientState State;
+
             public Socket PassiveListener;
             public int PassivePort;
+            public Thread DataThread;
+            public long RestartPosition;
         }
 
         private enum ClientState

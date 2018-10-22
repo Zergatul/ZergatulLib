@@ -273,7 +273,6 @@
     <Compile Include="Network\Dns\DefaultDnsProvider.cs" />
     <Compile Include="Network\Dns\DnsProvider.cs" />
     <Compile Include="Network\Dns\StaticDnsProvider.cs" />
-    <Compile Include="Network\Ftp\FtpControlStreamWriter.cs" />
     <Compile Include="Network\Ftp\FtpServer.cs" />
     <Compile Include="Network\Ftp\FtpServerConnection.cs" />
     <Compile Include="Network\Ftp\FtpServerFeaturesReply.cs" />
@@ -511,6 +510,7 @@
     <Compile Include="Network\WebSocket\WebSocketClient.cs" />
     <Compile Include="Network\WebSocket\ConnectionState.cs" />
     <Compile Include="Security\BLAKE2Parameters.cs" />
+    <Compile Include="Security\BlockCipherMode.cs" />
     <Compile Include="Security\CubeHashParameters.cs" />
     <Compile Include="Security\Default\BLAKE2s.cs" />
     <Compile Include="Security\Default\BLAKE2b.cs" />
@@ -528,6 +528,7 @@
     <Compile Include="Security\KeyDerivationFunctions.cs" />
     <Compile Include="Security\MDParameters.cs" />
     <Compile Include="Security\MDState.cs" />
+    <Compile Include="Security\OpenSsl\AES.cs" />
     <Compile Include="Security\OpenSsl\MD4.cs" />
     <Compile Include="Security\OpenSsl\PBKDF2.cs" />
     <Compile Include="Security\OpenSsl\Scrypt.cs" />
@@ -552,6 +553,9 @@
     <Compile Include="Security\DefaultProvider.cs" />
     <Compile Include="Security\OpenSsl\AbstractMessageDigest.cs" />
     <Compile Include="Security\OpenSsl\MD5.cs" />
+    <Compile Include="Security\Padding.cs" />
+    <Compile Include="Security\Paddings\PKCS7Padding.cs" />
+    <Compile Include="Security\Paddings\SymmetricPadding.cs" />
     <Compile Include="Security\PBKDF2Base.cs" />
     <Compile Include="Security\PBKDF2Parameters.cs" />
     <Compile Include="Security\Provider.cs" />
@@ -559,6 +563,9 @@
     <Compile Include="Security\ScryptParameters.cs" />
     <Compile Include="Security\SecureRandom.cs" />
     <Compile Include="Security\SecureRandoms.cs" />
+    <Compile Include="Security\SymmetricCipher.cs" />
+    <Compile Include="Security\SymmetricCipherParameters.cs" />
+    <Compile Include="Security\SymmetricCiphers.cs" />
     <Compile Include="StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>

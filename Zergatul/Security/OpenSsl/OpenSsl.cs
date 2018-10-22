@@ -9,15 +9,15 @@ namespace Zergatul.Security.OpenSsl
         private const string libssl = "libssl";
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr CRYPTO_malloc(int num, string file, int line);
+        public static extern IntPtr CRYPTO_malloc(int num, string file, int line);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void CRYPTO_free(IntPtr p);
+        public static extern void CRYPTO_free(IntPtr p);
 
         #region ERR
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static ulong ERR_get_error();
+        public static extern ulong ERR_get_error();
 
         [DllImport(libcrypto, EntryPoint = nameof(ERR_error_string), CallingConvention = CallingConvention.Cdecl)]
         private extern static IntPtr _ERR_error_string(ulong e, byte[] buf);
@@ -44,13 +44,13 @@ namespace Zergatul.Security.OpenSsl
         }
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void MD4_Init(IntPtr ctx);
+        public static extern void MD4_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void MD4_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void MD4_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void MD4_Final(byte[] md, IntPtr ctx);
+        public static extern void MD4_Final(byte[] md, IntPtr ctx);
 
         #endregion
 
@@ -69,13 +69,13 @@ namespace Zergatul.Security.OpenSsl
         }
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void MD5_Init(IntPtr ctx);
+        public static extern void MD5_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void MD5_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void MD5_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void MD5_Final(byte[] md, IntPtr ctx);
+        public static extern void MD5_Final(byte[] md, IntPtr ctx);
 
         #endregion
 
@@ -94,13 +94,13 @@ namespace Zergatul.Security.OpenSsl
         }
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA1_Init(IntPtr ctx);
+        public static extern void SHA1_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA1_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void SHA1_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA1_Final(byte[] md, IntPtr ctx);
+        public static extern void SHA1_Final(byte[] md, IntPtr ctx);
 
         #endregion
 
@@ -120,22 +120,22 @@ namespace Zergatul.Security.OpenSsl
         }
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA224_Init(IntPtr ctx);
+        public static extern void SHA224_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA224_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void SHA224_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA224_Final(byte[] md, IntPtr ctx);
+        public static extern void SHA224_Final(byte[] md, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA256_Init(IntPtr ctx);
+        public static extern void SHA256_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA256_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void SHA256_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA256_Final(byte[] md, IntPtr ctx);
+        public static extern void SHA256_Final(byte[] md, IntPtr ctx);
 
         #endregion
 
@@ -155,22 +155,22 @@ namespace Zergatul.Security.OpenSsl
         }
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA384_Init(IntPtr ctx);
+        public static extern void SHA384_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA384_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void SHA384_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA384_Final(byte[] md, IntPtr ctx);
+        public static extern void SHA384_Final(byte[] md, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA512_Init(IntPtr ctx);
+        public static extern void SHA512_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA512_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void SHA512_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void SHA512_Final(byte[] md, IntPtr ctx);
+        public static extern void SHA512_Final(byte[] md, IntPtr ctx);
 
         #endregion
 
@@ -189,13 +189,13 @@ namespace Zergatul.Security.OpenSsl
         }
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void RIPEMD160_Init(IntPtr ctx);
+        public static extern void RIPEMD160_Init(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void RIPEMD160_Update(IntPtr ctx, byte[] data, int len);
+        public static extern void RIPEMD160_Update(IntPtr ctx, byte[] data, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void RIPEMD160_Final(byte[] md, IntPtr ctx);
+        public static extern void RIPEMD160_Final(byte[] md, IntPtr ctx);
 
         #endregion
 
@@ -223,19 +223,61 @@ namespace Zergatul.Security.OpenSsl
         public const int EVP_PKEY_CTRL_SCRYPT_MAXMEM_BYTES = EVP_PKEY_ALG_CTRL + 13;
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr EVP_PKEY_CTX_new_id(int id, IntPtr e);
+        public static extern IntPtr EVP_CIPHER_CTX_new();
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EVP_PKEY_CTX_ctrl(IntPtr ctx, int keytype, int optype, int cmd, int p1, byte[] p2);
+        public static extern void EVP_CIPHER_CTX_free(IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EVP_PKEY_CTX_ctrl_uint64(IntPtr ctx, int keytype, int optype, int cmd, ulong value);
+        public static extern int EVP_CipherInit_ex(IntPtr ctx, IntPtr type, IntPtr impl, byte[] key, byte[] iv, int enc);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EVP_PKEY_derive(IntPtr ctx, byte[] key, ref int keylen);
+        public static extern int EVP_CIPHER_CTX_set_padding(IntPtr ctx, int padding);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EVP_PBE_scrypt(byte[] pass, int passlen, byte[] salt, int saltlen, ulong N, ulong r, ulong p, ulong maxmem, byte[] key, int keylen);
+        public static extern int EVP_CIPHER_CTX_iv_length(IntPtr ctx);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_CIPHER_CTX_key_length(IntPtr ctx);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_CipherUpdate(IntPtr ctx, byte[] @out, ref int outl, byte[] @in, int inl);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_CipherFinal_ex(IntPtr ctx, byte[] @out, ref int outl);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_aes_128_ecb();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_aes_128_cbc();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_aes_192_ecb();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_aes_192_cbc();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_aes_256_ecb();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_aes_256_cbc();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_PKEY_CTX_new_id(int id, IntPtr e);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_PKEY_CTX_ctrl(IntPtr ctx, int keytype, int optype, int cmd, int p1, byte[] p2);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_PKEY_CTX_ctrl_uint64(IntPtr ctx, int keytype, int optype, int cmd, ulong value);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_PKEY_derive(IntPtr ctx, byte[] key, ref int keylen);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_PBE_scrypt(byte[] pass, int passlen, byte[] salt, int saltlen, ulong N, ulong r, ulong p, ulong maxmem, byte[] key, int keylen);
 
         public static int EVP_PKEY_CTX_set1_pbe_pass(IntPtr ctx, byte[] pass, int passlen)
         {
@@ -297,74 +339,74 @@ namespace Zergatul.Security.OpenSsl
         #region BN_CTX
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr BN_CTX_new();
+        public static extern IntPtr BN_CTX_new();
 
         #endregion
 
         #region BIGNUM
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_is_zero(IntPtr a);
+        public static extern int BN_is_zero(IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_is_one(IntPtr a);
+        public static extern int BN_is_one(IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_is_odd(IntPtr a);
+        public static extern int BN_is_odd(IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr BN_value_one();
+        public static extern IntPtr BN_value_one();
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_rand(IntPtr rnd, int bits, int top, int bottom);
+        public static extern int BN_rand(IntPtr rnd, int bits, int top, int bottom);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_priv_rand(IntPtr rnd, int bits, int top, int bottom);
+        public static extern int BN_priv_rand(IntPtr rnd, int bits, int top, int bottom);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_rand_range(IntPtr rnd, IntPtr range);
+        public static extern int BN_rand_range(IntPtr rnd, IntPtr range);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_priv_rand_range(IntPtr rnd, IntPtr range);
+        public static extern int BN_priv_rand_range(IntPtr rnd, IntPtr range);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_pseudo_rand(IntPtr rnd, int bits, int top, int bottom);
+        public static extern int BN_pseudo_rand(IntPtr rnd, int bits, int top, int bottom);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_pseudo_rand_range(IntPtr rnd, IntPtr range);
+        public static extern int BN_pseudo_rand_range(IntPtr rnd, IntPtr range);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_num_bits(IntPtr a);
+        public static extern int BN_num_bits(IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr BN_new();
+        public static extern IntPtr BN_new();
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void BN_swap(IntPtr a, IntPtr b);
+        public static extern void BN_swap(IntPtr a, IntPtr b);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr BN_bin2bn(byte[] s, int len, IntPtr ret);
+        public static extern IntPtr BN_bin2bn(byte[] s, int len, IntPtr ret);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_bn2bin(IntPtr a, byte[] to);
+        public static extern int BN_bn2bin(IntPtr a, byte[] to);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_sub(IntPtr r, IntPtr a, IntPtr b);
+        public static extern int BN_sub(IntPtr r, IntPtr a, IntPtr b);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_usub(IntPtr r, IntPtr a, IntPtr b);
+        public static extern int BN_usub(IntPtr r, IntPtr a, IntPtr b);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_uadd(IntPtr r, IntPtr a, IntPtr b);
+        public static extern int BN_uadd(IntPtr r, IntPtr a, IntPtr b);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_add(IntPtr r, IntPtr a, IntPtr b);
+        public static extern int BN_add(IntPtr r, IntPtr a, IntPtr b);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static  int BN_mul(IntPtr r, IntPtr a, IntPtr b, IntPtr ctx);
+        public static extern  int BN_mul(IntPtr r, IntPtr a, IntPtr b, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_sqr(IntPtr r, IntPtr a, IntPtr ctx);
+        public static extern int BN_sqr(IntPtr r, IntPtr a, IntPtr ctx);
 
         /// <summary>
         /// sets sign of a BIGNUM
@@ -372,7 +414,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="b">pointer to the BIGNUM object</param>
         /// <param name="n">0 if the BIGNUM b should be positive and a value != 0 otherwise</param>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void BN_set_negative(IntPtr b, int n);
+        public static extern void BN_set_negative(IntPtr b, int n);
 
         /// <summary>
         /// returns 1 if the BIGNUM is negative
@@ -380,58 +422,58 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="b">pointer to the BIGNUM object</param>
         /// <returns>1 if a &lt; 0 and 0 otherwise</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_is_negative(IntPtr b);
+        public static extern int BN_is_negative(IntPtr b);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_div(IntPtr dv, IntPtr rem, IntPtr m, IntPtr d, IntPtr ctx);
+        public static extern int BN_div(IntPtr dv, IntPtr rem, IntPtr m, IntPtr d, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_mul_word(IntPtr a, ulong w);
+        public static extern int BN_mul_word(IntPtr a, ulong w);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_add_word(IntPtr a, ulong w);
+        public static extern int BN_add_word(IntPtr a, ulong w);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_sub_word(IntPtr a, ulong w);
+        public static extern int BN_sub_word(IntPtr a, ulong w);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_set_word(IntPtr a, ulong w);
+        public static extern int BN_set_word(IntPtr a, ulong w);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static ulong BN_get_word(IntPtr a);
+        public static extern ulong BN_get_word(IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_cmp(IntPtr a, IntPtr b);
+        public static extern int BN_cmp(IntPtr a, IntPtr b);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void BN_free(IntPtr a);
+        public static extern void BN_free(IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_is_bit_set(IntPtr a, int n);
+        public static extern int BN_is_bit_set(IntPtr a, int n);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_lshift(IntPtr r, IntPtr a, int n);
+        public static extern int BN_lshift(IntPtr r, IntPtr a, int n);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_lshift1(IntPtr r, IntPtr a);
+        public static extern int BN_lshift1(IntPtr r, IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_exp(IntPtr r, IntPtr a, IntPtr p, IntPtr ctx);
+        public static extern int BN_exp(IntPtr r, IntPtr a, IntPtr p, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_mod_exp(IntPtr r, IntPtr a, IntPtr p, IntPtr m, IntPtr ctx);
+        public static extern int BN_mod_exp(IntPtr r, IntPtr a, IntPtr p, IntPtr m, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_rshift(IntPtr r, IntPtr a, int n);
+        public static extern int BN_rshift(IntPtr r, IntPtr a, int n);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_rshift1(IntPtr r, IntPtr a);
+        public static extern int BN_rshift1(IntPtr r, IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void BN_clear(IntPtr a);
+        public static extern void BN_clear(IntPtr a);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr BN_dup(IntPtr a);
+        public static extern IntPtr BN_dup(IntPtr a);
 
         [DllImport(libcrypto, EntryPoint = nameof(BN_bn2hex), CallingConvention = CallingConvention.Cdecl)]
         private extern static IntPtr _BN_bn2hex(IntPtr a);
@@ -448,16 +490,16 @@ namespace Zergatul.Security.OpenSsl
         }
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_hex2bn(ref IntPtr a, [MarshalAs(UnmanagedType.LPStr)] string str);
+        public static extern int BN_hex2bn(ref IntPtr a, [MarshalAs(UnmanagedType.LPStr)] string str);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int BN_dec2bn(ref IntPtr a, [MarshalAs(UnmanagedType.LPStr)] string str);
+        public static extern int BN_dec2bn(ref IntPtr a, [MarshalAs(UnmanagedType.LPStr)] string str);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr BN_mod_inverse(IntPtr ret, IntPtr a, IntPtr n, IntPtr ctx);
+        public static extern IntPtr BN_mod_inverse(IntPtr ret, IntPtr a, IntPtr n, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr BN_mod_sqrt(IntPtr ret, IntPtr a, IntPtr n, IntPtr ctx);
+        public static extern IntPtr BN_mod_sqrt(IntPtr ret, IntPtr a, IntPtr n, IntPtr ctx);
 
         #endregion
 
@@ -492,7 +534,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="nid">NID of the OID of the curve name</param>
         /// <returns>newly created EC_GROUP object with specified curve or NULL if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr EC_GROUP_new_by_curve_name(int nid);
+        public static extern IntPtr EC_GROUP_new_by_curve_name(int nid);
 
         /// <summary>
         /// Returns the generator of a EC_GROUP object.
@@ -500,7 +542,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="group">EC_GROUP object</param>
         /// <returns>the currently used generator (possibly NULL).</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr EC_GROUP_get0_generator(IntPtr group);
+        public static extern IntPtr EC_GROUP_get0_generator(IntPtr group);
 
         /// <summary>
         /// Compares two EC_GROUP objects
@@ -510,7 +552,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>0 if the groups are equal, 1 if not, or -1 on error</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_GROUP_cmp(IntPtr a, IntPtr b, IntPtr ctx);
+        public static extern int EC_GROUP_cmp(IntPtr a, IntPtr b, IntPtr ctx);
 
         #endregion
 
@@ -529,7 +571,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="group">EC_GROUP the underlying EC_GROUP object</param>
         /// <returns>newly created EC_POINT object or NULL if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr EC_POINT_new(IntPtr group);
+        public static extern IntPtr EC_POINT_new(IntPtr group);
 
         /// <summary>
         /// Sets the affine coordinates of a EC_POINT over GFp
@@ -541,7 +583,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>1 on success and 0 if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_POINT_set_affine_coordinates_GFp(IntPtr group, IntPtr p, IntPtr x, IntPtr y, IntPtr ctx);
+        public static extern int EC_POINT_set_affine_coordinates_GFp(IntPtr group, IntPtr p, IntPtr x, IntPtr y, IntPtr ctx);
 
         /// <summary>
         /// Encodes a EC_POINT object to a octet string
@@ -554,7 +596,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>the length of the encoded octet string or 0 if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_POINT_point2oct(IntPtr group, IntPtr p, PointConversionForm form, byte[] buf, int len, IntPtr ctx);
+        public static extern int EC_POINT_point2oct(IntPtr group, IntPtr p, PointConversionForm form, byte[] buf, int len, IntPtr ctx);
 
         /// <summary>
         /// Decodes a EC_POINT from a octet string
@@ -566,7 +608,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>1 on success and 0 if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_POINT_oct2point(IntPtr group, IntPtr p, byte[] buf, int len, IntPtr ctx);
+        public static extern int EC_POINT_oct2point(IntPtr group, IntPtr p, byte[] buf, int len, IntPtr ctx);
 
         /// <summary>
         /// Compares two EC_POINTs
@@ -577,7 +619,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>1 if the points are not equal, 0 if they are, or -1 on error</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_POINT_cmp(IntPtr group, IntPtr a, IntPtr b, IntPtr ctx);
+        public static extern int EC_POINT_cmp(IntPtr group, IntPtr a, IntPtr b, IntPtr ctx);
 
         /// <summary>
         /// Computes the sum of two EC_POINT
@@ -589,7 +631,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>1 on success and 0 if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_POINT_add(IntPtr group, IntPtr r, IntPtr a, IntPtr b, IntPtr ctx);
+        public static extern int EC_POINT_add(IntPtr group, IntPtr r, IntPtr a, IntPtr b, IntPtr ctx);
 
         /// <summary>
         /// Computes r = generator * n + q * m
@@ -602,7 +644,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>1 on success and 0 if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_POINT_mul(IntPtr group, IntPtr r, IntPtr n, IntPtr q, IntPtr m, IntPtr ctx);
+        public static extern int EC_POINT_mul(IntPtr group, IntPtr r, IntPtr n, IntPtr q, IntPtr m, IntPtr ctx);
 
         #endregion
 
@@ -613,7 +655,7 @@ namespace Zergatul.Security.OpenSsl
         /// </summary>
         /// <returns>EC_KEY object or NULL if an error occurred.</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr EC_KEY_new();
+        public static extern IntPtr EC_KEY_new();
 
         /// <summary>
         /// Sets the EC_GROUP of a EC_KEY object.
@@ -622,7 +664,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="group">EC_GROUP to use in the EC_KEY object (note: the EC_KEY object will use an own copy of the EC_GROUP).</param>
         /// <returns>1 on success and 0 if an error occurred.</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_KEY_set_group(IntPtr key, IntPtr group);
+        public static extern int EC_KEY_set_group(IntPtr key, IntPtr group);
 
         /// <summary>
         /// Verifies that a private and/or public key is valid.
@@ -630,7 +672,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="key">the EC_KEY object</param>
         /// <returns>1 on success and 0 otherwise.</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_KEY_check_key(IntPtr key);
+        public static extern int EC_KEY_check_key(IntPtr key);
 
         /// <summary>
         /// Decodes a EC_KEY public key from a octet string
@@ -641,7 +683,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="ctx">BN_CTX object (optional)</param>
         /// <returns>1 on success and 0 if an error occurred</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int EC_KEY_oct2key(IntPtr key, byte[] buf, int len, IntPtr ctx);
+        public static extern int EC_KEY_oct2key(IntPtr key, byte[] buf, int len, IntPtr ctx);
 
         /// <summary>
         /// Returns the public key of a EC_KEY object.
@@ -649,7 +691,7 @@ namespace Zergatul.Security.OpenSsl
         /// <param name="key">the EC_KEY object</param>
         /// <returns>a EC_POINT object with the public key (possibly NULL)</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public extern static IntPtr EC_KEY_get0_public_key(IntPtr key);
+        public static extern IntPtr EC_KEY_get0_public_key(IntPtr key);
 
         #endregion
 

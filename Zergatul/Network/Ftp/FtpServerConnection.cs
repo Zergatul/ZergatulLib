@@ -9,18 +9,36 @@ namespace Zergatul.Network.Ftp
 {
     public class FtpServerConnection
     {
+        public TextWriter Log { get; set; }
+
         private readonly Stream _stream;
-        private readonly FtpControlStreamWriter _writer;
 
         public FtpServerConnection(Stream stream)
         {
             this._stream = stream;
-            this._writer = new FtpControlStreamWriter(stream);
         }
 
-        public void WriteReply(FtpReplyCode code, string message = null)
+        public void WriteReply(FtpReplyCode reply, string message = null)
         {
-            _writer.WriteReply(new FtpServerReply(code, message));
+            if (message != null)
+            {
+                for (int i = 0; i < message.Length; i++)
+                {
+                    int @char = message[i];
+                    if (@char == 10 || @char == 13)
+                        throw new NotImplementedException();
+                }
+            }
+
+            int code = (int)reply;
+            if (code < 100 || code >= 1000)
+                throw new InvalidOperationException();
+
+            string line = code + " " + (string.IsNullOrEmpty(message) ? reply.ToString() : message) + Constants.TelnetEndOfLine;
+            byte[] buffer = Encoding.ASCII.GetBytes(line);
+            _stream.Write(buffer, 0, buffer.Length);
+
+            Log?.Write(line);
         }
 
         public void WriteFeatures(string[] features)
@@ -29,8 +47,11 @@ namespace Zergatul.Network.Ftp
                 "211-Extensions supported:" + Constants.TelnetEndOfLine +
                 string.Join("", features.Select(f => " " + f + Constants.TelnetEndOfLine)) +
                 "211 END" + Constants.TelnetEndOfLine;
+
             byte[] buffer = Encoding.ASCII.GetBytes(message);
             _stream.Write(buffer, 0, buffer.Length);
+
+            Log?.Write(message);
         }
 
         public void ReadNextCommand(out string command, out string param)
@@ -60,6 +81,8 @@ namespace Zergatul.Network.Ftp
                 command = new string(chars, 0, index);
                 param = new string(chars, index + 1, chars.Length - index - 3);
             }
+
+            Log?.Write(new string(chars));
         }
     }
 }

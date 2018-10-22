@@ -20,7 +20,6 @@
         public const string STOU = "STOU";
         public const string APPE = "APPE";
         public const string ALLO = "ALLO";
-        public const string REST = "REST";
         public const string RNFR = "RNFR";
         public const string RNTO = "RNTO";
         public const string ABOR = "ABOR";
@@ -53,5 +52,6 @@
 
         // RFC 3659
         public const string SIZE = "SIZE";
+        public const string REST = "REST";
     }
 }
