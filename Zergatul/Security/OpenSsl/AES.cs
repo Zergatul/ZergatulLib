@@ -48,7 +48,7 @@ namespace Zergatul.Security.OpenSsl
                 outputLength -= 16;
                 if (_hasLastBlock)
                 {
-                    for (int i = outputLength - 1; i > 0; i--)
+                    for (int i = outputLength - 1; i >= 0; i--)
                         output[16 + i] = output[i];
                     Array.Copy(_buffer, 0, output, 0, 16);
                     outputLength += 16;

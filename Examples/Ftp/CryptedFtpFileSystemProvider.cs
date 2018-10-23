@@ -91,10 +91,12 @@ namespace Zergatul.Examples.Ftp
 
     class CryptedFtpFileSystemProvider : IFtpFileSystemProvider
     {
+        private readonly string _directory;
         private readonly byte[] _key;
 
-        public CryptedFtpFileSystemProvider(byte[] key)
+        public CryptedFtpFileSystemProvider(string directory, byte[] key)
         {
+            _directory = directory;
             _key = key;
         }
 
@@ -105,7 +107,11 @@ namespace Zergatul.Examples.Ftp
 
         public IFtpFile GetFile(string filename)
         {
-            return new CryptedFtpFile(@"", _key);
+            filename = Path.Combine(_directory, filename + ".crypt");
+            if (File.Exists(filename))
+                return new CryptedFtpFile(filename, _key);
+            else
+                return null;
         }
     }
 
@@ -235,6 +241,7 @@ namespace Zergatul.Examples.Ftp
 
             int read = System.Math.Min(_pBufLen - _pBufPos, count);
             Array.Copy(_pBuffer, _pBufPos, buffer, offset, read);
+            _pBufPos += read;
             _position += read;
 
             return read;

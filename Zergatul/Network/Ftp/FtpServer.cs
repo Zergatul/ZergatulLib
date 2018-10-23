@@ -95,6 +95,9 @@ namespace Zergatul.Network.Ftp
 
             while (true)
             {
+                if (client.Socket == null)
+                    break;
+
                 string command, param;
                 try
                 {
@@ -139,6 +142,10 @@ namespace Zergatul.Network.Ftp
 
                     case FtpCommands.PWD:
                         OnPwd(client, param);
+                        break;
+
+                    case FtpCommands.QUIT:
+                        OnQuit(client, param);
                         break;
 
                     case FtpCommands.REST:
@@ -297,6 +304,28 @@ namespace Zergatul.Network.Ftp
                 client.Connection.WriteReply(FtpReplyCode.PathnameCreated, _fileSystemProvider.GetCurrentDirectory());
             else
                 WriteBadSequence(client);
+        }
+
+        private void OnQuit(Client client, string param)
+        {
+            if (param != null)
+                throw new InvalidOperationException();
+
+            if (client.PassiveListener != null)
+            {
+                client.PassiveListener.Close();
+                client.PassiveListener = null;
+
+                lock (_occupiedPorts)
+                    _occupiedPorts.Remove(client.PassivePort);
+            }
+
+            client.Connection.WriteReply(FtpReplyCode.ServiceClosingControlConnection);
+            client.Socket.Close();
+            client.Socket = null;
+
+            lock (_clients)
+                _clients.Remove(client);
         }
 
         private void OnRest(Client client, string param)
