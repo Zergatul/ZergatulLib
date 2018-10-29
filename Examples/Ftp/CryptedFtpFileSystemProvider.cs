@@ -105,8 +105,14 @@ namespace Zergatul.Examples.Ftp
             return ".";
         }
 
+        public bool SetWorkingDirectory(string path)
+        {
+            return true;
+        }
+
         public IFtpFile GetFile(string filename)
         {
+            filename = filename.TrimStart('/');
             filename = Path.Combine(_directory, filename + ".crypt");
             if (File.Exists(filename))
                 return new CryptedFtpFile(filename, _key);

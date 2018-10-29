@@ -120,6 +120,10 @@ namespace Zergatul.Network.Ftp
                         OnAbor(client, param);
                         break;
 
+                    case FtpCommands.CWD:
+                        OnCwd(client, param);
+                        break;
+
                     case FtpCommands.EPSV:
                         OnEpsv(client, param);
                         break;
@@ -192,6 +196,19 @@ namespace Zergatul.Network.Ftp
                 client.Connection.WriteReply(FtpReplyCode.ConnectionClosed);
                 CloseDataConnection(client);
             }
+        }
+
+        private void OnCwd(Client client, string param)
+        {
+            if (client.State == ClientState.LoggedIn)
+            {
+                if (_fileSystemProvider.SetWorkingDirectory(param))
+                    client.Connection.WriteReply(FtpReplyCode.RequestedFileActionOkay);
+                else
+                    client.Connection.WriteReply(FtpReplyCode.RequestedActionNotTakenFileUnavailable2);
+            }
+            else
+                WriteBadSequence(client);
         }
 
         private void OnEpsv(Client client, string param)
@@ -288,7 +305,18 @@ namespace Zergatul.Network.Ftp
 
                 var localEndPoint = (IPEndPoint)client.Socket.LocalEndPoint;
                 var ip = localEndPoint.Address.GetAddressBytes();
-                string message = $"({ip[0]},{ip[1]},{ip[2]},{ip[3]},{port >> 8},{port & 0xFF})";
+                string message;
+                if (localEndPoint.Address.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    message = $"({ip[0]},{ip[1]},{ip[2]},{ip[3]},{port >> 8},{port & 0xFF})";
+                }
+                else if (localEndPoint.Address.IsIPv4MappedToIPv6)
+                {
+                    message = $"({ip[12]},{ip[13]},{ip[14]},{ip[15]},{port >> 8},{port & 0xFF})";
+                }
+                else
+                    throw new InvalidOperationException();
+
                 client.Connection.WriteReply(FtpReplyCode.EnteringPassiveMode, message);
             }
             else
