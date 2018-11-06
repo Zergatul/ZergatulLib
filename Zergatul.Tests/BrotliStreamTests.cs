@@ -122,12 +122,14 @@ namespace Zergatul.Tests
         {
             List<byte> decompressed = new List<byte>();
             byte[] buffer = new byte[1024];
+            long position;
             using (var fs = new FileStream($"BrotliTestCases/{filename}.compressed", FileMode.Open))
             using (var bs = new BrotliStream(fs, System.IO.Compression.CompressionMode.Decompress))
             {
                 int read;
                 while ((read = bs.Read(buffer, 0, buffer.Length)) != 0)
                     decompressed.AddRange(buffer.Take(read));
+                position = bs.Position;
             }
 
             string rawFile = File.Exists($"BrotliTestCases/{filename}.txt") ?
@@ -144,6 +146,8 @@ namespace Zergatul.Tests
             }
             if (rawBytes.Length != decomprs.Length)
                 Assert.Fail("Data length mismatch");
+            if (position != rawBytes.Length)
+                Assert.Fail("Invalid Stream.Position");
         }
     }
 }

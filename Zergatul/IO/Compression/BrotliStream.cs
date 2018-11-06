@@ -5,6 +5,7 @@ using System.IO.Compression;
 namespace Zergatul.IO.Compression
 {
     // https://tools.ietf.org/html/rfc7932
+    // TODO: optimize memory consumption by using ring buffer // just 50% memory effectiveness gain
     public class BrotliStream : Stream
     {
         public Stream BaseStream { get; private set; }
@@ -117,6 +118,7 @@ namespace Zergatul.IO.Compression
         private byte[] _buffer;
         private int _bufferOffset;
         private int _bufferLength;
+        private long _position;
         private State _state;
 
         private int _maxBackwardDistance;
@@ -151,6 +153,7 @@ namespace Zergatul.IO.Compression
             _buffer = new byte[1024];
             _bufferOffset = 0;
             _bufferLength = 0;
+            _position = 0;
             _blocks = new Block[3];
             _state = State.Uninitialized;
         }
@@ -297,8 +300,11 @@ namespace Zergatul.IO.Compression
             }
             _insertCopyBlock.bLen--;
 
-            int insertCode, copyCode;
-            DecodeInsertCopyLengthCode(ReadHuffmanValue(_insertCopyBlock.Trees[_insertCopyBlock.bType]), out insertCode, out copyCode, out _distanceCode);
+            DecodeInsertCopyLengthCode(
+                ReadHuffmanValue(_insertCopyBlock.Trees[_insertCopyBlock.bType]),
+                out int insertCode,
+                out int copyCode,
+                out _distanceCode);
             _insertLength = InsertLengthCodeOffset[insertCode] + _reader.ReadBits(InsertLengthCodeBits[insertCode]);
             _copyLength = CopyLengthCodeOffset[copyCode] + _reader.ReadBits(CopyLengthCodeBits[copyCode]);
 
@@ -858,11 +864,10 @@ namespace Zergatul.IO.Compression
                     if (_bufferOffset < _maxBackwardDistance)
                         throw new InvalidOperationException();
 
-                    for (int i = 0; i < _maxBackwardDistance; i++)
-                        _buffer[i] = _buffer[_maxBackwardDistance + i];
+                    Buffer.BlockCopy(_buffer, _bufferLength - _maxBackwardDistance, _buffer, 0, _maxBackwardDistance);
 
-                    _bufferOffset -= _maxBackwardDistance;
-                    _bufferLength -= _maxBackwardDistance;
+                    _bufferOffset = _maxBackwardDistance - (_bufferLength - _bufferOffset);
+                    _bufferLength = _maxBackwardDistance;
                 }
                 else
                 {
@@ -1100,9 +1105,13 @@ namespace Zergatul.IO.Compression
         public override bool CanRead => true;
         public override bool CanSeek => false;
         public override bool CanWrite => false;
-        public override long Length => throw new NotImplementedException();
+        public override long Length => throw new NotSupportedException();
 
-        public override long Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override long Position
+        {
+            get => _position;
+            set => throw new NotSupportedException();
+        }
 
         public override void Flush()
         {
@@ -1111,12 +1120,12 @@ namespace Zergatul.IO.Compression
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -1164,12 +1173,13 @@ namespace Zergatul.IO.Compression
             int read = System.Math.Min(count, _bufferLength - _bufferOffset);
             Array.Copy(_buffer, _bufferOffset, buffer, offset, read);
             _bufferOffset += read;
+            _position += read;
             return read;
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         #endregion
