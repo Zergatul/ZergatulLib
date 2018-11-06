@@ -74,9 +74,9 @@
     <Content Include="BrotliTestCases\alice29.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="BrotliTestCases\asyoulik">
+    <Content Include="BrotliTestCases\asyoulik.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="BrotliTestCases\empty.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
