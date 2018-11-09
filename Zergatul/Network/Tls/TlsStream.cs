@@ -65,6 +65,7 @@ namespace Zergatul.Network.Tls
     {
         public TlsStreamSettings Settings { get; set; }
         public ConnectionInfo ConnectionInfo { get; private set; }
+        public bool KeepOpen { get; set; }
 
         private Stream _innerStream;
         private RecordMessageStream _messageStream;
@@ -826,6 +827,19 @@ namespace Zergatul.Network.Tls
         private int _readBufferOffset;
         private int _readBufferLength;
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !_isClosed)
+            {
+                WriteAlertCloseNotify();
+                //TODO!!!
+                //ReadRecordMessage(ConnectionState.Closed);
+
+                if (!KeepOpen)
+                    _innerStream.Dispose();
+            }
+        }
+
         public override void Flush()
         {
             
@@ -883,16 +897,6 @@ namespace Zergatul.Network.Tls
             {
                 byte[] chunk = ByteArray.SubArray(data, c * limit, System.Math.Min(limit, count - c * limit));
                 _messageStream.WriteApplicationData(chunk);
-            }
-        }
-
-        public override void Close()
-        {
-            if (!_isClosed)
-            {
-                WriteAlertCloseNotify();
-                //TODO!!!
-                //ReadRecordMessage(ConnectionState.Closed);
             }
         }
 

@@ -43,7 +43,7 @@ namespace Zergatul.Network.Tls
             return result;
         }
 
-        public static TlsStreamSettings Default = new TlsStreamSettings
+        public static TlsStreamSettings Default => new TlsStreamSettings
         {
             SupportExtendedMasterSecret = true,
             ReuseSessions = true,

@@ -31,6 +31,12 @@ namespace Zergatul.IO
         public override bool CanSeek => _stream.CanSeek;
         public override bool CanWrite => _stream.CanWrite;
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                _stream.Dispose();
+        }
+
         public override void Flush()
         {
             if (_bufferPosition != 0)

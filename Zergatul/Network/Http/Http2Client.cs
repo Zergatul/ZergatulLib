@@ -12,6 +12,7 @@ namespace Zergatul.Network.Http
 {
     // TODO
     // implement settings timeout https://tools.ietf.org/html/rfc7540#section-6.5.3
+    // TODO: move http2connection here
     public class Http2Client : IDisposable
     {
         #region Static members
@@ -40,13 +41,13 @@ namespace Zergatul.Network.Http
 
         #endregion
 
-        private bool _disposed;
         private Uri _uri;
         private Proxy.ProxyBase _proxy;
         private Stream _stream;
         private Http2Connection _connection;
+        private State _state;
         private bool _isOpened;
-        private bool _isClosed;
+        private bool _isDisposed;
 
         private Hpack _clientHpack;
         private Hpack _serverHpack;
@@ -76,7 +77,7 @@ namespace Zergatul.Network.Http
         public void Open()
         {
             ThrowIfOpened();
-            ThrowIfClosed();
+            ThrowIfDisposed();
 
             var client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port, _proxy);
             switch (_uri.Scheme)
@@ -112,6 +113,7 @@ namespace Zergatul.Network.Http
         public Http2Response GetResponse(Http2Request request)
         {
             ThrowIfNotOpened();
+            ThrowIfDisposed();
 
             bool valid = !string.IsNullOrEmpty(request.Method);
             if (valid)
@@ -195,16 +197,16 @@ namespace Zergatul.Network.Http
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed)
+            if (_isDisposed)
                 return;
 
             if (disposing)
             {
-                if (_isOpened && !_isClosed)
+                if (_isOpened)
                     SendGoAway(ErrorCode.NO_ERROR);
             }
 
-            _disposed = true;
+            _isDisposed = true;
         }
 
         #endregion
@@ -223,10 +225,10 @@ namespace Zergatul.Network.Http
                 throw new InvalidOperationException();
         }
 
-        private void ThrowIfClosed()
+        private void ThrowIfDisposed()
         {
-            if (_isClosed)
-                throw new InvalidOperationException();
+            if (_isDisposed)
+                throw new ObjectDisposedException(nameof(Http2Client));
         }
 
         private void InitConnection()
@@ -234,52 +236,22 @@ namespace Zergatul.Network.Http
             _connection = new Http2Connection(_stream);
             _connection.Open();
 
+            _state = State.Init;
+
             // Send SETTINGS
-            var settings = new SettingsFrame();
-            settings.Parameters = new Dictionary<SettingParameter, uint>
-            {
-                [SettingParameter.SETTINGS_ENABLE_PUSH] = _enablePush ? 1U : 0U
-            };
-            _connection.SendFrame(settings);
-            _connection.Flush();
-
-            // Receive SETTINGS
-            var frame = _connection.ReadFrame();
-            if (frame.Type != FrameType.SETTINGS)
-            {
-                SendGoAway(ErrorCode.PROTOCOL_ERROR);
-                return;
-            }
-
-            settings = (SettingsFrame)frame;
-            if (settings.ACK)
-            {
-                SendGoAway(ErrorCode.PROTOCOL_ERROR);
-                return;
-            }
-            ApplySettings(settings);
-
-            // Send SETTINGS ACK
             _connection.SendFrame(new SettingsFrame
             {
-                ACK = true
+                Parameters = new Dictionary<SettingParameter, uint>
+                {
+                    [SettingParameter.SETTINGS_ENABLE_PUSH] = _enablePush ? 1U : 0U
+                }
             });
             _connection.Flush();
+            _state |= State.SettingsSend;
 
-            // Receive SETTINGS ACK
-            frame = _connection.ReadFrame();
-            if (frame.Type != FrameType.SETTINGS)
-            {
-                SendGoAway(ErrorCode.PROTOCOL_ERROR);
-                return;
-            }
-
-            settings = (SettingsFrame)frame;
-            if (!settings.ACK)
-            {
-                SendGoAway(ErrorCode.PROTOCOL_ERROR);
-                return;
-            }
+            // wait until we send ACK and receive ACK from server
+            while (!_state.HasFlag(State.Ready))
+                GetAndProcessNextFrame();
         }
 
         private void ApplySettings(SettingsFrame frame)
@@ -316,11 +288,28 @@ namespace Zergatul.Network.Http
                 }
         }
 
+        private void GetAndProcessNextFrame()
+        {
+            var frame = _connection.ReadFrame();
+            if (!ProcessFrame(frame))
+                _frameBuffer.Add(frame);
+        }
+
         private bool ProcessFrame(Frame frame)
         {
             switch (frame)
             {
+                case SettingsFrame settingsFrame:
+                    ProcessSettingsFrame(settingsFrame);
+                    return true;
+
                 case WindowUpdateFrame wndUpdFrame:
+                    if (_state == State.Init)
+                    {
+                        SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                        throw new InvalidOperationException();
+                    }
+
                     if (wndUpdFrame.Id != 0)
                         throw new NotImplementedException();
                     _connection.PeerSettings.InitialWindowSize += wndUpdFrame.Increment;
@@ -329,6 +318,33 @@ namespace Zergatul.Network.Http
                 default:
                     return false;
             }
+        }
+
+        private void ProcessSettingsFrame(SettingsFrame frame)
+        {
+            if (frame.ACK)
+            {
+                if (_state.HasFlag(State.SettingsSend))
+                {
+                    _state &= ~State.SettingsSend;
+                }
+                else
+                {
+                    SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                    throw new InvalidOperationException();
+                }
+            }
+            else
+            {
+                ApplySettings(frame);
+                _connection.SendFrame(new SettingsFrame { ACK = true });
+                _connection.Flush();
+
+                _state &= ~State.Init;
+            }
+
+            if ((_state & (State.Init | State.SettingsSend)) == 0)
+                _state |= State.Ready;
         }
 
         private void SendHeaders(uint streamId, IEnumerable<Header> headers)
@@ -348,13 +364,24 @@ namespace Zergatul.Network.Http
 
         private void SendGoAway(ErrorCode errorCode)
         {
-            _isClosed = true;
             _connection.SendFrame(new GoAwayFrame
             {
                 ErrorCode = errorCode
             });
             _connection.Flush();
             _connection.Close();
+        }
+
+        #endregion
+
+        #region Nested classes
+
+        [Flags]
+        private enum State
+        {
+            Init = 1,
+            SettingsSend = 2,
+            Ready = 4
         }
 
         #endregion
