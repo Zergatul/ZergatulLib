@@ -2,6 +2,7 @@
 {
     public class ConnectionInfo
     {
+        public byte[] SessionId { get; internal set; }
         public CipherSuite? CipherSuite { get; internal set; }
         public byte[] MasterSecret { get; internal set; }
         public bool? ReuseSession { get; internal set; }

@@ -1,25 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Zergatul.Network.Tls
 {
     public class TlsStreamSession
     {
-        public byte[] ID { get; private set; }
-        public byte[] MasterSecret { get; set; }
+        public byte[] ID { get; }
+        public byte[] MasterSecret { get; }
 
-        public TlsStreamSession(byte[] id)
+        public TlsStreamSession(byte[] id, byte[] secret)
         {
-            this.ID = (byte[])id.Clone();
+            if (id == null)
+                throw new ArgumentNullException(nameof(id));
+            if (secret == null)
+                throw new ArgumentNullException(nameof(secret));
+
+            ID = (byte[])id.Clone();
+            MasterSecret = (byte[])secret.Clone();
         }
     }
 
     public class TlsStreamSessions
     {
         public static TlsStreamSessions Instance { get; } = new TlsStreamSessions();
+
+        public event EventHandler<TlsStreamSessionEventArgs> SessionAdded;
+        public event EventHandler<TlsStreamSessionEventArgs> SessionRemoved;
 
         private Dictionary<string, TlsStreamSession> _sessions;
 
@@ -28,29 +34,58 @@ namespace Zergatul.Network.Tls
             _sessions = new Dictionary<string, TlsStreamSession>();
         }
 
-        public TlsStreamSession this[string host]
+        public void Add(string host, TlsStreamSession session)
         {
-            get
+            if (host == null)
+                throw new ArgumentNullException(nameof(host));
+            if (session == null)
+                throw new ArgumentNullException(nameof(session));
+
+            lock (_sessions)
             {
-                TlsStreamSession session;
-                if (_sessions.TryGetValue(host, out session))
+                if (_sessions.ContainsKey(host))
+                    _sessions[host] = session;
+                else
+                    _sessions.Add(host, session);
+            }
+
+            SessionAdded?.Invoke(this, new TlsStreamSessionEventArgs(host, session));
+        }
+
+        public TlsStreamSession Get(string host)
+        {
+            lock (_sessions)
+            {
+                if (_sessions.TryGetValue(host, out TlsStreamSession session))
                     return session;
                 else
                     return null;
             }
         }
 
-        public TlsStreamSession AddSession(string host, byte[] id)
+        public void Remove(string host)
         {
-            if (host == null)
-                return null;
+            TlsStreamSession session = null;
+            lock (_sessions)
+            {
+                if (_sessions.TryGetValue(host, out session))
+                    _sessions.Remove(host);
+            }
 
-            var session = new TlsStreamSession(id);
-            if (_sessions.ContainsKey(host))
-                _sessions[host] = session;
-            else
-                _sessions.Add(host, session);
-            return session;
+            if (session != null)
+                SessionRemoved?.Invoke(this, new TlsStreamSessionEventArgs(host, session));
+        }
+    }
+
+    public class TlsStreamSessionEventArgs : EventArgs
+    {
+        public string Host { get; }
+        public TlsStreamSession Session { get; }
+
+        public TlsStreamSessionEventArgs(string host, TlsStreamSession session)
+        {
+            Host = host;
+            Session = session;
         }
     }
 }

@@ -86,6 +86,7 @@ namespace Zergatul.Network.Tls
         private X509Certificate _serverCertificate;
         private TlsExtension[] _clientExtensions;
         private TlsExtension[] _serverExtensions;
+        private byte[] _sessionId;
         private TlsStreamSession _clientSession;
         private TlsStreamSession _serverSession;
         private bool _reuseSession;
@@ -188,6 +189,11 @@ namespace Zergatul.Network.Tls
             }
 
             _messageStream.ReleaseHandshakeBuffer();
+
+            if (Settings.ReuseSessions && !_reuseSession)
+            {
+                TlsStreamSessions.Instance.Add(host, new TlsStreamSession(_sessionId, SecurityParameters.MasterSecret));
+            }
         }
 
         public void AuthenticateAsServer(string host, X509Certificate certificate = null)
@@ -413,7 +419,7 @@ namespace Zergatul.Network.Tls
                 extensions.AddRange(Settings.Extensions);
 
             if (Settings.ReuseSessions)
-                _clientSession = TlsStreamSessions.Instance[_serverHost];
+                _clientSession = TlsStreamSessions.Instance.Get(_serverHost);
 
             return new HandshakeMessage(SelectedCipher)
             {
@@ -618,16 +624,17 @@ namespace Zergatul.Network.Tls
 
         private void OnServerHello(ServerHello message)
         {
+            /* ConnectionInfo */
             ConnectionInfo.CipherSuite = message.CipherSuite;
+            ConnectionInfo.SessionId = message.SessionID;
+            ConnectionInfo.ReuseSession = false;
+            /* ConnectionInfo */
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
             SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
             _messageStream.SelectedCipher = SelectedCipher;
             SecurityParameters.ServerRandom = message.Random.ToArray();
-
-            /* ConnectionInfo */
-            ConnectionInfo.ReuseSession = false;
-            /* ConnectionInfo */
+            _sessionId = message.SessionID;
 
             if (Role == Role.Client)
             {
@@ -643,6 +650,10 @@ namespace Zergatul.Network.Tls
                         ConnectionInfo.MasterSecret = (byte[])SecurityParameters.MasterSecret.Clone();
                         ConnectionInfo.ReuseSession = true;
                         /* ConnectionInfo */
+                    }
+                    else
+                    {
+                        TlsStreamSessions.Instance.Remove(_serverHost);
                     }
                 }
             }

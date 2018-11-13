@@ -80,10 +80,11 @@ namespace Zergatul.Network.Http
             ThrowIfDisposed();
 
             var client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port, _proxy);
+            Stream stream;
             switch (_uri.Scheme)
             {
                 case "http":
-                    _stream = client.GetStream();
+                    stream = client.GetStream();
                     break;
 
                 case "https":
@@ -92,12 +93,22 @@ namespace Zergatul.Network.Http
                     alpnExtension.ProtocolNames = new[] { "h2" };
                     tls.Settings.Extensions = new Tls.Extensions.TlsExtension[] { alpnExtension };
                     tls.AuthenticateAsClient(_uri.Host);
-                    _stream = new BufferedWriteStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
+                    stream = new BufferedWriteStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
                     break;
 
                 default:
                     throw new InvalidOperationException();
             }
+
+            Open(stream);
+        }
+
+        public void Open(Stream stream)
+        {
+            ThrowIfOpened();
+            ThrowIfDisposed();
+
+            _stream = stream;
 
             InitConnection();
 
