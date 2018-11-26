@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.Tests.BitcoinGold
 {

@@ -9,7 +9,7 @@ namespace Zergatul.Cryptocurrency.Tests
         public void Script_P2PKHTest()
         {
             var script = Script.FromHex("76A91489ABCDEFABBAABBAABBAABBAABBAABBAABBAABBA88AC");
-            Assert.IsTrue(script.IsPayToPublicKeyHash);
+            Assert.IsTrue(script.IsPayToPublicKeyHashRedeem);
         }
     }
 }

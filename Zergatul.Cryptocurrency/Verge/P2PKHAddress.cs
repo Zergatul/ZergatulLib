@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Cryptocurrency.Verge
 {
-    public class P2PKHAddress : P2PKHAddressBase
+    public class P2PKHAddress : Base.P2PKHAddressBase
     {
         private static readonly byte[] Prefix = new byte[] { 0x1E };
 

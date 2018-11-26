@@ -1,4 +1,6 @@
-﻿namespace Zergatul.Cryptocurrency.Zcash
+﻿using Zergatul.Cryptocurrency.Base;
+
+namespace Zergatul.Cryptocurrency.Zcash
 {
     public class ZcashFactory : BlockchainCryptoFactory
     {

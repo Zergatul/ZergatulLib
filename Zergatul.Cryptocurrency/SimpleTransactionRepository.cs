@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency
 {
@@ -21,7 +23,8 @@ namespace Zergatul.Cryptocurrency
                 if (!_transactions.ContainsKey(parts[0]))
                 {
                     var tx = new T();
-                    tx.ParseHex(parts[1]);
+                    if (!tx.TryParseHex(parts[1]))
+                        throw new InvalidOperationException();
                     _transactions.Add(parts[0], tx);
                 }
             }

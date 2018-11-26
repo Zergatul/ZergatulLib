@@ -68,10 +68,8 @@ namespace Zergatul.Cryptocurrency.Ethereum
             if (PrivateKey == null)
                 throw new InvalidOperationException();
 
-            var point = PrivateKey.ToECPoint();
-            byte[] pubKey = new byte[64];
-            Array.Copy(point.ToUncompressed(), 1, pubKey, 0, 64);
-            return pubKey;
+            byte[] pubKey = PrivateKey.ToUncompressedPublicKey();
+            return ByteArray.SubArray(pubKey, 1, 64);
         }
 
         public void FromHash(byte[] hash)

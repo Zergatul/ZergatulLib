@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Zergatul.Security;
 
-namespace Zergatul.Cryptocurrency
+namespace Zergatul.Cryptocurrency.Base
 {
     public abstract class TxInputBase
     {
@@ -17,28 +18,7 @@ namespace Zergatul.Cryptocurrency
         public AddressBase Address { get; set; }
 
         public TransactionBase Transaction { get; set; }
-
-        private TransactionBase _prevTransaction;
-        public TransactionBase PrevTransaction
-        {
-            get
-            {
-                return _prevTransaction;
-            }
-            set
-            {
-                _prevTransaction = value;
-                if (value != null)
-                {
-                    if (PrevTxOutIndex < value.GetOutputs().Count())
-                        PrevOutput = value.GetOutputs().ElementAt(PrevTxOutIndex);
-                    else
-                        PrevOutput = null;
-                }
-                else
-                    PrevOutput = null;
-            }
-        }
+        public TransactionBase PrevTransaction { get; set; }
 
         private TxOutputBase _prevOutput;
         public TxOutputBase PrevOutput
@@ -47,7 +27,7 @@ namespace Zergatul.Cryptocurrency
             {
                 return _prevOutput;
             }
-            private set
+            internal set
             {
                 _prevOutput = value;
                 if (value != null)
@@ -58,6 +38,8 @@ namespace Zergatul.Cryptocurrency
         }
 
         public ulong? Amount { get; private set; }
+
+        internal Script PrevOutputExpandedScript { get; set; }
 
         protected BlockchainCryptoFactory _factory;
 
@@ -99,40 +81,53 @@ namespace Zergatul.Cryptocurrency
             {
                 Script = null;
             }
-            if (Script?.IsPayToPublicKeyHashInput ?? false)
+        }
+
+        internal void ParseAddress()
+        {
+            if (Script?.IsPayToPublicKeyHashInput == true)
             {
                 var addr = _factory.GetP2PKHAddress();
                 addr.FromPublicKey(Script.Code[1].Data);
                 Address = addr;
             }
-        }
-
-        public void Sign()
-        {
-            if (PrevTx?.Length != 32)
-                throw new InvalidOperationException();
-            if (Address is P2PKHAddressBase)
+            if (Script?.IsPayToWitnessPublicKeyHashInput == true)
             {
-                var p2pkh = Address as P2PKHAddressBase;
-                if (p2pkh.PrivateKey == null)
-                    throw new InvalidOperationException();
-
-                byte[] signHash = GetSigHash(SIGHASH_ALL);
-                byte[] signature = p2pkh.PrivateKey.Sign(signHash);
-
-                Script = new Script();
-                Script.Code = new ScriptCode();
-                Script.Code.Add(new ScriptOpcodes.Operator { Data = ByteArray.Concat(signature, new byte[] { 1 }) });
-                Script.Code.Add(new ScriptOpcodes.Operator { Data = p2pkh.ToPublicKey() });
-
-                ScriptRaw = Script.ToBytes();
+                bool segwitOk =
+                   SegWit != null &&
+                   SegWit.Length == 2 &&
+                   SegWit[0].Length == 71 &&
+                   SegWit[1].Length == 33;
+                if (segwitOk)
+                {
+                    var addr = _factory.GetP2WPKHAddress();
+                    addr.FromPublicKey(SegWit[1]);
+                    Address = addr;
+                }
             }
-            else
-                throw new NotImplementedException();
+            if (Script?.IsPayToScriptHashPayToWitnessPublicKeyHashInput == true)
+            {
+                bool segwitOk =
+                    SegWit != null &&
+                    SegWit.Length == 2 &&
+                    SegWit[0].Length == 71 &&
+                    SegWit[1].Length == 33;
+                if (segwitOk)
+                {
+                    var addr = _factory.GetP2SHP2WPKHAddress();
+                    addr.FromScript(Script.Code[0].Data);
+                    Address = addr;
+                }
+            }
         }
 
         public bool Verify()
         {
+            if (PrevTransaction == null)
+                return false;
+
+            PrevOutput = PrevTransaction.GetOutputs().ElementAt(PrevTxOutIndex);
+
             if (PrevOutput == null)
                 return false;
 
@@ -148,11 +143,6 @@ namespace Zergatul.Cryptocurrency
             return PrevOutput.Script.Run(this);
         }
 
-        private const int SIGHASH_ALL = 0x00000001;
-        private const int SIGHASH_NONE = 0x00000002;
-        private const int SIGHASH_SINGLE = 0x00000003;
-        private const int SIGHASH_ANYONECANPAY = 0x00000080;
-
         public virtual byte[] GetSigHash(int hashType)
         {
             if (Transaction == null)
@@ -160,13 +150,13 @@ namespace Zergatul.Cryptocurrency
 
             if (!Transaction.IsSegWit)
             {
-                if ((hashType & 0x31) == SIGHASH_NONE)
+                if ((hashType & 0x31) == SignatureType.SIGHASH_NONE)
                     throw new NotImplementedException();
-                else if ((hashType & 0x31) == SIGHASH_SINGLE)
+                else if ((hashType & 0x31) == SignatureType.SIGHASH_SINGLE)
                     throw new NotImplementedException();
-                else if ((hashType & SIGHASH_ANYONECANPAY) != 0)
+                else if ((hashType & SignatureType.SIGHASH_ANYONECANPAY) != 0)
                     throw new NotImplementedException();
-                else if ((hashType & SIGHASH_ALL) != 0)
+                else if ((hashType & SignatureType.SIGHASH_ALL) != 0)
                 {
                     List<byte> txCopy = new List<byte>();
                     Transaction.SerializeHeader(txCopy);
@@ -200,7 +190,7 @@ namespace Zergatul.Cryptocurrency
                 byte[] hashSequence = null;
                 byte[] hashOutputs = null;
 
-                if ((hashType & SIGHASH_ANYONECANPAY) == 0)
+                if ((hashType & SignatureType.SIGHASH_ANYONECANPAY) == 0)
                 {
                     List<byte> buffer = new List<byte>();
                     foreach (var input in Transaction.GetInputs())
@@ -213,7 +203,7 @@ namespace Zergatul.Cryptocurrency
                 else
                     hashPrevOuts = new byte[32];
 
-                if ((hashType & SIGHASH_ANYONECANPAY) == 0 && (hashType & 0x1f) != SIGHASH_SINGLE && (hashType & 0x1f) != SIGHASH_NONE)
+                if ((hashType & SignatureType.SIGHASH_ANYONECANPAY) == 0 && (hashType & 0x1f) != SignatureType.SIGHASH_SINGLE && (hashType & 0x1f) != SignatureType.SIGHASH_NONE)
                 {
                     List<byte> buffer = new List<byte>();
                     foreach (var input in Transaction.GetInputs())
@@ -225,7 +215,7 @@ namespace Zergatul.Cryptocurrency
                 else
                     hashSequence = new byte[32];
 
-                if ((hashType & 0x1f) != SIGHASH_SINGLE && (hashType & 0x1f) != SIGHASH_NONE)
+                if ((hashType & 0x1f) != SignatureType.SIGHASH_SINGLE && (hashType & 0x1f) != SignatureType.SIGHASH_NONE)
                 {
                     List<byte> buffer = new List<byte>();
                     foreach (var output in Transaction.GetOutputs())
@@ -234,7 +224,7 @@ namespace Zergatul.Cryptocurrency
                     }
                     hashOutputs = DoubleSHA256.Hash(buffer.ToArray());
                 }
-                else if ((hashType & 0x1f) == SIGHASH_SINGLE /*&& nIn < txTo.vout.size()*/)
+                else if ((hashType & 0x1f) == SignatureType.SIGHASH_SINGLE /*&& nIn < txTo.vout.size()*/)
                 {
                     throw new NotImplementedException();
                     //CHashWriter ss(SER_GETHASH, 0);
@@ -246,28 +236,33 @@ namespace Zergatul.Cryptocurrency
 
                 var prevOutput = PrevTransaction.GetOutputs().ElementAt(PrevTxOutIndex);
 
-                var dsha256 = new DoubleSHA256();
+                using (var sha256 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+                {
+                    sha256.Update(BitHelper.GetBytes(Transaction.Version, ByteOrder.LittleEndian));
 
-                dsha256.Update(BitHelper.GetBytes(Transaction.Version, ByteOrder.LittleEndian));
+                    sha256.Update(hashPrevOuts);
+                    sha256.Update(hashSequence);
 
-                dsha256.Update(hashPrevOuts);
-                dsha256.Update(hashSequence);
+                    sha256.Update(PrevTx.Reverse().ToArray());
+                    sha256.Update(BitHelper.GetBytes(PrevTxOutIndex, ByteOrder.LittleEndian));
 
-                dsha256.Update(PrevTx.Reverse().ToArray());
-                dsha256.Update(BitHelper.GetBytes(PrevTxOutIndex, ByteOrder.LittleEndian));
+                    if (PrevOutputExpandedScript == null)
+                        throw new InvalidOperationException();
 
-                byte[] raw = prevOutput.Script.Expand().Raw;
-                dsha256.Update(VarLengthInt.Serialize(raw.Length));
-                dsha256.Update(raw);
+                    byte[] raw = PrevOutputExpandedScript.Raw ?? PrevOutputExpandedScript.ToBytes();
+                    sha256.Update(VarLengthInt.Serialize(raw.Length));
+                    sha256.Update(raw);
 
-                dsha256.Update(BitHelper.GetBytes(prevOutput.Amount, ByteOrder.LittleEndian));
+                    sha256.Update(BitHelper.GetBytes(prevOutput.Amount, ByteOrder.LittleEndian));
 
-                dsha256.Update(BitHelper.GetBytes(SequenceNo, ByteOrder.LittleEndian));
-                dsha256.Update(hashOutputs);
-                dsha256.Update(BitHelper.GetBytes(Transaction.LockTime, ByteOrder.LittleEndian));
-                dsha256.Update(BitHelper.GetBytes(hashType, ByteOrder.LittleEndian));
+                    sha256.Update(BitHelper.GetBytes(SequenceNo, ByteOrder.LittleEndian));
+                    sha256.Update(hashOutputs);
+                    sha256.Update(BitHelper.GetBytes(Transaction.LockTime, ByteOrder.LittleEndian));
+                    sha256.Update(BitHelper.GetBytes(hashType, ByteOrder.LittleEndian));
 
-                return dsha256.ComputeHash();
+                    using (var sha256inner = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+                        return sha256inner.Digest(sha256.Digest());
+                }
             }
         }
 

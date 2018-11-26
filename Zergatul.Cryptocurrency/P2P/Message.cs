@@ -21,9 +21,7 @@ namespace Zergatul.Cryptocurrency.P2P
             SerializePayload(plbuf);
             byte[] payload = plbuf.ToArray();
 
-            var dsha = new DoubleSHA256();
-            dsha.Update(payload);
-            byte[] hash = dsha.ComputeHash();
+            byte[] hash = DoubleSHA256.Hash(payload);
 
             buffer.AddRange(BitHelper.GetBytes(spec.Magic, ByteOrder.LittleEndian));
             buffer.AddRange(Encoding.ASCII.GetBytes(Command));

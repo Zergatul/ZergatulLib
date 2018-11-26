@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Cryptocurrency.Zcash
 {
-    public class P2SHAddress : Cryptocurrency.P2SHAddressBase
+    public class P2SHAddress : Base.P2SHAddressBase
     {
         private static readonly byte[] Prefix = new byte[] { 0x1C, 0xBD };
 

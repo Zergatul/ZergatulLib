@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Zergatul.Cryptocurrency.Bitcoin;
 using Zergatul.Network;
 
-namespace Zergatul.Cryptocurrency
+namespace Zergatul.Cryptocurrency.Base
 {
     public abstract class BlockBase
     {
@@ -57,9 +57,7 @@ namespace Zergatul.Cryptocurrency
             if (index != data.Length)
                 throw new BlockParseException();
 
-            var hash256 = new DoubleSHA256();
-            hash256.Update(data, 0, 80);
-            BlockID = hash256.ComputeHash();
+            BlockID = DoubleSHA256.Hash(data, 0, 80);
             Array.Reverse(BlockID);
         }
 
@@ -77,14 +75,13 @@ namespace Zergatul.Cryptocurrency
             for (int i = 0; i < _txs.Length; i++)
             {
                 _txs[i] = _factory.GetTransaction();
-                _txs[i].Parse(data, ref index);
+                if (!_txs[i].TryParse(data, ref index))
+                    throw new InvalidOperationException();
             }
         }
 
         public bool ValidateMerkleRoot()
         {
-            var hash256 = new DoubleSHA256();
-
             List<byte[]> hashes = new List<byte[]>(_txs.Length);
             for (int i = 0; i < _txs.Length; i++)
             {
@@ -100,10 +97,7 @@ namespace Zergatul.Cryptocurrency
                 {
                     byte[] left = hashes[2 * i];
                     byte[] right = 2 * i + 1 >= hashes.Count ? left : hashes[2 * i + 1];
-                    hash256.Reset();
-                    hash256.Update(left);
-                    hash256.Update(right);
-                    newHashes.Add(hash256.ComputeHash());
+                    newHashes.Add(DoubleSHA256.Hash(left, right));
                 }
                 hashes = newHashes;
             }

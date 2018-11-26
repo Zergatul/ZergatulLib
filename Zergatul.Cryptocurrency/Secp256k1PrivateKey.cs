@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zergatul.Cryptography;
-using Zergatul.Cryptography.Asymmetric;
-using Zergatul.Math;
-using Zergatul.Math.EllipticCurves.PrimeField;
+using Zergatul.Security;
 
 namespace Zergatul.Cryptocurrency
 {
@@ -60,9 +53,24 @@ namespace Zergatul.Cryptocurrency
                 throw new InvalidOperationException();
         }
 
-        public ECPoint ToECPoint()
+        public byte[] ToCompressedPublicKey()
         {
-            return EllipticCurve.secp256k1.GeneratorMultiplication(new BigInteger(_data, ByteOrder.BigEndian));
+            using (var generator = Provider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
+            {
+                generator.Init(new ECKeyPairGeneratorParameters { Curve = Curves.secp256k1 });
+                var publicKey = generator.GetPublicKey(new RawPrivateKey(_data));
+                return generator.Format(publicKey, KeyFormat.Compressed);
+            }
+        }
+
+        public byte[] ToUncompressedPublicKey()
+        {
+            using (var generator = Provider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
+            {
+                generator.Init(new ECKeyPairGeneratorParameters { Curve = Curves.secp256k1 });
+                var publicKey = generator.GetPublicKey(new RawPrivateKey(_data));
+                return generator.Format(publicKey, KeyFormat.Uncompressed);
+            }
         }
 
         public string ToWIF(byte prefix)
@@ -82,11 +90,17 @@ namespace Zergatul.Cryptocurrency
 
         public byte[] Sign(byte[] hash)
         {
-            var ecdsa = new ECPDSA();
-            ecdsa.Parameters = new ECPDSAParameters(Math.EllipticCurves.PrimeField.EllipticCurve.secp256k1);
-            ecdsa.Random = new DefaultSecureRandom();
-            ecdsa.PrivateKey = new ECPPrivateKey(_data);
-            return ecdsa.SignHash(hash);
+            using (var ecdsa = Signature.GetInstance(Signatures.ECDSA))
+            {
+                ecdsa.InitForSign(new RawPrivateKey(_data), new ECDSASignatureParameters
+                {
+                    Curve = Curves.secp256k1,
+                    Random = SecureRandom.GetInstance(SecureRandoms.Default),
+                    LowS = true
+                });
+                ecdsa.Update(hash, 0, hash.Length);
+                return ecdsa.Sign();
+            }
         }
     }
 }

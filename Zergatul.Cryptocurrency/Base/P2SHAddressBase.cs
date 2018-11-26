@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Zergatul.Cryptocurrency
+namespace Zergatul.Cryptocurrency.Base
 {
     /// <summary>
     /// Pay-to-script-hash
     /// </summary>
-    public abstract class P2SHAddressBase : AddressBase
+    public abstract class P2SHAddressBase : Base58AddressBase
     {
         protected BlockchainCryptoFactory _factory;
 
@@ -27,10 +27,7 @@ namespace Zergatul.Cryptocurrency
 
         public void FromScript(byte[] scriptData)
         {
-            var ripesha = new RIPE160SHA256();
-            ripesha.Update(scriptData);
-            byte[] hash = ripesha.ComputeHash();
-            FromScriptHash(hash);
+            FromScriptHash(RIPE160SHA256.Hash(scriptData));
         }
 
         public void FromScriptHash(byte[] hash)
@@ -43,6 +40,26 @@ namespace Zergatul.Cryptocurrency
             var addr = factory.GetP2SHAddress();
             addr.FromScriptHash(Hash);
             return addr;
+        }
+
+        public override Script CreateRedeemScript()
+        {
+            var hash = Hash;
+            if (hash?.Length != 20)
+                throw new InvalidOperationException();
+
+            var script = new Script();
+            script.Code = new ScriptCode();
+            script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_HASH160 });
+            script.Code.Add(new ScriptOpcodes.Operator { Data = hash });
+            script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_EQUAL });
+
+            return script;
+        }
+
+        public override void Sign(TxInputBase input)
+        {
+            throw new NotImplementedException();
         }
     }
 }

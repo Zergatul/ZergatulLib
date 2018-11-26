@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Zergatul.Cryptography.Asymmetric;
-using Zergatul.Math.EllipticCurves.PrimeField;
+using Zergatul.Cryptocurrency.Base;
+using Zergatul.Security;
 
 namespace Zergatul.Cryptocurrency.ScriptOpcodes
 {
@@ -13,8 +11,8 @@ namespace Zergatul.Cryptocurrency.ScriptOpcodes
         public Opcode? Opcode;
         public byte[] Data;
 
-        private static byte[] OP_FALSE = new byte[0];
-        private static byte[] OP_TRUE = new byte[] { 1 };
+        private static readonly byte[] OP_FALSE = new byte[0];
+        private static readonly byte[] OP_TRUE = new byte[] { 1 };
 
         public bool Run(TxInputBase input, Stack<byte[]> stack)
         {
@@ -132,10 +130,7 @@ namespace Zergatul.Cryptocurrency.ScriptOpcodes
                 throw new InvalidOperationException();
 
             byte[] data = stack.Pop();
-
-            var hash160 = new RIPE160SHA256();
-            hash160.Update(data);
-            stack.Push(hash160.ComputeHash());
+            stack.Push(RIPE160SHA256.Hash(data));
         }
 
         private const int SIGHASH_ALL = 0x00000001;
@@ -155,14 +150,15 @@ namespace Zergatul.Cryptocurrency.ScriptOpcodes
             byte[] sigHash = input.GetSigHash(hashType);
             signature = ByteArray.SubArray(signature, 0, signature.Length - 1);
 
-            var curve = EllipticCurve.secp256k1;
-            var ecdsa = new ECPDSA();
-            ecdsa.Parameters = new ECPDSAParameters(curve);
-            ecdsa.PublicKey = new ECPPublicKey(ECPoint.FromBytes(pubkey, curve));
-            if (ecdsa.VerifyHash(sigHash, signature))
-                stack.Push(OP_TRUE);
-            else
-                stack.Push(OP_FALSE);
+            using (var ecdsa = Signature.GetInstance(Signatures.ECDSA))
+            {
+                ecdsa.InitForVerify(new RawPublicKey(pubkey), new ECDSASignatureParameters { Curve = Curves.secp256k1 });
+                ecdsa.Update(sigHash, 0, sigHash.Length);
+                if (ecdsa.Verify(signature))
+                    stack.Push(OP_TRUE);
+                else
+                    stack.Push(OP_FALSE);
+            }
         }
 
         private void OP_CHECKMULTISIG(TxInputBase input, Stack<byte[]> stack)
@@ -186,8 +182,6 @@ namespace Zergatul.Cryptocurrency.ScriptOpcodes
             for (int i = 0; i < count; i++)
                 pubkeys.Add(stack.Pop());
 
-            var curve = EllipticCurve.secp256k1;
-
             while (signatures.Count > 0)
             {
                 byte[] signature = signatures.First();
@@ -199,14 +193,16 @@ namespace Zergatul.Cryptocurrency.ScriptOpcodes
                 bool match = false;
                 for (int i = 0; i < pubkeys.Count; i++)
                 {
-                    var ecdsa = new ECPDSA();
-                    ecdsa.Parameters = new ECPDSAParameters(curve);
-                    ecdsa.PublicKey = new ECPPublicKey(ECPoint.FromBytes(pubkeys[i], curve));
-                    if (ecdsa.VerifyHash(sigHash, signature))
+                    using (var ecdsa = Signature.GetInstance(Signatures.ECDSA))
                     {
-                        match = true;
-                        pubkeys.RemoveAt(i);
-                        break;
+                        ecdsa.InitForVerify(new RawPublicKey(pubkeys[i]), new ECDSASignatureParameters { Curve = Curves.secp256k1 });
+                        ecdsa.Update(sigHash, 0, sigHash.Length);
+                        if (ecdsa.Verify(signature))
+                        {
+                            match = true;
+                            pubkeys.RemoveAt(i);
+                            break;
+                        }
                     }
                 }
 

@@ -1,11 +1,12 @@
 ﻿using System;
+using Zergatul.Security;
 
-namespace Zergatul.Cryptocurrency
+namespace Zergatul.Cryptocurrency.Base
 {
     /// <summary>
     /// Pay-to-pubkey-hash
     /// </summary>
-    public abstract class P2PKHAddressBase : AddressBase
+    public abstract class P2PKHAddressBase : Base58AddressBase
     {
         public Secp256k1PrivateKey PrivateKey { get; set; }
         public bool? IsCompressed { get; set; }
@@ -32,10 +33,7 @@ namespace Zergatul.Cryptocurrency
 
         public void FromPublicKey(byte[] pubkeyData)
         {
-            var ripesha = new RIPE160SHA256();
-            ripesha.Update(pubkeyData);
-            byte[] hash = ripesha.ComputeHash();
-            FromPublicKeyHash(hash);
+            FromPublicKeyHash(RIPE160SHA256.Hash(pubkeyData));
         }
 
         public void FromPublicKeyHash(byte[] hash)
@@ -61,11 +59,10 @@ namespace Zergatul.Cryptocurrency
             if (PrivateKey == null)
                 throw new InvalidOperationException();
 
-            var point = PrivateKey.ToECPoint();
             if (PrivateKey.Compressed)
-                return point.ToCompressed();
+                return PrivateKey.ToCompressedPublicKey();
             else
-                return point.ToUncompressed();
+                return PrivateKey.ToUncompressedPublicKey();
         }
 
         public void FromPrivateKey(Secp256k1PrivateKey key)
@@ -112,6 +109,60 @@ namespace Zergatul.Cryptocurrency
                 var addr = _factory.GetP2PKHAddress();
                 addr.FromPrivateKey(key);
                 return addr;
+            }
+        }
+
+        public override Script CreateRedeemScript()
+        {
+            var hash = Hash;
+            if (hash?.Length != 20)
+                throw new InvalidOperationException();
+
+            var script = new Script();
+            script.Code = new ScriptCode();
+            script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_DUP });
+            script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_HASH160 });
+            script.Code.Add(new ScriptOpcodes.Operator { Data = hash });
+            script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_EQUALVERIFY });
+            script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_CHECKSIG });
+
+            return script;
+        }
+
+        public override void Sign(TxInputBase input)
+        {
+            var tx = input.Transaction;
+            if (tx == null)
+                throw new InvalidOperationException();
+
+            if (PrivateKey == null)
+                throw new InvalidOperationException();
+
+            byte[] pubKey = ToPublicKey();
+            if (pubKey == null)
+                throw new InvalidOperationException();
+
+            byte[] hash = Hash;
+            if (hash?.Length != 20)
+                throw new InvalidOperationException();
+
+            byte[] sigHash = input.GetSigHash(SignatureType.SIGHASH_ALL);
+            byte[] signature = PrivateKey.Sign(sigHash);
+
+            signature = ByteArray.Concat(signature, new byte[] { 0x01 });
+
+            if (tx.IsSegWit)
+            {
+                input.SegWit = new[] { signature, pubKey };
+                input.ScriptRaw = new byte[0];
+            }
+            else
+            {
+                input.Script = new Script();
+                input.Script.Code = new ScriptCode();
+                input.Script.Code.Add(new ScriptOpcodes.Operator { Data = signature });
+                input.Script.Code.Add(new ScriptOpcodes.Operator { Data = pubKey });
+                input.ScriptRaw = input.Script.ToBytes();
             }
         }
     }

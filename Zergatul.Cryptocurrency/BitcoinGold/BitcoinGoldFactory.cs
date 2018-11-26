@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.BitcoinGold
 {
@@ -12,7 +8,7 @@ namespace Zergatul.Cryptocurrency.BitcoinGold
 
         public override BlockBase GetBlock() => null;
         public override TransactionBase GetTransaction() => null;
-        public override Cryptocurrency.P2PKHAddressBase GetP2PKHAddress() => new P2PKHAddress();
-        public override Cryptocurrency.P2SHAddressBase GetP2SHAddress() => new P2SHAddress();
+        public override P2PKHAddressBase GetP2PKHAddress() => new P2PKHAddress();
+        public override P2SHAddressBase GetP2SHAddress() => new P2SHAddress();
     }
 }

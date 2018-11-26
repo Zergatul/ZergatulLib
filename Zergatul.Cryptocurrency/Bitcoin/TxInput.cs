@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.Bitcoin
 {

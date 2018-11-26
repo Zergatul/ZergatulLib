@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.Zcash
 {
@@ -65,9 +66,7 @@ namespace Zergatul.Cryptocurrency.Zcash
             if (index != data.Length)
                 throw new BlockParseException();
 
-            var hash256 = new DoubleSHA256();
-            hash256.Update(data, 0, 80);
-            BlockID = hash256.ComputeHash();
+            BlockID = DoubleSHA256.Hash(data, 0, 80);
             Array.Reverse(BlockID);
         }
     }

@@ -1,4 +1,6 @@
-﻿namespace Zergatul.Cryptocurrency.Verge
+﻿using Zergatul.Cryptocurrency.Base;
+
+namespace Zergatul.Cryptocurrency.Verge
 {
     public class VergeFactory : BlockchainCryptoFactory
     {

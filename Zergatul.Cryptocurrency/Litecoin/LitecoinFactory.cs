@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.Litecoin
 {
@@ -8,7 +8,7 @@ namespace Zergatul.Cryptocurrency.Litecoin
 
         public override BlockBase GetBlock() => new Block();
         public override TransactionBase GetTransaction() => new Transaction();
-        public override Cryptocurrency.P2PKHAddressBase GetP2PKHAddress() => new P2PKHAddress();
-        public override Cryptocurrency.P2SHAddressBase GetP2SHAddress() => new P2SHAddress();
+        public override P2PKHAddressBase GetP2PKHAddress() => new P2PKHAddress();
+        public override P2SHAddressBase GetP2SHAddress() => new P2SHAddress();
     }
 }

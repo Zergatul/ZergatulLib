@@ -73,9 +73,7 @@ namespace Zergatul.Cryptocurrency.P2P
             if (magic != _spec.Magic)
                 throw new InvalidOperationException();
 
-            var dsha256 = new DoubleSHA256();
-            dsha256.Update(message, 24, _length);
-            byte[] hash = dsha256.ComputeHash();
+            byte[] hash = DoubleSHA256.Hash(message, 24, _length);
 
             if (!hash.Take(4).SequenceEqual(message.Skip(20).Take(4)))
                 throw new InvalidOperationException();
@@ -108,6 +106,21 @@ namespace Zergatul.Cryptocurrency.P2P
                     break;
                 case "pong":
                     result = new PongMessage();
+                    break;
+                case "sendheaders":
+                    result = new SendHeadersMessage();
+                    break;
+                case "sendcmpct":
+                    result = new SendCmpctMessage();
+                    break;
+                case "getdata":
+                    result = new GetDataMessage();
+                    break;
+                case "reject":
+                    result = new RejectMessage();
+                    break;
+                case "feefilter":
+                    result = new FeeFilterMessage();
                     break;
                 default:
                     throw new NotImplementedException();

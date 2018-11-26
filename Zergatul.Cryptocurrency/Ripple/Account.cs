@@ -52,10 +52,7 @@ namespace Zergatul.Cryptocurrency.Ripple
             if (key.Length != 33)
                 throw new InvalidOperationException();
 
-            AbstractHash hash = new RIPE160SHA256();
-            hash.Update(key);
-            byte[] accID = hash.ComputeHash();
-
+            byte[] accID = RIPE160SHA256.Hash(key);
             return FromHash(accID);
         }
 

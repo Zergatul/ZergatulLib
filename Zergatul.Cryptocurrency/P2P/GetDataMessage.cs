@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Zergatul.Cryptocurrency.P2P
 {
@@ -11,6 +9,15 @@ namespace Zergatul.Cryptocurrency.P2P
         public override string Command => "getdata";
 
         public InvVect[] Inventory;
+
+        public override void DeserializePayload(byte[] buffer)
+        {
+            int index = 0;
+            Inventory = InvVect.Parse(buffer, ref index);
+
+            if (buffer.Length != index)
+                throw new InvalidOperationException();
+        }
 
         protected override void SerializePayload(List<byte> buffer)
         {
@@ -21,11 +28,6 @@ namespace Zergatul.Cryptocurrency.P2P
                 buffer.AddRange(BitHelper.GetBytes((uint)Inventory[0].Type, ByteOrder.LittleEndian));
                 buffer.AddRange(Inventory[0].Hash.Reverse());
             }
-        }
-
-        public override void DeserializePayload(byte[] buffer)
-        {
-            throw new NotImplementedException();
         }
     }
 }

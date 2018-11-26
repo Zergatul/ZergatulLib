@@ -11,10 +11,7 @@ namespace Zergatul.Cryptocurrency
 
         public static string Encode(byte[] version, byte[] data, char[] symbols)
         {
-            var dsha256 = new DoubleSHA256();
-            dsha256.Update(version);
-            dsha256.Update(data);
-            byte[] hash = dsha256.ComputeHash();
+            byte[] hash = DoubleSHA256.Hash(version, data);
 
             byte[] bytes = new byte[data.Length + 4 + version.Length];
             Array.Copy(version, 0, bytes, 0, version.Length);
@@ -50,9 +47,7 @@ namespace Zergatul.Cryptocurrency
             if (leadingZeros > 0)
                 bytes = ByteArray.Concat(new byte[leadingZeros], bytes);
 
-            var dsha256 = new DoubleSHA256();
-            dsha256.Update(bytes, 0, bytes.Length - 4);
-            byte[] hash = dsha256.ComputeHash();
+            byte[] hash = DoubleSHA256.Hash(bytes, 0, bytes.Length - 4);
 
             for (int i = 0; i < 4; i++)
                 if (bytes[bytes.Length - 4 + i] != hash[i])

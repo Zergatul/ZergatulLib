@@ -1,21 +1,36 @@
-﻿using Zergatul.Cryptography.Hash;
+﻿using Zergatul.Security;
 
 namespace Zergatul.Cryptocurrency
 {
-    internal class DoubleSHA256 : SHA256
+    public static class DoubleSHA256
     {
-        protected override byte[] InternalStateToBytes()
-        {
-            var sha256 = new SHA256();
-            sha256.Update(base.InternalStateToBytes());
-            return sha256.ComputeHash();
-        }
-
         public static byte[] Hash(byte[] data)
         {
-            var dsha256 = new DoubleSHA256();
-            dsha256.Update(data);
-            return dsha256.ComputeHash();
+            using (var sha1 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+            using (var sha2 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+            {
+                return sha2.Digest(sha1.Digest(data));
+            }
+        }
+
+        public static byte[] Hash(byte[] data, int offset, int length)
+        {
+            using (var sha1 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+            using (var sha2 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+            {
+                return sha2.Digest(sha1.Digest(data, offset, length));
+            }
+        }
+
+        public static byte[] Hash(params byte[][] data)
+        {
+            using (var sha1 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+            using (var sha2 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+            {
+                foreach (byte[] array in data)
+                    sha1.Update(array);
+                return sha2.Digest(sha1.Digest());
+            }
         }
     }
 }

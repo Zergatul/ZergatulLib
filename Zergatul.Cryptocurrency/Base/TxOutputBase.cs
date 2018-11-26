@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Zergatul.Cryptocurrency
+namespace Zergatul.Cryptocurrency.Base
 {
     public abstract class TxOutputBase
     {
@@ -40,48 +40,30 @@ namespace Zergatul.Cryptocurrency
             {
                 Script = null;
             }
-            if (Script?.IsPayToPublicKeyHash == true)
+            if (Script?.IsPayToPublicKeyHashRedeem == true)
             {
                 var addr = _factory.GetP2PKHAddress();
                 addr.FromPublicKeyHash(Script.Code[2].Data);
                 Address = addr;
             }
-            if (Script?.IsPayToPublicKey == true)
+            if (Script?.IsPayToPublicKeyRedeem == true)
             {
                 var addr = _factory.GetP2PKAddress();
                 addr.FromPublicKey(Script.Code[0].Data);
                 Address = addr;
             }
-            if (Script?.IsPayToScriptHash == true)
+            if (Script?.IsPayToScriptHashRedeem == true)
             {
                 var addr = _factory.GetP2SHAddress();
                 addr.FromScriptHash(Script.Code[1].Data);
                 Address = addr;
             }
-        }
-
-        public void CreateScript()
-        {
-            if (Address == null)
-                throw new InvalidOperationException();
-            if (Address is P2PKHAddressBase)
+            if (Script?.IsPayToWitnessPublicKeyHashRedeem == true)
             {
-                var p2pkh = Address as P2PKHAddressBase;
-                if (p2pkh.Hash?.Length != 20)
-                    throw new InvalidOperationException();
-
-                Script = new Script();
-                Script.Code = new ScriptCode();
-                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_DUP });
-                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_HASH160 });
-                Script.Code.Add(new ScriptOpcodes.Operator { Data = p2pkh.Hash });
-                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_EQUALVERIFY });
-                Script.Code.Add(new ScriptOpcodes.Operator { Opcode = ScriptOpcodes.Opcode.OP_CHECKSIG });
-
-                ScriptRaw = Script.ToBytes();
+                var addr = _factory.GetP2WPKHAddress();
+                addr.FromHash(Script.Code[1].Data);
+                Address = addr;
             }
-            else
-                throw new NotImplementedException();
         }
 
         public void Serialize(List<byte> bytes)

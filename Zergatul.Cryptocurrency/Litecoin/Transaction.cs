@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.Litecoin
 {
@@ -26,14 +24,14 @@ namespace Zergatul.Cryptocurrency.Litecoin
             throw new NotImplementedException();
         }
 
-        public override void Parse(byte[] data, ref int index)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void Sign()
         {
             throw new System.NotImplementedException();
+        }
+
+        public override bool TryParse(byte[] data, ref int index)
+        {
+            throw new NotImplementedException();
         }
     }
 }

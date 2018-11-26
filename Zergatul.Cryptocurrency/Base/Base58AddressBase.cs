@@ -1,14 +1,11 @@
 ﻿using System;
 
-namespace Zergatul.Cryptocurrency
+namespace Zergatul.Cryptocurrency.Base
 {
-    public abstract class AddressBase
+    public abstract class Base58AddressBase : AddressBase
     {
-        protected string _value = "[Invalid address]";
-
         protected abstract byte[] _prefix { get; }
 
-        public string Value => _value;
         public byte[] Hash => GetHash();
 
         protected virtual byte[] GetHash()
@@ -39,11 +36,6 @@ namespace Zergatul.Cryptocurrency
                 return false;
 
             return true;
-        }
-
-        public override string ToString()
-        {
-            return _value;
         }
     }
 }
