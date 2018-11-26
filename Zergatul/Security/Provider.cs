@@ -12,16 +12,27 @@ namespace Zergatul.Security
 
         protected delegate KeyDerivationFunction GetKeyDerivationFunctionDelegate();
         private Dictionary<string, GetKeyDerivationFunctionDelegate> _keyDerivationFunctions = new Dictionary<string, GetKeyDerivationFunctionDelegate>();
+        protected delegate KeyPairGenerator GetKeyPairGeneratorDelegate();
+        private Dictionary<string, GetKeyPairGeneratorDelegate> _keyPairGenerators = new Dictionary<string, GetKeyPairGeneratorDelegate>();
         protected delegate MessageDigest GetMessageDigestDelegate();
         private Dictionary<string, GetMessageDigestDelegate> _messageDigests = new Dictionary<string, GetMessageDigestDelegate>();
         protected delegate SecureRandom GetSecureRandomDelegate();
         private Dictionary<string, GetSecureRandomDelegate> _secureRandoms = new Dictionary<string, GetSecureRandomDelegate>();
+        protected delegate Signature GetSignatureDelegate();
+        private Dictionary<string, GetSignatureDelegate> _signatures = new Dictionary<string, GetSignatureDelegate>();
         protected delegate SymmetricCipher GetSymmetricCipherDelegate();
         private Dictionary<string, GetSymmetricCipherDelegate> _symmetricCiphers = new Dictionary<string, GetSymmetricCipherDelegate>();
 
         public KeyDerivationFunction GetKeyDerivationFunction(string algorithm)
         {
             if (_keyDerivationFunctions.TryGetValue(algorithm.ToUpperInvariant(), out GetKeyDerivationFunctionDelegate getter))
+                return getter();
+            return null;
+        }
+
+        public KeyPairGenerator GetKeyPairGenerator(string algorithm)
+        {
+            if (_keyPairGenerators.TryGetValue(algorithm.ToUpperInvariant(), out GetKeyPairGeneratorDelegate getter))
                 return getter();
             return null;
         }
@@ -36,6 +47,13 @@ namespace Zergatul.Security
         public SecureRandom GetSecureRandom(string algorithm)
         {
             if (_secureRandoms.TryGetValue(algorithm.ToUpperInvariant(), out GetSecureRandomDelegate getter))
+                return getter();
+            return null;
+        }
+
+        public Signature GetSignature(string algorithm)
+        {
+            if (_signatures.TryGetValue(algorithm.ToUpperInvariant(), out GetSignatureDelegate getter))
                 return getter();
             return null;
         }
@@ -55,6 +73,14 @@ namespace Zergatul.Security
             _keyDerivationFunctions.Add(algorithm.ToUpperInvariant(), getter);
         }
 
+        protected void RegisterKeyPairGenerator(string algorithm, GetKeyPairGeneratorDelegate getter)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            _keyPairGenerators.Add(algorithm.ToUpperInvariant(), getter);
+        }
+
         protected void RegisterMessageDigest(string algorithm, GetMessageDigestDelegate getter)
         {
             if (string.IsNullOrEmpty(algorithm))
@@ -69,6 +95,14 @@ namespace Zergatul.Security
                 throw new ArgumentNullException(nameof(algorithm));
 
             _secureRandoms.Add(algorithm.ToUpperInvariant(), getter);
+        }
+
+        protected void RegisterSignature(string algorithm, GetSignatureDelegate getter)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            _signatures.Add(algorithm.ToUpperInvariant(), getter);
         }
 
         protected void RegisterSymmetricCipher(string algorithm, GetSymmetricCipherDelegate getter)
@@ -133,6 +167,21 @@ namespace Zergatul.Security
             return null;
         }
 
+        public static KeyPairGenerator GetKeyPairGeneratorInstance(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            for (int i = 0; i < _providers.Count; i++)
+            {
+                var kpg = _providers[i].GetKeyPairGenerator(algorithm);
+                if (kpg != null)
+                    return kpg;
+            }
+
+            return null;
+        }
+
         public static MessageDigest GetMessageDigestInstance(string algorithm)
         {
             if (string.IsNullOrEmpty(algorithm))
@@ -158,6 +207,21 @@ namespace Zergatul.Security
                 var sr = _providers[i].GetSecureRandom(algorithm);
                 if (sr != null)
                     return sr;
+            }
+
+            return null;
+        }
+
+        public static Signature GetSignatureInstance(string algorithm)
+        {
+            if (string.IsNullOrEmpty(algorithm))
+                throw new ArgumentNullException(nameof(algorithm));
+
+            for (int i = 0; i < _providers.Count; i++)
+            {
+                var signature = _providers[i].GetSignature(algorithm);
+                if (signature != null)
+                    return signature;
             }
 
             return null;

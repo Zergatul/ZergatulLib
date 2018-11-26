@@ -11,6 +11,8 @@ namespace Zergatul.Security
             RegisterKeyDerivationFunction(KeyDerivationFunctions.PBKDF2, () => new PBKDF2());
             RegisterKeyDerivationFunction(KeyDerivationFunctions.Scrypt, () => new Scrypt());
 
+            RegisterKeyPairGenerator(KeyPairGenerators.EC, () => new ECKeyPairGenerator());
+
             RegisterMessageDigest(MessageDigests.MD4, () => new MD4());
             RegisterMessageDigest(MessageDigests.MD5, () => new MD5());
             RegisterMessageDigest(MessageDigests.SHA1, () => new SHA1());
@@ -19,6 +21,8 @@ namespace Zergatul.Security
             RegisterMessageDigest(MessageDigests.SHA384, () => new SHA384());
             RegisterMessageDigest(MessageDigests.SHA512, () => new SHA512());
             RegisterMessageDigest(MessageDigests.RIPEMD160, () => new RIPEMD160());
+
+            RegisterSignature(Signatures.ECDSA, () => new ECDSASignature());
 
             RegisterSymmetricCipher(SymmetricCiphers.AES, () => new AES());
         }

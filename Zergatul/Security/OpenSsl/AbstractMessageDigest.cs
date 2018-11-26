@@ -40,9 +40,15 @@ namespace Zergatul.Security.OpenSsl
 
         protected abstract void DoFinal(byte[] digest);
 
-        ~AbstractMessageDigest()
+        protected override void Dispose(bool disposing)
         {
+            if (_disposed)
+                return;
+
             OpenSsl.CRYPTO_free(_context);
+            _context = IntPtr.Zero;
+
+            base.Dispose(disposing);
         }
     }
 }

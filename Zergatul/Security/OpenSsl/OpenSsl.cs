@@ -341,6 +341,9 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr BN_CTX_new();
 
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void BN_CTX_free(IntPtr c);
+
         #endregion
 
         #region BIGNUM
@@ -378,12 +381,21 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int BN_num_bits(IntPtr a);
 
+        public static int BN_num_bytes(IntPtr a) => (BN_num_bits(a) + 7) / 8;
+
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr BN_new();
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern void BN_swap(IntPtr a, IntPtr b);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="len"></param>
+        /// <param name="ret"></param>
+        /// <returns>the BIGNUM, NULL on error</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr BN_bin2bn(byte[] s, int len, IntPtr ret);
 
@@ -424,8 +436,17 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int BN_is_negative(IntPtr b);
 
+        /// <summary>
+        /// Divides a by d and places the result in dv and the remainder in rem (dv=a/d, rem=a%d). 
+        /// </summary>
+        /// <param name="dv"></param>
+        /// <param name="rem"></param>
+        /// <param name="a"></param>
+        /// <param name="d"></param>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int BN_div(IntPtr dv, IntPtr rem, IntPtr m, IntPtr d, IntPtr ctx);
+        public static extern int BN_div(IntPtr dv, IntPtr rem, IntPtr a, IntPtr d, IntPtr ctx);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int BN_mul_word(IntPtr a, ulong w);
@@ -466,6 +487,12 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int BN_rshift(IntPtr r, IntPtr a, int n);
 
+        /// <summary>
+        /// Shifts a right by one and places the result in r (r=a/2).
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="a"></param>
+        /// <returns></returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int BN_rshift1(IntPtr r, IntPtr a);
 
@@ -495,6 +522,14 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int BN_dec2bn(ref IntPtr a, [MarshalAs(UnmanagedType.LPStr)] string str);
 
+        /// <summary>
+        /// Computes the inverse of a modulo n places the result in r ((a*r)%n==1). If r is NULL, a new BIGNUM is created.
+        /// </summary>
+        /// <param name="ret"></param>
+        /// <param name="a"></param>
+        /// <param name="n"></param>
+        /// <param name="ctx"></param>
+        /// <returns>the BIGNUM containing the inverse, and NULL on error.</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr BN_mod_inverse(IntPtr ret, IntPtr a, IntPtr n, IntPtr ctx);
 
@@ -545,6 +580,14 @@ namespace Zergatul.Security.OpenSsl
         public static extern IntPtr EC_GROUP_get0_generator(IntPtr group);
 
         /// <summary>
+        /// Gets the order of an EC_GROUP
+        /// </summary>
+        /// <param name="group">EC_GROUP object</param>
+        /// <returns>the group order</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EC_GROUP_get0_order(IntPtr group);
+
+        /// <summary>
         /// Compares two EC_GROUP objects
         /// </summary>
         /// <param name="a">first EC_GROUP object</param>
@@ -574,6 +617,13 @@ namespace Zergatul.Security.OpenSsl
         public static extern IntPtr EC_POINT_new(IntPtr group);
 
         /// <summary>
+        /// Frees a EC_POINT object.
+        /// </summary>
+        /// <param name="point">EC_POINT object to be freed</param>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void EC_POINT_free(IntPtr point);
+
+        /// <summary>
         /// Sets the affine coordinates of a EC_POINT over GFp
         /// </summary>
         /// <param name="group">underlying EC_GROUP object</param>
@@ -599,7 +649,7 @@ namespace Zergatul.Security.OpenSsl
         public static extern int EC_POINT_point2oct(IntPtr group, IntPtr p, PointConversionForm form, byte[] buf, int len, IntPtr ctx);
 
         /// <summary>
-        /// Decodes a EC_POINT from a octet string
+        /// Decodes a EC_POINT from a octet string.
         /// </summary>
         /// <param name="group">underlying EC_GROUP object</param>
         /// <param name="p">EC_POINT object</param>
@@ -646,6 +696,18 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int EC_POINT_mul(IntPtr group, IntPtr r, IntPtr n, IntPtr q, IntPtr m, IntPtr ctx);
 
+        /// <summary>
+        /// Gets the affine coordinates of a EC_POINT over GFp
+        /// </summary>
+        /// <param name="group">underlying EC_GROUP object</param>
+        /// <param name="p">EC_POINT object</param>
+        /// <param name="x">BIGNUM for the x-coordinate</param>
+        /// <param name="y">BIGNUM for the y-coordinate</param>
+        /// <param name="ctx">BN_CTX object (optional)</param>
+        /// <returns>1 on success and 0 if an error occurred</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EC_POINT_get_affine_coordinates_GFp(IntPtr group, IntPtr p, IntPtr x, IntPtr y, IntPtr ctx);
+
         #endregion
 
         #region EC_KEY
@@ -658,24 +720,65 @@ namespace Zergatul.Security.OpenSsl
         public static extern IntPtr EC_KEY_new();
 
         /// <summary>
+        /// Creates a new EC_KEY object using a named curve as underlying EC_GROUP object.
+        /// </summary>
+        /// <param name="nid">NID of the named curve</param>
+        /// <returns>EC_KEY object or NULL if an error occurred</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EC_KEY_new_by_curve_name(int nid);
+
+        /// <summary>
+        /// Frees a EC_KEY object.
+        /// </summary>
+        /// <param name="key">EC_KEY object to be freed</param>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void EC_KEY_free(IntPtr key);
+
+        /// <summary>
+        /// Returns the EC_GROUP object of a EC_KEY object.
+        /// </summary>
+        /// <param name="key">EC_KEY object</param>
+        /// <returns>the EC_GROUP object (possibly NULL)</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EC_KEY_get0_group(IntPtr key);
+
+        /// <summary>
         /// Sets the EC_GROUP of a EC_KEY object.
         /// </summary>
         /// <param name="key">EC_KEY object</param>
-        /// <param name="group">EC_GROUP to use in the EC_KEY object (note: the EC_KEY object will use an own copy of the EC_GROUP).</param>
+        /// <param name="group">EC_GROUP to use in the EC_KEY object (note: the EC_KEY object will use an own copy of the EC_GROUP)</param>
         /// <returns>1 on success and 0 if an error occurred.</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int EC_KEY_set_group(IntPtr key, IntPtr group);
 
         /// <summary>
+        /// Sets the private key of a EC_KEY object.
+        /// </summary>
+        /// <param name="key">EC_KEY object</param>
+        /// <param name="prv">BIGNUM with the private key (note: the EC_KEY object will use an own copy of the BIGNUM)</param>
+        /// <returns>1 on success and 0 if an error occurred</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EC_KEY_set_private_key(IntPtr key, IntPtr prv);
+
+        /// <summary>
+        /// Sets the public key of a EC_KEY object.
+        /// </summary>
+        /// <param name="key">EC_KEY object</param>
+        /// <param name="pub">EC_POINT object with the public key (note: the EC_KEY object will use an own copy of the EC_POINT object)</param>
+        /// <returns>1 on success and 0 if an error occurred</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EC_KEY_set_public_key(IntPtr key, IntPtr pub);
+
+        /// <summary>
         /// Verifies that a private and/or public key is valid.
         /// </summary>
         /// <param name="key">the EC_KEY object</param>
-        /// <returns>1 on success and 0 otherwise.</returns>
+        /// <returns>1 on success and 0 otherwise</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int EC_KEY_check_key(IntPtr key);
 
         /// <summary>
-        /// Decodes a EC_KEY public key from a octet string
+        /// Decodes a EC_KEY public key from a octet string.
         /// </summary>
         /// <param name="key">key to decode</param>
         /// <param name="buf">memory buffer with the encoded ec point</param>
@@ -692,6 +795,95 @@ namespace Zergatul.Security.OpenSsl
         /// <returns>a EC_POINT object with the public key (possibly NULL)</returns>
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EC_KEY_get0_public_key(IntPtr key);
+
+        #endregion
+
+        #region ECDSA
+
+        /// <summary>
+        /// Allocates and initialize a ECDSA_SIG structure
+        /// </summary>
+        /// <returns>pointer to a ECDSA_SIG structure or NULL if an error occurred</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr ECDSA_SIG_new();
+
+        /// <summary>
+        /// Frees a ECDSA_SIG structure
+        /// </summary>
+        /// <param name="sig">pointer to the ECDSA_SIG structure</param>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ECDSA_SIG_free(IntPtr sig);
+
+        /// <summary>
+        /// DER encode content of ECDSA_SIG object (note: this function modifies *pp (*pp += length of the DER encoded signature)).
+        /// </summary>
+        /// <param name="sig">pointer to the ECDSA_SIG object</param>
+        /// <param name="pp">pointer to a unsigned char pointer for the output or NULL</param>
+        /// <returns>the length of the DER encoded ECDSA_SIG object or 0</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int i2d_ECDSA_SIG(IntPtr sig, ref IntPtr pp);
+
+        /// <summary>
+        /// Decodes a DER encoded ECDSA signature (note: this function changes *pp (*pp += len)).
+        /// </summary>
+        /// <param name="sig">pointer to ECDSA_SIG pointer (may be NULL)</param>
+        /// <param name="pp">memory buffer with the DER encoded signature</param>
+        /// <param name="len">length of the buffer</param>
+        /// <returns>pointer to the decoded ECDSA_SIG structure (or NULL)</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr d2i_ECDSA_SIG(IntPtr sig, ref IntPtr pp, int len);
+
+        /// <summary>
+        /// Accessor for r and s fields of ECDSA_SIG
+        /// </summary>
+        /// <param name="sig">pointer to ECDSA_SIG pointer</param>
+        /// <param name="pr">pointer to BIGNUM pointer for r (may be NULL)</param>
+        /// <param name="ps">pointer to BIGNUM pointer for s (may be NULL)</param>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void ECDSA_SIG_get0(IntPtr sig, ref IntPtr pr, ref IntPtr ps);
+
+        /// <summary>
+        /// Setter for r and s fields of ECDSA_SIG
+        /// </summary>
+        /// <param name="sig">pointer to ECDSA_SIG pointer</param>
+        /// <param name="r">pointer to BIGNUM for r (may be NULL)</param>
+        /// <param name="s">pointer to BIGNUM for s (may be NULL)</param>
+        /// <returns>1 on success or 0 on failure</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ECDSA_SIG_set0(IntPtr sig, IntPtr r, IntPtr s);
+
+        /// <summary>
+        /// Computes the ECDSA signature of the given hash value using the supplied private key and returns the created signature.
+        /// </summary>
+        /// <param name="dgst">pointer to the hash value</param>
+        /// <param name="dgst_len">length of the hash value</param>
+        /// <param name="eckey">EC_KEY object containing a private EC key</param>
+        /// <returns>pointer to a ECDSA_SIG structure or NULL if an error occurred</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr ECDSA_do_sign(byte[] dgst, int dgst_len, IntPtr eckey);
+
+        /// <summary>
+        /// Computes ECDSA signature of a given hash value using the supplied private key (note: sig must point to ECDSA_size(eckey) bytes of memory).
+        /// </summary>
+        /// <param name="dgst">pointer to the hash value to sign</param>
+        /// <param name="dgstlen">length of the hash value</param>
+        /// <param name="kinv">BIGNUM with a pre-computed inverse k (optional)</param>
+        /// <param name="rp">BIGNUM with a pre-computed rp value (optional), see ECDSA_sign_setup</param>
+        /// <param name="eckey">EC_KEY object containing a private EC key</param>
+        /// <returns>pointer to a ECDSA_SIG structure or NULL if an error occurred</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr ECDSA_do_sign_ex(byte[] dgst, int dgstlen, IntPtr kinv, IntPtr rp, IntPtr eckey);
+
+        /// <summary>
+        /// Verifies that the supplied signature is a valid ECDSA signature of the supplied hash value using the supplied public key.
+        /// </summary>
+        /// <param name="dgst">pointer to the hash value</param>
+        /// <param name="dgst_len">length of the hash value</param>
+        /// <param name="sig">ECDSA_SIG structure</param>
+        /// <param name="eckey">EC_KEY object containing a public EC key</param>
+        /// <returns>1 if the signature is valid, 0 if the signature is invalid and -1 on error</returns>
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ECDSA_do_verify(byte[] dgst, int dgst_len, IntPtr sig, IntPtr eckey);
 
         #endregion
 

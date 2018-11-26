@@ -2,9 +2,11 @@
 
 namespace Zergatul.Security
 {
-    public abstract class MessageDigest
+    public abstract class MessageDigest : IDisposable
     {
         public abstract int DigestLength { get; }
+
+        protected bool _disposed;
 
         public virtual void Init(MDParameters parameters)
         {
@@ -33,6 +35,22 @@ namespace Zergatul.Security
         }
 
         public abstract void Update(byte[] data, int offset, int length);
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            _disposed = true;
+        }
+
+        ~MessageDigest()
+        {
+            Dispose(false);
+        }
 
         public static MessageDigest GetInstance(string algorithm) => Provider.GetMessageDigestInstance(algorithm);
     }
