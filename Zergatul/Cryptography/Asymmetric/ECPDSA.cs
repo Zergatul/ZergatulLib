@@ -69,6 +69,13 @@ namespace Zergatul.Cryptography.Asymmetric
             if (s.IsZero)
                 goto CalculateK;
 
+            if (Parameters.LowS)
+            {
+                var half = q >> 1;
+                if (s > half)
+                    s = q - s;
+            }
+
             return new ECDSASignatureValue(r, s).ToBytes();
         }
 
