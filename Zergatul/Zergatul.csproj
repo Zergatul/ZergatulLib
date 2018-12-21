@@ -509,6 +509,7 @@
     <Compile Include="Network\WebSocket\Opcode.cs" />
     <Compile Include="Network\WebSocket\WebSocketClient.cs" />
     <Compile Include="Network\WebSocket\ConnectionState.cs" />
+    <Compile Include="Security\BigInteger.cs" />
     <Compile Include="Security\BLAKE2Parameters.cs" />
     <Compile Include="Security\BlockCipherMode.cs" />
     <Compile Include="Security\CubeHashParameters.cs" />

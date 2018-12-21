@@ -102,6 +102,9 @@ namespace Zergatul.Security.Default
             switch (parameters.Curve)
             {
                 case Curves.secp256k1: curve = Math.EllipticCurves.PrimeField.EllipticCurve.secp256k1; break;
+                case Curves.secp256r1: curve = Math.EllipticCurves.PrimeField.EllipticCurve.secp256r1; break;
+                case Curves.secp384r1: curve = Math.EllipticCurves.PrimeField.EllipticCurve.secp384r1; break;
+                case Curves.secp521r1: curve = Math.EllipticCurves.PrimeField.EllipticCurve.secp521r1; break;
                 default:
                     throw new NotImplementedException();
             }

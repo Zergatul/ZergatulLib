@@ -83,6 +83,8 @@
     <Compile Include="MessageDigest\BMW256Tests.cs" />
     <Compile Include="MockSecureRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Signature\ECDSATests.cs" />
+    <Compile Include="StaticSecureRandom.cs" />
     <Compile Include="SymmetricCipher\AESTests.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -23,6 +23,15 @@ namespace Zergatul.Security
         protected delegate SymmetricCipher GetSymmetricCipherDelegate();
         private Dictionary<string, GetSymmetricCipherDelegate> _symmetricCiphers = new Dictionary<string, GetSymmetricCipherDelegate>();
 
+        public virtual BigInteger GetBigInteger(int value) => null;
+        public virtual BigInteger GetBigInteger(long value) => null;
+        public virtual BigInteger GetBigInteger(byte[] data, ByteOrder order = ByteOrder.BigEndian) => null;
+        public virtual BigInteger GetBigInteger(byte[] data, int offset, int length, ByteOrder order = ByteOrder.BigEndian) => null;
+        public virtual BigInteger GetBigInteger(string value, int radix = 10) => null;
+        public virtual BigInteger GetBigInteger(string value, int radix, char[] symbols) => null;
+        public virtual BigInteger GetBigIntegerRandom(BigInteger value) => null;
+        public virtual BigInteger GetBigIntegerRandom(BigInteger value, SecureRandom random) => null;
+
         public KeyDerivationFunction GetKeyDerivationFunction(string algorithm)
         {
             if (_keyDerivationFunctions.TryGetValue(algorithm.ToUpperInvariant(), out GetKeyDerivationFunctionDelegate getter))
