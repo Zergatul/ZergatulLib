@@ -182,7 +182,7 @@ namespace Zergatul.Network.WebSocket
         private void InitHttpRequestMessage()
         {
             _httpRequestMessage = new HttpRequestMessage();
-            _httpRequestMessage.Method = HttpMethod.Get;
+            _httpRequestMessage.Method = HttpMethods.Get;
             _httpRequestMessage.RequestUri = _uri.PathAndQuery;
             _httpRequestMessage.SetHeader(HttpRequestHeaders.Host, _uri.Host + (_uri.IsDefaultPort ? "" : ":" + _uri.Port));
             _httpRequestMessage.SetHeader(HttpRequestHeaders.Connection, "Upgrade");

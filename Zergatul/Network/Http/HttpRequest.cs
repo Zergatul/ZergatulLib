@@ -1,42 +1,55 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace Zergatul.Network.Http
 {
     public class HttpRequest
     {
-        public Proxy.ProxyBase Proxy { get; set; }
+        #region Properties
 
-        #region Headers-related properties
+        public Uri Uri { get; }
 
+        private string _method;
         public string Method
         {
-            get => _reqMsg.Method;
-            set => _reqMsg.Method = value;
+            get => _method;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException();
+                if (value == "")
+                    throw new ArgumentException();
+                _method = value;
+            }
         }
 
-        public HttpVersion Version
+        private string _version;
+        public string Version
         {
-            get => _reqMsg.Version;
-            set => _reqMsg.Version = value;
+            get => _version;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException();
+                if (value != "1.0" && value != "1.1")
+                    throw new ArgumentException();
+                _version = value;
+            }
         }
 
         public string AcceptEncoding
         {
-            get
-            {
-                return _reqMsg.GetHeader(HttpRequestHeaders.AcceptEncoding);
-            }
-            set
-            {
-                _reqMsg.SetHeader(HttpRequestHeaders.AcceptEncoding, value);
-            }
+            get => GetHeader(HttpRequestHeaders.AcceptEncoding);
+            set => SetHeader(HttpRequestHeaders.AcceptEncoding, value);
         }
 
         public bool KeepAlive
         {
             get
             {
-                string connection = _reqMsg.GetHeader(HttpRequestHeaders.Connection);
+                string connection = GetHeader(HttpRequestHeaders.Connection);
                 if (string.Equals(connection, HttpHeaderValue.KeepAlive, StringComparison.OrdinalIgnoreCase))
                     return true;
                 if (string.Equals(connection, HttpHeaderValue.Close, StringComparison.OrdinalIgnoreCase))
@@ -45,103 +58,120 @@ namespace Zergatul.Network.Http
             }
             set
             {
-                _reqMsg.SetHeader(HttpRequestHeaders.Connection, value ? HttpHeaderValue.KeepAlive : HttpHeaderValue.Close);
+                SetHeader(HttpRequestHeaders.Connection, value ? HttpHeaderValue.KeepAlive : HttpHeaderValue.Close);
             }
         }
 
         public string Host
         {
-            get
+            get => GetHeader(HttpRequestHeaders.Host);
+            set => SetHeader(HttpRequestHeaders.Host, value);
+        }
+
+        public string this[string header]
+        {
+            get => GetHeader(header);
+            set => SetHeader(header, value);
+        }
+
+        public Stream Body { get; set; }
+
+        #endregion
+
+        #region Private fields
+
+        private Dictionary<string, string> _headers = new Dictionary<string, string>();
+        private List<string> _orderedHeaders = new List<string>();
+
+        #endregion
+
+        public HttpRequest(string uri)
+            : this(new Uri(uri))
+        {
+
+        }
+
+        public HttpRequest(Uri uri)
+        {
+            if (uri == null)
+                throw new ArgumentNullException(nameof(uri));
+
+            Uri = uri;
+        }
+
+        #region Public methods
+
+        public string GetHeader(string header)
+        {
+            if (_headers.TryGetValue(header.ToLower(), out string value))
+                return value;
+            else
+                return null;
+        }
+
+        public void SetHeader(string header, string value)
+        {
+            string lower = header.ToLower();
+            bool remove = string.IsNullOrEmpty(value);
+            if (_headers.ContainsKey(lower))
             {
-                return _reqMsg.GetHeader(HttpRequestHeaders.Host);
+                if (remove)
+                    _headers.Remove(lower);
+                else
+                    _headers[lower] = value;
+
+                int index = _orderedHeaders.FindIndex(h => string.Equals(h, lower, StringComparison.InvariantCultureIgnoreCase));
+                if (index == -1)
+                    throw new InvalidOperationException();
+                _orderedHeaders.RemoveAt(index);
+
+                if (!remove)
+                    _orderedHeaders.Add(header);
             }
-            set
+            else
             {
-                _reqMsg.SetHeader(HttpRequestHeaders.Host, value);
+                if (!remove)
+                {
+                    _headers.Add(lower, value);
+                    _orderedHeaders.Add(header);
+                }
             }
+        }
+
+        /// <summary>
+        /// Writes request content to stream. For best performance stream should have internal buffer and Flush() method implementation.
+        /// </summary>
+        public void WriteTo(Stream stream)
+        {
+            byte[] buffer = Encoding.ASCII.GetBytes($"{Method} {_uri.PathAndQuery} HTTP/{Version}{Constants.TelnetEndOfLine}");
+            stream.Write(buffer, 0, buffer.Length);
+            foreach (string header in _orderedHeaders)
+            {
+                buffer = Encoding.ASCII.GetBytes($"{header}: {_headers[header.ToLower()]}{Constants.TelnetEndOfLine}");
+                stream.Write(buffer, 0, buffer.Length);
+            }
+            stream.Write(Constants.TelnetEndOfLineBytes, 0, Constants.TelnetEndOfLineBytes.Length);
+
+            if (Body != null)
+                Body.CopyTo(stream);
+
+            stream.Flush();
         }
 
         #endregion
 
-        public string this[string header]
-        {
-            get
-            {
-                return _reqMsg.GetHeader(header);
-            }
-            set
-            {
-                _reqMsg.SetHeader(header, value);
-            }
-        }
-
-        private Uri _uri;
-        private HttpConnectionProvider _connectionProvider;
-        private HttpRequestMessage _reqMsg;
-
-        public HttpRequest(string uri)
-            : this(new Uri(uri), HttpVersion.V1_1)
-        {
-
-        }
-
-        public HttpRequest(Uri uri, HttpVersion version)
-            : this(uri, version, DefaultHttpConnectionProvider.Instance)
-        {
-            
-        }
-
-        public HttpRequest(string uri, HttpVersion version)
-            : this(new Uri(uri), version)
-        {
-
-        }
-
-        public HttpRequest(Uri uri, HttpVersion version, HttpConnectionProvider provider)
-        {
-            this._uri = uri;
-            this._connectionProvider = provider;
-            this._reqMsg = new HttpRequestMessage();
-            this._reqMsg.Version = version;
-            SetDefaultHeaders();
-        }
-
-        public HttpResponse GetResponse()
-        {
-            if (_connectionProvider == null)
-                throw new NotImplementedException();
-
-            HttpConnection connection;
-            switch (Version)
-            {
-                case HttpVersion.V1_0:
-                case HttpVersion.V1_1:
-                    connection = _connectionProvider.GetHttp1Connection(_uri, Proxy);
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Unknown HTTP version");
-            }
-
-            _reqMsg.Write(connection);
-
-            return new HttpResponse(connection);
-        }
+        #region Private methods
 
         private void SetDefaultHeaders()
         {
-            Method = HttpMethod.Get;
-            _reqMsg.RequestUri = _uri.PathAndQuery;
-            Host = _uri.Host;
+            Method = HttpMethods.Get;
+            Version = "1.1";
 
-            switch (Version)
-            {
-                case HttpVersion.V1_0:
-                case HttpVersion.V1_1:
-                    AcceptEncoding = "gzip, br";
-                    KeepAlive = true;
-                    break;
-            }
+            Host = _uri.Host;
+            AcceptEncoding = "gzip, br";
+            KeepAlive = true;
         }
+
+        #endregion
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Network.Http
 {
-    public static class HttpMethod
+    public static class HttpMethods
     {
         public const string Options = "OPTIONS";
         public const string Get = "GET";

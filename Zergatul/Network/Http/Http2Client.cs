@@ -47,7 +47,7 @@ namespace Zergatul.Network.Http
         private Http2Connection _connection;
         private State _state;
         private bool _isOpened;
-        private bool _isDisposed;
+        private bool _disposed;
 
         private Hpack _clientHpack;
         private Hpack _serverHpack;
@@ -208,7 +208,7 @@ namespace Zergatul.Network.Http
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_isDisposed)
+            if (_disposed)
                 return;
 
             if (disposing)
@@ -217,7 +217,7 @@ namespace Zergatul.Network.Http
                     SendGoAway(ErrorCode.NO_ERROR);
             }
 
-            _isDisposed = true;
+            _disposed = true;
         }
 
         #endregion
@@ -238,7 +238,7 @@ namespace Zergatul.Network.Http
 
         private void ThrowIfDisposed()
         {
-            if (_isDisposed)
+            if (_disposed)
                 throw new ObjectDisposedException(nameof(Http2Client));
         }
 
