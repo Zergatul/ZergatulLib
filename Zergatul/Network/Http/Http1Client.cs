@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Zergatul.Network.Http
 {
@@ -17,7 +18,7 @@ namespace Zergatul.Network.Http
 
         public Http1Client(Proxy.ProxyBase proxy)
         {
-            _connections = new Dictionary<ConnectionGroup, ConnectionInfo>();
+            _connections = new Dictionary<ConnectionGroup, List<ConnectionInfo>>();
 
             _proxy = proxy;
         }
@@ -36,15 +37,71 @@ namespace Zergatul.Network.Http
             if (uri.Scheme != "http" || uri.Scheme != "https")
                 throw new InvalidOperationException("Invalid scheme");
 
-            List<ConnectionInfo> connections;
+            List<ConnectionInfo> connectionsList;
             lock (_connections)
             {
-                _connections.TryGetValue(new ConnectionGroup
+                var @group = new ConnectionGroup
                 {
                     Host = uri.Host,
                     Port = uri.Port,
                     IsSecure = uri.Scheme == "https"
-                }, out connections);
+                };
+                _connections.TryGetValue(@group, out connectionsList);
+
+                if (connectionsList == null)
+                {
+                    connectionsList = new List<ConnectionInfo>();
+                    _connections.Add(group, connectionsList);
+                }
+            }
+
+            lock (connectionsList)
+            {
+                DateTime now = DateTime.Now;
+                for (int i = 0; i < connectionsList.Count; i++)
+                {
+                    var connection = connectionsList[i];
+                    if (connection.InUse)
+                        continue;
+                    if (connection.Timeout != 0)
+                    {
+                        // check if connection timed out
+                        if ((now - connection.LastUse).TotalSeconds > connection.Timeout)
+                        {
+                            connectionsList.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
+                    }
+                    connection.InUse = true;
+                    return connection;
+                }
+            }
+
+            var newConnection = CreateNewConnection(uri);
+            lock (connectionsList)
+                connectionsList.Add(newConnection);
+            return newConnection;
+        }
+
+        private ConnectionInfo CreateNewConnection(Uri uri)
+        {
+            switch (uri.Scheme)
+            {
+                case "http":
+                    return new ConnectionInfo
+                    {
+                        InUse = true
+                    };
+
+                case "https":
+                    return new ConnectionInfo
+                    {
+                        InUse = true
+                    };
+
+                default:
+                    throw new InvalidOperationException();
             }
         }
 
@@ -110,7 +167,10 @@ namespace Zergatul.Network.Http
 
         private class ConnectionInfo
         {
-
+            public bool InUse;
+            public int Timeout;
+            public DateTime LastUse;
+            public Stream Stream;
         }
 
         #endregion
