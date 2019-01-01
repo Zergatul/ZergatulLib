@@ -1,24 +1,32 @@
 ﻿using System;
-using System.Net.Sockets;
+using System.IO;
 using System.Text;
 
 namespace Zergatul.Network.Vpn
 {
     public class SstpClient : IDisposable
     {
-        private TcpClient _client;
-        private NetworkStream _stream;
+        private Provider _provider;
+        private Stream _stream;
         private Guid _correlationId;
 
         public SstpClient()
+            : this(new DefaultProvider())
         {
 
         }
 
+        public SstpClient(Provider provider)
+        {
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            _provider = provider;
+        }
+
         public void Connect(string hostname, int port)
         {
-            _client = TcpConnector.GetTcpClient(hostname, port, null);
-            _stream = _client.GetStream();
+            _stream = _provider.GetTcpStream(hostname, port, null);
 
             _correlationId = Guid.NewGuid();
 
@@ -48,7 +56,7 @@ namespace Zergatul.Network.Vpn
         {
             if (disposing)
             {
-                _client?.Dispose();
+                _stream?.Close();
             }
         }
 

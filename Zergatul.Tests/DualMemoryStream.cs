@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Zergatul.Tls.Tests
+namespace Zergatul.Tests
 {
     public class DualMemoryStream : Stream
     {
@@ -19,7 +19,7 @@ namespace Zergatul.Tls.Tests
         public override bool CanSeek => false;
         public override bool CanWrite => true;
 
-        public override long Length => -1;
+        public override long Length => throw new NotSupportedException();
         public override long Position { get; set; }
 
         public override void Flush()

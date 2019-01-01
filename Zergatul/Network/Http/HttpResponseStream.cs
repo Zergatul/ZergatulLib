@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Text;
-using Zergatul.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Zergatul.Network.Http
 {
-    class HttpResponseStream : Stream
+    public class HttpResponseStream : Stream
     {
         private Stream _innerStream;
         private long _position;
@@ -13,61 +13,15 @@ namespace Zergatul.Network.Http
         private bool _chunked;
         private ChunkReadState _chunkReadState;
         private long _chunkLength;
-        private GenericMessageReadStream _readStream;
-        private byte[] _chunkLengthReadBuffer;
+        private byte[] _buffer;
 
         public HttpResponseStream(Stream innerStream, bool chunked, long length)
         {
-            this._innerStream = innerStream;
-            this._position = 0;
-            this._length = length;
-            this._chunked = chunked;
-
-            if (chunked)
-            {
-                this._chunkReadState = ChunkReadState.ReadChunkLength;
-                this._readStream = innerStream as GenericMessageReadStream;
-                if (this._readStream == null)
-                    throw new NotImplementedException();
-                this._chunkLengthReadBuffer = new byte[18];
-            }
-        }
-
-        public void ReadToEnd()
-        {
-            if (_length >= 0)
-            {
-                if (_position < _length)
-                {
-                    byte[] buffer = new byte[8 * 1024];
-                    while (_position < _length)
-                        Read(buffer, 0, buffer.Length);
-                }
-                return;
-            }
-
-            if (_chunked)
-            {
-                if (_chunkReadState != ChunkReadState.End)
-                {
-                    byte[] buffer = new byte[8 * 1024];
-                    while (_chunkReadState != ChunkReadState.End)
-                        Read(buffer, 0, buffer.Length);
-                }
-                return;
-            }
-
-            throw new InvalidOperationException();
-        }
-
-        private bool ReadEndOfLine()
-        {
-            int length = 0;
-            do
-            {
-                length += _readStream.Read(_chunkLengthReadBuffer, length, 2 - length);
-            } while (length < 2);
-            return _chunkLengthReadBuffer[0] == Constants.TelnetEndOfLineBytes[0] && _chunkLengthReadBuffer[1] == Constants.TelnetEndOfLineBytes[1];
+            _innerStream = innerStream;
+            _position = 0;
+            _length = length;
+            _chunked = chunked;
+            _chunkReadState = ChunkReadState.ReadChunkLength;
         }
 
         #region Stream overrides
@@ -104,21 +58,35 @@ namespace Zergatul.Network.Http
                 switch (_chunkReadState)
                 {
                     case ChunkReadState.ReadChunkLength:
-                        int length = 0;
-                        int index;
-                        do
+                        int ch = ReadNextByte();
+                        if (CharHelper.IsHex(ch))
+                            _chunkLength = CharHelper.ParseHex(ch);
+                        else
+                            throw new HttpParseException(InvalidChunkLength);
+                        while (true)
                         {
-                            _readStream.IncrementalRead(_chunkLengthReadBuffer, ref length);
+                            ch = ReadNextByte();
+                            if (CharHelper.IsCR(ch))
+                            {
+                                ch = ReadNextByte();
+                                if (CharHelper.IsLF(ch))
+                                    break;
+                                else
+                                    throw new HttpParseException(InvalidChunkLength);
+                            }
+                            if (CharHelper.IsHex(ch))
+                                _chunkLength = (_chunkLength << 4) | (long)CharHelper.ParseHex(ch);
+                            else
+                                throw new HttpParseException(InvalidChunkLength);
                         }
-                        while ((index = ByteArray.IndexOf(_chunkLengthReadBuffer, 0, length, Constants.TelnetEndOfLineBytes)) == -1);
-                        _chunkLength = Convert.ToInt64(Encoding.ASCII.GetString(_chunkLengthReadBuffer, 0, index), 16);
-                        index += 2;
-                        if (index < length)
-                            _readStream.SendBackBuffer(_chunkLengthReadBuffer, index, length - index);
                         if (_chunkLength == 0)
                         {
-                            if (!ReadEndOfLine())
-                                throw new ChunkedEncodingException("Last chunk must end with CRLF");
+                            ch = ReadNextByte();
+                            if (!CharHelper.IsCR(ch))
+                                throw new HttpParseException(InvalidEnding);
+                            ch = ReadNextByte();
+                            if (!CharHelper.IsLF(ch))
+                                throw new HttpParseException(InvalidEnding);
                             _chunkReadState = ChunkReadState.End;
                             goto case ChunkReadState.End;
                         }
@@ -127,19 +95,26 @@ namespace Zergatul.Network.Http
                             _chunkReadState = ChunkReadState.ReadChunkData;
                             goto case ChunkReadState.ReadChunkData;
                         }
+
                     case ChunkReadState.ReadChunkData:
                         count = checked((int)System.Math.Min(count, _chunkLength));
-                        int read = _readStream.Read(buffer, offset, count);
+                        int read = _innerStream.Read(buffer, offset, count);
                         _chunkLength -= read;
                         if (_chunkLength == 0)
                         {
-                            if (!ReadEndOfLine())
-                                throw new ChunkedEncodingException("Chunk must end with CRLF");
+                            ch = ReadNextByte();
+                            if (!CharHelper.IsCR(ch))
+                                throw new HttpParseException(InvalidChunkEnding);
+                            ch = ReadNextByte();
+                            if (!CharHelper.IsLF(ch))
+                                throw new HttpParseException(InvalidChunkEnding);
                             _chunkReadState = ChunkReadState.ReadChunkLength;
                         }
                         return read;
+
                     case ChunkReadState.End:
                         return 0;
+
                     default:
                         throw new InvalidOperationException();
                 }
@@ -158,6 +133,88 @@ namespace Zergatul.Network.Http
             }
         }
 
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (_chunked)
+            {
+                switch (_chunkReadState)
+                {
+                    case ChunkReadState.ReadChunkLength:
+                        int ch = await ReadNextByteAsync(cancellationToken);
+                        if (CharHelper.IsHex(ch))
+                            _chunkLength = CharHelper.ParseHex(ch);
+                        else
+                            throw new HttpParseException(InvalidChunkLength);
+                        while (true)
+                        {
+                            ch = await ReadNextByteAsync(cancellationToken);
+                            if (CharHelper.IsCR(ch))
+                            {
+                                ch = await ReadNextByteAsync(cancellationToken);
+                                if (CharHelper.IsLF(ch))
+                                    break;
+                                else
+                                    throw new HttpParseException(InvalidChunkLength);
+                            }
+                            if (CharHelper.IsHex(ch))
+                                _chunkLength = (_chunkLength << 4) | (long)CharHelper.ParseHex(ch);
+                            else
+                                throw new HttpParseException(InvalidChunkLength);
+                        }
+                        if (_chunkLength == 0)
+                        {
+                            ch = await ReadNextByteAsync(cancellationToken);
+                            if (!CharHelper.IsCR(ch))
+                                throw new HttpParseException(InvalidEnding);
+                            ch = await ReadNextByteAsync(cancellationToken);
+                            if (!CharHelper.IsLF(ch))
+                                throw new HttpParseException(InvalidEnding);
+                            _chunkReadState = ChunkReadState.End;
+                            goto case ChunkReadState.End;
+                        }
+                        else
+                        {
+                            _chunkReadState = ChunkReadState.ReadChunkData;
+                            goto case ChunkReadState.ReadChunkData;
+                        }
+
+                    case ChunkReadState.ReadChunkData:
+                        count = checked((int)System.Math.Min(count, _chunkLength));
+                        int read = await _innerStream.ReadAsync(buffer, offset, count, cancellationToken);
+                        _chunkLength -= read;
+                        if (_chunkLength == 0)
+                        {
+                            ch = await ReadNextByteAsync(cancellationToken);
+                            if (!CharHelper.IsCR(ch))
+                                throw new HttpParseException(InvalidChunkEnding);
+                            ch = await ReadNextByteAsync(cancellationToken);
+                            if (!CharHelper.IsLF(ch))
+                                throw new HttpParseException(InvalidChunkEnding);
+                            _chunkReadState = ChunkReadState.ReadChunkLength;
+                        }
+                        return read;
+
+                    case ChunkReadState.End:
+                        return 0;
+
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
+            else
+            {
+                if (_length > 0)
+                {
+                    if (_position >= _length)
+                        return 0;
+                    count = checked((int)System.Math.Min(count, _length - _position));
+                }
+                int read = await _innerStream.ReadAsync(buffer, offset, count, cancellationToken);
+                _position += read;
+                return read;
+            }
+        }
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();
@@ -171,6 +228,38 @@ namespace Zergatul.Network.Http
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
+        }
+
+        #endregion
+
+        #region Private constants
+
+        private const string EndOfStream = "Unexpected end of stream";
+        private const string InvalidChunkLength = "Invalid chunk length";
+        private const string InvalidChunkEnding = "Chunk must end with CRLF";
+        private const string InvalidEnding = "Expected CRLF after chunk with length 0";
+
+        #endregion
+
+        #region Private methods
+
+        private int ReadNextByte()
+        {
+            int result = _innerStream.ReadByte();
+            if (result == -1)
+                throw new HttpParseException(EndOfStream);
+            return result;
+        }
+
+        private async Task<int> ReadNextByteAsync(CancellationToken cancellationToken)
+        {
+            if (_buffer == null)
+                _buffer = new byte[1];
+
+            int read = await _innerStream.ReadAsync(_buffer, 0, 1, cancellationToken);
+            if (read == 0)
+                throw new HttpParseException(EndOfStream);
+            return _buffer[0];
         }
 
         #endregion

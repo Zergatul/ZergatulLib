@@ -22,55 +22,46 @@ namespace Zergatul.Network.WebSocket
             Mask,
         }
 
-        public void Read(GenericMessageReadStream stream, byte[] buffer)
+        public void Read(Stream stream)
         {
-            int length = 0;
-            int index = 0;
+            int @byte = ReadNextByte(stream);
+            Fin = (@byte & 0x80) != 0;
+            Opcode = (Opcode)(@byte & 0x0F);
 
-            while (length - index < 2)
-                stream.IncrementalRead(buffer, ref length);
+            @byte = ReadNextByte(stream);
+            IsMasked = (@byte & 0x80) != 0;
+            int payload = @byte & 0x7F;
 
-            Fin = (buffer[index] & 0x80) != 0;
-            Opcode = (Opcode)(buffer[index] & 0x0F);
-            index++;
-            IsMasked = (buffer[index] & 0x80) != 0;
-            int payload = buffer[index] & 0x7F;
-            index++;
             if (payload == 126)
             {
-                while (length - index < 2)
-                    stream.IncrementalRead(buffer, ref length);
-                payload = BitHelper.ToUInt16(buffer, index, ByteOrder.BigEndian);
-                index += 2;
+                payload = (ReadNextByte(stream) << 8) | ReadNextByte(stream);
             }
             if (payload == 127)
             {
-                while (length - index < 8)
-                    stream.IncrementalRead(buffer, ref length);
-                PayloadLength = BitHelper.ToUInt64(buffer, index, ByteOrder.BigEndian);
+                byte[] data = new byte[8];
+                StreamHelper.ReadArray(stream, data);
+                PayloadLength = BitHelper.ToUInt64(data, 0, ByteOrder.BigEndian);
+
                 payload = checked((int)PayloadLength);
-                index += 8;
             }
 
             if (IsMasked)
             {
-                while (length - index < 4)
-                    stream.IncrementalRead(buffer, ref length);
-                MaskingKey = ByteArray.SubArray(buffer, index, 4);
-                index += 4;
+                MaskingKey = new byte[4];
+                StreamHelper.ReadArray(stream, MaskingKey);
             }
 
-            while (length - index < payload)
-                stream.IncrementalRead(buffer, ref length);
+            ApplicationData = new byte[payload];
+            StreamHelper.ReadArray(stream, ApplicationData);
 
-            ApplicationData = ByteArray.SubArray(buffer, index, payload);
-            index += payload;
-
-            if (index < length)
-                stream.SendBackBuffer(buffer, index, length - index);
+            if (IsMasked)
+            {
+                for (int i = 0; i < ApplicationData.Length; i++)
+                    ApplicationData[i] ^= MaskingKey[i & 0x03];
+            }
         }
 
-        public byte[] ToBytes()
+        public void WriteTo(Stream stream)
         {
             int length = 2;
             if (PayloadLength > 125)
@@ -79,7 +70,6 @@ namespace Zergatul.Network.WebSocket
                 length += 8;
             if (IsMasked)
                 length += 4;
-            length += ApplicationData?.Length ?? 0;
 
             byte[] data = new byte[length];
 
@@ -105,10 +95,23 @@ namespace Zergatul.Network.WebSocket
                 Array.Copy(MaskingKey, 0, data, index, 4);
                 index += 4;
             }
-            if (ApplicationData != null)
-                Array.Copy(ApplicationData, 0, data, index, ApplicationData.Length);
 
-            return data;
+            stream.Write(data, 0, data.Length);
+
+            if (ApplicationData != null)
+                stream.Write(ApplicationData, 0, ApplicationData.Length);
         }
+
+        #region Private methods
+
+        private int ReadNextByte(Stream stream)
+        {
+            int result = stream.ReadByte();
+            if (result == -1)
+                throw new WebSocketException("Cannot read frame. Unexpected end of stream.");
+            return result;
+        }
+
+        #endregion
     }
 }

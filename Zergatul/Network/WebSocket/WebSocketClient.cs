@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Net.Sockets;
 using System.Text;
-using Zergatul.IO;
 using Zergatul.Network.Http;
 using Zergatul.Security;
 
@@ -14,25 +12,15 @@ namespace Zergatul.Network.WebSocket
 
         public string this[string header]
         {
-            get
-            {
-                return _httpRequestMessage.GetHeader(header);
-            }
-            set
-            {
-                _httpRequestMessage.SetHeader(header, value);
-            }
+            get => _request.GetHeader(header);
+            set => _request.SetHeader(header, value);
         }
 
         private Uri _uri;
-        private TcpClient _client;
+        private Provider _provider;
         private Stream _stream;
-        private HttpRequestMessage _httpRequestMessage;
-        private GenericMessageReadStream _readStream;
-        private byte[] _nonce;
-        private byte[] _buffer = new byte[1024 * 1024];
-        private SecureRandom _random;
-        private object _writeSyncObject = new object();
+        private HttpRequest _request;
+        private Random _random;
 
         public WebSocketClient(string uri)
             : this(new Uri(uri))
@@ -41,17 +29,24 @@ namespace Zergatul.Network.WebSocket
         }
 
         public WebSocketClient(Uri uri)
+            : this(uri, new DefaultProvider())
+        {
+
+        }
+
+        public WebSocketClient(Uri uri, Provider provider)
         {
             if (uri == null)
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(uri));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
             if (uri.Scheme != "ws" && uri.Scheme != "wss")
                 throw new ArgumentException();
 
-            this._uri = uri;
-            this.State = ConnectionState.Uninitialized;
-
-            this._nonce = new byte[16];
-            this._random = SecureRandom.GetInstance(SecureRandoms.Default);
+            _uri = uri;
+            _provider = provider;
+            _random = new Random();
+            State = ConnectionState.Uninitialized;
 
             InitHttpRequestMessage();
         }
@@ -60,53 +55,47 @@ namespace Zergatul.Network.WebSocket
         {
             this.State = ConnectionState.Connecting;
 
-            _client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port, null);
-
+            _stream = _provider.GetTcpStream(_uri.Host, _uri.Port, null);
             switch (_uri.Scheme)
             {
                 case "ws":
-                    _stream = _client.GetStream();
                     break;
+
                 case "wss":
-                    var tls = new Tls.TlsStream(_client.GetStream());
+                    var tls = new Tls.TlsStream(_stream);
                     tls.AuthenticateAsClient(_uri.Host);
                     _stream = tls;
                     break;
             }
 
-            _readStream = new GenericMessageReadStream(_stream);
+            byte[] nonce = new byte[16];
+            using (var random = SecureRandom.GetInstance(SecureRandoms.Default))
+                random.GetNextBytes(nonce);
 
-            _random.GetNextBytes(_nonce);
-            string key = Convert.ToBase64String(_nonce);
-            _httpRequestMessage.SetHeader(HttpRequestHeaders.SecWebSocketKey, key);
+            string key = Convert.ToBase64String(nonce);
+            _request.SetHeader(HttpRequestHeaders.SecWebSocketKey, key);
 
-            _httpRequestMessage.Write(_stream, 0x10000);
+            _request.WriteTo(_stream);
+            _stream.Flush();
 
-            var response = new HttpResponseMessage();
-            response.Read(_readStream, _buffer);
+            var response = new HttpResponse();
+            response.ReadFrom(_stream);
 
-            string error = null;
-            if (error == null && response.StatusCode != 101)
-                error = "Invalid status code: " + response.StatusCode;
-            if (error == null && !string.Equals(response[HttpResponseHeaders.Connection], "Upgrade", StringComparison.OrdinalIgnoreCase))
-                error = "Invalid Connection header";
-            if (error == null && !string.Equals(response[HttpResponseHeaders.Upgrade], "websocket", StringComparison.OrdinalIgnoreCase))
-                error = "Invalid upgrade header";
+            if (response.Status != HttpStatusCode.SwitchingProtocols)
+                ThrowWebSocketException("Invalid status code", response);
 
-            var md = MessageDigest.GetInstance(MessageDigests.SHA1);
-            byte[] digest = md.Digest(Encoding.ASCII.GetBytes(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"));
-            if (error == null && response[HttpResponseHeaders.SecWebSocketAccept] != Convert.ToBase64String(digest))
-                error = "Invalid Sec-WebSocket-Accept header";
+            if (!string.Equals(response[HttpResponseHeaders.Connection], "Upgrade", StringComparison.InvariantCultureIgnoreCase))
+                ThrowWebSocketException("Invalid Connection header", response);
 
-            if (error != null)
-            {
-                var ex = new InvalidOperationException(error);
-                string msg;
-                using (var sr = new StreamReader(_readStream))
-                    msg = sr.ReadToEnd();
-                ex.Data.Add("Response", msg);
-                throw ex;
-            }
+            if (!string.Equals(response[HttpResponseHeaders.Upgrade], "websocket", StringComparison.InvariantCultureIgnoreCase))
+                ThrowWebSocketException("Invalid Upgrade header", response);
+
+            byte[] digest;
+            using (var md = MessageDigest.GetInstance(MessageDigests.SHA1))
+                digest = md.Digest(Encoding.ASCII.GetBytes(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"));
+
+            if (response[HttpResponseHeaders.SecWebSocketAccept] != Convert.ToBase64String(digest))
+                ThrowWebSocketException("Invalid Sec-WebSocket-Accept header", response);
 
             State = ConnectionState.Connected;
         }
@@ -120,6 +109,7 @@ namespace Zergatul.Network.WebSocket
                 Opcode = Opcode.Text,
                 ApplicationData = Encoding.UTF8.GetBytes(text)
             });
+            _stream.Flush();
         }
 
         public void SendBinary(byte[] data)
@@ -131,6 +121,7 @@ namespace Zergatul.Network.WebSocket
                 Opcode = Opcode.Binary,
                 ApplicationData = data
             });
+            _stream.Flush();
         }
 
         public Message ReadNextMessage()
@@ -138,7 +129,7 @@ namespace Zergatul.Network.WebSocket
             while (true)
             {
                 Frame frame = new Frame();
-                frame.Read(_readStream, _buffer);
+                frame.Read(_stream);
 
                 switch (frame.Opcode)
                 {
@@ -159,6 +150,7 @@ namespace Zergatul.Network.WebSocket
                             Opcode = Opcode.Pong,
                             IsMasked = true
                         });
+                        _stream.Flush();
                         break;
 
                     default:
@@ -176,18 +168,25 @@ namespace Zergatul.Network.WebSocket
                 IsMasked = true
             });
             _stream.Close();
-            _client.Close();
         }
+
+        #region Private methods
 
         private void InitHttpRequestMessage()
         {
-            _httpRequestMessage = new HttpRequestMessage();
-            _httpRequestMessage.Method = HttpMethods.Get;
-            _httpRequestMessage.RequestUri = _uri.PathAndQuery;
-            _httpRequestMessage.SetHeader(HttpRequestHeaders.Host, _uri.Host + (_uri.IsDefaultPort ? "" : ":" + _uri.Port));
-            _httpRequestMessage.SetHeader(HttpRequestHeaders.Connection, "Upgrade");
-            _httpRequestMessage.SetHeader(HttpRequestHeaders.Upgrade, "websocket");
-            _httpRequestMessage.SetHeader(HttpRequestHeaders.SecWebSocketVersion, "13");
+            _request = new HttpRequest(_uri);
+            _request.Method = HttpMethods.Get;
+            _request.RemoveHeader(HttpRequestHeaders.AcceptEncoding);
+            _request.SetHeader(HttpRequestHeaders.Connection, "Upgrade");
+            _request.SetHeader(HttpRequestHeaders.Upgrade, "websocket");
+            _request.SetHeader(HttpRequestHeaders.SecWebSocketVersion, "13");
+        }
+
+        private void ThrowWebSocketException(string message, HttpResponse response)
+        {
+            var ex = new WebSocketException(message);
+            ex.Data.Add("Response", response);
+            throw ex;
         }
 
         private void SendFrame(Frame frame)
@@ -195,16 +194,16 @@ namespace Zergatul.Network.WebSocket
             if (frame.IsMasked && frame.MaskingKey == null)
             {
                 frame.MaskingKey = new byte[4];
-                _random.GetNextBytes(frame.MaskingKey);
+                _random.NextBytes(frame.MaskingKey);
             }
             frame.PayloadLength = (ulong)(frame.ApplicationData?.Length ?? 0);
             if (frame.IsMasked && frame.ApplicationData != null)
                 for (int i = 0; i < frame.ApplicationData.Length; i++)
                     frame.ApplicationData[i] ^= frame.MaskingKey[i & 0x03];
 
-            byte[] data = frame.ToBytes();
-            lock (_writeSyncObject)
-                _stream.Write(data, 0, data.Length);
+            frame.WriteTo(_stream);
         }
+
+        #endregion
     }
 }

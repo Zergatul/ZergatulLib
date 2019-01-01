@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zergatul.IO;
 using Zergatul.Network.Http.Frames;
 using Zergatul.Network.Tls;
@@ -42,7 +39,8 @@ namespace Zergatul.Network.Http
         #endregion
 
         private Uri _uri;
-        private Proxy.ProxyBase _proxy;
+        private readonly Proxy.ProxyBase _proxy;
+        private readonly Provider _provider;
         private Stream _stream;
         private Http2Connection _connection;
         private State _state;
@@ -62,14 +60,23 @@ namespace Zergatul.Network.Http
         }
 
         public Http2Client(Uri uri, Proxy.ProxyBase proxy)
+            : this(uri, proxy, new DefaultProvider())
+        {
+            
+        }
+
+        public Http2Client(Uri uri, Proxy.ProxyBase proxy, Provider provider)
         {
             if (uri.Query != "")
                 throw new ArgumentException(nameof(uri));
             if (uri.AbsolutePath != "/")
                 throw new ArgumentException(nameof(uri));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
             this._uri = uri;
             this._proxy = proxy;
+            this._provider = provider;
         }
 
         #region Public methods
@@ -79,21 +86,19 @@ namespace Zergatul.Network.Http
             ThrowIfOpened();
             ThrowIfDisposed();
 
-            var client = TcpConnector.GetTcpClient(_uri.Host, _uri.Port, _proxy);
-            Stream stream;
+            var stream = _provider.GetTcpStream(_uri.Host, _uri.Port, _proxy);
             switch (_uri.Scheme)
             {
                 case "http":
-                    stream = client.GetStream();
                     break;
 
                 case "https":
-                    var tls = new TlsStream(client.GetStream());
+                    var tls = new TlsStream(stream);
                     var alpnExtension = new Tls.Extensions.ApplicationLayerProtocolNegotiationExtension();
                     alpnExtension.ProtocolNames = new[] { "h2" };
                     tls.Settings.Extensions = new Tls.Extensions.TlsExtension[] { alpnExtension };
                     tls.AuthenticateAsClient(_uri.Host);
-                    stream = new BufferedWriteStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
+                    stream = new IO.BufferedStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
                     break;
 
                 default:

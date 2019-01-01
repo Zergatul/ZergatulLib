@@ -117,7 +117,7 @@
     <Compile Include="Cryptography\KDF\Scrypt.cs" />
     <Compile Include="Cryptography\KDF\HKDF.cs" />
     <Compile Include="IO\BitReader.cs" />
-    <Compile Include="IO\BufferedWriteStream.cs" />
+    <Compile Include="IO\BufferedStream.cs" />
     <Compile Include="IO\Compression\BrotliStaticDictionary.cs" />
     <Compile Include="IO\Compression\BrotliStream.cs" />
     <Compile Include="IO\Compression\BrotliStreamException.cs" />
@@ -268,18 +268,15 @@
     <Compile Include="Network\Asn1\Structures\X509\TBSCertificate.cs" />
     <Compile Include="Network\Asn1\Structures\X509\Validity.cs" />
     <Compile Include="Network\Asn1\VisibleString.cs" />
+    <Compile Include="Network\CharHelper.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
+    <Compile Include="Network\DefaultProvider.cs" />
     <Compile Include="Network\DefaultTlsProvider.cs" />
-    <Compile Include="Network\Dns\DefaultDnsProvider.cs" />
-    <Compile Include="Network\Dns\DnsProvider.cs" />
-    <Compile Include="Network\Dns\StaticDnsProvider.cs" />
     <Compile Include="Network\Ftp\FtpServer.cs" />
     <Compile Include="Network\Ftp\FtpServerConnection.cs" />
     <Compile Include="Network\Ftp\FtpServerFeaturesReply.cs" />
     <Compile Include="Network\Ftp\IFtpFile.cs" />
     <Compile Include="Network\Ftp\IFtpFileSystemProvider.cs" />
-    <Compile Include="Network\Http\ChunkedEncodingException.cs" />
-    <Compile Include="Network\Http\DefaultHttpConnectionProvider.cs" />
     <Compile Include="Network\Http\EmptyReponseStream.cs" />
     <Compile Include="Network\Http\Frames\DataFrame.cs" />
     <Compile Include="Network\Http\Frames\ErrorCode.cs" />
@@ -305,9 +302,9 @@
     <Compile Include="Network\Http\Http2ResponseRawDataStream.cs" />
     <Compile Include="Network\Http\Http2ResponseStream.cs" />
     <Compile Include="Network\Http\HttpConnection.cs" />
-    <Compile Include="Network\Http\HttpConnectionProvider.cs" />
     <Compile Include="Network\Http\HttpHeaderValue.cs" />
     <Compile Include="Network\Http\HttpMethods.cs" />
+    <Compile Include="Network\Http\HttpParseException.cs" />
     <Compile Include="Network\Http\HttpRequest.cs" />
     <Compile Include="Network\Http\HttpResponse.cs" />
     <Compile Include="Network\Http\HttpResponseHeaders.cs" />
@@ -315,8 +312,6 @@
     <Compile Include="Network\Http\HttpResponseMessage.cs" />
     <Compile Include="Network\Http\HttpResponseStream.cs" />
     <Compile Include="Network\Http\HttpStatusCode.cs" />
-    <Compile Include="Network\Http\Http1Connection.cs" />
-    <Compile Include="Network\Http\Http1KeepAliveConnectionProvider.cs" />
     <Compile Include="Network\ITlsProvider.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcClient.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcTransport.cs" />
@@ -382,6 +377,7 @@
     <Compile Include="Network\NotSupportedByProtocolException.cs" />
     <Compile Include="Network\OIDInfoResolver.cs" />
     <Compile Include="Network\OIDs.cs" />
+    <Compile Include="Network\Provider.cs" />
     <Compile Include="Network\Proxy\ChainProxy.cs" />
     <Compile Include="Network\Proxy\HttpProxy.cs" />
     <Compile Include="Network\Proxy\HttpsProxy.cs" />
@@ -400,7 +396,6 @@
     <Compile Include="Network\Smtp\SmtpReplyCode.cs" />
     <Compile Include="Network\Smtp\SmtpServerReply.cs" />
     <Compile Include="Network\TcpClientHelper.cs" />
-    <Compile Include="Network\TcpConnector.cs" />
     <Compile Include="Network\TimeoutException.cs" />
     <Compile Include="Network\Tls\AbstractTlsSignature.cs" />
     <Compile Include="Network\Tls\AbstractTlsSymmetricCipher.cs" />
@@ -515,6 +510,7 @@
     <Compile Include="Network\WebSocket\Opcode.cs" />
     <Compile Include="Network\WebSocket\WebSocketClient.cs" />
     <Compile Include="Network\WebSocket\ConnectionState.cs" />
+    <Compile Include="Network\WebSocket\WebSocketException.cs" />
     <Compile Include="Security\BigInteger.cs" />
     <Compile Include="Security\BLAKE2Parameters.cs" />
     <Compile Include="Security\BlockCipherMode.cs" />

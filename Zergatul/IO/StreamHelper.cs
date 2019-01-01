@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Zergatul.IO
 {
@@ -11,6 +13,18 @@ namespace Zergatul.IO
             while (index < data.Length)
             {
                 int read = stream.Read(data, index, data.Length - index);
+                if (read == 0)
+                    throw new EndOfStreamException();
+                index += read;
+            }
+        }
+
+        public static async Task ReadArray(Stream stream, byte[] data, CancellationToken cancellationToken)
+        {
+            int index = 0;
+            while (index < data.Length)
+            {
+                int read = await stream.ReadAsync(data, index, data.Length - index, cancellationToken);
                 if (read == 0)
                     throw new EndOfStreamException();
                 index += read;

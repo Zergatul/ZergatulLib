@@ -97,6 +97,7 @@ namespace Zergatul.Network.Http
                 throw new ArgumentNullException(nameof(uri));
 
             Uri = uri;
+            SetDefaultHeaders();
         }
 
         #region Public methods
@@ -138,12 +139,26 @@ namespace Zergatul.Network.Http
             }
         }
 
+        public void RemoveHeader(string header)
+        {
+            header = header.ToLower();
+            if (_headers.ContainsKey(header))
+            {
+                _headers.Remove(header);
+
+                int index = _orderedHeaders.FindIndex(h => string.Equals(h, header, StringComparison.InvariantCultureIgnoreCase));
+                if (index == -1)
+                    throw new InvalidOperationException();
+                _orderedHeaders.RemoveAt(index);
+            }
+        }
+
         /// <summary>
         /// Writes request content to stream. For best performance stream should have internal buffer and Flush() method implementation.
         /// </summary>
         public void WriteTo(Stream stream)
         {
-            byte[] buffer = Encoding.ASCII.GetBytes($"{Method} {_uri.PathAndQuery} HTTP/{Version}{Constants.TelnetEndOfLine}");
+            byte[] buffer = Encoding.ASCII.GetBytes($"{Method} {Uri.PathAndQuery} HTTP/{Version}{Constants.TelnetEndOfLine}");
             stream.Write(buffer, 0, buffer.Length);
             foreach (string header in _orderedHeaders)
             {
@@ -154,8 +169,6 @@ namespace Zergatul.Network.Http
 
             if (Body != null)
                 Body.CopyTo(stream);
-
-            stream.Flush();
         }
 
         #endregion
@@ -167,7 +180,7 @@ namespace Zergatul.Network.Http
             Method = HttpMethods.Get;
             Version = "1.1";
 
-            Host = _uri.Host;
+            Host = Uri.Host;
             AcceptEncoding = "gzip, br";
             KeepAlive = true;
         }

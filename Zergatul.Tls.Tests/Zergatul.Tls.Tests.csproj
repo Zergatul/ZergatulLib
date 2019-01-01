@@ -56,7 +56,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CipherSuiteTests.cs" />
-    <Compile Include="DualMemoryStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BCrypt.cs" />
     <Compile Include="Settings.cs" />
