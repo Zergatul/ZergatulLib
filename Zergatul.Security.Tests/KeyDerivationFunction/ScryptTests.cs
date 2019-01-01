@@ -8,9 +8,9 @@ namespace Zergatul.Security.Tests.KeyDerivationFunction
     [TestClass]
     public class ScryptTests
     {
-        private static Provider[] _providers = new Provider[]
+        private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultProvider(),
+            new DefaultSecurityProvider(),
             new OpenSslProvider()
         };
 

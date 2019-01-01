@@ -8,7 +8,7 @@ namespace Zergatul.Security.Tests.SymmetricCipher
     [TestClass]
     public class AESTests
     {
-        private static Provider[] _providers = new Provider[]
+        private static SecurityProvider[] _providers = new SecurityProvider[]
         {
             new OpenSslProvider()
         };
@@ -39,24 +39,28 @@ namespace Zergatul.Security.Tests.SymmetricCipher
                 foreach (var c in cases)
                 {
                     // Encrypt
-                    var aes = provider.GetSymmetricCipher(SymmetricCiphers.AES);
-                    aes.InitForEncryption(c.key, new SymmetricCipherParameters
+                    using (var aes = provider.GetSymmetricCipher(SymmetricCiphers.AES))
                     {
-                        Mode = BlockCipherMode.ECB
-                    });
-                    int len = aes.Update(c.plain, c.plain.Length, result);
-                    Assert.IsTrue(len == c.cipher.Length);
-                    Assert.IsTrue(result.Take(len).SequenceEqual(c.cipher));
+                        aes.InitForEncryption(c.key, new SymmetricCipherParameters
+                        {
+                            Mode = BlockCipherMode.ECB
+                        });
+                        int len = aes.Update(c.plain, c.plain.Length, result);
+                        Assert.IsTrue(len == c.cipher.Length);
+                        Assert.IsTrue(result.Take(len).SequenceEqual(c.cipher));
+                    }
 
                     // Decrypt
-                    aes = provider.GetSymmetricCipher(SymmetricCiphers.AES);
-                    aes.InitForDecryption(c.key, new SymmetricCipherParameters
+                    using (var aes = provider.GetSymmetricCipher(SymmetricCiphers.AES))
                     {
-                        Mode = BlockCipherMode.ECB
-                    });
-                    len = aes.Update(c.cipher, c.cipher.Length, result);
-                    Assert.IsTrue(len == c.plain.Length);
-                    Assert.IsTrue(result.Take(len).SequenceEqual(c.plain));
+                        aes.InitForDecryption(c.key, new SymmetricCipherParameters
+                        {
+                            Mode = BlockCipherMode.ECB
+                        });
+                        int len = aes.Update(c.cipher, c.cipher.Length, result);
+                        Assert.IsTrue(len == c.plain.Length);
+                        Assert.IsTrue(result.Take(len).SequenceEqual(c.plain));
+                    }
                 }
             }
         }
@@ -85,26 +89,30 @@ namespace Zergatul.Security.Tests.SymmetricCipher
                 foreach (var c in cases)
                 {
                     // Encrypt
-                    var aes = provider.GetSymmetricCipher(SymmetricCiphers.AES);
-                    aes.InitForEncryption(c.key, new SymmetricCipherParameters
+                    using (var aes = provider.GetSymmetricCipher(SymmetricCiphers.AES))
                     {
-                        Mode = BlockCipherMode.CBC,
-                        IV = c.iv
-                    });
-                    int len = aes.Update(c.plain, c.plain.Length, result);
-                    Assert.IsTrue(len == c.cipher.Length);
-                    Assert.IsTrue(result.Take(len).SequenceEqual(c.cipher));
+                        aes.InitForEncryption(c.key, new SymmetricCipherParameters
+                        {
+                            Mode = BlockCipherMode.CBC,
+                            IV = c.iv
+                        });
+                        int len = aes.Update(c.plain, c.plain.Length, result);
+                        Assert.IsTrue(len == c.cipher.Length);
+                        Assert.IsTrue(result.Take(len).SequenceEqual(c.cipher));
+                    }
 
                     // Decrypt
-                    aes = provider.GetSymmetricCipher(SymmetricCiphers.AES);
-                    aes.InitForDecryption(c.key, new SymmetricCipherParameters
+                    using (var aes = provider.GetSymmetricCipher(SymmetricCiphers.AES))
                     {
-                        Mode = BlockCipherMode.CBC,
-                        IV = c.iv
-                    });
-                    len = aes.Update(c.cipher, c.cipher.Length, result);
-                    Assert.IsTrue(len == c.plain.Length);
-                    Assert.IsTrue(result.Take(len).SequenceEqual(c.plain));
+                        aes.InitForDecryption(c.key, new SymmetricCipherParameters
+                        {
+                            Mode = BlockCipherMode.CBC,
+                            IV = c.iv
+                        });
+                        int len = aes.Update(c.cipher, c.cipher.Length, result);
+                        Assert.IsTrue(len == 16);
+                        Assert.IsTrue(result.Take(len).SequenceEqual(c.plain));
+                    }
                 }
             }
         }

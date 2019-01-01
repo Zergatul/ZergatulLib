@@ -48,14 +48,29 @@ namespace Zergatul.Network.Http
             }
         }
 
+        public IEnumerable<Header> Headers => _headers;
+
+        internal HttpResponseStream RawBody { get; set; }
+
+        private Http1Client _client;
         private Stream _stream;
         private StringBuilder _sb;
         private List<Header> _headers;
         private byte[] _buffer;
+        private bool _keepAlive;
+        private int _timeout;
         private bool _disposed = false;
 
         public HttpResponse()
+            : this(null)
         {
+
+        }
+
+        public HttpResponse(Http1Client client)
+        {
+            _client = client;
+
             _headers = new List<Header>();
         }
 
@@ -81,76 +96,6 @@ namespace Zergatul.Network.Http
             ProcessHeaders();
         }
 
-        //private void Init()
-        //{
-        //    _readStream = new GenericMessageReadStream(_connection.Stream);
-
-        //    _message = new HttpResponseMessage();
-        //    _message.Read(_readStream, _buffer);
-
-        //    string keepAlive = _message[HttpResponseHeaders.KeepAlive];
-        //    int timeout = 0;
-        //    if (keepAlive != null)
-        //    {
-        //        var match = _paramValueList.Match(keepAlive);
-        //        if (!match.Success)
-        //            throw new InvalidOperationException();
-        //        int count = match.Groups["param"].Captures.Count;
-        //        for (int i = 0; i < count; i++)
-        //        {
-        //            if (string.Equals(match.Groups["param"].Captures[i].Value, HttpHeaderValue.Timeout, StringComparison.InvariantCultureIgnoreCase))
-        //            {
-        //                timeout = int.Parse(match.Groups["value"].Captures[i].Value);
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    var http1Connection = _connection as Http1Connection;
-        //    if (http1Connection != null)
-        //    {
-        //        if (timeout != 0)
-        //        {
-        //            http1Connection.Timer.Restart();
-        //            http1Connection.Timeout = timeout;
-        //        }
-        //        else
-        //        {
-        //            http1Connection.Timer.Reset();
-        //            http1Connection.Timeout = 0;
-        //        }
-        //    }
-
-        //    long length = -1;
-        //    string contentLength = _message[HttpResponseHeaders.ContentLength];
-        //    if (contentLength != null)
-        //        length = long.Parse(contentLength);
-        //    bool chunked = false;
-        //    string transferEncoding = _message[HttpResponseHeaders.TransferEncoding];
-        //    if (transferEncoding != null)
-        //    {
-        //        if (transferEncoding.IndexOf(',') >= 0)
-        //            throw new NotImplementedException();
-        //        if (string.Equals(transferEncoding, HttpHeaderValue.Chunked, StringComparison.InvariantCultureIgnoreCase))
-        //        {
-        //            length = -1;
-        //            chunked = true;
-        //        }
-        //    }
-        //    _httpResponseStream = new HttpResponseStream(_readStream, chunked, length);
-        //    Stream = _httpResponseStream;
-        //    string contentEncoding = _message[HttpResponseHeaders.ContentEncoding];
-        //    if (contentEncoding != null)
-        //    {
-        //        if (string.Equals(contentEncoding, HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
-        //            Stream = new GZipStream(Stream, CompressionMode.Decompress, true);
-        //        else if (string.Equals(contentEncoding, HttpHeaderValue.Brotli, StringComparison.OrdinalIgnoreCase))
-        //            Stream = new BrotliStream(Stream, CompressionMode.Decompress);
-        //        else
-        //            throw new InvalidOperationException("Unsupported content encoding: " + contentEncoding);
-        //    }
-        //}
-
         #region IDisposable
 
         public void Dispose()
@@ -163,26 +108,11 @@ namespace Zergatul.Network.Http
         {
             if (_disposed)
                 return;
-            //var http1Connection = _connection as Http1Connection;
-            //if (disposing)
-            //{
-            //    _httpResponseStream.ReadToEnd();
-            //    if (http1Connection != null)
-            //    {
-            //        if (string.Equals(_message[HttpResponseHeaders.Connection], HttpHeaderValue.KeepAlive, StringComparison.InvariantCultureIgnoreCase))
-            //            http1Connection.Close();
-            //        else
-            //            http1Connection.CloseUnderlyingStream();
-            //    }
-            //    _disposed = true;
-            //}
-            //else
-            //{
-            //    // if dispose wasn't called, we will not keep this connection for keep-alive reuse
-            //    if (http1Connection != null)
-            //        http1Connection.CloseUnderlyingStream();
-            //    _disposed = true;
-            //}
+
+            if (disposing)
+            {
+                _client?.DisposeResponse(this, _keepAlive, _timeout);
+            }
         }
 
         ~HttpResponse()
@@ -198,6 +128,7 @@ namespace Zergatul.Network.Http
         private const string SpaceExpected = "Space symbol expected";
         private const string InvalidStatusCode = "Invalid status code";
         private const string CRLFExpected = "CRLF expected";
+        private const string SpaceOrCRLFExpected = "Space or CRLF expected";
         private const string InvalidReasonPhrase = "Invalid reason phrase";
         private const string InvalidHeaderName = "Invalid header name";
         private const string InvalidHeaderValue = "Invalid header value";
@@ -250,32 +181,44 @@ namespace Zergatul.Network.Http
             int d3 = ReadNextByte();
             if (!CharHelper.IsDigit(d3))
                 throw new HttpParseException(InvalidStatusCode);
-            if (ReadNextByte() != ' ')
-                throw new HttpParseException(SpaceExpected);
 
             Status = (HttpStatusCode)int.Parse($"{(char)d1}{(char)d2}{(char)d3}");
 
-            // parse reason phrase
-            // reason-phrase = *( HTAB / SP / VCHAR / obs-text )
-            _sb.Clear();
-            while (true)
+            int ch = ReadNextByte();
+            if (ch == ' ')
             {
-                int ch = ReadNextByte();
-                if (CharHelper.IsCR(ch))
+                // parse reason phrase
+                // reason-phrase = *( HTAB / SP / VCHAR / obs-text )
+                _sb.Clear();
+                while (true)
                 {
                     ch = ReadNextByte();
-                    if (CharHelper.IsLF(ch))
-                        break;
+                    if (CharHelper.IsCR(ch))
+                    {
+                        ch = ReadNextByte();
+                        if (CharHelper.IsLF(ch))
+                            break;
+                        else
+                            throw new HttpParseException(CRLFExpected);
+                    }
+                    if (CharHelper.IsTab(ch) || CharHelper.IsVChar(ch) || CharHelper.IsObsText(ch))
+                        _sb.Append((char)ch);
                     else
-                        throw new HttpParseException(CRLFExpected);
+                        throw new HttpParseException(InvalidReasonPhrase);
                 }
-                if (CharHelper.IsTab(ch) || CharHelper.IsVChar(ch) || CharHelper.IsObsText(ch))
-                    _sb.Append((char)ch);
-                else
-                    throw new HttpParseException(InvalidReasonPhrase);
-            }
 
-            ReasonPhase = _sb.ToString();
+                ReasonPhase = _sb.ToString();
+            }
+            else if (CharHelper.IsCR(ch))
+            {
+                ch = ReadNextByte();
+                if (!CharHelper.IsLF(ch))
+                    throw new HttpParseException(CRLFExpected);
+            }
+            else
+            {
+                throw new HttpParseException(SpaceOrCRLFExpected);
+            }
         }
 
         // copy of ParseStatusLine method
@@ -313,30 +256,44 @@ namespace Zergatul.Network.Http
             int d3 = await ReadNextByteAsync(cancellationToken);
             if (!CharHelper.IsDigit(d3))
                 throw new HttpParseException(InvalidStatusCode);
-            if (await ReadNextByteAsync(cancellationToken) != ' ')
-                throw new HttpParseException(SpaceExpected);
 
             Status = (HttpStatusCode)int.Parse($"{(char)d1}{(char)d2}{(char)d3}");
 
-            _sb.Clear();
-            while (true)
+            int ch = await ReadNextByteAsync(cancellationToken);
+            if (ch == ' ')
             {
-                int ch = await ReadNextByteAsync(cancellationToken);
-                if (CharHelper.IsCR(ch))
+                // parse reason phrase
+                // reason-phrase = *( HTAB / SP / VCHAR / obs-text )
+                _sb.Clear();
+                while (true)
                 {
                     ch = await ReadNextByteAsync(cancellationToken);
-                    if (CharHelper.IsLF(ch))
-                        break;
+                    if (CharHelper.IsCR(ch))
+                    {
+                        ch = await ReadNextByteAsync(cancellationToken);
+                        if (CharHelper.IsLF(ch))
+                            break;
+                        else
+                            throw new HttpParseException(CRLFExpected);
+                    }
+                    if (CharHelper.IsTab(ch) || CharHelper.IsVChar(ch) || CharHelper.IsObsText(ch))
+                        _sb.Append((char)ch);
                     else
-                        throw new HttpParseException(CRLFExpected);
+                        throw new HttpParseException(InvalidReasonPhrase);
                 }
-                if (CharHelper.IsTab(ch) || CharHelper.IsVChar(ch) || CharHelper.IsObsText(ch))
-                    _sb.Append((char)ch);
-                else
-                    throw new HttpParseException(InvalidReasonPhrase);
-            }
 
-            ReasonPhase = _sb.ToString();
+                ReasonPhase = _sb.ToString();
+            }
+            else if (CharHelper.IsCR(ch))
+            {
+                ch = await ReadNextByteAsync(cancellationToken);
+                if (!CharHelper.IsLF(ch))
+                    throw new HttpParseException(CRLFExpected);
+            }
+            else
+            {
+                throw new HttpParseException(SpaceOrCRLFExpected);
+            }
         }
 
         private void ParseHeaders()
@@ -501,19 +458,29 @@ namespace Zergatul.Network.Http
                 }
             }
 
-            Stream stream = new HttpResponseStream(_stream, chunked, length);
+            RawBody = new HttpResponseStream(_stream, chunked, length);
             string contentEncoding = this[HttpResponseHeaders.ContentEncoding];
             if (contentEncoding != null)
             {
                 if (string.Equals(contentEncoding, HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
-                    stream = new GZipStream(stream, CompressionMode.Decompress, true);
+                    Body = new GZipStream(RawBody, CompressionMode.Decompress, true);
                 else if (string.Equals(contentEncoding, HttpHeaderValue.Brotli, StringComparison.OrdinalIgnoreCase))
-                    stream = new BrotliStream(stream, CompressionMode.Decompress);
+                    Body = new BrotliStream(RawBody, CompressionMode.Decompress);
                 else
                     throw new InvalidOperationException("Unsupported content encoding: " + contentEncoding);
             }
+            else
+            {
+                Body = RawBody;
+            }
 
-            Body = stream;
+            _keepAlive = string.Equals(this[HttpResponseHeaders.Connection], HttpHeaderValue.KeepAlive, StringComparison.InvariantCultureIgnoreCase);
+            foreach (var pair in KeepAliveParser.Parse(this[HttpResponseHeaders.KeepAlive]))
+                if (pair.Key == "timeout")
+                {
+                    _timeout = int.Parse(pair.Value);
+                    break;
+                }
         }
 
         private int ReadNextByte()

@@ -55,7 +55,7 @@ namespace Zergatul.Cryptocurrency
 
         public byte[] ToCompressedPublicKey()
         {
-            using (var generator = Provider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
+            using (var generator = SecurityProvider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
             {
                 generator.Init(new ECKeyPairGeneratorParameters { Curve = Curves.secp256k1 });
                 var publicKey = generator.GetPublicKey(new RawPrivateKey(_data));
@@ -65,7 +65,7 @@ namespace Zergatul.Cryptocurrency
 
         public byte[] ToUncompressedPublicKey()
         {
-            using (var generator = Provider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
+            using (var generator = SecurityProvider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
             {
                 generator.Init(new ECKeyPairGeneratorParameters { Curve = Curves.secp256k1 });
                 var publicKey = generator.GetPublicKey(new RawPrivateKey(_data));

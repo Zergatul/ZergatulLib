@@ -25,7 +25,7 @@ namespace Zergatul.Cryptocurrency.Base
 
             _privateKey = key;
 
-            using (var generator = Provider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
+            using (var generator = SecurityProvider.GetKeyPairGeneratorInstance(KeyPairGenerators.EC))
             {
                 generator.Init(new ECKeyPairGeneratorParameters { Curve = Curves.secp256k1 });
                 var publicKey = generator.GetPublicKey(new RawPrivateKey(key));

@@ -8,7 +8,7 @@ namespace Zergatul.Network.Http
     public class Http1Client : IDisposable
     {
         private readonly Proxy.ProxyBase _proxy;
-        private readonly Provider _provider;
+        private readonly NetworkProvider _provider;
         private readonly Dictionary<ConnectionGroup, List<ConnectionInfo>> _connections;
         private bool _disposed;
 
@@ -19,12 +19,12 @@ namespace Zergatul.Network.Http
         }
 
         public Http1Client(Proxy.ProxyBase proxy)
-            : this(proxy, new DefaultProvider())
+            : this(proxy, new DefaultNetworkProvider())
         {
 
         }
 
-        public Http1Client(Proxy.ProxyBase proxy, Provider provider)
+        public Http1Client(Proxy.ProxyBase proxy, NetworkProvider provider)
         {
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));
@@ -45,10 +45,51 @@ namespace Zergatul.Network.Http
             request.WriteTo(connection.Stream);
             connection.Stream.Flush();
 
-            var response = new HttpResponse();
+            var response = new HttpResponse(this);
             response.ReadFrom(connection.Stream);
+            connection.LastResponse = response;
             return response;
         }
+
+        #region Internal methods
+
+        internal void DisposeResponse(HttpResponse response, bool keepAlive, int timeout)
+        {
+            List<ConnectionInfo> list = null;
+            ConnectionInfo connection = null;
+            lock (_connections)
+                foreach (var @group in _connections)
+                {
+                    lock (group.Value)
+                        foreach (var con in group.Value)
+                            if (con.LastResponse == response)
+                            {
+                                list = group.Value;
+                                connection = con;
+                                break;
+                            }
+
+                    if (list != null)
+                        break;
+                }
+
+            if (list == null || connection == null)
+                throw new InvalidOperationException();
+
+            if (keepAlive && response.RawBody.EndOfStream)
+            {
+                connection.InUse = false;
+                connection.Timeout = timeout;
+            }
+            else
+            {
+                lock (list)
+                    list.Remove(connection);
+                connection.Stream.Close();
+            }
+        }
+
+        #endregion
 
         #region Private methods
 
@@ -197,6 +238,7 @@ namespace Zergatul.Network.Http
             public int Timeout;
             public DateTime LastUse;
             public Stream Stream;
+            public HttpResponse LastResponse;
         }
 
         #endregion

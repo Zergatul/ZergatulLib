@@ -40,6 +40,9 @@ namespace Zergatul.Security.OpenSsl
 
             _position = (_position + inputLength) & 0x0F;
 
+            if (_padding == null)
+                return outputLength;
+
             if (!_enc && outputLength >= 16)
             {
                 if (_hasLastBlock)

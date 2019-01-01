@@ -24,6 +24,18 @@ namespace Zergatul.Network.Http
             _chunkReadState = ChunkReadState.ReadChunkLength;
         }
 
+        public bool EndOfStream
+        {
+            get
+            {
+                if (_chunked)
+                    return _chunkReadState == ChunkReadState.End;
+                if (_length >= 0)
+                    return _length == _position;
+                return false;
+            }
+        }
+
         #region Stream overrides
 
         public override bool CanRead => true;
@@ -234,7 +246,7 @@ namespace Zergatul.Network.Http
 
         #region Private constants
 
-        private const string EndOfStream = "Unexpected end of stream";
+        private const string UnexpectedEndOfStream = "Unexpected end of stream";
         private const string InvalidChunkLength = "Invalid chunk length";
         private const string InvalidChunkEnding = "Chunk must end with CRLF";
         private const string InvalidEnding = "Expected CRLF after chunk with length 0";
@@ -247,7 +259,7 @@ namespace Zergatul.Network.Http
         {
             int result = _innerStream.ReadByte();
             if (result == -1)
-                throw new HttpParseException(EndOfStream);
+                throw new HttpParseException(UnexpectedEndOfStream);
             return result;
         }
 
@@ -258,7 +270,7 @@ namespace Zergatul.Network.Http
 
             int read = await _innerStream.ReadAsync(_buffer, 0, 1, cancellationToken);
             if (read == 0)
-                throw new HttpParseException(EndOfStream);
+                throw new HttpParseException(UnexpectedEndOfStream);
             return _buffer[0];
         }
 

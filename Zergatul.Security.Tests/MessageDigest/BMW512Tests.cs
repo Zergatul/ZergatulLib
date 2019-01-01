@@ -9,9 +9,9 @@ namespace Zergatul.Security.Tests.MessageDigest
     [TestClass]
     public class BMW512Tests
     {
-        private static Provider[] _providers = new Provider[]
+        private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultProvider()
+            new DefaultSecurityProvider()
         };
 
         [TestMethod]

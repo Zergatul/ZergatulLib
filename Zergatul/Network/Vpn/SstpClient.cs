@@ -6,17 +6,17 @@ namespace Zergatul.Network.Vpn
 {
     public class SstpClient : IDisposable
     {
-        private Provider _provider;
+        private NetworkProvider _provider;
         private Stream _stream;
         private Guid _correlationId;
 
         public SstpClient()
-            : this(new DefaultProvider())
+            : this(new DefaultNetworkProvider())
         {
 
         }
 
-        public SstpClient(Provider provider)
+        public SstpClient(NetworkProvider provider)
         {
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));

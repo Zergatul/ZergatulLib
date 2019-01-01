@@ -236,7 +236,7 @@ namespace Zergatul.Cryptocurrency.Base
 
                 var prevOutput = PrevTransaction.GetOutputs().ElementAt(PrevTxOutIndex);
 
-                using (var sha256 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+                using (var sha256 = SecurityProvider.GetMessageDigestInstance(MessageDigests.SHA256))
                 {
                     sha256.Update(BitHelper.GetBytes(Transaction.Version, ByteOrder.LittleEndian));
 
@@ -260,7 +260,7 @@ namespace Zergatul.Cryptocurrency.Base
                     sha256.Update(BitHelper.GetBytes(Transaction.LockTime, ByteOrder.LittleEndian));
                     sha256.Update(BitHelper.GetBytes(hashType, ByteOrder.LittleEndian));
 
-                    using (var sha256inner = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
+                    using (var sha256inner = SecurityProvider.GetMessageDigestInstance(MessageDigests.SHA256))
                         return sha256inner.Digest(sha256.Digest());
                 }
             }

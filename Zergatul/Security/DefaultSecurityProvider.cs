@@ -2,11 +2,11 @@
 
 namespace Zergatul.Security
 {
-    public class DefaultProvider : Provider
+    public class DefaultSecurityProvider : SecurityProvider
     {
         public override string Name => "Default";
 
-        public DefaultProvider()
+        public DefaultSecurityProvider()
         {
             RegisterKeyDerivationFunction(KeyDerivationFunctions.PBKDF2, () => new PBKDF2());
             RegisterKeyDerivationFunction(KeyDerivationFunctions.Scrypt, () => new Scrypt());

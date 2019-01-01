@@ -6,7 +6,7 @@ namespace Zergatul.Security.Tests.MessageDigest
     [TestClass]
     public class MD2Tests
     {
-        private static Provider[] _providers = new Provider[]
+        private static SecurityProvider[] _providers = new SecurityProvider[]
         {
             new OpenSslProvider()
         };

@@ -270,7 +270,7 @@
     <Compile Include="Network\Asn1\VisibleString.cs" />
     <Compile Include="Network\CharHelper.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
-    <Compile Include="Network\DefaultProvider.cs" />
+    <Compile Include="Network\DefaultNetworkProvider.cs" />
     <Compile Include="Network\DefaultTlsProvider.cs" />
     <Compile Include="Network\Ftp\FtpServer.cs" />
     <Compile Include="Network\Ftp\FtpServerConnection.cs" />
@@ -312,6 +312,7 @@
     <Compile Include="Network\Http\HttpResponseMessage.cs" />
     <Compile Include="Network\Http\HttpResponseStream.cs" />
     <Compile Include="Network\Http\HttpStatusCode.cs" />
+    <Compile Include="Network\Http\KeepAliveParser.cs" />
     <Compile Include="Network\ITlsProvider.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcClient.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcTransport.cs" />
@@ -377,7 +378,7 @@
     <Compile Include="Network\NotSupportedByProtocolException.cs" />
     <Compile Include="Network\OIDInfoResolver.cs" />
     <Compile Include="Network\OIDs.cs" />
-    <Compile Include="Network\Provider.cs" />
+    <Compile Include="Network\NetworkProvider.cs" />
     <Compile Include="Network\Proxy\ChainProxy.cs" />
     <Compile Include="Network\Proxy\HttpProxy.cs" />
     <Compile Include="Network\Proxy\HttpsProxy.cs" />
@@ -570,7 +571,7 @@
     <Compile Include="Security\MessageDigest.cs" />
     <Compile Include="Security\MessageDigests.cs" />
     <Compile Include="Security\OpenSslProvider.cs" />
-    <Compile Include="Security\DefaultProvider.cs" />
+    <Compile Include="Security\DefaultSecurityProvider.cs" />
     <Compile Include="Security\OpenSsl\AbstractMessageDigest.cs" />
     <Compile Include="Security\OpenSsl\MD5.cs" />
     <Compile Include="Security\Padding.cs" />
@@ -579,7 +580,7 @@
     <Compile Include="Security\PBKDF2Base.cs" />
     <Compile Include="Security\PBKDF2Parameters.cs" />
     <Compile Include="Security\PrivateKey.cs" />
-    <Compile Include="Security\Provider.cs" />
+    <Compile Include="Security\SecurityProvider.cs" />
     <Compile Include="Security\PublicKey.cs" />
     <Compile Include="Security\RawPrivateKey.cs" />
     <Compile Include="Security\RawPublicKey.cs" />

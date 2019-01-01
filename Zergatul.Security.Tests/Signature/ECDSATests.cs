@@ -9,9 +9,9 @@ namespace Zergatul.Security.Tests.Signature
     [TestClass]
     public class ECDSATests
     {
-        private static Provider[] _providers = new Provider[]
+        private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultProvider(),
+            new DefaultSecurityProvider(),
             new OpenSslProvider()
         };
 

@@ -33,7 +33,7 @@ namespace Zergatul.Network.Tests.WebSocket
             buffer = BitHelper.HexToBytes(frame);
             server.Write(buffer, 0, buffer.Length);
 
-            var mock = new Mock<Provider>();
+            var mock = new Mock<NetworkProvider>();
             mock.Setup(p => p.GetTcpStream("example.com", 80, null)).Returns(client);
 
             var ws = new WebSocketClient(new Uri("ws://example.com/service"), mock.Object);

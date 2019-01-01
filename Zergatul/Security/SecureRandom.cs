@@ -25,6 +25,6 @@ namespace Zergatul.Security
             Dispose(false);
         }
 
-        public static SecureRandom GetInstance(string algorithm) => Provider.GetSecureRandomInstance(algorithm);
+        public static SecureRandom GetInstance(string algorithm) => SecurityProvider.GetSecureRandomInstance(algorithm);
     }
 }

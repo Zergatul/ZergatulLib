@@ -6,8 +6,8 @@ namespace Zergatul.Cryptocurrency
     {
         public static byte[] Hash(byte[] data)
         {
-            using (var sha256 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
-            using (var ripemd = Provider.GetMessageDigestInstance(MessageDigests.RIPEMD160))
+            using (var sha256 = SecurityProvider.GetMessageDigestInstance(MessageDigests.SHA256))
+            using (var ripemd = SecurityProvider.GetMessageDigestInstance(MessageDigests.RIPEMD160))
             {
                 return ripemd.Digest(sha256.Digest(data));
             }
@@ -15,8 +15,8 @@ namespace Zergatul.Cryptocurrency
 
         public static byte[] Hash(params byte[][] data)
         {
-            using (var sha256 = Provider.GetMessageDigestInstance(MessageDigests.SHA256))
-            using (var ripemd = Provider.GetMessageDigestInstance(MessageDigests.RIPEMD160))
+            using (var sha256 = SecurityProvider.GetMessageDigestInstance(MessageDigests.SHA256))
+            using (var ripemd = SecurityProvider.GetMessageDigestInstance(MessageDigests.RIPEMD160))
             {
                 foreach (byte[] array in data)
                     sha256.Update(array);

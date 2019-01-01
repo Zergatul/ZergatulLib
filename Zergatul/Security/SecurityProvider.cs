@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Zergatul.Security
 {
-    public abstract class Provider
+    public abstract class SecurityProvider
     {
         #region Instance
 
@@ -141,22 +141,22 @@ namespace Zergatul.Security
 
         #region Static
 
-        private static List<Provider> _providers;
-        public static IReadOnlyList<Provider> Providers { get; private set; }
-        public static Provider Default => _providers.Count == 0 ? null : _providers[0];
+        private static List<SecurityProvider> _providers;
+        public static IReadOnlyList<SecurityProvider> Providers { get; private set; }
+        public static SecurityProvider Default => _providers.Count == 0 ? null : _providers[0];
 
-        static Provider()
+        static SecurityProvider()
         {
-            _providers = new List<Provider>();
+            _providers = new List<SecurityProvider>();
             Providers = _providers.AsReadOnly();
 
-            Register(new DefaultProvider());
+            Register(new DefaultSecurityProvider());
             Register(new DotNetProvider());
             Register(new OpenSslProvider());
             Register(new BouncyCastleProvider());
         }
 
-        public static Provider Get(string name)
+        public static SecurityProvider Get(string name)
         {
             return _providers.SingleOrDefault(p => string.Equals(p.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
@@ -251,9 +251,9 @@ namespace Zergatul.Security
             return null;
         }
 
-        public static void Register(Provider provider) => Register(provider, int.MaxValue);
+        public static void Register(SecurityProvider provider) => Register(provider, int.MaxValue);
 
-        public static void Register(Provider provider, int index)
+        public static void Register(SecurityProvider provider, int index)
         {
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));

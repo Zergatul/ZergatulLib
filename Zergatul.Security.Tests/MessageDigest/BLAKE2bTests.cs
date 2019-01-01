@@ -10,9 +10,9 @@ namespace Zergatul.Security.Tests.MessageDigest
     [TestClass]
     public class BLAKE2bTests
     {
-        private static Provider[] _providers = new Provider[]
+        private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultProvider()
+            new DefaultSecurityProvider()
         };
 
         [TestMethod]

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Security
 {
-    public class BouncyCastleProvider : Provider
+    public class BouncyCastleProvider : SecurityProvider
     {
         public override string Name => "BC";
     }

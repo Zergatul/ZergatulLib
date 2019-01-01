@@ -2,7 +2,7 @@
 
 namespace Zergatul.Security
 {
-    public class OpenSslProvider : Provider
+    public class OpenSslProvider : SecurityProvider
     {
         public override string Name => "OpenSSL";
 

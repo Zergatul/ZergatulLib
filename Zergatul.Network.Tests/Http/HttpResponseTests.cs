@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -78,6 +77,53 @@ namespace Zergatul.Network.Tests.Http
 
             ms.Close();
             response.Dispose();
+        }
+
+        const string EmptyReasonPhraseResponse =
+            "HTTP/1.1 404\r\n" +
+            "Server: nginx/1.8.0\r\n" +
+            "Date: Tue, 01 Jan 2019 15:50:24 GMT\r\n" +
+            "Content-Type: application/json\r\n" +
+            "Transfer-Encoding: chunked\r\n" +
+            "Connection: keep-alive\r\n" +
+            "Expires: Thu, 19 Nov 1981 08:52:00 GMT\r\n" +
+            "Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0\r\n" +
+            "Pragma: no-cache\r\n" +
+            "\r\n" +
+            "6\r\n" +
+            "errors\r\n" +
+            "0\r\n" +
+            "\r\n";
+
+        [TestMethod]
+        public void EmptyReasonPhraseTest()
+        {
+            var ms = new MemoryStream(Encoding.ASCII.GetBytes(EmptyReasonPhraseResponse));
+            var response = new HttpResponse();
+            response.ReadFrom(ms);
+
+            Assert.IsTrue(response.Version == "HTTP/1.1");
+            Assert.IsTrue(response.Status == HttpStatusCode.NotFound);
+            Assert.IsTrue(response.ReasonPhase == null);
+
+            string data = new StreamReader(response.Body, Encoding.UTF8).ReadToEnd();
+            Assert.IsTrue(data == "errors");
+        }
+
+        [TestMethod]
+        public async Task EmptyReasonPhraseAsyncTest()
+        {
+            var ms = new AsyncMemoryStream(Encoding.ASCII.GetBytes(EmptyReasonPhraseResponse), 10);
+            var response = new HttpResponse();
+            await response.ReadFromAsync(ms, CancellationToken.None);
+
+            Assert.IsTrue(response.Version == "HTTP/1.1");
+            Assert.IsTrue(response.Status == HttpStatusCode.NotFound);
+            Assert.IsTrue(response.ReasonPhase == null);
+
+            var sr = new StreamReader(response.Body, Encoding.UTF8);
+            string data = await sr.ReadToEndAsync();
+            Assert.IsTrue(data == "errors");
         }
     }
 }

@@ -52,6 +52,6 @@ namespace Zergatul.Security
             Dispose(false);
         }
 
-        public static MessageDigest GetInstance(string algorithm) => Provider.GetMessageDigestInstance(algorithm);
+        public static MessageDigest GetInstance(string algorithm) => SecurityProvider.GetMessageDigestInstance(algorithm);
     }
 }

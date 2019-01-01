@@ -40,7 +40,7 @@ namespace Zergatul.Network.Http
 
         private Uri _uri;
         private readonly Proxy.ProxyBase _proxy;
-        private readonly Provider _provider;
+        private readonly NetworkProvider _provider;
         private Stream _stream;
         private Http2Connection _connection;
         private State _state;
@@ -60,12 +60,12 @@ namespace Zergatul.Network.Http
         }
 
         public Http2Client(Uri uri, Proxy.ProxyBase proxy)
-            : this(uri, proxy, new DefaultProvider())
+            : this(uri, proxy, new DefaultNetworkProvider())
         {
             
         }
 
-        public Http2Client(Uri uri, Proxy.ProxyBase proxy, Provider provider)
+        public Http2Client(Uri uri, Proxy.ProxyBase proxy, NetworkProvider provider)
         {
             if (uri.Query != "")
                 throw new ArgumentException(nameof(uri));

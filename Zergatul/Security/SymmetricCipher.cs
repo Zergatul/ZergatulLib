@@ -23,6 +23,6 @@ namespace Zergatul.Security
             
         }
 
-        public static SymmetricCipher GetInstance(string algorithm) => Provider.GetSymmetricCipherInstance(algorithm);
+        public static SymmetricCipher GetInstance(string algorithm) => SecurityProvider.GetSymmetricCipherInstance(algorithm);
     }
 }

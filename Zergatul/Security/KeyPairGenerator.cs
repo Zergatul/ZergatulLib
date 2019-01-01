@@ -27,6 +27,6 @@ namespace Zergatul.Security
             Dispose(false);
         }
 
-        public static KeyPairGenerator GetInstance(string algorithm) => Provider.GetKeyPairGeneratorInstance(algorithm);
+        public static KeyPairGenerator GetInstance(string algorithm) => SecurityProvider.GetKeyPairGeneratorInstance(algorithm);
     }
 }

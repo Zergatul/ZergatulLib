@@ -28,6 +28,6 @@ namespace Zergatul.Security
             Dispose(false);
         }
 
-        public static Signature GetInstance(string algorithm) => Provider.GetSignatureInstance(algorithm);
+        public static Signature GetInstance(string algorithm) => SecurityProvider.GetSignatureInstance(algorithm);
     }
 }

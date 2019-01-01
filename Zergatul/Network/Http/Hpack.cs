@@ -247,8 +247,13 @@ namespace Zergatul.Network.Http
                 }
                 else if ((octet & 0x20) != 0)
                 {
-                    // Dynamic Table Size Update
-                    throw new NotImplementedException();
+                    int index = octet & 0x1F;
+                    index = DecodeInteger(stream, 5, index);
+                    if (index > _maxTableSize)
+                        throw new HpackDecodingException();
+
+                    _dynamicTableCount = index;
+                    ShrinkDynamicTableIfNecessary();
                 }
                 else if ((octet & 0x10) != 0)
                 {
@@ -443,7 +448,11 @@ namespace Zergatul.Network.Http
                 _dynamicTableCount--;
             }
 
-            // shrink dynamic table
+            ShrinkDynamicTableIfNecessary();
+        }
+
+        private void ShrinkDynamicTableIfNecessary()
+        {
             if (_dynamicTable.Count - _dynamicTableCount >= 256)
                 _dynamicTable.RemoveRange(0, 256);
         }

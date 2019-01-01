@@ -10,7 +10,7 @@ namespace Zergatul.Cryptocurrency
 
         public SecureRandomWrapper()
         {
-            _random = Provider.GetSecureRandomInstance(SecureRandoms.Default);
+            _random = SecurityProvider.GetSecureRandomInstance(SecureRandoms.Default);
         }
 
         public void GetBytes(byte[] data)

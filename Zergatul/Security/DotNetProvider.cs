@@ -2,7 +2,7 @@
 
 namespace Zergatul.Security
 {
-    public class DotNetProvider : Provider
+    public class DotNetProvider : SecurityProvider
     {
         public override string Name => ".NET";
 

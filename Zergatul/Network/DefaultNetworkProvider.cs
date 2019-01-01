@@ -6,7 +6,7 @@ using Zergatul.Network.Proxy;
 
 namespace Zergatul.Network
 {
-    public class DefaultProvider : Provider
+    public class DefaultNetworkProvider : NetworkProvider
     {
         public override Stream GetTcpStream(string host, int port, ProxyBase proxy)
         {
@@ -26,7 +26,7 @@ namespace Zergatul.Network
 
         public override IPAddress[] DnsResolve(string host)
         {
-            return System.Net.Dns.GetHostAddresses(host);
+            return Dns.GetHostAddresses(host);
         }
     }
 }

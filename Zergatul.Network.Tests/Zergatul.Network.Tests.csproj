@@ -64,6 +64,7 @@
     <Compile Include="Http\HttpResponseStreamTests.cs" />
     <Compile Include="Http\HttpResponseTests.cs" />
     <Compile Include="Http\HpackTests.cs" />
+    <Compile Include="Http\KeepAliveParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WebSocket\WebSocketClientTests.cs" />
   </ItemGroup>

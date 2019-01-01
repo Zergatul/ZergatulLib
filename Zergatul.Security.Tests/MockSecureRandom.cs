@@ -13,12 +13,12 @@ namespace Zergatul.Security.Tests
         {
             public Disposable(byte[] data)
             {
-                Provider.Register(new MockSecureRandomProvider(data), 0);
+                SecurityProvider.Register(new MockSecureRandomProvider(data), 0);
             }
 
             public void Dispose()
             {
-                Provider.Unregister(0);
+                SecurityProvider.Unregister(0);
             }
         }
 
@@ -50,7 +50,7 @@ namespace Zergatul.Security.Tests
             }
         }
 
-        private class MockSecureRandomProvider : Provider
+        private class MockSecureRandomProvider : SecurityProvider
         {
             public override string Name => nameof(MockSecureRandomProvider);
 

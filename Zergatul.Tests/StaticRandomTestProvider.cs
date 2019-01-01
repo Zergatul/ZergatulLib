@@ -3,7 +3,7 @@ using Zergatul.Security;
 
 namespace Zergatul.Tests
 {
-    public class StaticRandomTestProvider : Provider
+    public class StaticRandomTestProvider : SecurityProvider
     {
         public override string Name => "StaticRandomTest";
 

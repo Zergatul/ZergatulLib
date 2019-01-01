@@ -17,7 +17,7 @@ namespace Zergatul.Network.WebSocket
         }
 
         private Uri _uri;
-        private Provider _provider;
+        private NetworkProvider _provider;
         private Stream _stream;
         private HttpRequest _request;
         private Random _random;
@@ -29,12 +29,12 @@ namespace Zergatul.Network.WebSocket
         }
 
         public WebSocketClient(Uri uri)
-            : this(uri, new DefaultProvider())
+            : this(uri, new DefaultNetworkProvider())
         {
 
         }
 
-        public WebSocketClient(Uri uri, Provider provider)
+        public WebSocketClient(Uri uri, NetworkProvider provider)
         {
             if (uri == null)
                 throw new ArgumentNullException(nameof(uri));

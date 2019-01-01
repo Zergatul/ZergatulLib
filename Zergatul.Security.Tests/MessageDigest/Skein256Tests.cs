@@ -8,9 +8,9 @@ namespace Zergatul.Security.Tests.MessageDigest
     [TestClass]
     public class Skein256Tests
     {
-        private static Provider[] _providers = new Provider[]
+        private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultProvider()
+            new DefaultSecurityProvider()
         };
 
         [TestMethod]
