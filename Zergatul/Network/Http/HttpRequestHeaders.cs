@@ -17,6 +17,7 @@
         public const string Accept = "Accept";
         public const string AcceptEncoding = "Accept-Encoding";
         public const string AcceptLanguage = "Accept-Language";
+        public const string ContentLength = "Content-Length";
         public const string ContentType = "Content-Type";
         public const string Cookie = "Cookie";
         public const string Host = "Host";
