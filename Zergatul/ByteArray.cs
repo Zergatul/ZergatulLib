@@ -133,6 +133,27 @@ namespace Zergatul
             return true;
         }
 
+        public static int IndexOf(byte[] array1, int offset, int length, byte[] array2)
+        {
+            if (array1 == null || array2 == null)
+                throw new ArgumentNullException();
+            if (array1.Length - offset < array2.Length)
+                return -1;
+            for (int i = offset; i < offset + length - array2.Length; i++)
+            {
+                bool match = true;
+                for (int j = 0; j < array2.Length; j++)
+                    if (array1[i + j] != array2[j])
+                    {
+                        match = false;
+                        break;
+                    }
+                if (match)
+                    return i;
+            }
+            return -1;
+        }
+
         public static bool Contains(byte[] array1, byte[] array2)
         {
             for (int i = 0; i <= array1.Length - array1.Length; i++)

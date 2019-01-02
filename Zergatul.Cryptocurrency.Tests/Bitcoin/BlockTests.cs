@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Cryptocurrency.Bitcoin;
 using System.IO;
 using System.Linq;
+using Zergatul.Security;
 
 namespace Zergatul.Cryptocurrency.Tests.Bitcoin
 {
@@ -171,6 +172,9 @@ namespace Zergatul.Cryptocurrency.Tests.Bitcoin
         [ClassInitialize]
         public static void Init(TestContext context)
         {
+            //Provider.UnregisterAll();
+            //Provider.Register(new OpenSslProvider());
+
             _repository = new SimpleTransactionRepository<Transaction>("Bitcoin/Transactions.txt");
         }
     }

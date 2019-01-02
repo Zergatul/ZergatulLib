@@ -54,7 +54,7 @@ namespace Zergatul.Network.Proxy
         {
             if (ResolveDnsLocally)
             {
-                var addresses = Dns.GetHostAddresses(hostname);
+                var addresses = global::System.Net.Dns.GetHostAddresses(hostname);
                 return CreateConnection(addresses[0], port, tcp);
             }
 
@@ -96,5 +96,26 @@ namespace Zergatul.Network.Proxy
                     throw new Socks4Exception("Server response: unknown reply");
             }
         }
+
+        #region System.Object overrides
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as Socks4;
+            if (other == null)
+                return false;
+
+            return
+                this.ServerAddress == other.ServerAddress &&
+                this.ServerHostName == other.ServerHostName &&
+                this.ServerPort == other.ServerPort;
+        }
+
+        public override int GetHashCode()
+        {
+            return 0x2BC9589A ^ base.GetHashCode();
+        }
+
+        #endregion
     }
 }

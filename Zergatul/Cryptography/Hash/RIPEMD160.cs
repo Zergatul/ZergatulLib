@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using Zergatul.Network;
+using Zergatul.Cryptography.Hash.Base;
 
 namespace Zergatul.Cryptography.Hash
 {
-#if !UseOpenSSL
-
     public class RIPEMD160 : RIPEMD
     {
         public override int HashSize => 20;
@@ -71,20 +68,4 @@ namespace Zergatul.Cryptography.Hash
             }
         }
     }
-
-#else
-
-    public class RIPEMD160 : AbstractOpenSSLHash
-    {
-        public override int BlockSize => 64;
-        public override int HashSize => 20;
-        public override OID OID => null;
-
-        protected override int GetContextSize() => Marshal.SizeOf(typeof(OpenSSL.RIPEMD160_CTX));
-        protected override void ContextInit() => OpenSSL.RIPEMD160_Init(_context);
-        protected override void ContextUpdate(byte[] data) => OpenSSL.RIPEMD160_Update(_context, data, data.Length);
-        protected override void ContextFinal(byte[] digest) => OpenSSL.RIPEMD160_Final(digest, _context);
-    }
-
-#endif
 }

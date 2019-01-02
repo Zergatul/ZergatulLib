@@ -50,6 +50,19 @@ namespace Zergatul.Cryptocurrency.Tests.Verge
             Assert.IsTrue(tx.FeeXVG == 0.1m);
         }
 
+        [TestMethod]
+        public void Test3()
+        {
+            var tx = _repository.GetTransaction("7c42e70856327d271681c393b0cd6ebf568e21c058d24207f80a797673a65452");
+
+            Assert.IsTrue(tx.Inputs[0].Address.Value == "DAGxUUS2byrUctdvSiQjahKWav5XavPsSv");
+
+            Assert.IsTrue(tx.Outputs[0].Address.Value == "DA2HEUPWgWVoxP5BZ3rj39cRVs6xtRQUTP" && tx.Outputs[0].AmountXVG == 21.20100400m);
+            Assert.IsTrue(tx.Outputs[1].Address.Value == "DF4NdEeV57TzwSEuDohjVCFTxyfavxkeQv" && tx.Outputs[1].AmountXVG == 10.03545200m);
+
+            Assert.IsTrue(tx.Verify(_repository));
+        }
+
         [ClassInitialize]
         public static void InitRepository(TestContext context)
         {

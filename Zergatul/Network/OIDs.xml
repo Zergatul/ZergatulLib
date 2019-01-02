@@ -50,35 +50,35 @@
           </oid>
           <oid value="3" id="curves" class="Curves" desc="ANSI X9.62 named elliptic curves">
             <oid value="0" id="characteristicTwo" class="Char2" desc="Characteristic two curve">
-              <oid value="1" id="c2pnb163v1" class="C2pnb163v1" desc="PolyNomial Basis (PNB) 163 V1" />
-              <oid value="2" id="c2pnb163v2" class="C2pnb163v2" desc="PolyNomial Basis (PNB) 163 V2" />
-              <oid value="3" id="c2pnb163v3" class="C2pnb163v3" desc="PolyNomial Basis (PNB) 163 V3" />
-              <oid value="4" id="c2pnb176w1" class="C2pnb176w1" desc="PolyNomial Basis (PNB) 176 W1" />
-              <oid value="5" id="c2tnb191v1" class="C2tnb191v1" desc="Tangent-Normal-Binormal (TNB) 191 V1" />
-              <oid value="6" id="c2tnb191v2" class="C2tnb191v2" desc="Tangent-Normal-Binormal (TNB) 191 V2" />
-              <oid value="7" id="c2tnb191v3" class="C2tnb191v3" desc="Tangent-Normal-Binormal (TNB) 191 V3" />
-              <oid value="8" id="c2onb191v4" class="C2onb191v4" desc="Optimal Normal Base (ONB) 191 V4" />
-              <oid value="9" id="c2onb191v5" class="C2onb191v5" desc="Optimal Normal Base (ONB) 191 V5" />
-              <oid value="10" id="c2pnb208w1" class="C2pnb208w1" desc="PolyNomial Basis (PNB) 208 W1" />
-              <oid value="11" id="c2tnb239v1" class="C2tnb239v1" desc="&quot;TNB&quot; 239 V1" />
-              <oid value="12" id="c2tnb239v2" class="C2tnb239v2" desc="&quot;TNB&quot; 239 V2" />
-              <oid value="13" id="c2tnb239v3" class="C2tnb239v3" desc="&quot;TNB&quot; 239 V3" />
-              <oid value="14" id="c2onb239v4" class="C2onb239v4" desc="Optimal Normal Base (ONB) 239 V4" />
-              <oid value="15" id="c2onb239v5" class="C2onb239v5" desc="Optimal Normal Base (ONB) 239 V5" />
-              <oid value="16" id="c2pnb272W1" class="C2pnb272W1" desc="PolyNomial Basis (PNB) 272 W1" />
-              <oid value="17" id="c2pnb304W1" class="C2pnb304W1" desc="PolyNomial Basis (PNB) 304 W1" />
-              <oid value="18" id="c2tnb359v1" class="C2tnb359v1" desc="&quot;TNB&quot; 359 V1" />
-              <oid value="19" id="c2pnb368w1" class="C2pnb368w1" desc="PolyNomial Basis (PNB) 368 W1" />
-              <oid value="20" id="c2tnb431r1" class="C2tnb431r1" desc="Tangent-Normal-Binormal (TNB) 431 R1" />
+              <oid value="1" id="c2pnb163v1" class="c2pnb163v1" desc="PolyNomial Basis (PNB) 163 V1" />
+              <oid value="2" id="c2pnb163v2" class="c2pnb163v2" desc="PolyNomial Basis (PNB) 163 V2" />
+              <oid value="3" id="c2pnb163v3" class="c2pnb163v3" desc="PolyNomial Basis (PNB) 163 V3" />
+              <oid value="4" id="c2pnb176v1" class="c2pnb176v1" desc="PolyNomial Basis (PNB) 176 W1" />
+              <oid value="5" id="c2tnb191v1" class="c2tnb191v1" desc="Tangent-Normal-Binormal (TNB) 191 V1" />
+              <oid value="6" id="c2tnb191v2" class="c2tnb191v2" desc="Tangent-Normal-Binormal (TNB) 191 V2" />
+              <oid value="7" id="c2tnb191v3" class="c2tnb191v3" desc="Tangent-Normal-Binormal (TNB) 191 V3" />
+              <oid value="8" id="c2onb191v4" class="c2onb191v4" desc="Optimal Normal Base (ONB) 191 V4" />
+              <oid value="9" id="c2onb191v5" class="c2onb191v5" desc="Optimal Normal Base (ONB) 191 V5" />
+              <oid value="10" id="c2pnb208w1" class="c2pnb208w1" desc="PolyNomial Basis (PNB) 208 W1" />
+              <oid value="11" id="c2tnb239v1" class="c2tnb239v1" desc="&quot;TNB&quot; 239 V1" />
+              <oid value="12" id="c2tnb239v2" class="c2tnb239v2" desc="&quot;TNB&quot; 239 V2" />
+              <oid value="13" id="c2tnb239v3" class="c2tnb239v3" desc="&quot;TNB&quot; 239 V3" />
+              <oid value="14" id="c2onb239v4" class="c2onb239v4" desc="Optimal Normal Base (ONB) 239 V4" />
+              <oid value="15" id="c2onb239v5" class="c2onb239v5" desc="Optimal Normal Base (ONB) 239 V5" />
+              <oid value="16" id="c2pnb272w1" class="c2pnb272w1" desc="PolyNomial Basis (PNB) 272 W1" />
+              <oid value="17" id="c2pnb304w1" class="c2pnb304w1" desc="PolyNomial Basis (PNB) 304 W1" />
+              <oid value="18" id="c2tnb359v1" class="c2tnb359v1" desc="&quot;TNB&quot; 359 V1" />
+              <oid value="19" id="c2pnb368w1" class="c2pnb368w1" desc="PolyNomial Basis (PNB) 368 W1" />
+              <oid value="20" id="c2tnb431r1" class="c2tnb431r1" desc="Tangent-Normal-Binormal (TNB) 431 R1" />
             </oid>
             <oid value="1" id="prime" class="Prime" desc="Prime curve">
-              <oid value="1" id="prime192v1" class="Prime192v1" desc="Elliptic curve domain &quot;secp192r1&quot; listed in &quot;SEC 2&quot; recommended elliptic curve domain" />
-              <oid value="2" id="prime192v2" class="Prime192v2" desc="Prime 192 V2" />
-              <oid value="3" id="prime192v3" class="Prime192v3" desc="Prime 192 V3" />
-              <oid value="4" id="prime239v1" class="Prime239v1" desc="Prime 239 V1" />
-              <oid value="5" id="prime239v2" class="Prime239v2" desc="Prime 239 V2" />
-              <oid value="6" id="prime239v3" class="Prime239v3" desc="Prime 239 V3" />
-              <oid value="7" id="prime256v1" class="Prime256v1" desc="256 bit elliptic curve (szOID_ECC_CURVE_P256)&#xA;&#xA;Also: Standards for Efficient Cryptography (SEC) 2 recommended elliptic curve domain (secp256r1)" />
+              <oid value="1" id="prime192v1" class="prime192v1" desc="Elliptic curve domain &quot;secp192r1&quot; listed in &quot;SEC 2&quot; recommended elliptic curve domain" />
+              <oid value="2" id="prime192v2" class="prime192v2" desc="Prime 192 V2" />
+              <oid value="3" id="prime192v3" class="prime192v3" desc="Prime 192 V3" />
+              <oid value="4" id="prime239v1" class="prime239v1" desc="Prime 239 V1" />
+              <oid value="5" id="prime239v2" class="prime239v2" desc="Prime 239 V2" />
+              <oid value="6" id="prime239v3" class="prime239v3" desc="Prime 239 V3" />
+              <oid value="7" id="prime256v1" class="prime256v1" desc="256 bit elliptic curve (szOID_ECC_CURVE_P256)&#xA;&#xA;Also: Standards for Efficient Cryptography (SEC) 2 recommended elliptic curve domain (secp256r1)" />
             </oid>
           </oid>
           <oid value="4" id="signatures" class="Signatures" desc="ANSI X9.62 Elliptic Curve Digital Signature Algorithm (ECDSA) signatures and modules">
@@ -348,6 +348,34 @@
             <oid value="27" id="dsaWithSHA1" class="DSAWithSHA1" desc="Digital Signature Algorithm (DSA) that uses the Secure Hash Algorithm 1 (SHA1) producing a 320-bit signature" />
             <oid value="28" id="dsaWithCommonSHA1" class="DSAWithCommonSHA1" desc="Digital Signature Algorithm (DSA) that uses the Secure Hash Algorithm 1 (SHA1) with Common Parameters producing a 320-bit signature" />
             <oid value="29" id="sha-1WithRSAEncryption" class="SHA1WithRSAEncryption" desc="Rivest, Shamir and Adleman (RSA) algorithm that uses the Secure Hash Algorithm 1 (SHA1) (obsolete)" />
+          </oid>
+        </oid>
+      </oid>
+      <oid value="36" id="teletrust" class="Teletrust" desc="TeleTrusT - Information Technology (IT) security association Germany">
+        <oid value="3" id="algorithm" class="Algorithm" desc="Teletrust defined algorithms">
+          <oid value="3" id="signatureAlgorithm" class="SignatureAlgorithm" desc="Teletrust defined signature algorithms">
+            <oid value="2" id="ecSign" class="ECSign" desc="Teletrust signature algorithm elliptic curve">
+              <oid value="8" id="ecStdCurvesAndGeneration" class="ECStdCurvesAndGeneration" desc="Elliptic Curve Cryptography (ECC) Brainpool Standard Curves and Curve Generation">
+                <oid value="1" id="ellipticCurve" class="EllipticCurve" desc="Domain parameter sets">
+                  <oid value="1" id="versionOne" class="VersionOne" desc="Version 1 of Brainpool parameter sets">
+                    <oid value="1" id="brainpoolP160r1" class="brainpoolP160r1" />
+                    <oid value="2" id="brainpoolP160t1" class="brainpoolP160t1" />
+                    <oid value="3" id="brainpoolP192r1" class="brainpoolP192r1" />
+                    <oid value="4" id="brainpoolP192t1" class="brainpoolP192t1" />
+                    <oid value="5" id="brainpoolP224r1" class="brainpoolP224r1" />
+                    <oid value="6" id="brainpoolP224t1" class="brainpoolP224t1" />
+                    <oid value="7" id="brainpoolP256r1" class="brainpoolP256r1" />
+                    <oid value="8" id="brainpoolP256t1" class="brainpoolP256t1" />
+                    <oid value="9" id="brainpoolP320r1" class="brainpoolP320r1" />
+                    <oid value="10" id="brainpoolP320t1" class="brainpoolP320t1" />
+                    <oid value="11" id="brainpoolP384r1" class="brainpoolP384r1" />
+                    <oid value="12" id="brainpoolP384t1" class="brainpoolP384t1" />
+                    <oid value="13" id="brainpoolP512r1" class="brainpoolP512r1" />
+                    <oid value="14" id="brainpoolP512t1" class="brainpoolP512t1" />
+                  </oid>
+                </oid>
+              </oid>
+            </oid>
           </oid>
         </oid>
       </oid>

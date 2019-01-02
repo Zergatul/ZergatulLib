@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.Verge
 {
@@ -9,7 +11,13 @@ namespace Zergatul.Cryptocurrency.Verge
 
         public decimal? FeeXVG => Fee == null ? 0 : 1m * Fee.Value / BlockchainCryptoFactory.Verge.Multiplier;
 
-        public override void Parse(byte[] data, ref int index)
+        public Transaction()
+            : base()
+        {
+
+        }
+
+        public override bool TryParse(byte[] data, ref int index)
         {
             int start = index;
 
@@ -25,6 +33,11 @@ namespace Zergatul.Cryptocurrency.Verge
             index += 4;
 
             RawOriginal = ByteArray.SubArray(data, start, index - start);
+
+            for (int i = 0; i < inputsCount; i++)
+                Inputs[i].ParseAddress();
+
+            return true;
         }
 
         public override void ParseHeader(byte[] data, ref int index)
@@ -42,19 +55,12 @@ namespace Zergatul.Cryptocurrency.Verge
             buffer.AddRange(BitHelper.GetBytes(Time, ByteOrder.LittleEndian));
         }
 
-        public bool Verify(ITransactionRepository<Transaction> repository)
+        public override void Sign()
         {
-            foreach (var input in Inputs)
-            {
-                if (!IsCoinbase)
-                {
-                    input.PrevTransaction = repository.GetTransaction(input.PrevTx);
-                    if (input.PrevTransaction == null)
-                        return false;
-                }
-            }
+            if (Time == 0)
+                throw new InvalidOperationException();
 
-            return Verify();
+            base.Sign();
         }
     }
 }

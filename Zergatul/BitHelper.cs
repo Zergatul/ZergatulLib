@@ -416,6 +416,15 @@ namespace Zergatul
             return result;
         }
 
+        public static byte[] ToByteArray(ulong[] array, ByteOrder order)
+        {
+            byte[] result = new byte[array.Length * 8];
+            for (int i = 0; i < array.Length; i++)
+                GetBytes(array[i], order, result, i * 8);
+
+            return result;
+        }
+
         public static uint[] ToUInt32Array(byte[] array, ByteOrder order)
         {
             if ((array.Length & 0x03) != 0)
@@ -426,6 +435,20 @@ namespace Zergatul
                 result[i] = ToUInt32(array, i << 2, order);
 
             return result;
+        }
+
+        public static void ToUInt32Array(byte[] array, ByteOrder order, uint[] result)
+        {
+            if ((array.Length & 0x03) != 0)
+                throw new InvalidOperationException();
+
+            int length = array.Length >> 2;
+
+            if (result.Length < length)
+                throw new InvalidOperationException();
+
+            for (int i = 0; i < length; i++)
+                result[i] = ToUInt32(array, i << 2, order);
         }
 
         public static ulong[] ToUInt64Array(byte[] array, ByteOrder order)

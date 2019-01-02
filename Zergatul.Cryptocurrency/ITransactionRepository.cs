@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zergatul.Cryptocurrency
+﻿namespace Zergatul.Cryptocurrency
 {
-    public interface ITransactionRepository<T>
-        where T : TransactionBase
+    public interface ITransactionRepository<out T>
+        where T : Base.TransactionBase
     {
         T GetTransaction(byte[] id);
         T GetTransaction(string id);

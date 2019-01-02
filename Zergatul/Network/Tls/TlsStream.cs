@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zergatul.Cryptography;
 using Zergatul.Cryptography.Certificate;
-using Zergatul.Cryptography.Hash;
-using Zergatul.Math;
 using Zergatul.Network.Tls.Extensions;
 using Zergatul.Network.Tls.Messages;
 
@@ -63,40 +59,34 @@ namespace Zergatul.Network.Tls
     // TODO
     // * work as proxy stream for another tls stream implementation, for debugging purposes
     // * refactor dhe_psk, and ecdhe_psk to use single code
-    // * tls sessions?
+    // * tls sessions for server
     // * client certificates
-    // * RecordMessage change to RecordMessageStream, it can read and write content messages, automatically releases write buffer and so on
     public partial class TlsStream : Stream
     {
         public TlsStreamSettings Settings { get; set; }
         public ConnectionInfo ConnectionInfo { get; private set; }
+        public bool KeepOpen { get; set; }
 
         private Stream _innerStream;
-        private BinaryReader _reader;
+        private RecordMessageStream _messageStream;
         private TlsUtils _utils;
         private ISecureRandom _random;
 
-        internal CipherSuiteBuilder SelectedCipher;
-        internal Role Role;
-        internal bool WriteEncrypted;
-        internal bool ReadEncrypted;
+        private CipherSuiteBuilder SelectedCipher;
+        private Role Role;
 
         private CipherSuite[] _clientCipherSuites;
 
-        private List<ContentMessage> _messageWriteBuffer = new List<ContentMessage>();
-        private RecordMessage _messageReadBuffer;
-
         private string _serverHost;
 
-        internal SecurityParameters SecurityParameters;
-        internal ulong ClientSequenceNum;
-        internal ulong ServerSequenceNum;
+        private SecurityParameters SecurityParameters;
         private bool _isClosed;
 
         private X509Certificate _clientCertificate;
         private X509Certificate _serverCertificate;
         private TlsExtension[] _clientExtensions;
         private TlsExtension[] _serverExtensions;
+        private byte[] _sessionId;
         private TlsStreamSession _clientSession;
         private TlsStreamSession _serverSession;
         private bool _reuseSession;
@@ -115,17 +105,17 @@ namespace Zergatul.Network.Tls
             }
 
             this._innerStream = innerStream;
-            this._reader = new BinaryReader(innerStream);
 
             this._random = random ?? new DefaultSecureRandom();
 
             this._utils = new TlsUtils(this._random);
 
-            this._messageReadBuffer = new RecordMessage(this);
-
             this.SecurityParameters = new SecurityParameters();
             this.SecurityParameters.Version = version;
-            this.SecurityParameters.HandshakeData = new List<byte>();
+            this.SecurityParameters.HandshakeBuffer = new List<byte>();
+
+            this._messageStream = new RecordMessageStream(innerStream, SecurityParameters.HandshakeBuffer);
+            this._messageStream.Version = version;
 
             this.Settings = TlsStreamSettings.Default;
             this.ConnectionInfo = new ConnectionInfo();
@@ -139,8 +129,8 @@ namespace Zergatul.Network.Tls
             _serverHost = host;
 
             GenerateRandom();
-            ClientSequenceNum = 0;
-            ServerSequenceNum = 0;
+            _messageStream.EncodingSequenceNum = 0;
+            _messageStream.DecodingSequenceNum = 0;
 
             MessageFlow flow = null;
 
@@ -155,7 +145,6 @@ namespace Zergatul.Network.Tls
                     throw new InvalidOperationException();
             }
 
-            ClearMessageBuffer();
             while (true)
             {
                 var possible = flow.Flows.Where(f => f.Condition(this)).ToArray();
@@ -180,7 +169,7 @@ namespace Zergatul.Network.Tls
                 }
                 if (serverFlows > 0)
                 {
-                    ReleaseMessageWriteBuffer();
+                    _messageStream.ReleaseHandshakeBuffer();
                     var cm = NextMessage();
                     bool change = false;
                     foreach (var pf in possible)
@@ -199,7 +188,12 @@ namespace Zergatul.Network.Tls
                 }
             }
 
-            ReleaseMessageWriteBuffer();
+            _messageStream.ReleaseHandshakeBuffer();
+
+            if (Settings.ReuseSessions && !_reuseSession)
+            {
+                TlsStreamSessions.Instance.Add(host, new TlsStreamSession(_sessionId, SecurityParameters.MasterSecret));
+            }
         }
 
         public void AuthenticateAsServer(string host, X509Certificate certificate = null)
@@ -211,8 +205,8 @@ namespace Zergatul.Network.Tls
             _serverCertificate = certificate;
 
             GenerateRandom();
-            ClientSequenceNum = 0;
-            ServerSequenceNum = 0;
+            _messageStream.EncodingSequenceNum = 0;
+            _messageStream.DecodingSequenceNum = 0;
 
             MessageFlow flow = null;
 
@@ -227,7 +221,6 @@ namespace Zergatul.Network.Tls
                     throw new InvalidOperationException();
             }
 
-            ClearMessageBuffer();
             while (true)
             {
                 var possible = flow.Flows.Where(f => f.Condition(this)).ToArray();
@@ -252,7 +245,7 @@ namespace Zergatul.Network.Tls
                 }
                 if (clientFlows > 0)
                 {
-                    ReleaseMessageWriteBuffer();
+                    _messageStream.ReleaseHandshakeBuffer();
                     var cm = NextMessage();
                     bool change = false;
                     foreach (var pf in possible)
@@ -271,7 +264,7 @@ namespace Zergatul.Network.Tls
                 }
             }
 
-            ReleaseMessageWriteBuffer();
+            _messageStream.ReleaseHandshakeBuffer();
         }
 
         #region Private methods
@@ -281,7 +274,7 @@ namespace Zergatul.Network.Tls
             ContentMessage message;
             try
             {
-                message = _messageReadBuffer.ReadNext(_reader);
+                message = _messageStream.ReadMessage();
             }
             catch (RecordOverflowException)
             {
@@ -298,140 +291,83 @@ namespace Zergatul.Network.Tls
                 WriteAlertBadRecordMAC();
                 throw;
             }
-            if (_messageReadBuffer.Version != ProtocolVersion.Tls12)
-            {
-                WriteAlertProtocolVersion();
-                throw new TlsStreamException("Only TLS 1.2 is supported");
-            }
 
             return message;
         }
 
-        private void WriteRecordMessage(RecordMessage message)
-        {
-            message.Write(_innerStream);
-        }
-
-        private void WriteHandshakeMessage(HandshakeMessage message)
-        {
-            WriteRecordMessage(new RecordMessage(this)
-            {
-                RecordType = ContentType.Handshake,
-                Version = ProtocolVersion.Tls12,
-                ContentMessages = new List<ContentMessage> { message }
-            });
-        }
-
-        private void ClearMessageBuffer()
-        {
-            _messageWriteBuffer.Clear();
-        }
-
         private void WriteHandshakeMessageBuffered(HandshakeMessage message)
         {
-            _messageWriteBuffer.Add(message);
+            _messageStream.WriteHandshake(message);
             OnContentMessage(this, new ContentMessageEventArgs(message, false, Role == Role.Server));
-        }
-
-        private void ReleaseMessageWriteBuffer()
-        {
-            if (_messageWriteBuffer.Count > 0)
-            {
-                var message = new RecordMessage(this)
-                {
-                    RecordType = ContentType.Handshake,
-                    Version = ProtocolVersion.Tls12,
-                    ContentMessages = _messageWriteBuffer
-                };
-                message.Write(_innerStream);
-
-                ClearMessageBuffer();
-            }
         }
 
         private void WriteChangeCipherSpec()
         {
-            ReleaseMessageWriteBuffer();
-
-            WriteRecordMessage(new RecordMessage(this)
-            {
-                RecordType = ContentType.ChangeCipherSpec,
-                Version = ProtocolVersion.Tls12,
-                ContentMessages = new List<ContentMessage>
-                {
-                    new ChangeCipherSpec()
-                }
-            });
-        }
-
-        private void WriteAlert(AlertLevel level, AlertDescription desc)
-        {
-            WriteRecordMessage(new RecordMessage(this)
-            {
-                RecordType = ContentType.Alert,
-                Version = ProtocolVersion.Tls12,
-                ContentMessages = new List<ContentMessage>
-                    {
-                        new Alert
-                        {
-                            Level = level,
-                            Description = desc
-                        }
-                    }
-            });
+            _messageStream.WriteChangeCipherSpec();
         }
 
         private void WriteAlertCloseNotify()
         {
-            WriteAlert(AlertLevel.Warning, AlertDescription.CloseNotify);
+            _messageStream.WriteAlert(AlertLevel.Warning, AlertDescription.CloseNotify);
         }
 
         private void WriteAlertUnexpectedMessage()
         {
-            WriteAlert(AlertLevel.Fatal, AlertDescription.UnexpectedMessage);
+            _messageStream.WriteAlert(AlertLevel.Fatal, AlertDescription.UnexpectedMessage);
         }
 
         private void WriteAlertBadRecordMAC()
         {
-            WriteAlert(AlertLevel.Fatal, AlertDescription.BadRecordMAC);
+            _messageStream.WriteAlert(AlertLevel.Fatal, AlertDescription.BadRecordMAC);
         }
 
         private void WriteAlertRecordOverflow()
         {
-            WriteAlert(AlertLevel.Fatal, AlertDescription.BadRecordMAC);
+            _messageStream.WriteAlert(AlertLevel.Fatal, AlertDescription.BadRecordMAC);
         }
 
         private void WriteAlertHandshakeFailure()
         {
-            WriteAlert(AlertLevel.Fatal, AlertDescription.HandshakeFailure);
+            _messageStream.WriteAlert(AlertLevel.Fatal, AlertDescription.HandshakeFailure);
         }
 
         private void WriteAlertBadCertificate()
         {
-            WriteAlert(AlertLevel.Fatal, AlertDescription.BadCertificate);
+            _messageStream.WriteAlert(AlertLevel.Fatal, AlertDescription.BadCertificate);
         }
 
         private void WriteAlertDecryptError()
         {
-            WriteAlert(AlertLevel.Fatal, AlertDescription.DecryptError);
+            _messageStream.WriteAlert(AlertLevel.Fatal, AlertDescription.DecryptError);
         }
 
         private void WriteAlertProtocolVersion()
         {
-            WriteAlert(AlertLevel.Fatal, AlertDescription.ProtocolVersion);
+            _messageStream.WriteAlert(AlertLevel.Fatal, AlertDescription.ProtocolVersion);
         }
 
         private void GenerateRandom()
         {
-            var random = new Random
+            byte[] random;
+            if (Settings.GetRandom != null)
             {
-                GMTUnixTime = _utils.GetGMTUnixTime(),
-                RandomBytes = _utils.GetRandomBytes(28)
-            };
+                random = Settings.GetRandom();
+                if (random.Length != 32)
+                    throw new InvalidOperationException("Random should have 32 bytes length");
+            }
+            else
+            {
+                random = new Random
+                {
+                    GMTUnixTime = _utils.GetGMTUnixTime(),
+                    RandomBytes = _utils.GetRandomBytes(28)
+                }.ToArray();
+            }
+
             if (Role == Role.Client)
-                SecurityParameters.ClientRandom = random.ToArray();
+                SecurityParameters.ClientRandom = random;
             if (Role == Role.Server)
-                SecurityParameters.ServerRandom = random.ToArray();
+                SecurityParameters.ServerRandom = random;
         }
 
         #region Message generation methods
@@ -455,14 +391,16 @@ namespace Zergatul.Network.Tls
                 {
                     SupportedAlgorithms = new SignatureAndHashAlgorithm[]
                     {
-                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.RSA },
-                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.ECDSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.RSA },
                         new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA256, Signature = SignatureAlgorithm.RSA },
                         new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA384, Signature = SignatureAlgorithm.RSA },
-                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.RSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.RSA },
+
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.ECDSA },
                         new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA256, Signature = SignatureAlgorithm.ECDSA },
                         new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA384, Signature = SignatureAlgorithm.ECDSA },
-                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.ECDSA },
+                        new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA512, Signature = SignatureAlgorithm.ECDSA },
+
                         new SignatureAndHashAlgorithm { Hash = HashAlgorithm.SHA1, Signature = SignatureAlgorithm.DSA },
                     }
                 },
@@ -477,11 +415,13 @@ namespace Zergatul.Network.Tls
             if (Settings.SupportedCurves?.Length > 0)
                 extensions.Add(new SupportedGroups(Settings.SupportedCurves));
             extensions.Add(new SupportedPointFormats(ECPointFormat.Uncompressed));
+            if (Settings.Extensions != null)
+                extensions.AddRange(Settings.Extensions);
 
             if (Settings.ReuseSessions)
-                _clientSession = TlsStreamSessions.Instance[_serverHost];
+                _clientSession = TlsStreamSessions.Instance.Get(_serverHost);
 
-            return new HandshakeMessage(this)
+            return new HandshakeMessage(SelectedCipher)
             {
                 Body = new ClientHello
                 {
@@ -514,7 +454,7 @@ namespace Zergatul.Network.Tls
             if (_clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0 && Settings.SupportExtendedMasterSecret)
                 extensions.Add(new ExtendedMasterSecret());
 
-            return new HandshakeMessage(this)
+            return new HandshakeMessage(SelectedCipher)
             {
                 Body = new ServerHello
                 {
@@ -529,7 +469,7 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateCertificate(X509Certificate certificate)
         {
-            return new HandshakeMessage(this)
+            return new HandshakeMessage(SelectedCipher)
             {
                 Body = new Certificate
                 {
@@ -543,7 +483,7 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateClientKeyExchange()
         {
-            return new HandshakeMessage(this)
+            return new HandshakeMessage(SelectedCipher)
             {
                 Body = SelectedCipher.KeyExchange.GenerateClientKeyExchange()
             };
@@ -551,7 +491,7 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateServerKeyExchange()
         {
-            return new HandshakeMessage(this)
+            return new HandshakeMessage(SelectedCipher)
             {
                 Body = SelectedCipher.KeyExchange.GenerateServerKeyExchange()
             };
@@ -559,12 +499,12 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateServerHelloDone()
         {
-            return new HandshakeMessage(this) { Body = new ServerHelloDone() };
+            return new HandshakeMessage(SelectedCipher) { Body = new ServerHelloDone() };
         }
 
         private HandshakeMessage GenerateFinished()
         {
-            return new HandshakeMessage(this) { Body = SelectedCipher.GetFinished() };
+            return new HandshakeMessage(SelectedCipher) { Body = SelectedCipher.GetFinished() };
         }
 
         #endregion
@@ -574,6 +514,23 @@ namespace Zergatul.Network.Tls
             bool clientExtMasterSecret = _clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             bool serverExtMasterSecret = _serverExtensions.OfType<ExtendedMasterSecret>().Count() > 0;
             SecurityParameters.ExtendedMasterSecret = clientExtMasterSecret && serverExtMasterSecret;
+
+            // Application-Layer Protocol Negotiation
+            var clientAlpn = _clientExtensions.OfType<ApplicationLayerProtocolNegotiationExtension>().SingleOrDefault();
+            var serverAlpn = _serverExtensions.OfType<ApplicationLayerProtocolNegotiationExtension>().SingleOrDefault();
+            if (clientAlpn != null ^ serverAlpn != null)
+                throw new TlsStreamException("Application-Layer Protocol Negotiation extension issue");
+
+            if (clientAlpn != null && serverAlpn != null)
+            {
+                if (serverAlpn.ProtocolNames.Length != 1)
+                    throw new TlsStreamException("Server ALPN invalid protocols count");
+
+                if (!clientAlpn.ProtocolNames.Contains(serverAlpn.ProtocolNames[0]))
+                    throw new TlsStreamException("Server proposed ALPN not in client list");
+
+                ConnectionInfo.ApplicationLevelProtocolName = serverAlpn.ProtocolNames[0];
+            }
 
             /* ConnectionInfo */
             ConnectionInfo.ExtendedMasterSecret = SecurityParameters.ExtendedMasterSecret;
@@ -667,19 +624,37 @@ namespace Zergatul.Network.Tls
 
         private void OnServerHello(ServerHello message)
         {
+            /* ConnectionInfo */
             ConnectionInfo.CipherSuite = message.CipherSuite;
+            ConnectionInfo.SessionId = message.SessionID;
+            ConnectionInfo.ReuseSession = false;
+            /* ConnectionInfo */
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
             SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
+            _messageStream.SelectedCipher = SelectedCipher;
             SecurityParameters.ServerRandom = message.Random.ToArray();
+            _sessionId = message.SessionID;
 
             if (Role == Role.Client)
             {
-                if (Settings.ReuseSessions)
+                if (Settings.ReuseSessions && _clientSession != null)
                 {
-                    _serverSession = TlsStreamSessions.Instance.AddSession(_serverHost, message.SessionID);
-                    if (ByteArray.Equals(_clientSession?.ID, _serverSession?.ID))
+                    if (ByteArray.Equals(_clientSession.ID, message.SessionID))
+                    {
                         _reuseSession = true;
+                        SecurityParameters.MasterSecret = _clientSession.MasterSecret;
+                        SelectedCipher.GenerateKeyMaterial();
+
+                        /* ConnectionInfo */
+                        ConnectionInfo.MasterSecret = (byte[])SecurityParameters.MasterSecret.Clone();
+                        ConnectionInfo.ReuseSession = true;
+                        /* ConnectionInfo */
+                    }
+                    else
+                    {
+                        TlsStreamSessions.Instance.Remove(_serverHost);
+                    }
                 }
             }
 
@@ -738,16 +713,24 @@ namespace Zergatul.Network.Tls
         {
             SelectedCipher.CalculateMasterSecret();
             SelectedCipher.GenerateKeyMaterial();
+
+            /* ConnectionInfo */
+            ConnectionInfo.MasterSecret = (byte[])SecurityParameters.MasterSecret.Clone();
+            /* ConnectionInfo */
         }
 
         private void OnClientChangeCipherSpec()
         {
             if (Role == Role.Client)
-                WriteEncrypted = true;
+                _messageStream.WriteEncrypted = true;
             if (Role == Role.Server)
-                ReadEncrypted = true;
+                _messageStream.ReadEncrypted = true;
 
-            SecurityParameters.ClientFinishedHandshakeData = SecurityParameters.HandshakeData.ToArray();
+            SecurityParameters.ClientFinishedHash = SelectedCipher.Hash(SecurityParameters.HandshakeBuffer.ToArray());
+
+            /* ConnectionInfo */
+            ConnectionInfo.Client.FinishedMessageHash = (byte[])SecurityParameters.ClientFinishedHash.Clone();
+            /* ConnectionInfo */
         }
 
         private void OnClientFinished(Finished message, bool validate)
@@ -765,11 +748,15 @@ namespace Zergatul.Network.Tls
         private void OnServerChangeCipherSpec()
         {
             if (Role == Role.Client)
-                ReadEncrypted = true;
+                _messageStream.ReadEncrypted = true;
             if (Role == Role.Server)
-                WriteEncrypted = true;
+                _messageStream.WriteEncrypted = true;
 
-            SecurityParameters.ServerFinishedHandshakeData = SecurityParameters.HandshakeData.ToArray();
+            SecurityParameters.ServerFinishedHash = SelectedCipher.Hash(SecurityParameters.HandshakeBuffer.ToArray());
+
+            /* ConnectionInfo */
+            ConnectionInfo.Server.FinishedMessageHash = (byte[])SecurityParameters.ServerFinishedHash.Clone();
+            /* ConnectionInfo */
         }
 
         private void OnServerFinished(Finished message, bool validate)
@@ -802,64 +789,6 @@ namespace Zergatul.Network.Tls
 
             if (message.Level == AlertLevel.Fatal)
                 throw new TlsStreamException($"TLS Fatal error: {message.Description}");
-        }
-
-        #endregion
-
-        #region Sequnce Numbers
-
-        internal ulong DecodingSequenceNum
-        {
-            get
-            {
-                if (Role == Role.Client)
-                    return ServerSequenceNum;
-                if (Role == Role.Server)
-                    return ClientSequenceNum;
-                throw new TlsStreamException("Invalid role");
-            }
-        }
-
-        internal void IncDecodingSequenceNum()
-        {
-            if (Role == Role.Client)
-            {
-                ServerSequenceNum++;
-                return;
-            }
-            if (Role == Role.Server)
-            {
-                ClientSequenceNum++;
-                return;
-            }
-            throw new TlsStreamException("Invalid role");
-        }
-
-        internal ulong EncodingSequenceNum
-        {
-            get
-            {
-                if (Role == Role.Client)
-                    return ClientSequenceNum;
-                if (Role == Role.Server)
-                    return ServerSequenceNum;
-                throw new TlsStreamException("Invalid role");
-            }
-        }
-
-        internal void IncEncodingSequenceNum()
-        {
-            if (Role == Role.Client)
-            {
-                ClientSequenceNum++;
-                return;
-            }
-            if (Role == Role.Server)
-            {
-                ServerSequenceNum++;
-                return;
-            }
-            throw new TlsStreamException("Invalid role");
         }
 
         #endregion
@@ -905,7 +834,22 @@ namespace Zergatul.Network.Tls
 
         #endregion
 
-        private List<byte> _readBuffer = new List<byte>();
+        private byte[] _readBuffer;
+        private int _readBufferOffset;
+        private int _readBufferLength;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !_isClosed)
+            {
+                WriteAlertCloseNotify();
+                //TODO!!!
+                //ReadRecordMessage(ConnectionState.Closed);
+
+                if (!KeepOpen)
+                    _innerStream.Dispose();
+            }
+        }
 
         public override void Flush()
         {
@@ -914,23 +858,41 @@ namespace Zergatul.Network.Tls
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (count > _readBuffer.Count && !_isClosed)
+            if (_readBuffer == null)
             {
-                var message = _messageReadBuffer.ReadNext(_reader);
+                _readBuffer = new byte[RecordMessageStream.PlaintextLimit];
+                _readBufferOffset = 0;
+                _readBufferLength = 0;
+            }
+
+            if (_readBufferOffset >= _readBufferLength && !_isClosed)
+            {
+                var message = _messageStream.ReadMessage();
                 if (message is ApplicationData)
                 {
                     var appData = message as ApplicationData;
-                    _readBuffer.AddRange(appData.Data);
-                }
-                if (message is Alert)
+                    Array.Copy(appData.Data, 0, _readBuffer, 0, appData.Data.Length);
+                    _readBufferOffset = 0;
+                    _readBufferLength = appData.Data.Length;
+                } else if (message is Alert)
                     OnAlert(message as Alert, true);
+                else
+                    throw new InvalidOperationException();
             }
 
-            if (count > _readBuffer.Count)
-                count = _readBuffer.Count;
-            for (int i = 0; i < count; i++)
-                buffer[offset + i] = _readBuffer[i];
-            _readBuffer.RemoveRange(0, count);
+            if (_readBufferOffset >= _readBufferLength)
+            {
+                _readBufferOffset = 0;
+                _readBufferLength = 0;
+            }
+
+            if (count > _readBufferLength - _readBufferOffset)
+                count = _readBufferLength - _readBufferOffset;
+            if (count == 0)
+                return 0;
+
+            Array.Copy(_readBuffer, _readBufferOffset, buffer, offset, count);
+            _readBufferOffset += count;
 
             return count;
         }
@@ -940,30 +902,12 @@ namespace Zergatul.Network.Tls
             var data = new byte[count];
             Array.Copy(buffer, offset, data, 0, count);
 
-            int limit = RecordMessage.PlaintextLimit;
+            int limit = RecordMessageStream.PlaintextLimit;
             int chunks = (count + limit - 1) / limit;
             for (int c = 0; c < chunks; c++)
-                WriteRecordMessage(new RecordMessage(this)
-                {
-                    RecordType = ContentType.ApplicationData,
-                    Version = ProtocolVersion.Tls12,
-                    ContentMessages = new List<ContentMessage>
-                    {
-                        new ApplicationData
-                        {
-                            Data = ByteArray.SubArray(data, c * limit, System.Math.Min(limit, count - c * limit))
-                        }
-                    }
-                });
-        }
-
-        public override void Close()
-        {
-            if (!_isClosed)
             {
-                WriteAlertCloseNotify();
-                //TODO!!!
-                //ReadRecordMessage(ConnectionState.Closed);
+                byte[] chunk = ByteArray.SubArray(data, c * limit, System.Math.Min(limit, count - c * limit));
+                _messageStream.WriteApplicationData(chunk);
             }
         }
 

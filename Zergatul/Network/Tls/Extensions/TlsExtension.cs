@@ -54,12 +54,14 @@ namespace Zergatul.Network.Tls.Extensions
         {
             switch (type)
             {
-                case ExtensionType.ExtendedMasterSecret:
-                    return new ExtendedMasterSecret();
                 case ExtensionType.SupportedGroups:
                     return new SupportedGroups();
                 case ExtensionType.ECPointFormats:
                     return new SupportedPointFormats();
+                case ExtensionType.ApplicationLayerProtocolNegotiation:
+                    return new ApplicationLayerProtocolNegotiationExtension();
+                case ExtensionType.ExtendedMasterSecret:
+                    return new ExtendedMasterSecret();
                 default:
                     return new TlsExtension(type);
             }

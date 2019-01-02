@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Cryptocurrency.Bitcoin
 {
-    public class P2PKAddress : P2PKAddressBase
+    public class P2PKAddress : Base.P2PKAddressBase
     {
         private static readonly byte[] Prefix = new byte[] { 0x00 };
 

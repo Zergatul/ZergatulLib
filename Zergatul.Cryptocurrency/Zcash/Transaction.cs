@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using Zergatul.Cryptocurrency.Base;
 
 namespace Zergatul.Cryptocurrency.Zcash
 {
@@ -8,7 +7,7 @@ namespace Zergatul.Cryptocurrency.Zcash
     {
         public decimal? FeeZEC => Fee == null ? 0 : 1m * Fee.Value / BlockchainCryptoFactory.Zcash.Multiplier;
 
-        public override void Parse(byte[] data, ref int index)
+        public override bool TryParse(byte[] data, ref int index)
         {
             int start = index;
 
@@ -24,6 +23,16 @@ namespace Zergatul.Cryptocurrency.Zcash
             index += 4;
 
             RawOriginal = ByteArray.SubArray(data, start, index - start);
+
+            for (int i = 0; i < inputsCount; i++)
+                Inputs[i].ParseAddress();
+
+            return true;
+        }
+
+        public override void Sign()
+        {
+            throw new System.NotImplementedException();
         }
 
         public bool Verify(ITransactionRepository<Transaction> repository)

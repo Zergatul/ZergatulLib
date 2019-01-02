@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Zergatul.Cryptocurrency.ScriptOpcodes;
 
 namespace Zergatul.Cryptocurrency
@@ -83,7 +81,7 @@ namespace Zergatul.Cryptocurrency
 
         public static Script FromHex(string hex) => FromBytes(BitHelper.HexToBytes(hex));
 
-        public bool IsPayToPublicKeyHash =>
+        public bool IsPayToPublicKeyHashRedeem =>
             Code != null &&
             Code.Count == 5 &&
             Code[0].Opcode == Opcode.OP_DUP &&
@@ -92,7 +90,11 @@ namespace Zergatul.Cryptocurrency
             Code[3].Opcode == Opcode.OP_EQUALVERIFY &&
             Code[4].Opcode == Opcode.OP_CHECKSIG;
 
-        public bool IsPayToWitnessPublicKeyHash =>
+        public bool IsPayToWitnessPublicKeyHashInput =>
+            Code == null ||
+            Code.Count == 0;
+
+        public bool IsPayToWitnessPublicKeyHashRedeem =>
             Code != null &&
             Code.Count == 2 &&
             Code[0].Opcode == Opcode.OP_0 &&
@@ -104,37 +106,46 @@ namespace Zergatul.Cryptocurrency
             (Code[0].Data?.Length == 71 || Code[0].Data?.Length == 72) &&
             (Code[1].Data?.Length == 33 || Code[1].Data?.Length == 65);
 
-        public bool IsPayToPublicKey =>
+        public bool IsPayToPublicKeyRedeem =>
             Code != null &&
             Code.Count == 2 &&
             (Code[0].Data?.Length == 33 || Code[0].Data?.Length == 65) &&
             Code[1].Opcode == Opcode.OP_CHECKSIG;
 
-        public bool IsPayToScriptHash =>
+        public bool IsPayToScriptHashRedeem =>
             Code != null &&
             Code.Count == 3 &&
             Code[0].Opcode == Opcode.OP_HASH160 &&
             Code[1].Data?.Length == 20 &&
             Code[2].Opcode == Opcode.OP_EQUAL;
 
-        public bool Run(TxInputBase input)
+        public bool IsPayToScriptHashPayToWitnessPublicKeyHashInput =>
+            Code != null &&
+            Code.Count == 1 &&
+            Code[0].Data?.Length == 22 &&
+            Code[0].Data[0] == 0x00 &&
+            Code[0].Data[1] == 0x14;
+
+        public bool Run(Base.TxInputBase input)
         {
             if (input.Script.Code.Any(o => o.Data == null))
                 throw new InvalidOperationException();
 
+            var inputData = input.Script.Code.Select(o => o.Data);
             if (input.SegWit == null)
-                return Run(input, input.Script.Code.Select(o => o.Data));
+                return Run(input, inputData);
             else
-                return Run(input, input.SegWit);
+                return Run(input, input.SegWit.Concat(inputData));
         }
 
-        public bool Run(TxInputBase input, IEnumerable<byte[]> initialStack)
+        public bool Run(Base.TxInputBase input, IEnumerable<byte[]> initialStack)
         {
             Stack<byte[]> stack = new Stack<byte[]>(initialStack);
 
             try
             {
-                foreach (var op in Expand().Code)
+                input.PrevOutputExpandedScript = Expand();
+                foreach (var op in input.PrevOutputExpandedScript.Code)
                     if (!op.Run(input, stack))
                         return false;
             }
@@ -151,11 +162,14 @@ namespace Zergatul.Cryptocurrency
                 if (result[i] != 0)
                 {
                     // BIP-0016
-                    if (IsPayToScriptHash)
+                    if (IsPayToScriptHashRedeem)
                     {
                         int count = input.Script.Code.Count;
                         var serializedScript = FromBytes(input.Script.Code[count - 1].Data);
-                        return serializedScript.Run(input, input.Script.Code.Take(count - 1).Select(o => o.Data));
+                        if (input.SegWit != null)
+                            return serializedScript.Run(input, input.SegWit.Concat(input.Script.Code.Take(count - 1).Select(o => o.Data)));
+                        else
+                            return serializedScript.Run(input, input.Script.Code.Take(count - 1).Select(o => o.Data));
                     }
                     else
                         return true;
@@ -166,7 +180,7 @@ namespace Zergatul.Cryptocurrency
 
         public Script Expand()
         {
-            if (IsPayToWitnessPublicKeyHash)
+            if (IsPayToWitnessPublicKeyHashRedeem)
             {
                 var script = new Script();
                 script.Code = new ScriptCode
@@ -188,6 +202,34 @@ namespace Zergatul.Cryptocurrency
             }
             else
                 return this;
+        }
+
+        public byte[] ToBytes()
+        {
+            var list = new List<byte>();
+            foreach (var op in Code)
+            {
+                if (op.Data == null && op.Opcode == null)
+                    throw new InvalidOperationException();
+                if (op.Data != null && op.Opcode != null)
+                    throw new InvalidOperationException();
+
+                if (op.Opcode != null)
+                    list.Add((byte)op.Opcode.Value);
+
+                if (op.Data != null)
+                {
+                    if (op.Data.Length >= 1 && op.Data.Length <= 0x4B)
+                    {
+                        list.Add((byte)op.Data.Length);
+                        list.AddRange(op.Data);
+                    }
+                    else
+                        throw new NotImplementedException();
+                }
+            }
+
+            return list.ToArray();
         }
     }
 

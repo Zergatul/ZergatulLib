@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Zergatul.Cryptography.Hash.Base;
 
 namespace Zergatul.Cryptography.Hash
 {

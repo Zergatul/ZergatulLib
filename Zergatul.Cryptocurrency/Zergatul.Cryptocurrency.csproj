@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,11 +29,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="libdb_dotnet62, Version=6.2.32.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>BerkeleyDB\libdb_dotnet62.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -44,6 +49,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Base\AddressBase.cs" />
+    <Compile Include="Base\P2WPKHAddressBase.cs" />
+    <Compile Include="Base\SignatureType.cs" />
+    <Compile Include="Bech32Encoding.cs" />
     <Compile Include="BitcoinGold\P2PKAddress.cs" />
     <Compile Include="BitcoinGold\BitcoinGoldFactory.cs" />
     <Compile Include="BitcoinGold\P2PKHAddress.cs" />
@@ -53,13 +62,35 @@
     <Compile Include="Bitcoin\P2PKAddress.cs" />
     <Compile Include="Bitcoin\P2PKHAddress.cs" />
     <Compile Include="Bitcoin\P2SHAddress.cs" />
+    <Compile Include="Bitcoin\P2SHP2WPKHAddress.cs" />
+    <Compile Include="Bitcoin\P2WPKHAddress.cs" />
+    <Compile Include="Bitcoin\Testnet\BitcoinFactory.cs" />
+    <Compile Include="Bitcoin\Testnet\P2PKHAddress.cs" />
+    <Compile Include="Bitcoin\Testnet\P2SHAddress.cs" />
+    <Compile Include="Bitcoin\Testnet\P2SHP2WPKHAddress.cs" />
+    <Compile Include="Bitcoin\Testnet\Transaction.cs" />
+    <Compile Include="Bitcoin\Testnet\TxInput.cs" />
+    <Compile Include="Bitcoin\Testnet\TxOutput.cs" />
     <Compile Include="Bitcoin\TxInput.cs" />
     <Compile Include="Bitcoin\TxOutput.cs" />
     <Compile Include="BlockchainCryptoFactory.cs" />
     <Compile Include="BlockParseException.cs" />
-    <Compile Include="P2PKAddressBase.cs" />
+    <Compile Include="ElectrumClient.cs" />
+    <Compile Include="Ethereum\Address.cs" />
+    <Compile Include="Ethereum\Chain.cs" />
+    <Compile Include="Ethereum\MixedCaseAddressEncoding.cs" />
+    <Compile Include="Ethereum\Rlp.cs" />
+    <Compile Include="Ethereum\Transaction.cs" />
+    <Compile Include="Base\P2PKAddressBase.cs" />
     <Compile Include="Litecoin\LitecoinFactory.cs" />
     <Compile Include="Litecoin\P2PKHAddress.cs" />
+    <Compile Include="Base\P2SHP2WPKHAddressBase.cs" />
+    <Compile Include="P2P\CCode.cs" />
+    <Compile Include="P2P\FeeFilterMessage.cs" />
+    <Compile Include="P2P\RejectMessage.cs" />
+    <Compile Include="P2P\SendCmpctMessage.cs" />
+    <Compile Include="P2P\SendHeadersMessage.cs" />
+    <Compile Include="P2P\TxMessage.cs" />
     <Compile Include="Secp256k1PrivateKey.cs" />
     <Compile Include="P2P\AddrMessage.cs" />
     <Compile Include="ScriptOpcodes\Opcode.cs" />
@@ -67,11 +98,11 @@
     <Compile Include="ScriptParseException.cs" />
     <Compile Include="Bitcoin\TransactionParseException.cs" />
     <Compile Include="Bitcoin\Wallet.cs" />
-    <Compile Include="AddressBase.cs" />
-    <Compile Include="P2PKHAddressBase.cs" />
+    <Compile Include="Base\Base58AddressBase.cs" />
+    <Compile Include="Base\P2PKHAddressBase.cs" />
     <Compile Include="Base58Encoding.cs" />
     <Compile Include="DoubleSHA256.cs" />
-    <Compile Include="P2SHAddressBase.cs" />
+    <Compile Include="Base\P2SHAddressBase.cs" />
     <Compile Include="RIPE160SHA256.cs" />
     <Compile Include="Script.cs" />
     <Compile Include="Bitcoin\Transaction.cs" />
@@ -82,11 +113,12 @@
     <Compile Include="P2P\InvVect.cs" />
     <Compile Include="P2P\PingMessage.cs" />
     <Compile Include="P2P\PongMessage.cs" />
+    <Compile Include="SecureRandomWrapper.cs" />
     <Compile Include="SimpleTransactionRepository.cs" />
-    <Compile Include="TxInputBase.cs" />
-    <Compile Include="TxOutputBase.cs" />
+    <Compile Include="Base\TxInputBase.cs" />
+    <Compile Include="Base\TxOutputBase.cs" />
     <Compile Include="VarLengthInt.cs" />
-    <Compile Include="BlockBase.cs" />
+    <Compile Include="Base\BlockBase.cs" />
     <Compile Include="ITransactionRepository.cs" />
     <Compile Include="Litecoin\P2SHAddress.cs" />
     <Compile Include="Litecoin\Block.cs" />
@@ -102,7 +134,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ripple\Account.cs" />
     <Compile Include="Ripple\Constants.cs" />
-    <Compile Include="TransactionBase.cs" />
+    <Compile Include="Base\TransactionBase.cs" />
     <Compile Include="Verge\P2PKHAddress.cs" />
     <Compile Include="Verge\P2SHAddress.cs" />
     <Compile Include="Verge\Transaction.cs" />
@@ -137,7 +169,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Ethereum\" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

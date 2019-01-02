@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.IO;
 using Stream = System.IO.Stream;
 
 namespace Zergatul.Network.Tls
@@ -53,6 +55,9 @@ namespace Zergatul.Network.Tls
 
         private void FillBuffer(int count)
         {
+            if (count == 0)
+                return;
+
             if (count > _buffer.Length)
                 _buffer = new byte[count];
 
@@ -62,6 +67,8 @@ namespace Zergatul.Network.Tls
                 while (true)
                 {
                     totalRead += _stream.Read(_buffer, totalRead, count - totalRead);
+                    if (totalRead == 0)
+                        throw new EndOfStreamException();
                     if (totalRead == count)
                         break;
                 }
@@ -117,9 +124,20 @@ namespace Zergatul.Network.Tls
 
         public byte[] ReadToEnd()
         {
-            if (_limit == null || Position > _limit.Value)
+            int count = -1;
+            if (_limit != null && Position <= _limit.Value)
+                count = _limit.Value - Position;
+            else
+            {
+                var stream = _stream as LimitedReadStream;
+                if (stream != null)
+                    count = (int)(stream.Length - stream.Position);
+            }
+
+            if (count < 0)
                 throw new InvalidOperationException();
-            return ReadBytes(_limit.Value - Position);
+
+            return ReadBytes(count);
         }
 
         public ReadCounter StartCounter(int totalBytes)

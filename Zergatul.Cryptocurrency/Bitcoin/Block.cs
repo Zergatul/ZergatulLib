@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Cryptocurrency.Base;
 using Zergatul.Network;
 
 namespace Zergatul.Cryptocurrency.Bitcoin

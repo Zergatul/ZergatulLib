@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Cryptocurrency.Verge
 {
-    public class TxOutput : TxOutputBase
+    public class TxOutput : Base.TxOutputBase
     {
         public decimal AmountXVG => 1m * Amount / _factory.Multiplier;
 

@@ -12,9 +12,14 @@ namespace Zergatul.Network.Tls
         public DiffieHellmanParameters DHParameters;
         public bool ReuseSessions;
 
+        public Func<byte[]> GetRandom;
+
+        public Extensions.TlsExtension[] Extensions;
+
         public byte[] PSKIdentityHint;
         public Func<byte[], PreSharedKey> GetPSKByHint;
         public Func<byte[], PreSharedKey> GetPSKByIdentity;
+
         public Func<X509Certificate, bool> ServerCertificateValidationOverride;
         public bool RequestClientCertificate;
         public Func<X509Certificate, bool> ClientCertificateValidate;
@@ -29,49 +34,51 @@ namespace Zergatul.Network.Tls
             if (SupportedCurves != null)
                 result.SupportedCurves = (NamedGroup[])SupportedCurves.Clone();
 
+            if (Extensions != null)
+                result.Extensions = (Extensions.TlsExtension[])Extensions.Clone();
+
             if (PSKIdentityHint != null)
                 result.PSKIdentityHint = (byte[])PSKIdentityHint.Clone();
 
             return result;
         }
 
-        public static TlsStreamSettings Default = new TlsStreamSettings
+        public static TlsStreamSettings Default => new TlsStreamSettings
         {
             SupportExtendedMasterSecret = true,
             ReuseSessions = true,
             DHParameters = DiffieHellmanParameters.Group14,
             CipherSuites = new CipherSuite[]
             {
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM_8,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM_8,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
-
-                CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
-
-                CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-                CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
+                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
 
                 CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
                 CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
                 CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
                 CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
 
-                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM_8,
-                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CCM,
-                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM_8,
-                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CCM,
+                CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 
-                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+                CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+
+                CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+
+                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CCM,
+                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CCM,
+
+                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA,
+                CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+                CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256
             },
             SupportedCurves = new NamedGroup[]
             {

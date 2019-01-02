@@ -10,11 +10,11 @@ namespace Zergatul.Network.Tls.Messages
     {
         public HandshakeBody Body;
 
-        private TlsStream _tlsStream;
+        private CipherSuiteBuilder _cipher;
 
-        public HandshakeMessage(TlsStream stream)
+        public HandshakeMessage(CipherSuiteBuilder cipher)
         {
-            this._tlsStream = stream;
+            this._cipher = cipher;
         }
 
         public override void Read(BinaryReader reader)
@@ -34,11 +34,11 @@ namespace Zergatul.Network.Tls.Messages
             var contentWriter = new BinaryWriter(content);
             if (Body.Type == HandshakeType.ServerKeyExchange)
             {
-                _tlsStream.SelectedCipher.KeyExchange.WriteServerKeyExchange((ServerKeyExchange)Body, contentWriter);
+                _cipher.KeyExchange.WriteServerKeyExchange((ServerKeyExchange)Body, contentWriter);
             }
             else if (Body.Type == HandshakeType.ClientKeyExchange)
             {
-                _tlsStream.SelectedCipher.KeyExchange.WriteClientKeyExchange((ClientKeyExchange)Body, contentWriter);
+                _cipher.KeyExchange.WriteClientKeyExchange((ClientKeyExchange)Body, contentWriter);
             }
             else
                 Body.WriteTo(contentWriter);
@@ -61,13 +61,13 @@ namespace Zergatul.Network.Tls.Messages
                     Body = new Certificate();
                     break;
                 case HandshakeType.ServerKeyExchange:
-                    Body = _tlsStream.SelectedCipher.KeyExchange.ReadServerKeyExchange(reader);
+                    Body = _cipher.KeyExchange.ReadServerKeyExchange(reader);
                     return;
                 case HandshakeType.ServerHelloDone:
                     Body = new ServerHelloDone();
                     break;
                 case HandshakeType.ClientKeyExchange:
-                    Body = _tlsStream.SelectedCipher.KeyExchange.ReadClientKeyExchange(reader);
+                    Body = _cipher.KeyExchange.ReadClientKeyExchange(reader);
                     return;
                 case HandshakeType.Finished:
                     Body = new Finished();

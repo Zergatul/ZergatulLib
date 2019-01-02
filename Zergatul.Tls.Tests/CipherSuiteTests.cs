@@ -17,7 +17,7 @@ namespace Zergatul.Tls.Tests
 
         #region Certificates
 
-        private static X509Certificate GetRSACert()
+        public static X509Certificate GetRSACert()
         {
             return new X509Certificate(Settings.RSA4096CertName, Settings.RSA4096CertPwd);
         }

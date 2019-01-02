@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Cryptocurrency.Zcash
 {
-    public class TxInput : TxInputBase
+    public class TxInput : Base.TxInputBase
     {
         public TxInput()
             : base(BlockchainCryptoFactory.Zcash)

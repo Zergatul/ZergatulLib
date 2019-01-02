@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Zergatul.Cryptocurrency.Tests</RootNamespace>
     <AssemblyName>Zergatul.Cryptocurrency.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -16,6 +16,7 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -52,8 +54,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Bech32Tests.cs" />
     <Compile Include="BitcoinGold\AddressTests.cs" />
     <Compile Include="Bitcoin\P2PKHAddressTests.cs" />
+    <Compile Include="Bitcoin\P2SHP2WPKHAddressTests.cs" />
+    <Compile Include="Bitcoin\P2WPKHAddressTests.cs" />
+    <Compile Include="Ethereum\AddressTests.cs" />
+    <Compile Include="Ethereum\RlpTests.cs" />
+    <Compile Include="Ethereum\TransactionTests.cs" />
+    <Compile Include="Ethereum\MixedCaseAddressEncodingTests.cs" />
     <Compile Include="ScriptTests.cs" />
     <Compile Include="Bitcoin\TransactionTests.cs" />
     <Compile Include="Base58Tests.cs" />
@@ -63,6 +72,7 @@
     <Compile Include="Bitcoin\BlockTests.cs" />
     <Compile Include="Secp256k1PrivateKeyTests.cs" />
     <Compile Include="Ripple\AccountTests.cs" />
+    <Compile Include="TestHelper.cs" />
     <Compile Include="Verge\AddressTests.cs" />
     <Compile Include="Verge\TransactionTests.cs" />
     <Compile Include="Zcash\AddressTests.cs" />
@@ -72,6 +82,14 @@
     <ProjectReference Include="..\Zergatul.Cryptocurrency\Zergatul.Cryptocurrency.csproj">
       <Project>{6cb93460-a3cd-4985-8cdd-7ff4ca26b7dd}</Project>
       <Name>Zergatul.Cryptocurrency</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul.Security.Tests\Zergatul.Security.Tests.csproj">
+      <Project>{a6a93ded-7bb6-4d84-84c9-1eeeb7ca8f33}</Project>
+      <Name>Zergatul.Security.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul.Tests\Zergatul.Tests.csproj">
+      <Project>{74762E1C-9C03-4EAB-BD9E-2785A6974FA1}</Project>
+      <Name>Zergatul.Tests</Name>
     </ProjectReference>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">
       <Project>{70DCFA02-0D6B-4220-8E1C-F1B8BA158FAC}</Project>

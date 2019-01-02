@@ -77,5 +77,22 @@ namespace Zergatul.Network.Proxy
         }
 
         public abstract TcpListener CreateListener(int port);
+
+        #region System.Object overrides
+
+        public override bool Equals(object obj)
+        {
+            throw new InvalidOperationException("Please override equals in proxy implementations");
+        }
+
+        public override int GetHashCode()
+        {
+            return
+                _serverAddress.GetHashCode() ^
+                (_serverHostname?.GetHashCode() ?? 0) ^
+                _serverPort;
+        }
+
+        #endregion
     }
 }

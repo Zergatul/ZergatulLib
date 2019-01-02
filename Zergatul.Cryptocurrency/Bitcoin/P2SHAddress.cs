@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Zergatul.Cryptocurrency.Bitcoin
+﻿namespace Zergatul.Cryptocurrency.Bitcoin
 {
-    public class P2SHAddress : Cryptocurrency.P2SHAddressBase
+    public class P2SHAddress : Base.P2SHAddressBase
     {
         private static readonly byte[] Prefix = new byte[] { 0x05 };
 

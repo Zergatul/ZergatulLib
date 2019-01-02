@@ -11,19 +11,24 @@ namespace Zergatul.Cryptocurrency
 
         public static string Encode(byte[] version, byte[] data, char[] symbols)
         {
-            var dsha256 = new DoubleSHA256();
-            dsha256.Update(version);
-            dsha256.Update(data);
-            byte[] hash = dsha256.ComputeHash();
+            byte[] hash = DoubleSHA256.Hash(version, data);
 
             byte[] bytes = new byte[data.Length + 4 + version.Length];
             Array.Copy(version, 0, bytes, 0, version.Length);
             Array.Copy(data, 0, bytes, version.Length, data.Length);
             Array.Copy(hash, 0, bytes, version.Length + data.Length, 4);
 
-            var bigint = new BigInteger(bytes, ByteOrder.BigEndian);
+            return EncodeRaw(bytes, symbols);
+        }
+
+        public static string EncodeRaw(byte[] data, char[] symbols = null)
+        {
+            if (symbols == null)
+                symbols = DefaultSymbols;
+
+            var bigint = new BigInteger(data, ByteOrder.BigEndian);
             string result = bigint.ToString(58, symbols);
-            for (int i = 0; i < bytes.Length && bytes[i] == 0; i++)
+            for (int i = 0; i < data.Length && data[i] == 0; i++)
                 result = symbols[0] + result;
             return result;
         }
@@ -42,9 +47,7 @@ namespace Zergatul.Cryptocurrency
             if (leadingZeros > 0)
                 bytes = ByteArray.Concat(new byte[leadingZeros], bytes);
 
-            var dsha256 = new DoubleSHA256();
-            dsha256.Update(bytes, 0, bytes.Length - 4);
-            byte[] hash = dsha256.ComputeHash();
+            byte[] hash = DoubleSHA256.Hash(bytes, 0, bytes.Length - 4);
 
             for (int i = 0; i < 4; i++)
                 if (bytes[bytes.Length - 4 + i] != hash[i])

@@ -84,5 +84,26 @@ namespace Zergatul.Network.Proxy
         {
             throw new NotImplementedException();
         }
+
+        #region System.Object overrides
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as HttpProxy;
+            if (other == null)
+                return false;
+
+            return
+                this.ServerAddress == other.ServerAddress &&
+                this.ServerHostName == other.ServerHostName &&
+                this.ServerPort == other.ServerPort;
+        }
+
+        public override int GetHashCode()
+        {
+            return 0x110F0F61 ^ base.GetHashCode();
+        }
+
+        #endregion
     }
 }

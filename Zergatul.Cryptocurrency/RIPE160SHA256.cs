@@ -1,14 +1,27 @@
-﻿using Zergatul.Cryptography.Hash;
+﻿using Zergatul.Security;
 
 namespace Zergatul.Cryptocurrency
 {
-    public class RIPE160SHA256 : SHA256
+    public static class RIPE160SHA256
     {
-        protected override byte[] InternalStateToBytes()
+        public static byte[] Hash(byte[] data)
         {
-            var ripemd160 = new RIPEMD160();
-            ripemd160.Update(base.InternalStateToBytes());
-            return ripemd160.ComputeHash();
+            using (var sha256 = SecurityProvider.GetMessageDigestInstance(MessageDigests.SHA256))
+            using (var ripemd = SecurityProvider.GetMessageDigestInstance(MessageDigests.RIPEMD160))
+            {
+                return ripemd.Digest(sha256.Digest(data));
+            }
+        }
+
+        public static byte[] Hash(params byte[][] data)
+        {
+            using (var sha256 = SecurityProvider.GetMessageDigestInstance(MessageDigests.SHA256))
+            using (var ripemd = SecurityProvider.GetMessageDigestInstance(MessageDigests.RIPEMD160))
+            {
+                foreach (byte[] array in data)
+                    sha256.Update(array);
+                return ripemd.Digest(sha256.Digest());
+            }
         }
     }
 }
