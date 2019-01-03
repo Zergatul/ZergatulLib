@@ -396,6 +396,7 @@
     <Compile Include="Network\Smtp\SmtpException.cs" />
     <Compile Include="Network\Smtp\SmtpReplyCode.cs" />
     <Compile Include="Network\Smtp\SmtpServerReply.cs" />
+    <Compile Include="Network\SocketHelper.cs" />
     <Compile Include="Network\TcpClientHelper.cs" />
     <Compile Include="Network\TimeoutException.cs" />
     <Compile Include="Network\Tls\AbstractTlsSignature.cs" />

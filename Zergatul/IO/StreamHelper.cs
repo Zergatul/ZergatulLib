@@ -7,6 +7,11 @@ namespace Zergatul.IO
 {
     public static class StreamHelper
     {
+        public static Task CopyToAsync(Stream source, Stream destination, CancellationToken cancellationToken)
+        {
+            return source.CopyToAsync(destination, 81920, cancellationToken);
+        }
+
         public static void ReadArray(Stream stream, byte[] data)
         {
             int index = 0;

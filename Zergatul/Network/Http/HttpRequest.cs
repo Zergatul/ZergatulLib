@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Zergatul.IO;
 
 namespace Zergatul.Network.Http
 {
@@ -169,6 +172,21 @@ namespace Zergatul.Network.Http
 
             if (Body != null)
                 Body.CopyTo(stream);
+        }
+
+        public async Task WriteToAsync(Stream stream, CancellationToken cancellationToken)
+        {
+            byte[] buffer = Encoding.ASCII.GetBytes($"{Method} {Uri.PathAndQuery} HTTP/{Version}{Constants.TelnetEndOfLine}");
+            await stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
+            foreach (string header in _orderedHeaders)
+            {
+                buffer = Encoding.ASCII.GetBytes($"{header}: {_headers[header.ToLower()]}{Constants.TelnetEndOfLine}");
+                await stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
+            }
+            await stream.WriteAsync(Constants.TelnetEndOfLineBytes, 0, Constants.TelnetEndOfLineBytes.Length, cancellationToken);
+
+            if (Body != null)
+                await StreamHelper.CopyToAsync(Body, stream, cancellationToken);
         }
 
         #endregion

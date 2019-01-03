@@ -1,0 +1,3 @@
+﻿Change TlsStream to buffered write + flush
+
+Http1Client, CreateNewConnectionAsync - use async for TLS authenticate

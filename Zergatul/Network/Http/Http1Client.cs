@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Zergatul.Network.Tls;
 
 namespace Zergatul.Network.Http
@@ -47,6 +49,25 @@ namespace Zergatul.Network.Http
 
             var response = new HttpResponse(this);
             response.ReadFrom(connection.Stream);
+            connection.LastResponse = response;
+            return response;
+        }
+
+        public Task<HttpResponse> GetResponseAsync(HttpRequest request) => GetResponseAsync(request, CancellationToken.None);
+
+        public async Task<HttpResponse> GetResponseAsync(HttpRequest request, CancellationToken cancellationToken)
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            ThrowIfDisposed();
+
+            var connection = await GetConnectionAsync(request.Uri, cancellationToken);
+            await request.WriteToAsync(connection.Stream, cancellationToken);
+            await connection.Stream.FlushAsync(cancellationToken);
+
+            var response = new HttpResponse(this);
+            await response.ReadFromAsync(connection.Stream, cancellationToken);
             connection.LastResponse = response;
             return response;
         }
@@ -98,7 +119,37 @@ namespace Zergatul.Network.Http
             if (uri.Scheme != "http" && uri.Scheme != "https")
                 throw new InvalidOperationException("Invalid scheme");
 
-            List<ConnectionInfo> connectionsList;
+            GetFreeConnection(uri, out List<ConnectionInfo> list, out ConnectionInfo connection);
+
+            if (connection == null)
+            {
+                connection = CreateNewConnection(uri);
+                lock (list)
+                    list.Add(connection);
+            }
+
+            return connection;
+        }
+
+        private async Task<ConnectionInfo> GetConnectionAsync(Uri uri, CancellationToken cancellationToken)
+        {
+            if (uri.Scheme != "http" && uri.Scheme != "https")
+                throw new InvalidOperationException("Invalid scheme");
+
+            GetFreeConnection(uri, out List<ConnectionInfo> list, out ConnectionInfo connection);
+
+            if (connection == null)
+            {
+                connection = await CreateNewConnectionAsync(uri);
+                lock (list)
+                    list.Add(connection);
+            }
+
+            return connection;
+        }
+
+        private void GetFreeConnection(Uri uri, out List<ConnectionInfo> list, out ConnectionInfo connection)
+        {
             lock (_connections)
             {
                 var @group = new ConnectionGroup
@@ -107,21 +158,21 @@ namespace Zergatul.Network.Http
                     Port = uri.Port,
                     IsSecure = uri.Scheme == "https"
                 };
-                _connections.TryGetValue(@group, out connectionsList);
+                _connections.TryGetValue(@group, out list);
 
-                if (connectionsList == null)
+                if (list == null)
                 {
-                    connectionsList = new List<ConnectionInfo>();
-                    _connections.Add(group, connectionsList);
+                    list = new List<ConnectionInfo>();
+                    _connections.Add(group, list);
                 }
             }
 
-            lock (connectionsList)
+            lock (list)
             {
                 DateTime now = DateTime.Now;
-                for (int i = 0; i < connectionsList.Count; i++)
+                for (int i = 0; i < list.Count; i++)
                 {
-                    var connection = connectionsList[i];
+                    connection = list[i];
                     if (connection.InUse)
                         continue;
                     if (connection.Timeout != 0)
@@ -129,20 +180,18 @@ namespace Zergatul.Network.Http
                         // check if connection timed out
                         if ((now - connection.LastUse).TotalSeconds > connection.Timeout)
                         {
-                            connectionsList.RemoveAt(i);
+                            list.RemoveAt(i);
                             i--;
                             continue;
                         }
                     }
+                    connection.LastUse = now;
                     connection.InUse = true;
-                    return connection;
+                    return;
                 }
             }
 
-            var newConnection = CreateNewConnection(uri);
-            lock (connectionsList)
-                connectionsList.Add(newConnection);
-            return newConnection;
+            connection = null;
         }
 
         private ConnectionInfo CreateNewConnection(Uri uri)
@@ -155,6 +204,7 @@ namespace Zergatul.Network.Http
                     return new ConnectionInfo
                     {
                         Stream = stream,
+                        LastUse = DateTime.Now,
                         InUse = true
                     };
 
@@ -164,6 +214,36 @@ namespace Zergatul.Network.Http
                     return new ConnectionInfo
                     {
                         Stream = tls,
+                        LastUse = DateTime.Now,
+                        InUse = true
+                    };
+
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        private async Task<ConnectionInfo> CreateNewConnectionAsync(Uri uri)
+        {
+            var stream = await _provider.GetTcpStreamAsync(uri.Host, uri.Port, _proxy);
+            switch (uri.Scheme)
+            {
+                case "http":
+                    var buffered = new IO.BufferedStream(stream);
+                    return new ConnectionInfo
+                    {
+                        Stream = stream,
+                        LastUse = DateTime.Now,
+                        InUse = true
+                    };
+
+                case "https":
+                    var tls = new TlsStream(stream);
+                    tls.AuthenticateAsClient(uri.Host); // TODO: use async
+                    return new ConnectionInfo
+                    {
+                        Stream = tls,
+                        LastUse = DateTime.Now,
                         InUse = true
                     };
 
