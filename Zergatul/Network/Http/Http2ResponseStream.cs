@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using Zergatul.IO;
 using Zergatul.IO.Compression;
 
@@ -23,7 +22,7 @@ namespace Zergatul.Network.Http
                 switch (response.ContentEncoding)
                 {
                     case HttpHeaderValue.GZip:
-                        _innerStream = new GZipStream(rawStream, CompressionMode.Decompress, true);
+                        _innerStream = new System.IO.Compression.GZipStream(rawStream, System.IO.Compression.CompressionMode.Decompress, true);
                         break;
 
                     case HttpHeaderValue.Brotli:

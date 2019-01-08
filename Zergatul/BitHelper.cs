@@ -471,5 +471,16 @@ namespace Zergatul
             for (int i = 0; i < length; i++)
                 result[i] = ToUInt64(array, i << 3, order);
         }
+
+        public static int ReverseBits(int value, int bits)
+        {
+            int result = 0;
+            for (int i = 0; i < bits; i++)
+            {
+                result |= (value & 1) << (bits - i - 1);
+                value >>= 1;
+            }
+            return result;
+        }
     }
 }

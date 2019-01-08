@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Zergatul.IO;
 using Stream = System.IO.Stream;
@@ -59,7 +60,7 @@ namespace Zergatul.Network.Tls
                 return;
 
             if (count > _buffer.Length)
-                _buffer = new byte[count];
+                _buffer = new byte[System.Math.Max(count, _buffer.Length * 2)];
 
             if (_stream != null)
             {
@@ -88,9 +89,50 @@ namespace Zergatul.Network.Tls
                         _tracking[t].Add(_buffer[i]);
         }
 
+        private async Task FillBufferAsync(int count, CancellationToken cancellationToken)
+        {
+            if (count == 0)
+                return;
+
+            if (count > _buffer.Length)
+                _buffer = new byte[System.Math.Max(count, _buffer.Length * 2)];
+
+            if (_stream != null)
+            {
+                int totalRead = _bufIndex;
+                while (true)
+                {
+                    totalRead += await _stream.ReadAsync(_buffer, totalRead, count - totalRead, cancellationToken);
+                    if (totalRead == 0)
+                        throw new EndOfStreamException();
+                    if (totalRead == count)
+                        break;
+                }
+                _bufIndex = 0;
+            }
+
+            if (_array != null)
+            {
+                Array.Copy(_array, Position, _buffer, 0, count);
+            }
+
+            Position += count;
+
+            if (_tracking != null)
+                for (int t = 0; t < _tracking.Count; t++)
+                    for (int i = 0; i < count; i++)
+                        _tracking[t].Add(_buffer[i]);
+        }
+
         public byte ReadByte()
         {
             FillBuffer(1);
+            return _buffer[0];
+        }
+
+        public async Task<byte> ReadByteAsync(CancellationToken cancellationToken)
+        {
+            await FillBufferAsync(1, cancellationToken);
             return _buffer[0];
         }
 
@@ -104,9 +146,25 @@ namespace Zergatul.Network.Tls
             return result;
         }
 
+        public async Task<byte[]> ReadBytesAsync(int count, CancellationToken cancellationToken)
+        {
+            await FillBufferAsync(count, cancellationToken);
+
+            var result = new byte[count];
+            Array.Copy(_buffer, result, count);
+
+            return result;
+        }
+
         public ushort ReadShort()
         {
             FillBuffer(2);
+            return (ushort)(_buffer[0] << 8 | _buffer[1]);
+        }
+
+        public async Task<ushort> ReadShortAsync(CancellationToken cancellationToken)
+        {
+            await FillBufferAsync(2, cancellationToken);
             return (ushort)(_buffer[0] << 8 | _buffer[1]);
         }
 

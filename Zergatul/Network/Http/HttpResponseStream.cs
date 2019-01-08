@@ -67,6 +67,7 @@ namespace Zergatul.Network.Http
         {
             if (_chunked)
             {
+                int read = 0;
                 switch (_chunkReadState)
                 {
                     case ChunkReadState.ReadChunkLength:
@@ -105,12 +106,15 @@ namespace Zergatul.Network.Http
                         else
                         {
                             _chunkReadState = ChunkReadState.ReadChunkData;
-                            goto case ChunkReadState.ReadChunkData;
+                            if (read != 0)
+                                return read;
+                            else
+                                goto case ChunkReadState.ReadChunkData;
                         }
 
                     case ChunkReadState.ReadChunkData:
                         count = checked((int)System.Math.Min(count, _chunkLength));
-                        int read = _innerStream.Read(buffer, offset, count);
+                        read = _innerStream.Read(buffer, offset, count);
                         _chunkLength -= read;
                         if (_chunkLength == 0)
                         {
@@ -121,11 +125,12 @@ namespace Zergatul.Network.Http
                             if (!CharHelper.IsLF(ch))
                                 throw new HttpParseException(InvalidChunkEnding);
                             _chunkReadState = ChunkReadState.ReadChunkLength;
+                            goto case ChunkReadState.ReadChunkLength;
                         }
                         return read;
 
                     case ChunkReadState.End:
-                        return 0;
+                        return read;
 
                     default:
                         throw new InvalidOperationException();

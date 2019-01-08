@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Zergatul.Cryptography;
 using Zergatul.Cryptography.Certificate;
+using Zergatul.IO;
 using Zergatul.Network.Tls.Extensions;
 using Zergatul.Network.Tls.Messages;
 
@@ -194,6 +197,8 @@ namespace Zergatul.Network.Tls
             {
                 TlsStreamSessions.Instance.Add(host, new TlsStreamSession(_sessionId, SecurityParameters.MasterSecret));
             }
+
+            OnAuthFinished();
         }
 
         public void AuthenticateAsServer(string host, X509Certificate certificate = null)
@@ -265,6 +270,8 @@ namespace Zergatul.Network.Tls
             }
 
             _messageStream.ReleaseHandshakeBuffer();
+
+            OnAuthFinished();
         }
 
         #region Private methods
@@ -368,6 +375,67 @@ namespace Zergatul.Network.Tls
                 SecurityParameters.ClientRandom = random;
             if (Role == Role.Server)
                 SecurityParameters.ServerRandom = random;
+        }
+
+        private void OnAuthFinished()
+        {
+            if (_readBuffer == null)
+            {
+                _readBuffer = new byte[RecordMessageStream.PlaintextLimit];
+                _readBufferOffset = 0;
+                _readBufferLength = 0;
+            }
+
+            if (_writeBuffer == null)
+            {
+                _writeBuffer = new byte[RecordMessageStream.PlaintextLimit];
+                _writeBufferLength = 0;
+            }
+        }
+
+        private void CopyToReadBuffer(ApplicationData message)
+        {
+            Buffer.BlockCopy(message.Data, 0, _readBuffer, 0, message.Data.Length);
+            _readBufferOffset = 0;
+            _readBufferLength = message.Data.Length;
+        }
+
+        private int ReadFromBuffer(byte[] buffer, int offset, int count)
+        {
+            if (_readBufferOffset >= _readBufferLength)
+            {
+                _readBufferOffset = 0;
+                _readBufferLength = 0;
+            }
+
+            if (count > _readBufferLength - _readBufferOffset)
+                count = _readBufferLength - _readBufferOffset;
+            if (count == 0)
+                return 0;
+
+            Array.Copy(_readBuffer, _readBufferOffset, buffer, offset, count);
+            _readBufferOffset += count;
+
+            return count;
+        }
+
+        private void FlushWriteBufferIfFull()
+        {
+            if (_writeBufferLength == _writeBuffer.Length)
+            {
+                _messageStream.WriteApplicationData(_writeBuffer);
+                _writeBufferLength = 0;
+                _innerStream.Flush();
+            }
+        }
+
+        private async Task FlushWriteBufferIfFullAsync(CancellationToken cancellationToken)
+        {
+            if (_writeBufferLength == _writeBuffer.Length)
+            {
+                await _messageStream.WriteApplicationDataAsync(_writeBuffer, cancellationToken);
+                _writeBufferLength = 0;
+            }
         }
 
         #region Message generation methods
@@ -835,8 +903,10 @@ namespace Zergatul.Network.Tls
         #endregion
 
         private byte[] _readBuffer;
+        private byte[] _writeBuffer;
         private int _readBufferOffset;
         private int _readBufferLength;
+        private int _writeBufferLength;
 
         protected override void Dispose(bool disposing)
         {
@@ -853,61 +923,107 @@ namespace Zergatul.Network.Tls
 
         public override void Flush()
         {
-            
+            if (_writeBufferLength > 0)
+            {
+                byte[] data = ByteArray.SubArray(_writeBuffer, 0, _writeBufferLength);
+                _writeBufferLength = 0;
+                _messageStream.WriteApplicationData(data);
+                _innerStream.Flush();
+            }
+        }
+
+        public override async Task FlushAsync(CancellationToken cancellationToken)
+        {
+            if (_writeBufferLength > 0)
+            {
+                byte[] data = ByteArray.SubArray(_writeBuffer, 0, _writeBufferLength);
+                _writeBufferLength = 0;
+                await _messageStream.WriteApplicationDataAsync(data, cancellationToken);
+                await _innerStream.FlushAsync(cancellationToken);
+            }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_readBuffer == null)
-            {
-                _readBuffer = new byte[RecordMessageStream.PlaintextLimit];
-                _readBufferOffset = 0;
-                _readBufferLength = 0;
-            }
+            if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
+                return 0;
 
             if (_readBufferOffset >= _readBufferLength && !_isClosed)
             {
                 var message = _messageStream.ReadMessage();
-                if (message is ApplicationData)
+                switch (message)
                 {
-                    var appData = message as ApplicationData;
-                    Array.Copy(appData.Data, 0, _readBuffer, 0, appData.Data.Length);
-                    _readBufferOffset = 0;
-                    _readBufferLength = appData.Data.Length;
-                } else if (message is Alert)
-                    OnAlert(message as Alert, true);
-                else
-                    throw new InvalidOperationException();
+                    case ApplicationData appData:
+                        CopyToReadBuffer(appData);
+                        break;
+                    case Alert alert:
+                        OnAlert(message as Alert, true);
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
             }
 
-            if (_readBufferOffset >= _readBufferLength)
-            {
-                _readBufferOffset = 0;
-                _readBufferLength = 0;
-            }
+            return ReadFromBuffer(buffer, offset, count);
+        }
 
-            if (count > _readBufferLength - _readBufferOffset)
-                count = _readBufferLength - _readBufferOffset;
-            if (count == 0)
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
                 return 0;
 
-            Array.Copy(_readBuffer, _readBufferOffset, buffer, offset, count);
-            _readBufferOffset += count;
+            if (_readBufferOffset >= _readBufferLength && !_isClosed)
+            {
+                var message = await _messageStream.ReadMessageAsync(cancellationToken);
+                switch (message)
+                {
+                    case ApplicationData appData:
+                        CopyToReadBuffer(appData);
+                        break;
+                    case Alert alert:
+                        OnAlert(message as Alert, true);
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
 
-            return count;
+            return ReadFromBuffer(buffer, offset, count);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            var data = new byte[count];
-            Array.Copy(buffer, offset, data, 0, count);
+            if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
+                return;
 
-            int limit = RecordMessageStream.PlaintextLimit;
-            int chunks = (count + limit - 1) / limit;
-            for (int c = 0; c < chunks; c++)
+            while (count > 0)
             {
-                byte[] chunk = ByteArray.SubArray(data, c * limit, System.Math.Min(limit, count - c * limit));
-                _messageStream.WriteApplicationData(chunk);
+                int write = System.Math.Min(_writeBuffer.Length - _writeBufferLength, count);
+                Buffer.BlockCopy(buffer, offset, _writeBuffer, _writeBufferLength, write);
+
+                _writeBufferLength += write;
+                offset += write;
+                count -= write;
+
+                FlushWriteBufferIfFull();
+            }
+        }
+
+        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
+                return;
+
+            while (count > 0)
+            {
+                int write = System.Math.Min(_writeBuffer.Length - _writeBufferLength, count);
+                Buffer.BlockCopy(buffer, offset, _writeBuffer, _writeBufferLength, write);
+
+                _writeBufferLength += write;
+                offset += write;
+                count -= write;
+
+                await FlushWriteBufferIfFullAsync(cancellationToken);
             }
         }
 

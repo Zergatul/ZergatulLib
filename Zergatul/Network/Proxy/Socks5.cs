@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Zergatul.Network.Proxy
 {
@@ -82,7 +80,7 @@ namespace Zergatul.Network.Proxy
             return tcp;
         }
 
-        private void Greeting(NetworkStream stream)
+        private void Greeting(Stream stream)
         {
             byte[] packet = new byte[3];
             packet[0] = Version;
@@ -98,7 +96,7 @@ namespace Zergatul.Network.Proxy
                 throw new Socks5Exception("Server response: client didn't offer acceptable authentication methods");
         }
 
-        private void Connect(NetworkStream stream, IPAddress address, int port)
+        private void Connect(Stream stream, IPAddress address, int port)
         {
             byte[] packet = new byte[10];
             packet[0] = Version;
@@ -113,7 +111,7 @@ namespace Zergatul.Network.Proxy
             ReadConnectResponse(stream);
         }
 
-        private void Connect(NetworkStream stream, string domainName, int port)
+        private void Connect(Stream stream, string domainName, int port)
         {
             byte[] packet = new byte[5 + domainName.Length + 2];
             packet[0] = Version;
@@ -130,7 +128,7 @@ namespace Zergatul.Network.Proxy
             ReadConnectResponse(stream);
         }
 
-        private void ReadConnectResponse(NetworkStream stream)
+        private void ReadConnectResponse(Stream stream)
         {
             byte[] response = new byte[256];
             int totalRead = 0;

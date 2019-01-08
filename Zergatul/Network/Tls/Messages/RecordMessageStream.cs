@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Zergatul.IO;
 
 namespace Zergatul.Network.Tls.Messages
@@ -75,7 +77,6 @@ namespace Zergatul.Network.Tls.Messages
 
                 ushort length = _reader.ReadShort();
 
-
                 if (ReadEncrypted) // TODO: optimize to use stream
                 {
                     if (length > CiphertextLimit)
@@ -119,6 +120,82 @@ namespace Zergatul.Network.Tls.Messages
                 }
 
                 message.Read(reader);
+                if (_readContentType == ContentType.Handshake)
+                {
+                    _handshakeBuffer.AddRange(tracking);
+                    reader.StopTracking();
+                }
+
+                if (!_readStream.CanRead)
+                    _readStream = null;
+
+                return message;
+            }
+            else
+                throw new InvalidOperationException();
+        }
+
+        public async Task<ContentMessage> ReadMessageAsync(CancellationToken cancellationToken)
+        {
+            if (_readStream == null)
+            {
+                _readContentType = (ContentType)await _reader.ReadByteAsync(cancellationToken);
+                var version = (ProtocolVersion)await _reader.ReadShortAsync(cancellationToken);
+
+                if (version != Version)
+                    throw new TlsStreamException("Invalid TLS version");
+
+                ushort length = await _reader.ReadShortAsync(cancellationToken);
+
+                if (ReadEncrypted) // TODO: optimize to use stream
+                {
+                    if (length > CiphertextLimit)
+                        throw new RecordOverflowException();
+
+                    byte[] buffer = SelectedCipher.SymmetricCipher.Decrypt(
+                        _readContentType,
+                        version,
+                        DecodingSequenceNum++,
+                        await _reader.ReadBytesAsync(length, cancellationToken));
+                    _readStream = new LimitedReadStream(new MemoryStream(buffer), buffer.Length);
+                }
+                else
+                {
+                    if (length > PlaintextLimit)
+                        throw new RecordOverflowException();
+
+                    _readStream = new LimitedReadStream(_stream, length);
+                }
+            }
+
+            if (_readStream.CanRead)
+            {
+                var reader = new BinaryReader(_readStream);
+                var tracking = new List<byte>();
+
+                ContentMessage message;
+                switch (_readContentType)
+                {
+                    case ContentType.Handshake:
+                        message = new HandshakeMessage(SelectedCipher);
+                        reader.StartTracking(tracking);
+                        break;
+                    case ContentType.ChangeCipherSpec:
+                        message = new ChangeCipherSpec();
+                        break;
+                    case ContentType.Alert:
+                        message = new Alert();
+                        break;
+                    case ContentType.ApplicationData:
+                        message = new ApplicationData();
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                message.Read(reader);
+                //throw new NotImplementedException();
+                //await message.ReadAsync(reader, cancellationToken);
                 if (_readContentType == ContentType.Handshake)
                 {
                     _handshakeBuffer.AddRange(tracking);
@@ -191,9 +268,16 @@ namespace Zergatul.Network.Tls.Messages
             });
         }
 
-        public void WriteApplicationData(byte[] data)
+        public void WriteApplicationData(byte[] data) => WriteMessage(GetApplicationData(data));
+
+        public Task WriteApplicationDataAsync(byte[] data, CancellationToken cancellationToken)
         {
-            WriteMessage(new RecordMessage
+            return WriteMessageAsync(GetApplicationData(data), cancellationToken);
+        }
+
+        private RecordMessage GetApplicationData(byte[] data)
+        {
+            return new RecordMessage
             {
                 RecordType = ContentType.ApplicationData,
                 Version = Version,
@@ -204,10 +288,24 @@ namespace Zergatul.Network.Tls.Messages
                         Data = data
                     }
                 }
-            });
+            };
         }
 
         private void WriteMessage(RecordMessage message)
+        {
+            byte[] buffer = GetBuffer(message);
+            _stream.Write(buffer, 0, buffer.Length);
+            _stream.Flush();
+        }
+
+        private async Task WriteMessageAsync(RecordMessage message, CancellationToken cancellationToken)
+        {
+            byte[] buffer = GetBuffer(message);
+            await _stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
+            await _stream.FlushAsync(cancellationToken);
+        }
+
+        private byte[] GetBuffer(RecordMessage message)
         {
             List<byte> buffer;
             BinaryWriter writer;
@@ -238,8 +336,7 @@ namespace Zergatul.Network.Tls.Messages
             writer.WriteShort((ushort)message.ContentMessagesRaw.Count);
             buffer.AddRange(message.ContentMessagesRaw);
 
-            _stream.Write(buffer.ToArray(), 0, buffer.Count);
-            _stream.Flush();
+            return buffer.ToArray();
         }
     }
 }

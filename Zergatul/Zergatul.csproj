@@ -121,8 +121,17 @@
     <Compile Include="IO\Compression\BrotliStaticDictionary.cs" />
     <Compile Include="IO\Compression\BrotliStream.cs" />
     <Compile Include="IO\Compression\BrotliStreamException.cs" />
+    <Compile Include="IO\Compression\CompressionMode.cs" />
+    <Compile Include="IO\Compression\DeflateStream.cs" />
+    <Compile Include="IO\Compression\DeflateStreamException.cs" />
+    <Compile Include="IO\Compression\GzipStream.cs" />
+    <Compile Include="IO\Compression\GzipStreamException.cs" />
+    <Compile Include="IO\Compression\HuffmanTree.cs" />
+    <Compile Include="IO\Compression\HuffmanTreeException.cs" />
+    <Compile Include="IO\CRC32.cs" />
     <Compile Include="IO\GenericMessageReadStream.cs" />
     <Compile Include="IO\LimitedStream.cs" />
+    <Compile Include="Network\NetworkStream.cs" />
     <Compile Include="IO\StreamHelper.cs" />
     <Compile Include="Math\BigFloat.cs" />
     <Compile Include="Math\EdwardsCurves\EdCurve.cs" />

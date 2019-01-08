@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -463,7 +462,7 @@ namespace Zergatul.Network.Http
             if (contentEncoding != null)
             {
                 if (string.Equals(contentEncoding, HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
-                    Body = new GZipStream(RawBody, CompressionMode.Decompress, true);
+                    Body = new System.IO.Compression.GZipStream(RawBody, System.IO.Compression.CompressionMode.Decompress, true);
                 else if (string.Equals(contentEncoding, HttpHeaderValue.Brotli, StringComparison.OrdinalIgnoreCase))
                     Body = new BrotliStream(RawBody, CompressionMode.Decompress);
                 else

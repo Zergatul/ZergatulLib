@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -66,7 +67,7 @@ namespace Zergatul.Network.Proxy
             throw new NotImplementedException();
         }
 
-        void SendCommand(NetworkStream stream, byte command, byte[] host, int port)
+        void SendCommand(Stream stream, byte command, byte[] host, int port)
         {
             byte[] request = new byte[9];
             request[0] = Version;
