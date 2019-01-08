@@ -61,7 +61,7 @@ namespace Zergatul.IO
         {
             if (_writeBufferPos != 0)
             {
-                _stream.Write(_writeBuffer, 0, _writeBufferPos);
+                await _stream.WriteAsync(_writeBuffer, 0, _writeBufferPos, cancellationToken);
                 _writeBufferPos = 0;
                 await _stream.FlushAsync(cancellationToken);
             }

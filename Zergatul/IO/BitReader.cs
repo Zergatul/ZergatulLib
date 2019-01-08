@@ -20,8 +20,8 @@ namespace Zergatul.IO
 
         public int ReadBits(int bits)
         {
-            if (bits < 0 || bits > 24)
-                throw new ArgumentOutOfRangeException(nameof(bits), "Bits must be >= 0 and <= 24");
+            if (bits < 0 || bits > 32)
+                throw new ArgumentOutOfRangeException(nameof(bits), "Bits must be >= 0 and <= 32");
 
             while (_bufferLengthBits < bits)
             {
@@ -36,11 +36,42 @@ namespace Zergatul.IO
                 }
             }
 
-            int result = (int)(_buffer & ((1 << bits) - 1));
+            int result = (int)(_buffer & ((1L << bits) - 1));
             _buffer >>= bits;
             _bufferLengthBits -= bits;
 
             return result;
+        }
+
+        public void Peek(int bits, out int value, out int read)
+        {
+            if (bits < 0 || bits > 32)
+                throw new ArgumentOutOfRangeException(nameof(bits), "Bits must be >= 0 and <= 32");
+
+            while (_bufferLengthBits < bits)
+            {
+                int readBytes = _stream.Read(_readBuffer, 0, _readBuffer.Length);
+                if (readBytes == 0)
+                    break;
+
+                for (int i = 0; i < readBytes; i++)
+                {
+                    _buffer |= (long)_readBuffer[i] << _bufferLengthBits;
+                    _bufferLengthBits += 8;
+                }
+            }
+
+            value = (int)(_buffer & ((1L << bits) - 1));
+            read = System.Math.Min(_bufferLengthBits, bits);
+        }
+
+        public void RemoveBits(int bits)
+        {
+            if (bits < 0 || bits > _bufferLengthBits)
+                throw new ArgumentOutOfRangeException(nameof(bits));
+
+            _buffer >>= bits;
+            _bufferLengthBits -= bits;
         }
 
         /// <summary>
@@ -50,6 +81,13 @@ namespace Zergatul.IO
         {
             int bits = _bufferLengthBits & 0x07;
             return ReadBits(bits);
+        }
+
+        public int GetBufferedBytesCount()
+        {
+            if ((_bufferLengthBits & 0x07) != 0)
+                throw new InvalidOperationException();
+            return _bufferLengthBits >> 3;
         }
     }
 }

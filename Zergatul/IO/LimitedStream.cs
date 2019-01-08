@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Zergatul.IO
 {
@@ -22,6 +24,16 @@ namespace Zergatul.IO
             if (count == 0)
                 return 0;
             int read = _stream.Read(buffer, offset, count);
+            _totalRead += read;
+            return read;
+        }
+
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            count = System.Math.Min(count, _limit - _totalRead);
+            if (count == 0)
+                return 0;
+            int read = await _stream.ReadAsync(buffer, offset, count, cancellationToken);
             _totalRead += read;
             return read;
         }
