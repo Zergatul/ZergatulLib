@@ -124,7 +124,7 @@ namespace Zergatul.Tests
             byte[] buffer = new byte[1024];
             long position;
             using (var fs = new FileStream($"BrotliTestCases/{filename}.compressed", FileMode.Open))
-            using (var bs = new BrotliStream(fs, System.IO.Compression.CompressionMode.Decompress))
+            using (var bs = new BrotliStream(fs, CompressionMode.Decompress))
             {
                 int read;
                 while ((read = bs.Read(buffer, 0, buffer.Length)) != 0)

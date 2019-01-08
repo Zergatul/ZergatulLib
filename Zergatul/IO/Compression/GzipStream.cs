@@ -12,6 +12,7 @@ namespace Zergatul.IO.Compression
         private long _position;
 
         private CompressionMode _mode;
+        private bool _leaveOpen;
         private BitReader _reader;
         private State _state;
         private DeflateStream _deflate;
@@ -19,7 +20,7 @@ namespace Zergatul.IO.Compression
         private long _memberLength;
         private bool _begin;
 
-        public GzipStream(Stream stream, CompressionMode mode)
+        public GzipStream(Stream stream, CompressionMode mode, bool leaveOpen)
         {
             if (mode == CompressionMode.Compress)
                 throw new NotImplementedException();
@@ -33,6 +34,12 @@ namespace Zergatul.IO.Compression
             _begin = true;
         }
 
+        public GzipStream(Stream stream, CompressionMode mode)
+            : this(stream, mode, false)
+        {
+            
+        }
+
         #region Stream overrides
 
         public override bool CanRead => _mode == CompressionMode.Decompress;
@@ -44,6 +51,15 @@ namespace Zergatul.IO.Compression
         {
             get => _position;
             set => throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (!_leaveOpen)
+                    BaseStream?.Dispose();
+            }
         }
 
         public override void Flush()

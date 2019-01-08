@@ -22,6 +22,8 @@ namespace Zergatul.Tests
             _delay = delay;
         }
 
+        public byte[] GetBuffer() => _ms.GetBuffer();
+
         #region Stream overrides
 
         public override bool CanRead => _ms.CanRead;

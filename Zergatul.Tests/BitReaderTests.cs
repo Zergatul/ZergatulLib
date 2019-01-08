@@ -22,6 +22,11 @@ namespace Zergatul.Tests
             Assert.IsTrue(br.ReadBits(1) == 0);
             Assert.IsTrue(br.ReadBits(1) == 0);
             Assert.IsTrue(br.ReadBits(1) == 0);
+
+            ms.Position = 0;
+
+            Assert.IsTrue(br.ReadBits(4) == 1);
+            Assert.IsTrue(br.ReadBits(4) == 0);
         }
     }
 }
