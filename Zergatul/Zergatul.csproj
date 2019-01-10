@@ -129,7 +129,9 @@
     <Compile Include="IO\Compression\HuffmanTree.cs" />
     <Compile Include="IO\Compression\HuffmanTreeException.cs" />
     <Compile Include="IO\CRC32.cs" />
+    <Compile Include="IO\Compression\DeflateDecompressor.cs" />
     <Compile Include="IO\GenericMessageReadStream.cs" />
+    <Compile Include="IO\InputBuffer.cs" />
     <Compile Include="IO\LimitedStream.cs" />
     <Compile Include="Network\NetworkStream.cs" />
     <Compile Include="IO\StreamHelper.cs" />

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.IO.Compression;
 
@@ -18,14 +19,18 @@ namespace Zergatul.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(EndOfStreamException))]
+        public async Task EmptyStreamTestAsync()
+        {
+            await BinTestAsync("", "");
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(DeflateStreamException))]
         public void ReservedBlockTypeTest()
         {
             BinTest("1 11", "");
         }
-
-        // test end of stream in block type
-        // test("1 0", "");
 
         [TestMethod]
         public void UncompressedBlockEmptyTest()
@@ -315,6 +320,37 @@ namespace Zergatul.Tests
             while (true)
             {
                 int read = ds.Read(buffer, 0, buffer.Length);
+                output.AddRange(buffer.Take(read));
+                if (read == 0)
+                    break;
+            }
+
+            Assert.IsTrue(BitHelper.BytesToHex(output.ToArray()) == hexOutput.Replace(" ", "").ToLower());
+            Assert.IsTrue(ds.Position == output.Count);
+        }
+
+        private static async Task BinTestAsync(string binInput, string hexOutput)
+        {
+            binInput = binInput.Replace(" ", "");
+            if (binInput.Length % 8 != 0)
+                binInput = binInput + new string('0', 8 - binInput.Length % 8);
+
+            List<byte> data = new List<byte>();
+            for (int i = 0; i < binInput.Length / 8; i++)
+            {
+                string bits = new string(binInput.Substring(i * 8, 8).Reverse().ToArray());
+                data.Add(Convert.ToByte(bits, 2));
+            }
+
+            var ms = new AsyncMemoryStream(data.ToArray(), 10);
+
+            var output = new List<byte>();
+            var buffer = new byte[20];
+
+            var ds = new DeflateStream(ms, CompressionMode.Decompress);
+            while (true)
+            {
+                int read = await ds.ReadAsync(buffer, 0, buffer.Length);
                 output.AddRange(buffer.Take(read));
                 if (read == 0)
                     break;

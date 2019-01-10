@@ -89,5 +89,25 @@ namespace Zergatul.IO
                 throw new InvalidOperationException();
             return _bufferLengthBits >> 3;
         }
+
+        public int ReadBytes(byte[] buffer, int offset, int count)
+        {
+            if ((_bufferLengthBits & 0x07) != 0)
+                throw new InvalidOperationException();
+
+            int bufferCopy = System.Math.Min(_bufferLengthBits >> 3, count);
+            for (int i = 0; i < bufferCopy; i++)
+            {
+                buffer[offset++] = (byte)(_buffer & 0xFF);
+                _buffer >>= 8;
+            }
+            _bufferLengthBits -= bufferCopy << 3;
+            count -= bufferCopy;
+            if (count == 0)
+                return bufferCopy;
+
+            int read = _stream.Read(buffer, offset, count);
+            return bufferCopy + read;
+        }
     }
 }

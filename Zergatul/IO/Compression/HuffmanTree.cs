@@ -5,46 +5,46 @@ namespace Zergatul.IO.Compression
 {
     public class HuffmanTree
     {
-        private int _maxBits;
-        private int[] _treeSymbols;
-        private int[] _treeBits;
+        private int MaxBits { get; }
+        private int[] Symbols { get; }
+        private int[] Bits { get; }
 
         public HuffmanTree(int[] bits)
         {
             if (bits == null)
                 throw new ArgumentNullException(nameof(bits));
 
-            _maxBits = -1;
+            MaxBits = -1;
             for (int i = 0; i < bits.Length; i++)
             {
                 if (bits[i] < 0)
                     throw new HuffmanTreeException();
-                if (bits[i] > _maxBits)
-                    _maxBits = bits[i];
+                if (bits[i] > MaxBits)
+                    MaxBits = bits[i];
             }
 
-            int[] blCount = new int[_maxBits + 1];
-            int[] nextCode = new int[_maxBits + 1];
+            int[] blCount = new int[MaxBits + 1];
+            int[] nextCode = new int[MaxBits + 1];
             for (int i = 0; i < bits.Length; i++)
                 blCount[bits[i]]++;
 
-            for (int i = 1; i <= _maxBits; i++)
+            for (int i = 1; i <= MaxBits; i++)
                 if (blCount[i] > (1 << i))
                     throw new HuffmanTreeException();
 
             int code = 0;
             blCount[0] = 0;
-            for (int b = 1; b <= _maxBits; b++)
+            for (int b = 1; b <= MaxBits; b++)
             {
                 code = (code + blCount[b - 1]) << 1;
                 nextCode[b] = code;
             }
-            _treeSymbols = new int[1 << _maxBits];
-            _treeBits = new int[1 << _maxBits];
-            for (int i = 0; i < _treeSymbols.Length; i++)
+            Symbols = new int[1 << MaxBits];
+            Bits = new int[1 << MaxBits];
+            for (int i = 0; i < Symbols.Length; i++)
             {
-                _treeSymbols[i] = -1;
-                _treeBits[i] = -1;
+                Symbols[i] = -1;
+                Bits[i] = -1;
             }
 
             for (int i = 0; i < bits.Length; i++)
@@ -54,12 +54,12 @@ namespace Zergatul.IO.Compression
                 {
                     code = BitHelper.ReverseBits(nextCode[len], len);
                     nextCode[len]++;
-                    int records = 1 << (_maxBits - len);
+                    int records = 1 << (MaxBits - len);
                     for (int j = 0; j < records; j++)
                     {
                         int index = (j << len) | code;
-                        _treeSymbols[index] = i;
-                        _treeBits[index] = len;
+                        Symbols[index] = i;
+                        Bits[index] = len;
                     }
                 }
             }
@@ -67,16 +67,35 @@ namespace Zergatul.IO.Compression
 
         public int ReadNextSymbol(BitReader reader)
         {
-            reader.Peek(_maxBits, out int value, out int read);
+            reader.Peek(MaxBits, out int value, out int read);
 
-            int symbolBits = _treeBits[value];
+            int symbolBits = Bits[value];
             if (symbolBits == -1)
                 return -1;
             if (symbolBits > read)
                 throw new EndOfStreamException();
 
             reader.RemoveBits(symbolBits);
-            return _treeSymbols[value];
+            return Symbols[value];
+        }
+
+        public int ReadNextSymbol(InputBuffer buffer)
+        {
+            int value = buffer.Peek(MaxBits, out int read);
+
+            int symbolBits = Bits[value];
+            if (symbolBits == -1)
+            {
+                if (read == MaxBits)
+                    throw new HuffmanTreeException();
+                else
+                    return -1;
+            }
+            if (symbolBits > read)
+                return -1;
+
+            buffer.SkipBits(symbolBits);
+            return Symbols[value];
         }
     }
 }

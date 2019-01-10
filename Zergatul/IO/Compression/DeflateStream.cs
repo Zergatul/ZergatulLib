@@ -18,12 +18,13 @@ namespace Zergatul.IO.Compression
         private bool _isFinalBlock;
         private int _blockLength;
         private byte[] _ringBuffer;
-        private int _bufferPos;
+        private int _ringBufferPos;
         private int _copyDistance;
         private int _copyLength;
         private int[] _codeLen;
         private HuffmanTree _literalAlphabet;
         private HuffmanTree _distanceAlphabet;
+        private bool _isFixedBlock;
 
         public DeflateStream(Stream stream, CompressionMode mode)
             : this(stream, new BitReader(stream), mode, false)
@@ -44,7 +45,7 @@ namespace Zergatul.IO.Compression
             _state = State.ReadBlockHeader;
             _position = 0;
             _ringBuffer = new byte[0x8000];
-            _bufferPos = 0;
+            _ringBufferPos = 0;
             _codeLen = new int[19];
         }
 
@@ -67,6 +68,8 @@ namespace Zergatul.IO.Compression
             {
                 if (!_leaveOpen)
                     BaseStream.Dispose();
+
+                BaseStream = null;
             }
         }
 
@@ -79,6 +82,8 @@ namespace Zergatul.IO.Compression
         {
             if (_mode != CompressionMode.Decompress)
                 throw new InvalidOperationException();
+
+            EnsureNotDisposed();
 
             if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
                 return 0;
@@ -101,10 +106,12 @@ namespace Zergatul.IO.Compression
                                 break;
 
                             case 1: // fixed Huffman codes
-                                _state = State.ReadFixedBlock;
+                                _isFixedBlock = true;
+                                _state = State.ReadBlock;
                                 break;
 
                             case 2: // dynamic Huffman codes
+                                _isFixedBlock = false;
                                 int hLit = 257 + _reader.ReadBits(5);
                                 int hDist = 1 + _reader.ReadBits(5);
                                 int hCLen = 4 + _reader.ReadBits(4);
@@ -122,7 +129,7 @@ namespace Zergatul.IO.Compression
                                     throw new DeflateStreamException(ex);
                                 }
 
-                                _state = State.ReadDynamicBlock;
+                                _state = State.ReadBlock;
                                 break;
 
                             case 3: // reserved (error)
@@ -146,38 +153,19 @@ namespace Zergatul.IO.Compression
                         }
                         else
                         {
-                            int bufRead = System.Math.Min(_reader.GetBufferedBytesCount(), System.Math.Min(count, _blockLength));
-                            for (int i = 0; i < bufRead; i++)
-                            {
-                                int literal = _reader.ReadBits(8);
-                                buffer[offset++] = (byte)literal;
-                                AddLiteral(literal);
-                            }
-
-                            count -= bufRead;
-                            read += bufRead;
-                            _blockLength -= bufRead;
-
-                            count = System.Math.Min(count, _blockLength);
-                            if (count > 0)
-                            {
-                                int rawRead = BaseStream.Read(buffer, offset, count);
-                                if (rawRead == 0)
-                                    throw new EndOfStreamException();
-
-                                for (int i = 0; i < rawRead; i++)
-                                    AddLiteral(buffer[offset + i]);
-
-                                read += rawRead;
-                                _blockLength -= rawRead;
-                            }
-
+                            int rawRead = _reader.ReadBytes(buffer, offset, System.Math.Min(count, _blockLength));
+                            if (rawRead == 0)
+                                throw new EndOfStreamException();
+                            for (int i = 0; i < rawRead; i++)
+                                AddLiteral(buffer[offset + i]);
+                            read += rawRead;
+                            _blockLength -= rawRead;
                             return read;
                         }
                         break;
 
-                    case State.ReadFixedBlock:
-                        int value = FixedTree.ReadNextSymbol(_reader);
+                    case State.ReadBlock:
+                        int value = (_isFixedBlock ? FixedTree : _literalAlphabet).ReadNextSymbol(_reader);
                         if (value < 256)
                         {
                             buffer[offset++] = (byte)value;
@@ -203,65 +191,11 @@ namespace Zergatul.IO.Compression
                             if (bits > 0)
                                 _copyLength += _reader.ReadBits(bits);
 
-                            int distanceCode = BitHelper.ReverseBits(_reader.ReadBits(5), 5);
-                            if (distanceCode >= 30)
-                                throw new DeflateStreamException();
-
-                            _copyDistance = FixedDistanceAlphabet[distanceCode];
-                            bits = FixedDistanceAlphabetBits[distanceCode];
-                            if (bits > 0)
-                                _copyDistance += _reader.ReadBits(bits);
-
-                            if (_copyDistance > _position)
-                                throw new DeflateStreamException();
-
-                            _state = State.CopyInsideFixedBlock;
-                        }
-                        break;
-
-                    case State.CopyInsideFixedBlock:
-                        while (count > 0 && _copyLength > 0)
-                        {
-                            byte literal = _ringBuffer[(0x8000 + _bufferPos - _copyDistance) & 0x7FFF];
-                            buffer[offset++] = literal;
-                            AddLiteral(literal);
-                            count--;
-                            read++;
-                            _copyLength--;
-                        }
-
-                        if (_copyLength == 0)
-                            _state = State.ReadFixedBlock;
-                        return read;
-
-                    case State.ReadDynamicBlock:
-                        value = _literalAlphabet.ReadNextSymbol(_reader);
-                        if (value < 256)
-                        {
-                            buffer[offset++] = (byte)value;
-                            AddLiteral(value);
-                            count--;
-                            read++;
-                        }
-                        else if (value == 256)
-                        {
-                            if (_isFinalBlock)
-                                _state = State.End;
+                            int distanceCode;
+                            if (_isFixedBlock)
+                                distanceCode = BitHelper.ReverseBits(_reader.ReadBits(5), 5);
                             else
-                                _state = State.ReadBlockHeader;
-                        }
-                        else
-                        {
-                            if (value >= 286)
-                                throw new DeflateStreamException();
-
-                            value -= 257;
-                            _copyLength = FixedLengthAlphabet[value];
-                            int bits = FixedLengthAlphabetBits[value];
-                            if (bits > 0)
-                                _copyLength += _reader.ReadBits(bits);
-
-                            int distanceCode = _distanceAlphabet.ReadNextSymbol(_reader);
+                                distanceCode = _distanceAlphabet.ReadNextSymbol(_reader);
                             if (distanceCode < 0 || distanceCode >= 30)
                                 throw new DeflateStreamException();
 
@@ -273,24 +207,18 @@ namespace Zergatul.IO.Compression
                             if (_copyDistance > _position)
                                 throw new DeflateStreamException();
 
-                            _state = State.CopyInsideDynamicBlock;
+                            _state = State.Copy;
                         }
                         break;
 
-                    case State.CopyInsideDynamicBlock:
-                        while (count > 0 && _copyLength > 0)
-                        {
-                            byte literal = _ringBuffer[(0x8000 + _bufferPos - _copyDistance) & 0x7FFF];
-                            buffer[offset++] = literal;
-                            AddLiteral(literal);
-                            count--;
-                            read++;
-                            _copyLength--;
-                        }
-
-                        if (_copyLength == 0)
-                            _state = State.ReadDynamicBlock;
-                        return read;
+                    case State.Copy:
+                        int copied = ProcessCopy(buffer, offset, count);
+                        read += copied;
+                        offset += copied;
+                        count -= copied;
+                        if (count == 0)
+                            return read;
+                        break;
 
                     case State.End:
                         return read;
@@ -319,10 +247,10 @@ namespace Zergatul.IO.Compression
 
         private void AddLiteral(int value)
         {
-            _ringBuffer[_bufferPos++] = (byte)value;
+            _ringBuffer[_ringBufferPos++] = (byte)value;
             _position++;
-            if (_bufferPos == _ringBuffer.Length)
-                _bufferPos = 0;
+            if (_ringBufferPos == _ringBuffer.Length)
+                _ringBufferPos = 0;
         }
 
         private HuffmanTree ReadLengthsTree(HuffmanTree codes, int count)
@@ -360,6 +288,31 @@ namespace Zergatul.IO.Compression
                 }
             }
             return new HuffmanTree(bits);
+        }
+
+        private int ProcessCopy(byte[] buffer, int offset, int count)
+        {
+            int copied = 0;
+            while (count > 0 && _copyLength > 0)
+            {
+                byte literal = _ringBuffer[(0x8000 + _ringBufferPos - _copyDistance) & 0x7FFF];
+                buffer[offset++] = literal;
+                AddLiteral(literal);
+                count--;
+                copied++;
+                _copyLength--;
+            }
+
+            if (_copyLength == 0)
+                _state = State.ReadBlock;
+
+            return copied;
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (BaseStream == null)
+                throw new ObjectDisposedException(nameof(DeflateStream));
         }
 
         #endregion
@@ -429,10 +382,8 @@ namespace Zergatul.IO.Compression
         {
             ReadBlockHeader,
             ReadUncompressedBlock,
-            ReadFixedBlock,
-            CopyInsideFixedBlock,
-            ReadDynamicBlock,
-            CopyInsideDynamicBlock,
+            ReadBlock,
+            Copy,
             End
         }
 
