@@ -89,10 +89,10 @@ namespace Zergatul.IO.Compression
                 if (read == MaxBits)
                     throw new HuffmanTreeException();
                 else
-                    return -1;
+                    return int.MinValue;
             }
             if (symbolBits > read)
-                return -1;
+                return int.MinValue;
 
             buffer.SkipBits(symbolBits);
             return Symbols[value];

@@ -2,7 +2,8 @@
 
 namespace Zergatul.IO.Compression
 {
-    class DeflateDecompressor
+    // https://tools.ietf.org/html/rfc1951
+    class DeflateDecompressor : IByteProcessor
     {
         public int Available { get; private set; }
         public bool IsFinished { get; private set; }
@@ -10,10 +11,10 @@ namespace Zergatul.IO.Compression
 
         private State _state;
         private bool _isFinalBlock;
+        private bool _isFixedBlock;
         private BlockType _blockType;
         private int _blockLength;
         private byte[] _ringBuffer;
-        private int _ringBufferLastReadPos;
         private int _ringBufferPos;
         private int _position;
         private int[] _codeLen;
@@ -26,6 +27,12 @@ namespace Zergatul.IO.Compression
         private int _arrayIndex;
         private HuffmanTree _codeLenTree;
         private int[] _treeBits;
+        private int _lastCommandSymbol;
+        private HuffmanTree _literalAlphabet;
+        private HuffmanTree _distanceAlphabet;
+        private int _copyLength;
+        private int _distanceCode;
+        private int _copyDistance;
 
         public DeflateDecompressor(int readBufferSize)
         {
@@ -36,10 +43,28 @@ namespace Zergatul.IO.Compression
             _input = new InputBuffer(readBufferSize);
         }
 
+        public void Decode()
+        {
+            try
+            {
+                DecodeInternal();
+            }
+            catch (HuffmanTreeException ex)
+            {
+                throw new DeflateDataFormatException(ex);
+            }
+        }
+
         public void Get(byte[] buffer, int offset, int count)
         {
             if (count > Available)
                 throw new InvalidOperationException();
+
+            int start = (0x8000 + _ringBufferPos - Available) & 0x7FFF;
+            for (int i = 0; i < count; i++)
+                buffer[offset + i] = _ringBuffer[(start + i) & 0x7FFF];
+
+            Available -= count;
         }
 
         public void Process(byte[] buffer, int offset, int count)
@@ -48,14 +73,15 @@ namespace Zergatul.IO.Compression
                 throw new InvalidOperationException();
 
             _input.Add(buffer, offset, count);
-
-            Decode();
         }
 
         #region Private methods
 
-        private void Decode()
+        private void DecodeInternal()
         {
+            if (Available == _ringBuffer.Length)
+                return;
+
             while (true)
             {
                 switch (_state)
@@ -72,13 +98,16 @@ namespace Zergatul.IO.Compression
                                 _state = State.ReadUncompressedBlockHeader;
                                 break;
                             case BlockType.Fixed:
+                                _literalAlphabet = FixedAlphabetTree;
+                                _isFixedBlock = true;
                                 _state = State.ReadBlock;
                                 break;
                             case BlockType.Dynamic:
+                                _isFixedBlock = false;
                                 _state = State.ReadDynamicBlockHeader;
                                 break;
                             case BlockType.Reserved:
-                                throw new DeflateStreamException();
+                                throw new DeflateDataFormatException();
                         }
                         break;
 
@@ -88,7 +117,7 @@ namespace Zergatul.IO.Compression
                         _blockLength = _input.ReadRawInt16();
                         int nLen = _input.ReadRawInt16();
                         if (_blockLength != (~nLen & 0xFFFF))
-                            throw new DeflateStreamException();
+                            throw new DeflateDataFormatException();
                         _state = State.ReadUncompressedBlock;
                         goto case State.ReadUncompressedBlock;
 
@@ -110,149 +139,216 @@ namespace Zergatul.IO.Compression
                             _codeLenTree = new HuffmanTree(_codeLen);
                             _arrayIndex = 0;
                             _treeBits = new int[hLit];
-                            _state = State.ReadLiteralTree;
-                            goto case State.ReadLiteralTree;
+                            _literalAlphabet = null;
+                            _distanceAlphabet = null;
+                            _state = State.ReadTree;
+                            goto case State.ReadTree;
                         }
                         else
                             return;
 
-                    case State.ReadLiteralTree:
-                        while (_arrayIndex < hLit && _input.TotalBits >= 1)
+                    case State.ReadTree:
+                        while (_arrayIndex < _treeBits.Length && _input.TotalBits >= 1)
                         {
                             int symbol = _codeLenTree.ReadNextSymbol(_input);
+                            if (symbol == int.MinValue)
+                                return;
                             if (symbol < 16)
                                 _treeBits[_arrayIndex++] = symbol;
-                            else if (symbol == 16)
+                            else
                             {
-                                if (_arrayIndex == 0)
-                                    throw new DeflateStreamException();
-                                int repeat = _input.ReadBits(2) + 3;
-                                for (int i = 0; i < repeat; i++)
-                                    bits[index++] = bits[index - 1];
-                            }
-                            else if (symbol == 17)
-                            {
-                                int repeat = _reader.ReadBits(3) + 3;
-                                if (index + repeat > count)
-                                    throw new DeflateStreamException();
-                                for (int i = 0; i < repeat; i++)
-                                    bits[index++] = 0;
-                            }
-                            else if (symbol == 18)
-                            {
-                                int repeat = _reader.ReadBits(7) + 11;
-                                if (index + repeat > count)
-                                    throw new DeflateStreamException();
-                                for (int i = 0; i < repeat; i++)
-                                    bits[index++] = 0;
+                                _lastCommandSymbol = symbol;
+                                _state = State.ReadCommandSymbol;
+                                goto case State.ReadCommandSymbol;
                             }
                         }
-                        break;
-
-                        //for (int i = 0; i < hCLen; i++)
-                        //    _codeLen[_codeLenIndex[i]] = _reader.ReadBits(3);
-
-                        //try
-                        //{
-                        //    var tree = new HuffmanTree(_codeLen);
-                        //    _literalAlphabet = ReadLengthsTree(tree, hLit);
-                        //    _distanceAlphabet = ReadLengthsTree(tree, hDist);
-                        //}
-                        //catch (HuffmanTreeException ex)
-                        //{
-                        //    throw new DeflateStreamException(ex);
-                        //}
-
-                        //_state = State.ReadBlock;
-                        //break;
-
-                    case State.ReadUncompressedBlock:
-                        if (_blockLength == 0)
+                        if (_arrayIndex == _treeBits.Length)
                         {
-                            if (_isFinalBlock)
+                            if (_literalAlphabet == null)
                             {
-                                _state = State.End;
-                                return read;
+                                _literalAlphabet = new HuffmanTree(_treeBits);
+                                _arrayIndex = 0;
+                                _treeBits = new int[hDist];
+                                goto case State.ReadTree;
                             }
                             else
-                                _state = State.ReadBlockHeader;
+                            {
+                                _distanceAlphabet = new HuffmanTree(_treeBits);
+                                _state = State.ReadBlock;
+                                goto case State.ReadBlock;
+                            }
                         }
                         else
+                            return;
+
+                    case State.ReadCommandSymbol:
+                        switch (_lastCommandSymbol)
                         {
-                            int rawRead = _reader.ReadBytes(buffer, offset, System.Math.Min(count, _blockLength));
-                            if (rawRead == 0)
-                                throw new EndOfStreamException();
-                            for (int i = 0; i < rawRead; i++)
-                                AddLiteral(buffer[offset + i]);
-                            read += rawRead;
-                            _blockLength -= rawRead;
-                            return read;
+                            case 16:
+                                if (_arrayIndex == 0)
+                                    throw new DeflateDataFormatException();
+                                if (_input.TotalBits < 2)
+                                    return;
+                                int repeat = _input.ReadBits(2) + 3;
+                                if (_arrayIndex + repeat > _treeBits.Length)
+                                    throw new DeflateDataFormatException();
+                                for (int i = 0; i < repeat; i++)
+                                    _treeBits[_arrayIndex++] = _treeBits[_arrayIndex - 1];
+                                _state = State.ReadTree;
+                                break;
+
+                            case 17:
+                                if (_input.TotalBits < 3)
+                                    return;
+                                repeat = _input.ReadBits(3) + 3;
+                                if (_arrayIndex + repeat > _treeBits.Length)
+                                    throw new DeflateDataFormatException();
+                                for (int i = 0; i < repeat; i++)
+                                    _treeBits[_arrayIndex++] = 0;
+                                _state = State.ReadTree;
+                                break;
+
+                            case 18:
+                                if (_input.TotalBits < 7)
+                                    return;
+                                repeat = _input.ReadBits(7) + 11;
+                                if (_arrayIndex + repeat > _treeBits.Length)
+                                    throw new DeflateDataFormatException();
+                                for (int i = 0; i < repeat; i++)
+                                    _treeBits[_arrayIndex++] = 0;
+                                _state = State.ReadTree;
+                                break;
+
+                            default:
+                                throw new InvalidOperationException();
                         }
                         break;
 
+                    case State.ReadUncompressedBlock:
+                        while (_blockLength > 0)
+                        {
+                            if (_input.TotalBits < 8)
+                                return;
+                            byte literal = _input.ReadRawByte();
+                            _blockLength--;
+                            if (AddLiteral(literal))
+                                return;
+                        }
+                        _state = State.EndBlock;
+                        goto case State.EndBlock;
+
                     case State.ReadBlock:
-                        int value = (_isFixedBlock ? FixedTree : _literalAlphabet).ReadNextSymbol(_reader);
+                        if (_input.TotalBits < 1)
+                            return;
+                        int value = _literalAlphabet.ReadNextSymbol(_input);
+                        if (value == int.MinValue)
+                            return;
                         if (value < 256)
                         {
-                            buffer[offset++] = (byte)value;
-                            AddLiteral(value);
-                            count--;
-                            read++;
+                            if (AddLiteral((byte)value))
+                                return;
+                            goto case State.ReadBlock;
                         }
                         else if (value == 256)
                         {
-                            if (_isFinalBlock)
-                                _state = State.End;
-                            else
-                                _state = State.ReadBlockHeader;
+                            _state = State.EndBlock;
+                            goto case State.EndBlock;
                         }
                         else
                         {
                             if (value >= 286)
-                                throw new DeflateStreamException();
-
-                            value -= 257;
-                            _copyLength = FixedLengthAlphabet[value];
-                            int bits = FixedLengthAlphabetBits[value];
-                            if (bits > 0)
-                                _copyLength += _reader.ReadBits(bits);
-
-                            int distanceCode;
-                            if (_isFixedBlock)
-                                distanceCode = BitHelper.ReverseBits(_reader.ReadBits(5), 5);
-                            else
-                                distanceCode = _distanceAlphabet.ReadNextSymbol(_reader);
-                            if (distanceCode < 0 || distanceCode >= 30)
-                                throw new DeflateStreamException();
-
-                            _copyDistance = FixedDistanceAlphabet[distanceCode];
-                            bits = FixedDistanceAlphabetBits[distanceCode];
-                            if (bits > 0)
-                                _copyDistance += _reader.ReadBits(bits);
-
-                            if (_copyDistance > _position)
-                                throw new DeflateStreamException();
-
-                            _state = State.Copy;
+                                throw new DeflateDataFormatException();
+                            _lastCommandSymbol = value - 257;
+                            _copyLength = FixedLengthAlphabet[_lastCommandSymbol];
+                            _state = State.ReadCopyLength;
+                            goto case State.ReadCopyLength;
                         }
-                        break;
+
+                    case State.ReadCopyLength:
+                        int bits = FixedLengthAlphabetBits[_lastCommandSymbol];
+                        if (bits > 0)
+                        {
+                            if (_input.TotalBits < bits)
+                                return;
+                            else
+                                _copyLength += _input.ReadBits(bits);
+                        }
+                        _state = State.ReadDistanceCode;
+                        goto case State.ReadDistanceCode;
+
+                    case State.ReadDistanceCode:
+                        if (_isFixedBlock)
+                        {
+                            if (_input.TotalBits < 5)
+                                return;
+                            _distanceCode = BitHelper.ReverseBits(_input.ReadBits(5), 5);
+                        }
+                        else
+                        {
+                            _distanceCode = _distanceAlphabet.ReadNextSymbol(_input);
+                            if (_distanceCode == int.MinValue)
+                                return;
+                        }
+                        if (_distanceCode < 0 || _distanceCode >= 30)
+                            throw new DeflateDataFormatException();
+                        _state = State.ReadDistance;
+                        goto case State.ReadDistance;
+
+                    case State.ReadDistance:
+                        _copyDistance = FixedDistanceAlphabet[_distanceCode];
+                        bits = FixedDistanceAlphabetBits[_distanceCode];
+                        if (bits > 0)
+                        {
+                            if (_input.TotalBits < bits)
+                                return;
+                            _copyDistance += _input.ReadBits(bits);
+                        }
+                        if (_copyDistance > _position)
+                            throw new DeflateDataFormatException();
+                        _state = State.Copy;
+                        goto case State.Copy;
 
                     case State.Copy:
-                        int copied = ProcessCopy(buffer, offset, count);
-                        read += copied;
-                        offset += copied;
-                        count -= copied;
-                        if (count == 0)
-                            return read;
-                        break;
+                        while (_copyLength > 0)
+                        {
+                            byte literal = _ringBuffer[(0x8000 + _ringBufferPos - _copyDistance) & 0x7FFF];
+                            _copyLength--;
+                            if (AddLiteral(literal))
+                                return;
+                        }
+                        _state = State.ReadBlock;
+                        goto case State.ReadBlock;
+
+                    case State.EndBlock:
+                        if (_isFinalBlock)
+                        {
+                            _state = State.End;
+                            goto case State.End;
+                        }
+                        else
+                        {
+                            _state = State.ReadBlockHeader;
+                            goto case State.ReadBlockHeader;
+                        }
 
                     case State.End:
-                        return read;
+                        IsFinished = true;
+                        return;
 
                     default:
                         throw new InvalidOperationException();
                 }
             }
+        }
+
+        private bool AddLiteral(byte value)
+        {
+            _ringBuffer[_ringBufferPos++] = value;
+            _position++;
+            Available++;
+            if (_ringBufferPos == _ringBuffer.Length)
+                _ringBufferPos = 0;
+            return Available == _ringBuffer.Length;
         }
 
         #endregion
@@ -296,7 +392,7 @@ namespace Zergatul.IO.Compression
             16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
         };
 
-        private static readonly HuffmanTree FixedTree;
+        private static readonly HuffmanTree FixedAlphabetTree;
 
         static DeflateDecompressor()
         {
@@ -311,7 +407,7 @@ namespace Zergatul.IO.Compression
             while (index < 288)
                 lengths[index++] = 8;
 
-            FixedTree = new HuffmanTree(lengths);
+            FixedAlphabetTree = new HuffmanTree(lengths);
         }
 
         #endregion
@@ -325,10 +421,14 @@ namespace Zergatul.IO.Compression
             ReadUncompressedBlock,
             ReadDynamicBlockHeader,
             ReadCodeLen,
-            ReadLiteralTree,
-            ReadDistanceTree,
+            ReadTree,
+            ReadCommandSymbol,
             ReadBlock,
+            ReadCopyLength,
+            ReadDistanceCode,
+            ReadDistance,
             Copy,
+            EndBlock,
             End
         }
 

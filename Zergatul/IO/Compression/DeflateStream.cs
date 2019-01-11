@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Zergatul.IO.Compression
@@ -9,30 +10,19 @@ namespace Zergatul.IO.Compression
     {
         public Stream BaseStream { get; private set; }
 
-        private long _position;
-
         private CompressionMode _mode;
-        private BitReader _reader;
         private bool _leaveOpen;
-        private State _state;
-        private bool _isFinalBlock;
-        private int _blockLength;
-        private byte[] _ringBuffer;
-        private int _ringBufferPos;
-        private int _copyDistance;
-        private int _copyLength;
-        private int[] _codeLen;
-        private HuffmanTree _literalAlphabet;
-        private HuffmanTree _distanceAlphabet;
-        private bool _isFixedBlock;
+        private long _position;
+        private byte[] _readBuffer;
+        private DeflateDecompressor _decompressor;
 
         public DeflateStream(Stream stream, CompressionMode mode)
-            : this(stream, new BitReader(stream), mode, false)
+            : this(stream, mode, false)
         {
-            
+
         }
 
-        public DeflateStream(Stream stream, BitReader reader, CompressionMode mode, bool leaveOpen)
+        public DeflateStream(Stream stream, CompressionMode mode, bool leaveOpen)
         {
             if (mode == CompressionMode.Compress)
                 throw new NotImplementedException();
@@ -40,13 +30,10 @@ namespace Zergatul.IO.Compression
             BaseStream = stream ?? throw new ArgumentNullException(nameof(stream));
 
             _mode = mode;
-            _reader = reader;
             _leaveOpen = leaveOpen;
-            _state = State.ReadBlockHeader;
-            _position = 0;
-            _ringBuffer = new byte[0x8000];
-            _ringBufferPos = 0;
-            _codeLen = new int[19];
+
+            _readBuffer = new byte[0x1000];
+            _decompressor = new DeflateDecompressor(_readBuffer.Length);
         }
 
         #region Stream overrides
@@ -88,147 +75,62 @@ namespace Zergatul.IO.Compression
             if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
                 return 0;
 
-            int read = 0;
             while (true)
             {
-                switch (_state)
+                _decompressor.Decode();
+
+                int available = _decompressor.Available;
+                if (available > 0)
                 {
-                    case State.ReadBlockHeader:
-                        _isFinalBlock = _reader.ReadBits(1) == 1;
-                        switch (_reader.ReadBits(2))
-                        {
-                            case 0: // no compression
-                                _reader.ReadTillByteBoundary();
-                                _blockLength = _reader.ReadBits(16);
-                                if (_blockLength != (~_reader.ReadBits(16) & 0xFFFF))
-                                    throw new DeflateStreamException();
-                                _state = State.ReadUncompressedBlock;
-                                break;
-
-                            case 1: // fixed Huffman codes
-                                _isFixedBlock = true;
-                                _state = State.ReadBlock;
-                                break;
-
-                            case 2: // dynamic Huffman codes
-                                _isFixedBlock = false;
-                                int hLit = 257 + _reader.ReadBits(5);
-                                int hDist = 1 + _reader.ReadBits(5);
-                                int hCLen = 4 + _reader.ReadBits(4);
-                                for (int i = 0; i < hCLen; i++)
-                                    _codeLen[_codeLenIndex[i]] = _reader.ReadBits(3);
-
-                                try
-                                {
-                                    var tree = new HuffmanTree(_codeLen);
-                                    _literalAlphabet = ReadLengthsTree(tree, hLit);
-                                    _distanceAlphabet = ReadLengthsTree(tree, hDist);
-                                }
-                                catch (HuffmanTreeException ex)
-                                {
-                                    throw new DeflateStreamException(ex);
-                                }
-
-                                _state = State.ReadBlock;
-                                break;
-
-                            case 3: // reserved (error)
-                                throw new DeflateStreamException();
-
-                            default:
-                                throw new InvalidOperationException();
-                        }
-                        break;
-
-                    case State.ReadUncompressedBlock:
-                        if (_blockLength == 0)
-                        {
-                            if (_isFinalBlock)
-                            {
-                                _state = State.End;
-                                return read;
-                            }
-                            else
-                                _state = State.ReadBlockHeader;
-                        }
-                        else
-                        {
-                            int rawRead = _reader.ReadBytes(buffer, offset, System.Math.Min(count, _blockLength));
-                            if (rawRead == 0)
-                                throw new EndOfStreamException();
-                            for (int i = 0; i < rawRead; i++)
-                                AddLiteral(buffer[offset + i]);
-                            read += rawRead;
-                            _blockLength -= rawRead;
-                            return read;
-                        }
-                        break;
-
-                    case State.ReadBlock:
-                        int value = (_isFixedBlock ? FixedTree : _literalAlphabet).ReadNextSymbol(_reader);
-                        if (value < 256)
-                        {
-                            buffer[offset++] = (byte)value;
-                            AddLiteral(value);
-                            count--;
-                            read++;
-                        }
-                        else if (value == 256)
-                        {
-                            if (_isFinalBlock)
-                                _state = State.End;
-                            else
-                                _state = State.ReadBlockHeader;
-                        }
-                        else
-                        {
-                            if (value >= 286)
-                                throw new DeflateStreamException();
-
-                            value -= 257;
-                            _copyLength = FixedLengthAlphabet[value];
-                            int bits = FixedLengthAlphabetBits[value];
-                            if (bits > 0)
-                                _copyLength += _reader.ReadBits(bits);
-
-                            int distanceCode;
-                            if (_isFixedBlock)
-                                distanceCode = BitHelper.ReverseBits(_reader.ReadBits(5), 5);
-                            else
-                                distanceCode = _distanceAlphabet.ReadNextSymbol(_reader);
-                            if (distanceCode < 0 || distanceCode >= 30)
-                                throw new DeflateStreamException();
-
-                            _copyDistance = FixedDistanceAlphabet[distanceCode];
-                            bits = FixedDistanceAlphabetBits[distanceCode];
-                            if (bits > 0)
-                                _copyDistance += _reader.ReadBits(bits);
-
-                            if (_copyDistance > _position)
-                                throw new DeflateStreamException();
-
-                            _state = State.Copy;
-                        }
-                        break;
-
-                    case State.Copy:
-                        int copied = ProcessCopy(buffer, offset, count);
-                        read += copied;
-                        offset += copied;
-                        count -= copied;
-                        if (count == 0)
-                            return read;
-                        break;
-
-                    case State.End:
-                        return read;
-
-                    default:
-                        throw new InvalidOperationException();
+                    count = System.Math.Min(available, count);
+                    _decompressor.Get(buffer, offset, count);
+                    _position += count;
+                    return count;
                 }
-            }
 
-            throw new InvalidOperationException();
+                if (_decompressor.IsFinished)
+                    return 0;
+
+                int read = BaseStream.Read(_readBuffer, 0, _readBuffer.Length);
+                if (read == 0)
+                    throw new EndOfStreamException();
+
+                _decompressor.Process(_readBuffer, 0, read);
+            }
+        }
+
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (_mode != CompressionMode.Decompress)
+                throw new InvalidOperationException();
+
+            EnsureNotDisposed();
+
+            if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
+                return 0;
+
+            while (true)
+            {
+                _decompressor.Decode();
+
+                int available = _decompressor.Available;
+                if (available > 0)
+                {
+                    count = System.Math.Min(available, count);
+                    _decompressor.Get(buffer, offset, count);
+                    _position += count;
+                    return count;
+                }
+
+                if (_decompressor.IsFinished)
+                    return 0;
+
+                int read = await BaseStream.ReadAsync(_readBuffer, 0, _readBuffer.Length, cancellationToken);
+                if (read == 0)
+                    throw new EndOfStreamException();
+
+                _decompressor.Process(_readBuffer, 0, read);
+            }
         }
 
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
@@ -245,146 +147,10 @@ namespace Zergatul.IO.Compression
 
         #region Private methods
 
-        private void AddLiteral(int value)
-        {
-            _ringBuffer[_ringBufferPos++] = (byte)value;
-            _position++;
-            if (_ringBufferPos == _ringBuffer.Length)
-                _ringBufferPos = 0;
-        }
-
-        private HuffmanTree ReadLengthsTree(HuffmanTree codes, int count)
-        {
-            int[] bits = new int[count];
-            int index = 0;
-            while (index < count)
-            {
-                int symbol = codes.ReadNextSymbol(_reader);
-                if (symbol < 16)
-                    bits[index++] = symbol;
-                else if (symbol == 16)
-                {
-                    if (index == 0)
-                        throw new DeflateStreamException();
-                    int repeat = _reader.ReadBits(2) + 3;
-                    for (int i = 0; i < repeat; i++)
-                        bits[index++] = bits[index - 1];
-                }
-                else if (symbol == 17)
-                {
-                    int repeat = _reader.ReadBits(3) + 3;
-                    if (index + repeat > count)
-                        throw new DeflateStreamException();
-                    for (int i = 0; i < repeat; i++)
-                        bits[index++] = 0;
-                }
-                else if (symbol == 18)
-                {
-                    int repeat = _reader.ReadBits(7) + 11;
-                    if (index + repeat > count)
-                        throw new DeflateStreamException();
-                    for (int i = 0; i < repeat; i++)
-                        bits[index++] = 0;
-                }
-            }
-            return new HuffmanTree(bits);
-        }
-
-        private int ProcessCopy(byte[] buffer, int offset, int count)
-        {
-            int copied = 0;
-            while (count > 0 && _copyLength > 0)
-            {
-                byte literal = _ringBuffer[(0x8000 + _ringBufferPos - _copyDistance) & 0x7FFF];
-                buffer[offset++] = literal;
-                AddLiteral(literal);
-                count--;
-                copied++;
-                _copyLength--;
-            }
-
-            if (_copyLength == 0)
-                _state = State.ReadBlock;
-
-            return copied;
-        }
-
         private void EnsureNotDisposed()
         {
             if (BaseStream == null)
                 throw new ObjectDisposedException(nameof(DeflateStream));
-        }
-
-        #endregion
-
-        #region Constants
-
-        private static readonly int[] FixedLengthAlphabetBits = new[]
-        {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            1, 1, 1, 1, 2, 2, 2, 2,
-            3, 3, 3, 3, 4, 4, 4, 4,
-            5, 5, 5, 5, 0
-        };
-
-        private static readonly int[] FixedLengthAlphabet = new[]
-        {
-            3, 4, 5, 6, 7, 8, 9, 10, 11, 13,
-            15, 17, 19, 23, 27, 31, 35, 43,
-            51, 69, 67, 83, 99, 115, 131, 163, 195, 227, 258
-        };
-
-        private static readonly int[] FixedDistanceAlphabetBits = new[]
-        {
-            0, 0, 0, 0, 1, 1, 2, 2, 3, 3,
-            4, 4, 5, 5, 6, 6, 7, 7, 8, 8,
-            9, 9, 10, 10, 11, 11, 12, 12,
-            13, 13,
-        };
-
-        private static readonly int[] FixedDistanceAlphabet = new[]
-        {
-            1, 2, 3, 4, 5, 7, 9, 13, 17,
-            25, 33, 49, 65, 97, 129, 193,
-            257, 385, 513, 769, 1025, 1537,
-            2049, 3073, 4097, 6145, 8193,
-            12289, 16385, 24577,
-        };
-
-        private static readonly int[] _codeLenIndex = new[]
-        {
-            16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
-        };
-
-        private static readonly HuffmanTree FixedTree;
-
-        static DeflateStream()
-        {
-            int[] lengths = new int[288];
-            int index = 0;
-            while (index < 144)
-                lengths[index++] = 8;
-            while (index < 256)
-                lengths[index++] = 9;
-            while (index < 280)
-                lengths[index++] = 7;
-            while (index < 288)
-                lengths[index++] = 8;
-
-            FixedTree = new HuffmanTree(lengths);
-        }
-
-        #endregion
-
-        #region Nested classes
-
-        private enum State
-        {
-            ReadBlockHeader,
-            ReadUncompressedBlock,
-            ReadBlock,
-            Copy,
-            End
         }
 
         #endregion

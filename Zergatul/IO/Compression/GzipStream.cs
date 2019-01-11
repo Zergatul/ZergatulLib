@@ -28,6 +28,7 @@ namespace Zergatul.IO.Compression
             BaseStream = stream ?? throw new ArgumentNullException(nameof(stream));
 
             _mode = mode;
+            _leaveOpen = leaveOpen;
             _reader = new BitReader(stream);
             _state = State.ReadHeader;
             _crc32 = new CRC32(CRC32Parameters.IEEE8023);
@@ -107,7 +108,8 @@ namespace Zergatul.IO.Compression
                             throw new NotImplementedException();
                         if (flags.HasFlag(MemberFlags.FHCRC))
                             throw new NotImplementedException();
-                        _deflate = new DeflateStream(BaseStream, _reader, CompressionMode.Decompress, true);
+                        throw new NotImplementedException();
+                        //_deflate = new DeflateStream(BaseStream, _reader, CompressionMode.Decompress, true);
                         _crc32.Reset();
                         _memberLength = 0;
                         _state = State.ReadDeflateStream;

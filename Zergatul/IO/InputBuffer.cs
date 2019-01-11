@@ -64,7 +64,7 @@ namespace Zergatul.IO
         {
             if (_bitLength < bits)
             {
-                _bitBuffer |= _readBuffer[_readBufferStart] << _bitLength;
+                _bitBuffer |= _readBuffer[_readBufferStart++] << _bitLength;
                 _bitLength += 8;
             }
 
@@ -73,6 +73,12 @@ namespace Zergatul.IO
             _bitLength -= bits;
             TotalBits -= bits;
             return result;
+        }
+
+        public byte ReadRawByte()
+        {
+            TotalBits -= 8;
+            return _readBuffer[_readBufferStart++];
         }
 
         public int ReadRawInt16()

@@ -2,15 +2,15 @@
 
 namespace Zergatul.IO.Compression
 {
-    public class DeflateStreamException : Exception
+    public class DeflateDataFormatException : Exception
     {
-        public DeflateStreamException()
+        public DeflateDataFormatException()
             : base()
         {
 
         }
 
-        public DeflateStreamException(Exception innerException)
+        public DeflateDataFormatException(Exception innerException)
             : base("", innerException)
         {
 
