@@ -69,7 +69,6 @@ namespace Zergatul.Network.Http
         public HttpResponse(Http1Client client)
         {
             _client = client;
-
             _headers = new List<Header>();
         }
 
@@ -89,8 +88,8 @@ namespace Zergatul.Network.Http
             _stream = stream;
             _sb = new StringBuilder();
 
-            await ParseStatusLineAsync(cancellationToken);
-            await ParseHeadersAsync(cancellationToken);
+            await ParseStatusLineAsync(cancellationToken).ConfigureAwait(false);
+            await ParseHeadersAsync(cancellationToken).ConfigureAwait(false);
 
             ProcessHeaders();
         }
@@ -462,7 +461,7 @@ namespace Zergatul.Network.Http
             if (contentEncoding != null)
             {
                 if (string.Equals(contentEncoding, HttpHeaderValue.GZip, StringComparison.OrdinalIgnoreCase))
-                    Body = new System.IO.Compression.GZipStream(RawBody, System.IO.Compression.CompressionMode.Decompress, true);
+                    Body = new GzipStream(RawBody, CompressionMode.Decompress, true);
                 else if (string.Equals(contentEncoding, HttpHeaderValue.Brotli, StringComparison.OrdinalIgnoreCase))
                     Body = new BrotliStream(RawBody, CompressionMode.Decompress);
                 else

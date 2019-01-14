@@ -11,7 +11,7 @@ namespace Zergatul.Cryptocurrency.P2P
     {
         private ProtocolSpecification _spec;
         private TcpClient _client;
-        private NetworkStream _stream;
+        private System.Net.Sockets.NetworkStream _stream;
         private PeerStreamReader _reader;
 
         private Dictionary<string, byte[]> _blocks = new Dictionary<string, byte[]>();

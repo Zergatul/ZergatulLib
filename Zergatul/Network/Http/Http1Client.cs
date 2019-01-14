@@ -62,12 +62,12 @@ namespace Zergatul.Network.Http
 
             ThrowIfDisposed();
 
-            var connection = await GetConnectionAsync(request.Uri, cancellationToken);
-            await request.WriteToAsync(connection.Stream, cancellationToken);
-            await connection.Stream.FlushAsync(cancellationToken);
+            var connection = await GetConnectionAsync(request.Uri, cancellationToken).ConfigureAwait(false);
+            await request.WriteToAsync(connection.Stream, cancellationToken).ConfigureAwait(false);
+            await connection.Stream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
             var response = new HttpResponse(this);
-            await response.ReadFromAsync(connection.Stream, cancellationToken);
+            await response.ReadFromAsync(connection.Stream, cancellationToken).ConfigureAwait(false);
             connection.LastResponse = response;
             return response;
         }

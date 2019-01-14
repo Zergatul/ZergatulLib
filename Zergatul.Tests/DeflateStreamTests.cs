@@ -537,6 +537,18 @@ namespace Zergatul.Tests
             await BinTestAsync(blockHeader + codeCounts + codeLenCodeLens + codeLens + data + padding, "");
         }
 
+        [TestMethod]
+        public void CommandSymbol16Test()
+        {
+            HexTest("ed9c" +
+                "e98f e346 76c0 ff95 8e10 f84b 5a12 ef63" +
+                "b0b3 86ee fb6a dd0a 0c81 e221 51a2 4889" +
+                "8744 6961 60b3 8661 0730 1263 818c 8120" +
+                "9b45 3ee4 6380 d989 8d1d 7bed dd7f 41fd" +
+                "1fe5 1529 a95b 9a9e 6949 33d2 c29b 86ad" +
+                "e916 bb58 f51e abea 57af 5e3d be5f fd1f", "7b");
+        }
+
         private static void BinTest(string binInput, string hexOutput)
         {
             binInput = binInput.Replace(" ", "");
@@ -590,6 +602,26 @@ namespace Zergatul.Tests
             while (true)
             {
                 int read = await ds.ReadAsync(buffer, 0, buffer.Length);
+                output.AddRange(buffer.Take(read));
+                if (read == 0)
+                    break;
+            }
+
+            Assert.IsTrue(BitHelper.BytesToHex(output.ToArray()) == hexOutput.Replace(" ", "").ToLower());
+            Assert.IsTrue(ds.Position == output.Count);
+        }
+
+        private static void HexTest(string hexInput, string hexOutput)
+        {
+            var ms = new MemoryStream(BitHelper.HexToBytes(hexInput.Replace(" ", "")));
+
+            var output = new List<byte>();
+            var buffer = new byte[20];
+
+            var ds = new DeflateStream(ms, CompressionMode.Decompress);
+            while (true)
+            {
+                int read = ds.Read(buffer, 0, buffer.Length);
                 output.AddRange(buffer.Take(read));
                 if (read == 0)
                     break;

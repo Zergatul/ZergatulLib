@@ -124,8 +124,9 @@
     <Compile Include="IO\Compression\CompressionMode.cs" />
     <Compile Include="IO\Compression\DeflateStream.cs" />
     <Compile Include="IO\Compression\DeflateDataFormatException.cs" />
+    <Compile Include="IO\Compression\GzipDecompressor.cs" />
     <Compile Include="IO\Compression\GzipStream.cs" />
-    <Compile Include="IO\Compression\GzipStreamException.cs" />
+    <Compile Include="IO\Compression\GzipDataFormatException.cs" />
     <Compile Include="IO\Compression\HuffmanTree.cs" />
     <Compile Include="IO\Compression\HuffmanTreeException.cs" />
     <Compile Include="IO\CRC32.cs" />

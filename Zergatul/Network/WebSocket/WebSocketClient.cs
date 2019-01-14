@@ -59,6 +59,7 @@ namespace Zergatul.Network.WebSocket
             switch (_uri.Scheme)
             {
                 case "ws":
+                    _stream = new IO.BufferedStream(_stream, 0x1000);
                     break;
 
                 case "wss":

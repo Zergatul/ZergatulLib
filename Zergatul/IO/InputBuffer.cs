@@ -4,6 +4,7 @@ namespace Zergatul.IO
 {
     public class InputBuffer
     {
+        public int BufferSize { get; }
         public int TotalBits { get; private set; }
 
         private int _bitBuffer;
@@ -15,6 +16,7 @@ namespace Zergatul.IO
 
         public InputBuffer(int bufferSize)
         {
+            BufferSize = bufferSize;
             _readBuffer = new byte[bufferSize * 2];
         }
 
@@ -23,14 +25,19 @@ namespace Zergatul.IO
             if (_readBuffer.Length - (_readBufferEnd - _readBufferStart) < count)
                 throw new InvalidOperationException("No free space");
 
-            if (_readBufferStart + count > _readBuffer.Length)
+            if (_readBufferStart == _readBufferEnd)
             {
-                Buffer.BlockCopy(_readBuffer, _readBufferStart, _readBuffer, 0, _readBufferStart);
+                _readBufferStart = 0;
+                _readBufferEnd = 0;
+            }
+            else if (_readBufferStart + count > _readBuffer.Length)
+            {
+                Buffer.BlockCopy(_readBuffer, _readBufferStart, _readBuffer, 0, _readBufferEnd - _readBufferStart);
                 _readBufferEnd -= _readBufferStart;
                 _readBufferStart = 0;
             }
 
-            Buffer.BlockCopy(buffer, offset, _readBuffer, _readBufferStart, count);
+            Buffer.BlockCopy(buffer, offset, _readBuffer, _readBufferEnd, count);
             _readBufferEnd += count;
             TotalBits += count << 3;
         }
@@ -62,7 +69,7 @@ namespace Zergatul.IO
 
         public int ReadBits(int bits)
         {
-            if (_bitLength < bits)
+            while (_bitLength < bits)
             {
                 _bitBuffer |= _readBuffer[_readBufferStart++] << _bitLength;
                 _bitLength += 8;
@@ -85,6 +92,17 @@ namespace Zergatul.IO
         {
             int result = _readBuffer[_readBufferStart++] | (_readBuffer[_readBufferStart++] << 8);
             TotalBits -= 16;
+            return result;
+        }
+
+        public int ReadRawInt32()
+        {
+            int result =
+                _readBuffer[_readBufferStart++] |
+                (_readBuffer[_readBufferStart++] << 8) |
+                (_readBuffer[_readBufferStart++] << 16) |
+                (_readBuffer[_readBufferStart++] << 24);
+            TotalBits -= 32;
             return result;
         }
 

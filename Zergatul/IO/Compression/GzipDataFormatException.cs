@@ -2,7 +2,7 @@
 
 namespace Zergatul.IO.Compression
 {
-    public class GzipStreamException : Exception
+    public class GzipDataFormatException : Exception
     {
     }
 }

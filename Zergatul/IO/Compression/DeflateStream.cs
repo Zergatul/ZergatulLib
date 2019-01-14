@@ -77,12 +77,11 @@ namespace Zergatul.IO.Compression
 
             while (true)
             {
-                _decompressor.Decode();
-
-                int available = _decompressor.Available;
-                if (available > 0)
+                if (_decompressor.Available == 0)
+                    _decompressor.Decode();
+                if (_decompressor.Available > 0)
                 {
-                    count = System.Math.Min(available, count);
+                    count = System.Math.Min(_decompressor.Available, count);
                     _decompressor.Get(buffer, offset, count);
                     _position += count;
                     return count;
@@ -95,7 +94,7 @@ namespace Zergatul.IO.Compression
                 if (read == 0)
                     throw new EndOfStreamException();
 
-                _decompressor.Process(_readBuffer, 0, read);
+                _decompressor.Add(_readBuffer, 0, read);
             }
         }
 
@@ -111,12 +110,11 @@ namespace Zergatul.IO.Compression
 
             while (true)
             {
-                _decompressor.Decode();
-
-                int available = _decompressor.Available;
-                if (available > 0)
+                if (_decompressor.Available == 0)
+                    _decompressor.Decode();
+                if (_decompressor.Available > 0)
                 {
-                    count = System.Math.Min(available, count);
+                    count = System.Math.Min(_decompressor.Available, count);
                     _decompressor.Get(buffer, offset, count);
                     _position += count;
                     return count;
@@ -125,11 +123,11 @@ namespace Zergatul.IO.Compression
                 if (_decompressor.IsFinished)
                     return 0;
 
-                int read = await BaseStream.ReadAsync(_readBuffer, 0, _readBuffer.Length, cancellationToken);
+                int read = await BaseStream.ReadAsync(_readBuffer, 0, _readBuffer.Length, cancellationToken).ConfigureAwait(false);
                 if (read == 0)
                     throw new EndOfStreamException();
 
-                _decompressor.Process(_readBuffer, 0, read);
+                _decompressor.Add(_readBuffer, 0, read);
             }
         }
 
