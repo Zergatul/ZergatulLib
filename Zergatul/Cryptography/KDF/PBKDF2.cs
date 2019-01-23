@@ -26,6 +26,7 @@ namespace Zergatul.Cryptography.KDF
             {
                 case "SHA1": _hash = new SHA1(); break;
                 case "SHA256": _hash = new SHA256(); break;
+                case "SHA512": _hash = new SHA512(); break;
                 default:
                     throw new NotImplementedException();
             }
