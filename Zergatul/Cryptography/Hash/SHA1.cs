@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Zergatul.Network;
+﻿using Zergatul.Network;
 
 namespace Zergatul.Cryptography.Hash
 {
-#if !UseOpenSSL
-
     public class SHA1 : AbstractHash
     {
         public override int BlockSize => 64;
@@ -106,20 +98,4 @@ namespace Zergatul.Cryptography.Hash
             return hash;
         }
     }
-
-#else
-
-    public class SHA1 : AbstractOpenSSLHash
-    {
-        public override int BlockSize => 64;
-        public override int HashSize => 20;
-        public override OID OID => OID.ISO.IdentifiedOrganization.OIW.SECSIG.Algorithms.SHA1;
-
-        protected override int GetContextSize() => Marshal.SizeOf(typeof(OpenSSL.SHA_CTX));
-        protected override void ContextInit() => OpenSSL.SHA1_Init(_context);
-        protected override void ContextUpdate(byte[] data) => OpenSSL.SHA1_Update(_context, data, data.Length);
-        protected override void ContextFinal(byte[] digest) => OpenSSL.SHA1_Final(digest, _context);
-    }
-
-#endif
 }

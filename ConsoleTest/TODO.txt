@@ -3,3 +3,5 @@
 Http1Client, CreateNewConnectionAsync - use async for TLS authenticate
 
 Brotli async support
+
+remove UseOpenSsl defined

@@ -46,6 +46,21 @@ namespace Zergatul.Security.OpenSsl
         public static extern void BIO_set_init(IntPtr bio, int init);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BIO_get_init(IntPtr bio);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void BIO_set_data(IntPtr bio, IntPtr ptr);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr BIO_get_data(IntPtr bio);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void BIO_set_shutdown(IntPtr bio, int shut);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int BIO_get_shutdown(IntPtr bio);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern int BIO_read(IntPtr bio, IntPtr buf, int len);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
@@ -1086,6 +1101,23 @@ namespace Zergatul.Security.OpenSsl
 
         #endregion
 
+        #region SSL_ERROR
+
+        public const int SSL_ERROR_NONE = 0;
+        public const int SSL_ERROR_SSL = 1;
+        public const int SSL_ERROR_WANT_READ = 2;
+        public const int SSL_ERROR_WANT_WRITE = 3;
+        public const int SSL_ERROR_WANT_X509_LOOKUP = 4;
+        public const int SSL_ERROR_SYSCALL = 5;
+        public const int SSL_ERROR_ZERO_RETURN = 6;
+        public const int SSL_ERROR_WANT_CONNECT = 7;
+        public const int SSL_ERROR_WANT_ACCEPT = 8;
+        public const int SSL_ERROR_WANT_ASYNC = 9;
+        public const int SSL_ERROR_WANT_ASYNC_JOB = 10;
+        public const int SSL_ERROR_WANT_CLIENT_HELLO_CB = 11;
+
+        #endregion
+
         #region SSL_MODE
 
         /// <summary>
@@ -1258,16 +1290,19 @@ namespace Zergatul.Security.OpenSsl
         public static extern int SSL_connect(IntPtr ssl);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SSL_read(IntPtr ssl, byte[] buf, int num);
+        public static extern int SSL_read(IntPtr ssl, IntPtr buf, int num);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SSL_write(IntPtr ssl, byte[] buf, int num);
+        public static extern int SSL_write(IntPtr ssl, IntPtr buf, int num);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern int SSL_shutdown(IntPtr ssl);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SSL_free(IntPtr ssl);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SSL_get_error(IntPtr ssl, int ret);
 
         #endregion
 
@@ -1286,6 +1321,12 @@ namespace Zergatul.Security.OpenSsl
             {
                 this.ErrorMessage = OpenSsl.ERR_error_string(this.Code);
             }
+        }
+
+        public OpenSslException(string message)
+            : base(message)
+        {
+
         }
     }
 }

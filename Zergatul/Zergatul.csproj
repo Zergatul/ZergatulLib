@@ -29,7 +29,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;UseOpenSSL</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -560,6 +560,7 @@
     <Compile Include="Security\MDState.cs" />
     <Compile Include="Security\OpenSsl\AES.cs" />
     <Compile Include="Security\OpenSsl\BigInteger.cs" />
+    <Compile Include="Security\OpenSsl\BioStreamWrapper.cs" />
     <Compile Include="Security\OpenSsl\ECDSASignature.cs" />
     <Compile Include="Security\OpenSsl\ECGroupConverter.cs" />
     <Compile Include="Security\OpenSsl\ECKeyPairGenerator.cs" />
@@ -588,6 +589,7 @@
     <Compile Include="Security\DefaultSecurityProvider.cs" />
     <Compile Include="Security\OpenSsl\AbstractMessageDigest.cs" />
     <Compile Include="Security\OpenSsl\MD5.cs" />
+    <Compile Include="Security\OpenSsl\TlsStream.cs" />
     <Compile Include="Security\Padding.cs" />
     <Compile Include="Security\Paddings\PKCS7Padding.cs" />
     <Compile Include="Security\Paddings\SymmetricPadding.cs" />
@@ -608,6 +610,9 @@
     <Compile Include="Security\SymmetricCipher.cs" />
     <Compile Include="Security\SymmetricCipherParameters.cs" />
     <Compile Include="Security\SymmetricCiphers.cs" />
+    <Compile Include="Security\TlsStream.cs" />
+    <Compile Include="Security\TlsStreamParameters.cs" />
+    <Compile Include="Security\TlsVersion.cs" />
     <Compile Include="StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>

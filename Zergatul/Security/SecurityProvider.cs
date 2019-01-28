@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Zergatul.Security
@@ -73,6 +74,8 @@ namespace Zergatul.Security
                 return getter();
             return null;
         }
+
+        public virtual TlsStream GetTlsStream(Stream innerStream) => null;
 
         protected void RegisterKeyDerivationFunction(string algorithm, GetKeyDerivationFunctionDelegate getter)
         {
@@ -246,6 +249,18 @@ namespace Zergatul.Security
                 var sc = _providers[i].GetSymmetricCipher(algorithm);
                 if (sc != null)
                     return sc;
+            }
+
+            return null;
+        }
+
+        public static TlsStream GetTlsStreamInstance(Stream innerStream)
+        {
+            for (int i = 0; i < _providers.Count; i++)
+            {
+                var tls = _providers[i].GetTlsStream(innerStream);
+                if (tls != null)
+                    return tls;
             }
 
             return null;

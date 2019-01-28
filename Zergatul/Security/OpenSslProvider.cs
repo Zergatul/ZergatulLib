@@ -1,4 +1,5 @@
-﻿using Zergatul.Security.OpenSsl;
+﻿using System.IO;
+using Zergatul.Security.OpenSsl;
 
 namespace Zergatul.Security
 {
@@ -26,5 +27,7 @@ namespace Zergatul.Security
 
             RegisterSymmetricCipher(SymmetricCiphers.AES, () => new AES());
         }
+
+        public override TlsStream GetTlsStream(Stream innerStream) => new OpenSsl.TlsStream(innerStream);
     }
 }
