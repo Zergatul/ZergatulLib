@@ -620,10 +620,10 @@
     <None Include="Scripts\GenerateOIDs.ps1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="libcrypto.dll">
+    <Content Include="libcrypto-1_1-x64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libssl.dll">
+    <Content Include="libssl-1_1-x64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Network\OIDs.xml">

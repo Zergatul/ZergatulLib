@@ -5,8 +5,8 @@ namespace Zergatul.Security.OpenSsl
 {
     internal static class OpenSsl
     {
-        private const string libcrypto = "libcrypto";
-        private const string libssl = "libssl";
+        private const string libcrypto = "libcrypto-1_1-x64.dll";
+        private const string libssl = "libssl-1_1-x64.dll";
 
         #region libcrypto
 
@@ -28,6 +28,63 @@ namespace Zergatul.Security.OpenSsl
             IntPtr ptr = _ERR_error_string(e, null);
             return Marshal.PtrToStringAnsi(ptr);
         }
+
+        #endregion
+
+        #region Constants
+
+        #region BIO_CTRL
+
+        public const int BIO_CTRL_RESET = 1;
+        public const int BIO_CTRL_EOF = 2;
+        public const int BIO_CTRL_INFO = 3;
+        public const int BIO_CTRL_SET = 4;
+        public const int BIO_CTRL_GET = 5;
+        public const int BIO_CTRL_PUSH = 6;
+        public const int BIO_CTRL_POP = 7;
+        public const int BIO_CTRL_GET_CLOSE = 8;
+        public const int BIO_CTRL_SET_CLOSE = 9;
+        public const int BIO_CTRL_PENDING = 10;
+        public const int BIO_CTRL_FLUSH = 11;
+        public const int BIO_CTRL_DUP = 12;
+        public const int BIO_CTRL_WPENDING = 13;
+        public const int BIO_CTRL_SET_CALLBACK = 14;
+        public const int BIO_CTRL_GET_CALLBACK = 15;
+        public const int BIO_CTRL_PEEK = 29;
+        public const int BIO_CTRL_SET_FILENAME = 30;
+        public const int BIO_CTRL_DGRAM_CONNECT = 31;
+        public const int BIO_CTRL_DGRAM_SET_CONNECTED = 32;
+        public const int BIO_CTRL_DGRAM_SET_RECV_TIMEOUT = 33;
+        public const int BIO_CTRL_DGRAM_GET_RECV_TIMEOUT = 34;
+        public const int BIO_CTRL_DGRAM_SET_SEND_TIMEOUT = 35;
+        public const int BIO_CTRL_DGRAM_GET_SEND_TIMEOUT = 36;
+        public const int BIO_CTRL_DGRAM_GET_RECV_TIMER_EXP = 37;
+        public const int BIO_CTRL_DGRAM_GET_SEND_TIMER_EXP = 38;
+        public const int BIO_CTRL_DGRAM_MTU_DISCOVER = 39;
+        public const int BIO_CTRL_DGRAM_QUERY_MTU = 40;
+        public const int BIO_CTRL_DGRAM_GET_FALLBACK_MTU = 47;
+        public const int BIO_CTRL_DGRAM_GET_MTU = 41;
+        public const int BIO_CTRL_DGRAM_SET_MTU = 42;
+        public const int BIO_CTRL_DGRAM_MTU_EXCEEDED = 43;
+        public const int BIO_CTRL_DGRAM_GET_PEER = 46;
+        public const int BIO_CTRL_DGRAM_SET_PEER = 44;
+        public const int BIO_CTRL_DGRAM_SET_NEXT_TIMEOUT = 45;
+        public const int BIO_CTRL_DGRAM_SET_DONT_FRAG = 48;
+        public const int BIO_CTRL_DGRAM_GET_MTU_OVERHEAD = 49;
+        public const int BIO_CTRL_DGRAM_SCTP_SET_IN_HANDSHAKE = 50;
+        public const int BIO_CTRL_DGRAM_SCTP_ADD_AUTH_KEY = 51;
+        public const int BIO_CTRL_DGRAM_SCTP_NEXT_AUTH_KEY = 52;
+        public const int BIO_CTRL_DGRAM_SCTP_AUTH_CCS_RCVD = 53;
+        public const int BIO_CTRL_DGRAM_SCTP_GET_SNDINFO = 60;
+        public const int BIO_CTRL_DGRAM_SCTP_SET_SNDINFO = 61;
+        public const int BIO_CTRL_DGRAM_SCTP_GET_RCVINFO = 62;
+        public const int BIO_CTRL_DGRAM_SCTP_SET_RCVINFO = 63;
+        public const int BIO_CTRL_DGRAM_SCTP_GET_PRINFO = 64;
+        public const int BIO_CTRL_DGRAM_SCTP_SET_PRINFO = 65;
+        public const int BIO_CTRL_DGRAM_SCTP_SAVE_SHUTDOWN = 70;
+        public const int BIO_CTRL_DGRAM_SET_PEEK_MODE = 71;
+
+        #endregion
 
         #endregion
 
@@ -94,6 +151,12 @@ namespace Zergatul.Security.OpenSsl
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         public static extern IntPtr BIO_meth_new(int type, string name);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate long BIOCtrlDelegate(IntPtr bio, int cmd, long larg, IntPtr parg);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern int BIO_meth_set_ctrl(IntPtr biom, [MarshalAs(UnmanagedType.FunctionPtr)] BIOCtrlDelegate ctrl);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate int BIOWriteDelegate(IntPtr bio, IntPtr buffer, int count);

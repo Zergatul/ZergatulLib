@@ -19,6 +19,7 @@ namespace Zergatul.Security.OpenSsl
         private readonly int _id;
         private byte[] _readBuffer;
         private byte[] _writeBuffer;
+        private int _writeBufferPos;
 
         public BioStreamWrapper(Stream stream, int bufferSize = 0x10000)
         {
@@ -34,6 +35,7 @@ namespace Zergatul.Security.OpenSsl
 
             _readBuffer = new byte[bufferSize];
             _writeBuffer = new byte[bufferSize];
+            _writeBufferPos = 0;
         }
 
         #region IDisposable
@@ -72,6 +74,9 @@ namespace Zergatul.Security.OpenSsl
             if (_bioMethod == IntPtr.Zero)
                 throw new OpenSslException();
 
+            if (OpenSsl.BIO_meth_set_ctrl(_bioMethod, CtrlDelegate) != 1)
+                throw new OpenSslException();
+
             if (OpenSsl.BIO_meth_set_read(_bioMethod, ReadDelegate) != 1)
                 throw new OpenSslException();
 
@@ -95,13 +100,33 @@ namespace Zergatul.Security.OpenSsl
             }
         }
 
+        private static long CtrlDelegate(IntPtr bio, int cmd, long larg, IntPtr parg)
+        {
+            switch (cmd)
+            {
+                case OpenSsl.BIO_CTRL_PUSH:
+                case OpenSsl.BIO_CTRL_POP:
+                    return 0;
+
+                case OpenSsl.BIO_CTRL_FLUSH:
+                    var wrapper = GetWrapper(bio);
+                    if (wrapper._writeBufferPos > 0)
+                    {
+                        wrapper._stream.Write(wrapper._writeBuffer, 0, wrapper._writeBufferPos);
+                        wrapper._writeBufferPos = 0;
+                    }
+                    wrapper._stream.Flush();
+                    return 1;
+
+                default:
+                    break;
+            }
+            return 0;
+        }
+
         private static int ReadDelegate(IntPtr bio, IntPtr buffer, int count)
         {
-            int id = (int)OpenSsl.BIO_get_data(bio);
-            BioStreamWrapper wrapper;
-            lock (_syncRoot)
-                wrapper = _wrappers[id];
-
+            var wrapper = GetWrapper(bio);
             count = System.Math.Min(count, wrapper._readBuffer.Length);
             count = wrapper._stream.Read(wrapper._readBuffer, 0, count);
             Marshal.Copy(wrapper._readBuffer, 0, buffer, count);
@@ -110,15 +135,30 @@ namespace Zergatul.Security.OpenSsl
 
         private static int WriteDelegate(IntPtr bio, IntPtr buffer, int count)
         {
-            int id = (int)OpenSsl.BIO_get_data(bio);
-            BioStreamWrapper wrapper;
-            lock (_syncRoot)
-                wrapper = _wrappers[id];
+            var wrapper = GetWrapper(bio);
+            int total = 0;
+            while (total < count)
+            {
+                int write = System.Math.Min(count, wrapper._writeBuffer.Length - wrapper._writeBufferPos);
+                Marshal.Copy(buffer + total, wrapper._writeBuffer, wrapper._writeBufferPos, write);
+                total += write;
+                wrapper._writeBufferPos += write;
+                if (wrapper._writeBufferPos == wrapper._writeBuffer.Length)
+                {
+                    wrapper._stream.Write(wrapper._writeBuffer, 0, wrapper._writeBuffer.Length);
+                    wrapper._stream.Flush();
+                    wrapper._writeBufferPos = 0;
+                }
+            }
 
-            count = System.Math.Min(count, wrapper._writeBuffer.Length);
-            Marshal.Copy(buffer, wrapper._writeBuffer, 0, count);
-            wrapper._stream.Write(wrapper._writeBuffer, 0, count);
-            return count;
+            return total;
+        }
+
+        private static BioStreamWrapper GetWrapper(IntPtr bio)
+        {
+            int id = (int)OpenSsl.BIO_get_data(bio);
+            lock (_syncRoot)
+                return _wrappers[id];
         }
 
         #endregion

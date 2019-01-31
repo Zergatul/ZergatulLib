@@ -28,6 +28,7 @@ namespace Zergatul.Security.OpenSsl
             int ret = OpenSsl.SSL_connect(_ssl);
             if (ret != 1)
                 ProcessError(ret);
+            _state = State.Authenticated;
         }
 
         public override Task AuthenticateAsClientAsync()
@@ -42,6 +43,7 @@ namespace Zergatul.Security.OpenSsl
             int ret = OpenSsl.SSL_accept(_ssl);
             if (ret != 1)
                 ProcessError(ret);
+            _state = State.Authenticated;
         }
 
         public override Task AuthenticateAsServerAsync()
