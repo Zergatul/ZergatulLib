@@ -11,9 +11,14 @@ namespace Zergatul.Security.OpenSsl
         private Stream _stream;
         private BioStreamWrapper _wrapper;
         private State _state;
+        private byte[] _writeBuffer;
+        private GCHandle _writeBufferHandle;
+        private int _writeBufferPos;
 
         private IntPtr _sslContext;
         private IntPtr _ssl;
+
+        private OpenSsl.VerifyCallbackDelegate VerifyCallback;
 
         public TlsStream(Stream innerStream)
         {
@@ -27,7 +32,11 @@ namespace Zergatul.Security.OpenSsl
             Init(server: false);
             int ret = OpenSsl.SSL_connect(_ssl);
             if (ret != 1)
+            {
                 ProcessError(ret);
+                return;
+            }
+            OnAuthFinished();
             _state = State.Authenticated;
         }
 
@@ -42,7 +51,11 @@ namespace Zergatul.Security.OpenSsl
             Init(server: true);
             int ret = OpenSsl.SSL_accept(_ssl);
             if (ret != 1)
+            {
                 ProcessError(ret);
+                return;
+            }
+            OnAuthFinished();
             _state = State.Authenticated;
         }
 
@@ -82,6 +95,12 @@ namespace Zergatul.Security.OpenSsl
                 }
             }
 
+            if (_writeBuffer != null)
+            {
+                _writeBuffer = null;
+                _writeBufferHandle.Free();
+            }
+
             _wrapper?.Dispose();
             _wrapper = null;
 
@@ -100,7 +119,21 @@ namespace Zergatul.Security.OpenSsl
 
         public override void Flush()
         {
-            throw new NotImplementedException();
+            if (_state != State.Authenticated)
+                throw new InvalidOperationException();
+
+            if (_writeBufferPos != 0)
+            {
+                int count = _writeBufferPos;
+                _writeBufferPos = 0;
+                int ret = OpenSsl.SSL_write(_ssl, _writeBufferHandle.AddrOfPinnedObject(), count);
+                _writeBufferPos = 0;
+                if (ret <= 0)
+                    ProcessError(ret);
+                if (ret != count)
+                    throw new NotImplementedException();
+                _wrapper.Flush();
+            }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -135,18 +168,23 @@ namespace Zergatul.Security.OpenSsl
             if (StreamHelper.ValidateReadWriteParameters(buffer, offset, count))
                 return;
 
-            var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
-            try
+            while (count > 0)
             {
-                int ret = OpenSsl.SSL_write(_ssl, handle.AddrOfPinnedObject() + offset, count);
-                if (ret <= 0)
-                    ProcessError(ret);
-                if (ret != count)
-                    throw new NotImplementedException();
-            }
-            finally
-            {
-                handle.Free();
+                int copy = System.Math.Min(_writeBuffer.Length - _writeBufferPos, count);
+                Buffer.BlockCopy(buffer, offset, _writeBuffer, _writeBufferPos, copy);
+                _writeBufferPos += copy;
+                offset += copy;
+                count -= copy;
+
+                if (_writeBufferPos == _writeBuffer.Length)
+                {
+                    int ret = OpenSsl.SSL_write(_ssl, _writeBufferHandle.AddrOfPinnedObject(), _writeBuffer.Length);
+                    _writeBufferPos = 0;
+                    if (ret <= 0)
+                        ProcessError(ret);
+                    if (ret != _writeBuffer.Length)
+                        throw new NotImplementedException();
+                }
             }
         }
 
@@ -156,6 +194,9 @@ namespace Zergatul.Security.OpenSsl
 
         private void Init(bool server)
         {
+            if (_state != State.Init)
+                throw new InvalidOperationException();
+
             IntPtr method;
             switch (Parameters.Version ?? TlsVersion.Tls12)
             {
@@ -185,8 +226,31 @@ namespace Zergatul.Security.OpenSsl
             if (_ssl == IntPtr.Zero)
                 throw new OpenSslException();
 
+            if (server)
+            {
+                // store in field to disable gargage collecting of delegate
+                VerifyCallback = CertificateValidateCallback;
+                if (Parameters.ClientCertificateValidateCallback != null)
+                    OpenSsl.SSL_set_verify
+            }
+
             OpenSsl.SSL_set0_rbio(_ssl, _wrapper.Bio);
             OpenSsl.SSL_set0_wbio(_ssl, _wrapper.Bio);
+        }
+
+        private int CertificateValidateCallback(int preverifyOk, IntPtr x509Ctx)
+        {
+
+        }
+
+        private void OnAuthFinished()
+        {
+            if (_writeBuffer == null)
+            {
+                _writeBuffer = new byte[Network.Tls.Messages.RecordMessageStream.PlaintextLimit];
+                _writeBufferHandle = GCHandle.Alloc(_writeBuffer, GCHandleType.Pinned);
+                _writeBufferPos = 0;
+            }
         }
 
         private void ProcessError(int ret)
@@ -197,7 +261,9 @@ namespace Zergatul.Security.OpenSsl
                     return;
 
                 case OpenSsl.SSL_ERROR_ZERO_RETURN:
-                    throw new OpenSslException("The TLS/SSL peer has closed the connection for writing by sending the \"close notify\" alert");
+                    // The TLS/SSL peer has closed the connection for writing by sending the "close notify" alert
+                    _state = State.Closed;
+                    return;
 
                 case OpenSsl.SSL_ERROR_WANT_READ:
                     throw new NotImplementedException();
@@ -240,7 +306,8 @@ namespace Zergatul.Security.OpenSsl
         private enum State
         {
             Init,
-            Authenticated
+            Authenticated,
+            Closed
         }
 
         #endregion

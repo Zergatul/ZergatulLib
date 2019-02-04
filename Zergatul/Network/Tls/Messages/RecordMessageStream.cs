@@ -72,8 +72,10 @@ namespace Zergatul.Network.Tls.Messages
                 _readContentType = (ContentType)_reader.ReadByte();
                 var version = (ProtocolVersion)_reader.ReadShort();
 
-                if (version != Version)
-                    throw new TlsStreamException("Invalid TLS version");
+                // TODO!!!
+                // validate correctly version
+                //if (version != Version)
+                //    throw new TlsStreamException("Invalid TLS version");
 
                 ushort length = _reader.ReadShort();
 

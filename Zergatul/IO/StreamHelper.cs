@@ -67,5 +67,51 @@ namespace Zergatul.IO
 
             return false;
         }
+
+        public static IAsyncResult BeginReadFromTapToApm(Stream stream, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        {
+            var tcs = new TaskCompletionSource<int>(state);
+            stream.ReadAsync(buffer, offset, count).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    tcs.TrySetException(t.Exception.InnerExceptions);
+                else if (t.IsCanceled)
+                    tcs.TrySetCanceled();
+                else
+                    tcs.TrySetResult(t.Result);
+
+                callback?.Invoke(tcs.Task);
+            });
+
+            return tcs.Task;
+        }
+
+        public static int EndReadFromTapToApm(IAsyncResult asyncResult)
+        {
+            return ((Task<int>)asyncResult).Result;
+        }
+
+        public static IAsyncResult BeginWriteFromTapToApm(Stream stream, byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        {
+            var tcs = new TaskCompletionSource<int>(state);
+            stream.WriteAsync(buffer, offset, count).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                    tcs.TrySetException(t.Exception.InnerExceptions);
+                else if (t.IsCanceled)
+                    tcs.TrySetCanceled();
+                else
+                    tcs.TrySetResult(0);
+
+                callback?.Invoke(tcs.Task);
+            });
+
+            return tcs.Task;
+        }
+
+        public static void EndWriteFromTapToApm(IAsyncResult asyncResult)
+        {
+            ((Task)asyncResult).Wait();
+        }
     }
 }

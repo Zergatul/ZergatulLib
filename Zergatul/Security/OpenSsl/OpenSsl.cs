@@ -1244,6 +1244,16 @@ namespace Zergatul.Security.OpenSsl
 
         #endregion
 
+        #region SSL_VERIFY
+
+        public const int SSL_VERIFY_NONE = 0x00;
+        public const int SSL_VERIFY_PEER = 0x01;
+        public const int SSL_VERIFY_FAIL_IF_NO_PEER_CERT = 0x02;
+        public const int SSL_VERIFY_CLIENT_ONCE = 0x04;
+        public const int SSL_VERIFY_POST_HANDSHAKE = 0x08;
+
+        #endregion
+
         #endregion
 
         #region SSL_CTX
@@ -1274,6 +1284,15 @@ namespace Zergatul.Security.OpenSsl
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern long SSL_CTX_clear_options(IntPtr ctx, long options);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate int VerifyCallbackDelegate(int preverifyOk, IntPtr x509Ctx);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SSL_CTX_set_verify(IntPtr ctx, int mode, [MarshalAs(UnmanagedType.FunctionPtr)] VerifyCallbackDelegate verifyCallback);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SSL_CTX_set_verify_depth(IntPtr ctx, int depth);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SSL_CTX_free(IntPtr ctx);
@@ -1336,6 +1355,12 @@ namespace Zergatul.Security.OpenSsl
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern long SSL_clear_options(IntPtr ssl, long options);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SSL_set_verify(IntPtr ssl, int mode, [MarshalAs(UnmanagedType.FunctionPtr)] VerifyCallbackDelegate verifyCallback);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SSL_set_verify_depth(IntPtr ssl, int depth);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SSL_set_bio(IntPtr ssl, IntPtr rbio, IntPtr wbio);

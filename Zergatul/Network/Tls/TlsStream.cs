@@ -504,7 +504,9 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateServerHello()
         {
-            var commonCiphers = Settings.CipherSuites.Where(cs => _clientCipherSuites.Contains(cs));
+            var commonCiphers = Settings.CipherSuites
+                .Where(cs => IsCompatible(cs, _serverCertificate))
+                .Where(cs => _clientCipherSuites.Contains(cs));
             if (!commonCiphers.Any())
             {
                 WriteAlertHandshakeFailure();
@@ -608,6 +610,26 @@ namespace Zergatul.Network.Tls
         private bool CanBeSkipped(MessageInfo info)
         {
             return info == MessageInfo.Forbidden || info == MessageInfo.CanBeOmitted;
+        }
+
+        private static bool IsCompatible(CipherSuite cs, X509Certificate certificate)
+        {
+            var type = CipherSuiteBuilder.GetCertificateType(cs);
+            switch (type)
+            {
+                case CertificateType.None:
+                    return true;
+                case CertificateType.RSA:
+                    return certificate?.PublicKey?.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS1.RSA;
+                case CertificateType.DSA:
+                    return certificate?.PublicKey?.Algorithm == OID.ISO.MemberBody.US.X957.X9Algorithm.DSA;
+                case CertificateType.DiffieHellman:
+                    return certificate?.PublicKey?.Algorithm == OID.ISO.MemberBody.US.RSADSI.PKCS.PKCS3.DHKeyAgreement;
+                case CertificateType.EC:
+                    return certificate?.PublicKey?.Algorithm == OID.ISO.MemberBody.US.ANSI_X962.KeyType.ECPublicKey;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         #region Message decider methods

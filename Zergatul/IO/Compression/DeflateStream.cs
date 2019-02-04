@@ -49,6 +49,16 @@ namespace Zergatul.IO.Compression
             set => throw new NotImplementedException();
         }
 
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+            StreamHelper.BeginReadFromTapToApm(this, buffer, offset, count, callback, state);
+
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+            StreamHelper.BeginWriteFromTapToApm(this, buffer, offset, count, callback, state);
+
+        public override int EndRead(IAsyncResult asyncResult) => StreamHelper.EndReadFromTapToApm(asyncResult);
+
+        public override void EndWrite(IAsyncResult asyncResult) => StreamHelper.EndWriteFromTapToApm(asyncResult);
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

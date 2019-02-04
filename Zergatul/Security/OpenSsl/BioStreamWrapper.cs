@@ -21,7 +21,7 @@ namespace Zergatul.Security.OpenSsl
         private byte[] _writeBuffer;
         private int _writeBufferPos;
 
-        public BioStreamWrapper(Stream stream, int bufferSize = 0x10000)
+        public BioStreamWrapper(Stream stream, int bufferSize = 0x8000)
         {
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _id = GetNextId(this);
@@ -36,6 +36,16 @@ namespace Zergatul.Security.OpenSsl
             _readBuffer = new byte[bufferSize];
             _writeBuffer = new byte[bufferSize];
             _writeBufferPos = 0;
+        }
+
+        public void Flush()
+        {
+            if (_writeBufferPos > 0)
+            {
+                _stream.Write(_writeBuffer, 0, _writeBufferPos);
+                _stream.Flush();
+                _writeBufferPos = 0;
+            }
         }
 
         #region IDisposable
@@ -64,6 +74,12 @@ namespace Zergatul.Security.OpenSsl
 
         #region Static methods
 
+        // to prevent garbage collector to collect delegate instances
+        // we store them in static fields
+        private static readonly OpenSsl.BIOCtrlDelegate CtrlDelegate;
+        private static readonly OpenSsl.BIOReadDelegate ReadDelegate;
+        private static readonly OpenSsl.BIOWriteDelegate WriteDelegate;
+
         static BioStreamWrapper()
         {
             int type = OpenSsl.BIO_get_new_index();
@@ -74,12 +90,15 @@ namespace Zergatul.Security.OpenSsl
             if (_bioMethod == IntPtr.Zero)
                 throw new OpenSslException();
 
+            CtrlDelegate = BIOCtrl;
             if (OpenSsl.BIO_meth_set_ctrl(_bioMethod, CtrlDelegate) != 1)
                 throw new OpenSslException();
 
+            ReadDelegate = BIORead;
             if (OpenSsl.BIO_meth_set_read(_bioMethod, ReadDelegate) != 1)
                 throw new OpenSslException();
 
+            WriteDelegate = BIOWrite;
             if (OpenSsl.BIO_meth_set_write(_bioMethod, WriteDelegate) != 1)
                 throw new OpenSslException();
 
@@ -100,7 +119,7 @@ namespace Zergatul.Security.OpenSsl
             }
         }
 
-        private static long CtrlDelegate(IntPtr bio, int cmd, long larg, IntPtr parg)
+        private static long BIOCtrl(IntPtr bio, int cmd, long larg, IntPtr parg)
         {
             switch (cmd)
             {
@@ -113,9 +132,9 @@ namespace Zergatul.Security.OpenSsl
                     if (wrapper._writeBufferPos > 0)
                     {
                         wrapper._stream.Write(wrapper._writeBuffer, 0, wrapper._writeBufferPos);
+                        wrapper._stream.Flush();
                         wrapper._writeBufferPos = 0;
                     }
-                    wrapper._stream.Flush();
                     return 1;
 
                 default:
@@ -124,7 +143,7 @@ namespace Zergatul.Security.OpenSsl
             return 0;
         }
 
-        private static int ReadDelegate(IntPtr bio, IntPtr buffer, int count)
+        private static int BIORead(IntPtr bio, IntPtr buffer, int count)
         {
             var wrapper = GetWrapper(bio);
             count = System.Math.Min(count, wrapper._readBuffer.Length);
@@ -133,20 +152,20 @@ namespace Zergatul.Security.OpenSsl
             return count;
         }
 
-        private static int WriteDelegate(IntPtr bio, IntPtr buffer, int count)
+        private static int BIOWrite(IntPtr bio, IntPtr buffer, int count)
         {
             var wrapper = GetWrapper(bio);
             int total = 0;
-            while (total < count)
+            while (count > 0)
             {
                 int write = System.Math.Min(count, wrapper._writeBuffer.Length - wrapper._writeBufferPos);
                 Marshal.Copy(buffer + total, wrapper._writeBuffer, wrapper._writeBufferPos, write);
-                total += write;
                 wrapper._writeBufferPos += write;
+                total += write;
+                count -= write;
                 if (wrapper._writeBufferPos == wrapper._writeBuffer.Length)
                 {
                     wrapper._stream.Write(wrapper._writeBuffer, 0, wrapper._writeBuffer.Length);
-                    wrapper._stream.Flush();
                     wrapper._writeBufferPos = 0;
                 }
             }

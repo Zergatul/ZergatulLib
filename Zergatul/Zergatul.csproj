@@ -416,6 +416,7 @@
     <Compile Include="Network\Tls\AbstractTlsSymmetricCipher.cs" />
     <Compile Include="Network\Tls\AEADCipher.cs" />
     <Compile Include="Network\Tls\CCMCipher.cs" />
+    <Compile Include="Network\Tls\CertificateType.cs" />
     <Compile Include="Network\Tls\ChaCha20Poly1305Cipher.cs" />
     <Compile Include="Network\Tls\CipherSuiteResolver.cs" />
     <Compile Include="Network\Tls\ConnectionInfo.cs" />
