@@ -13,7 +13,7 @@ namespace Zergatul.Security.OpenSsl
         private static readonly StaticFinalizer _finalizer;
         private static int _lastId;
 
-        public IntPtr Bio { get; }
+        public IntPtr Bio { get; private set; }
 
         private readonly Stream _stream;
         private readonly int _id;
@@ -48,6 +48,11 @@ namespace Zergatul.Security.OpenSsl
             }
         }
 
+        public void SetFree()
+        {
+            Bio = IntPtr.Zero;
+        }
+
         #region IDisposable
 
         public void Dispose()
@@ -62,7 +67,10 @@ namespace Zergatul.Security.OpenSsl
                 _wrappers.Remove(_id);
 
             if (Bio != IntPtr.Zero)
+            {
                 OpenSsl.BIO_free(Bio);
+                Bio = IntPtr.Zero;
+            }
         }
 
         ~BioStreamWrapper()

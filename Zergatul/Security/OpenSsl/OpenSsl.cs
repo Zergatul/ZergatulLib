@@ -10,11 +10,15 @@ namespace Zergatul.Security.OpenSsl
 
         #region libcrypto
 
+        #region Memory
+
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr CRYPTO_malloc(int num, string file, int line);
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern void CRYPTO_free(IntPtr p);
+
+        #endregion
 
         #region ERR
 
@@ -1045,6 +1049,20 @@ namespace Zergatul.Security.OpenSsl
             byte[] salt, int saltlen,
             int iter,
             IntPtr digest, int keylen, byte[] @out);
+
+        #endregion
+
+        #region X509_CTX
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr X509_STORE_CTX_get_current_cert(IntPtr ctx);
+
+        #endregion
+
+        #region X509
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int i2d_X509(IntPtr x509, ref IntPtr ppout);
 
         #endregion
 

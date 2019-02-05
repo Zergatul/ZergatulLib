@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Zergatul.Cryptography.Certificate;
 using Zergatul.IO;
 
 namespace Zergatul.Security.OpenSsl
@@ -18,6 +19,7 @@ namespace Zergatul.Security.OpenSsl
         private IntPtr _sslContext;
         private IntPtr _ssl;
 
+        private bool _isServer;
         private OpenSsl.VerifyCallbackDelegate VerifyCallback;
 
         public TlsStream(Stream innerStream)
@@ -29,7 +31,8 @@ namespace Zergatul.Security.OpenSsl
 
         public override void AuthenticateAsClient()
         {
-            Init(server: false);
+            _isServer = false;
+            Init();
             int ret = OpenSsl.SSL_connect(_ssl);
             if (ret != 1)
             {
@@ -42,13 +45,15 @@ namespace Zergatul.Security.OpenSsl
 
         public override Task AuthenticateAsClientAsync()
         {
-            Init(server: false);
+            _isServer = false;
+            Init();
             throw new NotImplementedException();
         }
 
         public override void AuthenticateAsServer()
         {
-            Init(server: true);
+            _isServer = true;
+            Init();
             int ret = OpenSsl.SSL_accept(_ssl);
             if (ret != 1)
             {
@@ -61,7 +66,8 @@ namespace Zergatul.Security.OpenSsl
 
         public override Task AuthenticateAsServerAsync()
         {
-            Init(server: true);
+            _isServer = true;
+            Init();
             throw new NotImplementedException();
         }
 
@@ -101,8 +107,12 @@ namespace Zergatul.Security.OpenSsl
                 _writeBufferHandle.Free();
             }
 
-            _wrapper?.Dispose();
-            _wrapper = null;
+            if (_wrapper != null)
+            {
+                _wrapper.SetFree();
+                _wrapper.Dispose();
+                _wrapper = null;
+            }
 
             if (_ssl != IntPtr.Zero)
             {
@@ -192,7 +202,7 @@ namespace Zergatul.Security.OpenSsl
 
         #region Private methods
 
-        private void Init(bool server)
+        private void Init()
         {
             if (_state != State.Init)
                 throw new InvalidOperationException();
@@ -201,15 +211,15 @@ namespace Zergatul.Security.OpenSsl
             switch (Parameters.Version ?? TlsVersion.Tls12)
             {
                 case TlsVersion.Tls10:
-                    method = server ? OpenSsl.TLSv1_server_method() : OpenSsl.TLSv1_client_method();
+                    method = _isServer ? OpenSsl.TLSv1_server_method() : OpenSsl.TLSv1_client_method();
                     break;
 
                 case TlsVersion.Tls11:
-                    method = server ? OpenSsl.TLSv1_1_server_method() : OpenSsl.TLSv1_1_client_method();
+                    method = _isServer ? OpenSsl.TLSv1_1_server_method() : OpenSsl.TLSv1_1_client_method();
                     break;
 
                 case TlsVersion.Tls12:
-                    method = server ? OpenSsl.TLSv1_2_server_method() : OpenSsl.TLSv1_2_client_method();
+                    method = _isServer ? OpenSsl.TLSv1_2_server_method() : OpenSsl.TLSv1_2_client_method();
                     break;
 
                 default:
@@ -226,21 +236,61 @@ namespace Zergatul.Security.OpenSsl
             if (_ssl == IntPtr.Zero)
                 throw new OpenSslException();
 
-            if (server)
+            // store in field to disable gargage collecting of converted delegate
+            VerifyCallback = CertificateValidateCallback;
+            if (_isServer)
             {
-                // store in field to disable gargage collecting of delegate
-                VerifyCallback = CertificateValidateCallback;
-                if (Parameters.ClientCertificateValidateCallback != null)
-                    OpenSsl.SSL_set_verify
+                if (Parameters.RequestClientCertificate == true)
+                    OpenSsl.SSL_set_verify(_ssl, OpenSsl.SSL_VERIFY_PEER, VerifyCallback);
+                else
+                    OpenSsl.SSL_set_verify(_ssl, OpenSsl.SSL_VERIFY_NONE, null);
+            }
+            else
+            {
+                OpenSsl.SSL_set_verify(_ssl, OpenSsl.SSL_VERIFY_PEER, VerifyCallback);
             }
 
-            OpenSsl.SSL_set0_rbio(_ssl, _wrapper.Bio);
-            OpenSsl.SSL_set0_wbio(_ssl, _wrapper.Bio);
+            OpenSsl.SSL_set_bio(_ssl, _wrapper.Bio, _wrapper.Bio);
         }
 
         private int CertificateValidateCallback(int preverifyOk, IntPtr x509Ctx)
         {
-
+            if (_isServer)
+            {
+                return 0;
+            }
+            else
+            {
+                var validate = Parameters.ServerCertificateValidateCallback;
+                if (validate != null)
+                {
+                    IntPtr x509 = OpenSsl.X509_STORE_CTX_get_current_cert(x509Ctx);
+                    if (x509 == IntPtr.Zero)
+                        throw new InvalidOperationException();
+                    IntPtr ptr = IntPtr.Zero;
+                    int length = OpenSsl.i2d_X509(x509, ref ptr);
+                    if (length < 0)
+                        throw new OpenSslException();
+                    byte[] raw = new byte[length];
+                    var handle = GCHandle.Alloc(raw, GCHandleType.Pinned);
+                    try
+                    {
+                        ptr = handle.AddrOfPinnedObject();
+                        if (OpenSsl.i2d_X509(x509, ref ptr) != length)
+                            throw new InvalidOperationException();
+                    }
+                    finally
+                    {
+                        handle.Free();
+                    }
+                    var certificate = new X509Certificate(raw);
+                    return validate(certificate) ? 1 : 0;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
         }
 
         private void OnAuthFinished()
