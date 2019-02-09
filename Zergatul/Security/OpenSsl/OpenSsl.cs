@@ -181,177 +181,9 @@ namespace Zergatul.Security.OpenSsl
 
         #endregion
 
-        #region MD4
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct MD4_CTX
-        {
-            public uint A, B, C, D;
-            public uint Nl, Nh;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            public uint[] data;
-
-            public uint num;
-        }
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MD4_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MD4_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MD4_Final(byte[] md, IntPtr ctx);
-
-        #endregion
-
-        #region MD5
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct MD5_CTX
-        {
-            public uint A, B, C, D;
-            public uint Nl, Nh;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            public uint[] data;
-
-            public uint num;
-        }
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MD5_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MD5_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void MD5_Final(byte[] md, IntPtr ctx);
-
-        #endregion
-
-        #region SHA1
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SHA_CTX
-        {
-            public uint h0, h1, h2, h3, h4;
-            public uint Nl, Nh;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            public uint[] data;
-
-            public uint num;
-        }
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA1_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA1_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA1_Final(byte[] md, IntPtr ctx);
-
-        #endregion
-
-        #region SHA256
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SHA256_CTX
-        {
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-            public uint[] h;
-            public uint Nl, Nh;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            public uint[] data;
-
-            public uint num, md_len;
-        }
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA224_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA224_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA224_Final(byte[] md, IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA256_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA256_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA256_Final(byte[] md, IntPtr ctx);
-
-        #endregion
-
-        #region SHA512
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SHA512_CTX
-        {
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-            public ulong[] h;
-            public ulong Nl, Nh;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            public ulong[] data;
-
-            public uint num, md_len;
-        }
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA384_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA384_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA384_Final(byte[] md, IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA512_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA512_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void SHA512_Final(byte[] md, IntPtr ctx);
-
-        #endregion
-
-        #region RIPEMD160
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RIPEMD160_CTX
-        {
-            public uint A, B, C, D, E;
-            public uint Nl, Nh;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
-            public uint[] data;
-
-            public uint num;
-        }
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void RIPEMD160_Init(IntPtr ctx);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void RIPEMD160_Update(IntPtr ctx, byte[] data, int len);
-
-        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void RIPEMD160_Final(byte[] md, IntPtr ctx);
-
-        #endregion
-
         #region EVP
+
+        #region Constants
 
         public const int EVP_PKEY_SCRYPT = 973;
 
@@ -373,6 +205,8 @@ namespace Zergatul.Security.OpenSsl
         public const int EVP_PKEY_CTRL_SCRYPT_R = EVP_PKEY_ALG_CTRL + 11;
         public const int EVP_PKEY_CTRL_SCRYPT_P = EVP_PKEY_ALG_CTRL + 12;
         public const int EVP_PKEY_CTRL_SCRYPT_MAXMEM_BYTES = EVP_PKEY_ALG_CTRL + 13;
+
+        #endregion
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_CIPHER_CTX_new();
@@ -456,6 +290,41 @@ namespace Zergatul.Security.OpenSsl
             return EVP_PKEY_CTX_ctrl_uint64(ctx, -1, EVP_PKEY_OP_DERIVE, EVP_PKEY_CTRL_SCRYPT_P, p);
         }
 
+        #region MD
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_MD_CTX_new();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_MD_CTX_reset(IntPtr ctx);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void EVP_MD_CTX_free(IntPtr ctx);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_DigestInit_ex(IntPtr ctx, IntPtr type, IntPtr impl);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_DigestUpdate(IntPtr ctx, IntPtr d, int cnt);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_DigestUpdate(IntPtr ctx, byte[] d, int cnt);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_DigestFinal_ex(IntPtr ctx, byte[] md, IntPtr s);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_MD_size(IntPtr md);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int EVP_MD_block_size(IntPtr md);
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_md4();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_md5();
+
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_sha1();
 
@@ -470,6 +339,17 @@ namespace Zergatul.Security.OpenSsl
 
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_sha512();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_ripemd160();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_blake2b512();
+
+        [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr EVP_blake2s256();
+
+        #endregion
 
         public static IntPtr EVPByName(string algorithm)
         {
