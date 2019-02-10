@@ -65,6 +65,7 @@
     <Compile Include="FragmentationTests.cs" />
     <Compile Include="CloseTests.cs" />
     <Compile Include="TlsStaticTests.cs" />
+    <Compile Include="OpenSslTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul.Tests\Zergatul.Tests.csproj">

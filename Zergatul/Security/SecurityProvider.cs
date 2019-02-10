@@ -75,7 +75,7 @@ namespace Zergatul.Security
             return null;
         }
 
-        public virtual TlsStream GetTlsStream(Stream innerStream) => null;
+        public virtual Tls.TlsStream GetTlsStream(Stream innerStream) => null;
 
         protected void RegisterKeyDerivationFunction(string algorithm, GetKeyDerivationFunctionDelegate getter)
         {
@@ -254,7 +254,7 @@ namespace Zergatul.Security
             return null;
         }
 
-        public static TlsStream GetTlsStreamInstance(Stream innerStream)
+        public static Tls.TlsStream GetTlsStreamInstance(Stream innerStream)
         {
             for (int i = 0; i < _providers.Count; i++)
             {

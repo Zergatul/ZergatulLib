@@ -569,6 +569,7 @@
     <Compile Include="Security\OpenSsl\ECPublicKey.cs" />
     <Compile Include="Security\OpenSsl\MD4.cs" />
     <Compile Include="Security\OpenSsl\MD5.cs" />
+    <Compile Include="Security\OpenSsl\MDHelper.cs" />
     <Compile Include="Security\OpenSsl\PBKDF2.cs" />
     <Compile Include="Security\OpenSsl\RIPEMD160.cs" />
     <Compile Include="Security\OpenSsl\Scrypt.cs" />
@@ -613,9 +614,11 @@
     <Compile Include="Security\SymmetricCipher.cs" />
     <Compile Include="Security\SymmetricCipherParameters.cs" />
     <Compile Include="Security\SymmetricCiphers.cs" />
-    <Compile Include="Security\TlsStream.cs" />
-    <Compile Include="Security\TlsStreamParameters.cs" />
-    <Compile Include="Security\TlsVersion.cs" />
+    <Compile Include="Security\Tls\TlsHelper.cs" />
+    <Compile Include="Security\Tls\TlsStream.cs" />
+    <Compile Include="Security\Tls\TlsStreamParameters.cs" />
+    <Compile Include="Security\Tls\TlsVersion.cs" />
+    <Compile Include="Security\Tls\CipherSuite.cs" />
     <Compile Include="StringHelper.cs" />
   </ItemGroup>
   <ItemGroup>

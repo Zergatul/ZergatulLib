@@ -6,6 +6,7 @@ using Zergatul.Network.Tls;
 using System.Threading;
 using System.Text;
 using Zergatul.Cryptography.Certificate;
+using Zergatul.Tests;
 
 namespace Zergatul.Tls.Tests
 {

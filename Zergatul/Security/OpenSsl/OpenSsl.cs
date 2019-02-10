@@ -208,6 +208,8 @@ namespace Zergatul.Security.OpenSsl
 
         #endregion
 
+        #region EVP_CIPHER
+
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_CIPHER_CTX_new();
 
@@ -250,6 +252,10 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_aes_256_cbc();
 
+        #endregion
+
+        #region other
+
         [DllImport(libcrypto, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr EVP_PKEY_CTX_new_id(int id, IntPtr e);
 
@@ -289,6 +295,8 @@ namespace Zergatul.Security.OpenSsl
         {
             return EVP_PKEY_CTX_ctrl_uint64(ctx, -1, EVP_PKEY_OP_DERIVE, EVP_PKEY_CTRL_SCRYPT_P, p);
         }
+
+        #endregion
 
         #region MD
 
@@ -350,21 +358,6 @@ namespace Zergatul.Security.OpenSsl
         public static extern IntPtr EVP_blake2s256();
 
         #endregion
-
-        public static IntPtr EVPByName(string algorithm)
-        {
-            switch (algorithm)
-            {
-                case MessageDigests.SHA1: return EVP_sha1();
-                case MessageDigests.SHA224: return EVP_sha224();
-                case MessageDigests.SHA256: return EVP_sha256();
-                case MessageDigests.SHA384: return EVP_sha384();
-                case MessageDigests.SHA512: return EVP_sha512();
-                default:
-                    throw new NotSupportedException();
-
-            }
-        }
 
         #endregion
 
@@ -1200,6 +1193,15 @@ namespace Zergatul.Security.OpenSsl
         #region SSL_METHOD
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr TLS_method();
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr TLS_server_method();
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr TLS_client_method();
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr TLSv1_method();
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
@@ -1232,6 +1234,18 @@ namespace Zergatul.Security.OpenSsl
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr SSL_new(IntPtr ctx);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SSL_set_min_proto_version(IntPtr ssl, int version);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SSL_set_max_proto_version(IntPtr ssl, int version);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SSL_set_cipher_list(IntPtr ssl, [MarshalAs(UnmanagedType.LPStr)] string str);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SSL_set_ciphersuites(IntPtr s, [MarshalAs(UnmanagedType.LPStr)] string str);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern long SSL_ctrl(IntPtr ssl, int cmd, long larg, IntPtr parg);

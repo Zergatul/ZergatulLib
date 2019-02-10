@@ -14,7 +14,7 @@
                 _parameters.Salt,
                 _parameters.Salt?.Length ?? 0,
                 _parameters.Iterations,
-                OpenSsl.EVPByName(_parameters.MessageDigest),
+                MDHelper.GetMdByName(_parameters.MessageDigest),
                 _parameters.KeyLength,
                 bytes);
             if (result != 1)

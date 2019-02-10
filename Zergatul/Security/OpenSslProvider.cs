@@ -30,6 +30,6 @@ namespace Zergatul.Security
             RegisterSymmetricCipher(SymmetricCiphers.AES, () => new AES());
         }
 
-        public override TlsStream GetTlsStream(Stream innerStream) => new OpenSsl.TlsStream(innerStream);
+        public override Tls.TlsStream GetTlsStream(Stream innerStream) => new TlsStream(innerStream);
     }
 }

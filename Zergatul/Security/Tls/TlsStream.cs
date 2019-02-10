@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Zergatul.Security
+namespace Zergatul.Security.Tls
 {
     public abstract class TlsStream : Stream
     {

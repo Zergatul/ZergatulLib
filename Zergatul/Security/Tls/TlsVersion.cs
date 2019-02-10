@@ -1,4 +1,4 @@
-﻿namespace Zergatul.Security
+﻿namespace Zergatul.Security.Tls
 {
     public enum TlsVersion
     {
