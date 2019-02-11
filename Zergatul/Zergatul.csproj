@@ -421,6 +421,7 @@
     <Compile Include="Network\Tls\CipherSuiteResolver.cs" />
     <Compile Include="Network\Tls\ConnectionInfo.cs" />
     <Compile Include="Network\Tls\ConnectionState.cs" />
+    <Compile Include="Network\Tls\Defaults.cs" />
     <Compile Include="Network\Tls\DHAnonKeyExchange.cs" />
     <Compile Include="Network\Tls\ECDHEPSKKeyExchange.cs" />
     <Compile Include="Network\Tls\DHEPSKKeyExchange.cs" />
@@ -447,7 +448,6 @@
     <Compile Include="Network\Tls\CipherSuiteBuilder.cs" />
     <Compile Include="Network\Tls\ECDSASignature.cs" />
     <Compile Include="Network\Tls\Extensions\ExtendedMasterSecret.cs" />
-    <Compile Include="Network\Tls\CipherSuite.cs" />
     <Compile Include="Network\Tls\DHEKeyExchange.cs" />
     <Compile Include="Network\Tls\ECDHEKeyExchange.cs" />
     <Compile Include="Network\Tls\CipherType.cs" />
@@ -500,12 +500,14 @@
     <Compile Include="Network\Tls\Messages\ServerHello.cs" />
     <Compile Include="Network\Tls\Messages\ServerHelloDone.cs" />
     <Compile Include="Network\Tls\Messages\ServerKeyExchange.cs" />
+    <Compile Include="Network\Tls\StateMachine.cs" />
     <Compile Include="Network\Tls\StreamCipher.cs" />
     <Compile Include="Network\Tls\TLSCiphertext.cs" />
     <Compile Include="Network\Tls\TLSCompressed.cs" />
     <Compile Include="Network\Tls\TlsConnectionKeys.cs" />
     <Compile Include="Network\Tls\TLSPlaintext.cs" />
     <Compile Include="Network\Tls\TlsProvider.cs" />
+    <Compile Include="Network\Tls\TlsStreamNew.cs" />
     <Compile Include="Network\Tls\TlsStream.cs" />
     <Compile Include="Network\Tls\TlsStreamException.cs" />
     <Compile Include="Network\Tls\TlsStreamMessageFlow.cs" />
