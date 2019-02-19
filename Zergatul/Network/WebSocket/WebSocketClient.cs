@@ -63,8 +63,9 @@ namespace Zergatul.Network.WebSocket
                     break;
 
                 case "wss":
-                    var tls = new Tls.TlsStream(_stream);
-                    tls.AuthenticateAsClient(_uri.Host);
+                    var tls = SecurityProvider.GetTlsStreamInstance(_stream);
+                    tls.Parameters.Host = _uri.Host;
+                    tls.AuthenticateAsClient();
                     _stream = tls;
                     break;
             }

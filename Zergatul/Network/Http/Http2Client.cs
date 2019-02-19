@@ -4,6 +4,7 @@ using System.IO;
 using Zergatul.IO;
 using Zergatul.Network.Http.Frames;
 using Zergatul.Network.Tls;
+using Zergatul.Security;
 
 namespace Zergatul.Network.Http
 {
@@ -93,12 +94,10 @@ namespace Zergatul.Network.Http
                     break;
 
                 case "https":
-                    var tls = new TlsStream(stream);
-                    var alpnExtension = new Tls.Extensions.ApplicationLayerProtocolNegotiationExtension();
-                    alpnExtension.ProtocolNames = new[] { "h2" };
-                    tls.Settings.Extensions = new Tls.Extensions.TlsExtension[] { alpnExtension };
-                    tls.AuthenticateAsClient(_uri.Host);
-                    stream = new IO.BufferedStream(tls, Tls.Messages.RecordMessageStream.PlaintextLimit);
+                    var tls = SecurityProvider.GetTlsStreamInstance(stream);
+                    tls.Parameters.Host = _uri.Host;
+                    tls.Parameters.AppProtocols = new[] { "h2" };
+                    tls.AuthenticateAsClient();
                     break;
 
                 default:

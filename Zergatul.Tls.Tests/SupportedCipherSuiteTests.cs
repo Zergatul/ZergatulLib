@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Network.Tls;
-using Zergatul.Cryptography;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Tls.Tests
 {
@@ -14,7 +14,7 @@ namespace Zergatul.Tls.Tests
         public void Test()
         {
             List<CipherSuite> notSupported = new List<CipherSuite>();
-            foreach (var cs in TlsStream.SupportedCipherSuites)
+            foreach (var cs in Network.Tls.TlsStream.SupportedCipherSuites)
             {
                 try
                 {

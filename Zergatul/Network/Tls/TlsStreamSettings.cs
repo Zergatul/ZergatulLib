@@ -1,6 +1,7 @@
 ﻿using System;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.Certificate;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Network.Tls
 {

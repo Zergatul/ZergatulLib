@@ -284,7 +284,6 @@
     <Compile Include="Network\CharHelper.cs" />
     <Compile Include="Network\ControlStreamReader.cs" />
     <Compile Include="Network\DefaultNetworkProvider.cs" />
-    <Compile Include="Network\DefaultTlsProvider.cs" />
     <Compile Include="Network\Ftp\FtpServer.cs" />
     <Compile Include="Network\Ftp\FtpServerConnection.cs" />
     <Compile Include="Network\Ftp\FtpServerFeaturesReply.cs" />
@@ -326,7 +325,6 @@
     <Compile Include="Network\Http\HttpResponseStream.cs" />
     <Compile Include="Network\Http\HttpStatusCode.cs" />
     <Compile Include="Network\Http\KeepAliveParser.cs" />
-    <Compile Include="Network\ITlsProvider.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcClient.cs" />
     <Compile Include="Network\JsonRpc\JsonRpcTransport.cs" />
     <Compile Include="Network\JsonRpc\WebSocketTransport.cs" />
@@ -500,14 +498,11 @@
     <Compile Include="Network\Tls\Messages\ServerHello.cs" />
     <Compile Include="Network\Tls\Messages\ServerHelloDone.cs" />
     <Compile Include="Network\Tls\Messages\ServerKeyExchange.cs" />
-    <Compile Include="Network\Tls\StateMachine.cs" />
     <Compile Include="Network\Tls\StreamCipher.cs" />
     <Compile Include="Network\Tls\TLSCiphertext.cs" />
     <Compile Include="Network\Tls\TLSCompressed.cs" />
     <Compile Include="Network\Tls\TlsConnectionKeys.cs" />
     <Compile Include="Network\Tls\TLSPlaintext.cs" />
-    <Compile Include="Network\Tls\TlsProvider.cs" />
-    <Compile Include="Network\Tls\TlsStreamNew.cs" />
     <Compile Include="Network\Tls\TlsStream.cs" />
     <Compile Include="Network\Tls\TlsStreamException.cs" />
     <Compile Include="Network\Tls\TlsStreamMessageFlow.cs" />
@@ -515,7 +510,6 @@
     <Compile Include="Network\Tls\TlsStreamSettings.cs" />
     <Compile Include="Network\Tls\TlsStreamSupportedCipherSuites.cs" />
     <Compile Include="Network\Tls\TlsUtils.cs" />
-    <Compile Include="Network\Tls\WriteDataEventArgs.cs" />
     <Compile Include="Network\Vpn\SstpClient.cs" />
     <Compile Include="Network\Vpn\Sstp\Attribute.cs" />
     <Compile Include="Network\Vpn\Sstp\AttributeId.cs" />

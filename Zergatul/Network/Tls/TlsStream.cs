@@ -9,6 +9,7 @@ using Zergatul.Cryptography.Certificate;
 using Zergatul.IO;
 using Zergatul.Network.Tls.Extensions;
 using Zergatul.Network.Tls.Messages;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Network.Tls
 {
@@ -64,7 +65,7 @@ namespace Zergatul.Network.Tls
     // * refactor dhe_psk, and ecdhe_psk to use single code
     // * tls sessions for server
     // * client certificates
-    public partial class TlsStream : Stream
+    public partial class TlsStream : Security.Tls.TlsStream
     {
         public TlsStreamSettings Settings { get; set; }
         public ConnectionInfo ConnectionInfo { get; private set; }
@@ -126,10 +127,13 @@ namespace Zergatul.Network.Tls
             this._flows = new Flows(this);
         }
 
-        public void AuthenticateAsClient(string host)
+        public override void AuthenticateAsClient()
         {
+            if (Parameters.Host == null)
+                throw new ArgumentNullException("Parameters.Host");
+
             Role = Role.Client;
-            _serverHost = host;
+            _serverHost = Parameters.Host;
 
             GenerateRandom();
             _messageStream.EncodingSequenceNum = 0;
@@ -195,19 +199,24 @@ namespace Zergatul.Network.Tls
 
             if (Settings.ReuseSessions && !_reuseSession)
             {
-                TlsStreamSessions.Instance.Add(host, new TlsStreamSession(_sessionId, SecurityParameters.MasterSecret));
+                TlsStreamSessions.Instance.Add(_serverHost, new TlsStreamSession(_sessionId, SecurityParameters.MasterSecret));
             }
 
             OnAuthFinished();
         }
 
-        public void AuthenticateAsServer(string host, X509Certificate certificate = null)
+        public override Task AuthenticateAsClientAsync()
         {
-            if (certificate != null && !certificate.HasPrivateKey)
+            throw new NotImplementedException();
+        }
+
+        public override void AuthenticateAsServer()
+        {
+            if (Parameters.Certificate != null && !Parameters.Certificate.HasPrivateKey)
                 throw new TlsStreamException("Certificate with private key is required for server authentification");
 
             Role = Role.Server;
-            _serverCertificate = certificate;
+            _serverCertificate = Parameters.Certificate;
 
             GenerateRandom();
             _messageStream.EncodingSequenceNum = 0;
@@ -272,6 +281,11 @@ namespace Zergatul.Network.Tls
             _messageStream.ReleaseHandshakeBuffer();
 
             OnAuthFinished();
+        }
+
+        public override Task AuthenticateAsServerAsync()
+        {
+            throw new NotImplementedException();
         }
 
         #region Private methods

@@ -4,6 +4,7 @@ using Zergatul.Tests;
 using Zergatul.Network.Tls;
 using System.Threading;
 using System.Linq;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Tls.Tests
 {
@@ -13,38 +14,33 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void NoExtendedMasterSecret()
         {
-            var tlsSettings = new TlsStreamSettings
-            {
-                SupportExtendedMasterSecret = false,
-                CipherSuites = new CipherSuite[]
-                {
-                    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
-                },
-                ServerCertificateValidationOverride = c => true,
-                GetRandom = () => new byte[32]
-            };
-
             var dual = new DualPeer();
 
-            TlsStream tlsServer = new TlsStream(dual.Peer1,
-                ProtocolVersion.Tls12,
-                new StaticRandom(Enumerable.Repeat((byte)123, 10000)));
-            tlsServer.Settings = tlsSettings;
+            var tlsServer = new Network.Tls.TlsStream(dual.Peer1);
+            tlsServer.Parameters.MinVersion = TlsVersion.Tls12;
+            tlsServer.Parameters.MaxVersion = TlsVersion.Tls12;
+            tlsServer.Parameters.CipherSuites = new[] { CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 };
+            tlsServer.Parameters.SecureRandom = new StaticSecureRandom(Enumerable.Repeat((byte)123, 10000));
+            tlsServer.Parameters.Certificate = CipherSuiteTests.GetRSACert();
+            tlsServer.Parameters.Host = "localhost";
+            tlsServer.Parameters.ExtendedMasterSecret = false;
 
-            var tlsClient = new TlsStream(dual.Peer2,
-                ProtocolVersion.Tls12,
-                new StaticRandom(Enumerable.Repeat((byte)159, 10000)));
-            tlsClient.Settings = tlsSettings;
+            var tlsClient = new Network.Tls.TlsStream(dual.Peer2);
+            tlsClient.Parameters.MinVersion = TlsVersion.Tls12;
+            tlsClient.Parameters.MaxVersion = TlsVersion.Tls12;
+            tlsClient.Parameters.CipherSuites = new[] { CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 };
+            tlsClient.Parameters.SecureRandom = new StaticSecureRandom(Enumerable.Repeat((byte)159, 10000));
+            tlsClient.Parameters.Host = "localhost";
+            tlsClient.Parameters.ExtendedMasterSecret = false;
 
             var serverThread = new Thread(() =>
             {
-                
-                tlsServer.AuthenticateAsServer("localhost", CipherSuiteTests.GetRSACert());
+                tlsServer.AuthenticateAsServer();
                 tlsServer.Close();
             });
             serverThread.Start();
 
-            tlsClient.AuthenticateAsClient("localhost");
+            tlsClient.AuthenticateAsClient();
             tlsClient.Close();
 
             serverThread.Join();
@@ -68,38 +64,34 @@ namespace Zergatul.Tls.Tests
         [TestMethod]
         public void ExtendedMasterSecret()
         {
-            var tlsSettings = new TlsStreamSettings
-            {
-                SupportExtendedMasterSecret = true,
-                CipherSuites = new CipherSuite[]
-                {
-                    CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256
-                },
-                ServerCertificateValidationOverride = c => true,
-                GetRandom = () => new byte[32]
-            };
-
             var dual = new DualPeer();
 
-            TlsStream tlsServer = new TlsStream(dual.Peer1,
-                ProtocolVersion.Tls12,
-                new StaticRandom(Enumerable.Repeat((byte)123, 10000)));
-            tlsServer.Settings = tlsSettings;
+            var tlsServer = new Network.Tls.TlsStream(dual.Peer1);
+            tlsServer.Parameters.MinVersion = TlsVersion.Tls12;
+            tlsServer.Parameters.MaxVersion = TlsVersion.Tls12;
+            tlsServer.Parameters.CipherSuites = new[] { CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 };
+            tlsServer.Parameters.SecureRandom = new StaticSecureRandom(Enumerable.Repeat((byte)123, 10000));
+            tlsServer.Parameters.Certificate = CipherSuiteTests.GetRSACert();
+            tlsServer.Parameters.Host = "localhost";
+            tlsServer.Parameters.ExtendedMasterSecret = true;
 
-            var tlsClient = new TlsStream(dual.Peer2,
-                ProtocolVersion.Tls12,
-                new StaticRandom(Enumerable.Repeat((byte)159, 10000)));
-            tlsClient.Settings = tlsSettings;
+            var tlsClient = new Network.Tls.TlsStream(dual.Peer2);
+            tlsClient.Parameters.MinVersion = TlsVersion.Tls12;
+            tlsClient.Parameters.MaxVersion = TlsVersion.Tls12;
+            tlsClient.Parameters.CipherSuites = new[] { CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256 };
+            tlsClient.Parameters.SecureRandom = new StaticSecureRandom(Enumerable.Repeat((byte)159, 10000));
+            tlsClient.Parameters.Host = "localhost";
+            tlsClient.Parameters.ExtendedMasterSecret = true;
 
             var serverThread = new Thread(() =>
             {
 
-                tlsServer.AuthenticateAsServer("localhost", CipherSuiteTests.GetRSACert());
+                tlsServer.AuthenticateAsServer();
                 tlsServer.Close();
             });
             serverThread.Start();
 
-            tlsClient.AuthenticateAsClient("localhost");
+            tlsClient.AuthenticateAsClient();
             tlsClient.Close();
 
             serverThread.Join();

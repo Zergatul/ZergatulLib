@@ -13,7 +13,7 @@ using System.Collections;
 
 namespace Zergatul.Tls.Tests
 {
-    [TestClass]
+    /*[TestClass]
     public class BouncyCastleTests
     {
         private static CipherSuite[] NotSupportedByBC = new CipherSuite[]
@@ -416,5 +416,5 @@ namespace Zergatul.Tls.Tests
                 // validate server certificate
             }
         }
-    }
+    }*/
 }

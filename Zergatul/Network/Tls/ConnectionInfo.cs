@@ -1,4 +1,6 @@
-﻿namespace Zergatul.Network.Tls
+﻿using Zergatul.Security.Tls;
+
+namespace Zergatul.Network.Tls
 {
     public class ConnectionInfo
     {

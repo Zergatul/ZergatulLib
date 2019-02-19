@@ -7,6 +7,7 @@ using Zergatul.Cryptography.Certificate;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Tls.Tests
 {
@@ -58,9 +59,10 @@ namespace Zergatul.Tls.Tests
                     var serverClient = listener.AcceptTcpClient();
                     try
                     {
-                        var tlsServerStream = new TlsStream(serverClient.GetStream());
+                        var tlsServerStream = new Network.Tls.TlsStream(serverClient.GetStream());
+                        tlsServerStream.Parameters.Host = "localhost";
+                        tlsServerStream.Parameters.Certificate = cert;
                         tlsServerStream.Settings = tlsSettings;
-                        tlsServerStream.AuthenticateAsServer("localhost", cert);
                         tlsServerStream.Write(serverSend);
                         response = new byte[clientSend.Length];
                         tlsServerStream.Read(response);
@@ -82,9 +84,10 @@ namespace Zergatul.Tls.Tests
             byte[] buffer = null;
             try
             {
-                var tls = new TlsStream(client.GetStream());
+                var tls = new Network.Tls.TlsStream(client.GetStream());
+                tls.Parameters.Host = "localhost";
                 tls.Settings = tlsSettings;
-                tls.AuthenticateAsClient("localhost");
+                tls.AuthenticateAsClient();
 
                 buffer = new byte[serverSend.Length];
                 tls.Read(buffer);

@@ -1,4 +1,5 @@
-﻿using Zergatul.Security.Default;
+﻿using System.IO;
+using Zergatul.Security.Default;
 
 namespace Zergatul.Security
 {
@@ -44,5 +45,7 @@ namespace Zergatul.Security
 
             RegisterSignature(Signatures.ECDSA, () => new ECDSASignature());
         }
+
+        public override Tls.TlsStream GetTlsStream(Stream innerStream) => new Network.Tls.TlsStream(innerStream);
     }
 }

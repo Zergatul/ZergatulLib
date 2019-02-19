@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Zergatul.Network.Tls;
+using Zergatul.Security;
 
 namespace Zergatul.Network.Http
 {
@@ -209,8 +210,9 @@ namespace Zergatul.Network.Http
                     };
 
                 case "https":
-                    var tls = new TlsStream(stream);
-                    tls.AuthenticateAsClient(uri.Host);
+                    var tls = SecurityProvider.GetTlsStreamInstance(stream);
+                    tls.Parameters.Host = uri.Host;
+                    tls.AuthenticateAsClient();
                     return new ConnectionInfo
                     {
                         Stream = tls,
@@ -238,8 +240,9 @@ namespace Zergatul.Network.Http
                     };
 
                 case "https":
-                    var tls = new TlsStream(stream);
-                    tls.AuthenticateAsClient(uri.Host); // TODO: use async
+                    var tls = SecurityProvider.GetTlsStreamInstance(stream);
+                    tls.Parameters.Host = uri.Host;
+                    await tls.AuthenticateAsClientAsync();
                     return new ConnectionInfo
                     {
                         Stream = tls,

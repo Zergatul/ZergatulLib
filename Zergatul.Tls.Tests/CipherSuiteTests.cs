@@ -7,6 +7,7 @@ using System.Threading;
 using System.Text;
 using Zergatul.Cryptography.Certificate;
 using Zergatul.Tests;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Tls.Tests
 {
@@ -2058,9 +2059,11 @@ namespace Zergatul.Tls.Tests
                 else
                     throw new NotImplementedException();
 
-                var tlsServer = new TlsStream(dual.Peer1);
+                var tlsServer = new Network.Tls.TlsStream(dual.Peer1);
                 tlsServer.Settings = tlsSettings;
-                tlsServer.AuthenticateAsServer("localhost", cert);
+                tlsServer.Parameters.Host = "localhost";
+                tlsServer.Parameters.Certificate = cert;
+                tlsServer.AuthenticateAsServer();
                 tlsServer.Write(Encoding.ASCII.GetBytes(MessageToSend));
                 response = new byte[MessageResponse.Length];
                 tlsServer.Read(response, 0, response.Length);
@@ -2069,9 +2072,10 @@ namespace Zergatul.Tls.Tests
             serverThread.Start();
 
             byte[] buffer = null;
-            var tlsClient = new TlsStream(dual.Peer2);
+            var tlsClient = new Network.Tls.TlsStream(dual.Peer2);
             tlsClient.Settings = tlsSettings;
-            tlsClient.AuthenticateAsClient("localhost");
+            tlsClient.Parameters.Host = "localhost";
+            tlsClient.AuthenticateAsClient();
 
             buffer = new byte[MessageToSend.Length];
             tlsClient.Read(buffer, 0, buffer.Length);
@@ -2156,9 +2160,11 @@ namespace Zergatul.Tls.Tests
                     var serverClient = listener.AcceptTcpClient();
                     try
                     {
-                        var tlsServerStream = new TlsStream(serverClient.GetStream());
+                        var tlsServerStream = new Network.Tls.TlsStream(serverClient.GetStream());
                         tlsServerStream.Settings = tlsSettings;
-                        tlsServerStream.AuthenticateAsServer("localhost", cert);
+                        tlsServerStream.Parameters.Host = "localhost";
+                        tlsServerStream.Parameters.Certificate = cert;
+                        tlsServerStream.AuthenticateAsServer();
                         tlsServerStream.Write(Encoding.ASCII.GetBytes(MessageToSend));
                         response = new byte[MessageResponse.Length];
                         tlsServerStream.Read(response, 0, response.Length);
@@ -2180,9 +2186,10 @@ namespace Zergatul.Tls.Tests
             byte[] buffer = null;
             try
             {
-                var tls = new TlsStream(client.GetStream());
+                var tls = new Network.Tls.TlsStream(client.GetStream());
                 tls.Settings = tlsSettings;
-                tls.AuthenticateAsClient("localhost");
+                tls.Parameters.Host = "localhost";
+                tls.AuthenticateAsClient();
 
                 buffer = new byte[MessageToSend.Length];
                 tls.Read(buffer, 0, buffer.Length);

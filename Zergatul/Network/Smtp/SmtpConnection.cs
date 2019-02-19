@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Network.Proxy;
 using Zergatul.Network.Tls;
+using Zergatul.Security;
 
 namespace Zergatul.Network.Smtp
 {
@@ -19,7 +20,6 @@ namespace Zergatul.Network.Smtp
         private TcpClient _tcpClient;
         private Stream _stream;
         private SmtpControlStreamReader _reader;
-        private ITlsProvider _tlsProvider;
 
         #endregion
 
@@ -46,17 +46,8 @@ namespace Zergatul.Network.Smtp
         #region .ctor
 
         public SmtpConnection()
-            : this(new DefaultTlsProvider())
         {
 
-        }
-
-        public SmtpConnection(ITlsProvider tlsProvider)
-        {
-            if (tlsProvider == null)
-                throw new ArgumentNullException(nameof(tlsProvider));
-
-            this._tlsProvider = tlsProvider;
         }
 
         #endregion
@@ -119,7 +110,10 @@ namespace Zergatul.Network.Smtp
             if (reply.Code != SmtpReplyCode.ServiceReady)
                 throw new SmtpException();
 
-            var tls = _tlsProvider.AuthenticateAsClient(_stream, host);
+            var tls = SecurityProvider.GetTlsStreamInstance(_stream);
+            tls.Parameters.Host = host;
+            tls.AuthenticateAsClient();
+
             _stream = tls;
             _reader = new SmtpControlStreamReader(tls);
         }

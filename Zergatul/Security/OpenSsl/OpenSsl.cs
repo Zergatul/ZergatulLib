@@ -1145,6 +1145,13 @@ namespace Zergatul.Security.OpenSsl
 
         #endregion
 
+        #region SSL_SHUTDOWN
+
+        public const int SSL_SENT_SHUTDOWN = 1;
+        public const int SSL_RECEIVED_SHUTDOWN = 2;
+
+        #endregion
+
         #endregion
 
         #region SSL_CTX
@@ -1297,6 +1304,9 @@ namespace Zergatul.Security.OpenSsl
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern int SSL_shutdown(IntPtr ssl);
+
+        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int SSL_get_shutdown(IntPtr ssl);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern void SSL_free(IntPtr ssl);

@@ -96,16 +96,30 @@ namespace Zergatul.Security.OpenSsl
                     int ret = OpenSsl.SSL_shutdown(_ssl);
                     if (ret < 0)
                         ProcessError(ret);
-                    if (Parameters.BidirectionalShutdown && ret == 0)
+                    if (Parameters.BidirectionalShutdown && Parameters.KeepOpen && ret == 0)
                     {
                         /* The shutdown is not yet finished: the close_notify was sent but the peer did not send it back yet.
                          * Call SSL_read() to do a bidirectional shutdown.
                          * The output of SSL_get_error may be misleading, as an erroneous SSL_ERROR_SYSCALL may be flagged even though no error occurred.
                          */
-                        throw new NotImplementedException();
+                        byte[] buffer = new byte[1024];
+                        GCHandle handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+                        try
+                        {
+                            while (!ReceivedShutdown())
+                            {
+                                ret = OpenSsl.SSL_read(_ssl, handle.AddrOfPinnedObject(), buffer.Length);
+                                if (ret < 0)
+                                    ProcessError(ret);
+                            }
+                        }
+                        finally
+                        {
+                            handle.Free();
+                        }
                     }
 
-                    if (!Parameters.LeaveOpen)
+                    if (!Parameters.KeepOpen)
                         _stream.Dispose();
                     _stream = null;
                 }
@@ -581,6 +595,11 @@ namespace Zergatul.Security.OpenSsl
                 _writeBufferHandle = GCHandle.Alloc(_writeBuffer, GCHandleType.Pinned);
                 _writeBufferPos = 0;
             }
+        }
+
+        private bool ReceivedShutdown()
+        {
+            return (OpenSsl.SSL_get_shutdown(_ssl) & OpenSsl.SSL_RECEIVED_SHUTDOWN) != 0;
         }
 
         private void ProcessError(int ret)

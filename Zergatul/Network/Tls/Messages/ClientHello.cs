@@ -28,7 +28,7 @@ namespace Zergatul.Network.Tls.Messages
             if (sessionIDLength == 0)
                 SessionID = null;
             else
-                throw new NotImplementedException();
+                SessionID = reader.ReadBytes(32);
 
             ushort cipherSuitesLength = reader.ReadShort();
             if (cipherSuitesLength % 2 == 1 || cipherSuitesLength == 0)

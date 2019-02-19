@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using Zergatul.Cryptography.Asymmetric;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Tls.Tests
 {
@@ -79,7 +80,7 @@ namespace Zergatul.Tls.Tests
                     var client = listener.AcceptTcpClient();
                     try
                     {
-                        var tlsStream = new TlsStream(client.GetStream());
+                        var tlsStream = new Network.Tls.TlsStream(client.GetStream());
                         tlsStream.Settings = new TlsStreamSettings
                         {
                             SupportExtendedMasterSecret = true,
@@ -97,7 +98,9 @@ namespace Zergatul.Tls.Tests
                             new Cryptography.Certificate.X509Certificate("ecdsa-cert.pfx", @"\7FoIK*f1{\q") :
                             new Cryptography.Certificate.X509Certificate("rsa-cert.pfx", "hh87$-Jqo");
 
-                        tlsStream.AuthenticateAsServer("localhost", cert);
+                        tlsStream.Parameters.Host = "localhost";
+                        tlsStream.Parameters.Certificate = cert;
+                        tlsStream.AuthenticateAsServer();
                         tlsStream.Write(Encoding.ASCII.GetBytes(serverWrite));
 
                         clientReadEvent.WaitOne();
@@ -187,7 +190,8 @@ namespace Zergatul.Tls.Tests
             var clientThread = new Thread(() =>
             {
                 var tcp = new TcpClient("localhost", 32028);
-                var tlsStream = new TlsStream(tcp.GetStream());
+                var tlsStream = new Network.Tls.TlsStream(tcp.GetStream());
+                tlsStream.Parameters.Host = "localhost";
                 tlsStream.Settings = new TlsStreamSettings
                 {
                     SupportExtendedMasterSecret = true,
@@ -201,7 +205,7 @@ namespace Zergatul.Tls.Tests
                 };
                 try
                 {
-                    tlsStream.AuthenticateAsClient("localhost");
+                    tlsStream.AuthenticateAsClient();
 
                     byte[] buffer = new byte[serverWrite.Length];
                     tlsStream.Read(buffer, 0, buffer.Length);

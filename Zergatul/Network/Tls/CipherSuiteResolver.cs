@@ -1,6 +1,7 @@
 ﻿using System;
 using Zergatul.Cryptography.Symmetric;
 using Zergatul.Cryptography.Hash;
+using Zergatul.Security.Tls;
 
 using Cipher = Zergatul.Network.Tls.CipherSuiteBuilder;
 using RSA_KE = Zergatul.Network.Tls.RSAKeyExchange;
