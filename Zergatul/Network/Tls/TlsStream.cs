@@ -9,6 +9,7 @@ using Zergatul.Cryptography.Certificate;
 using Zergatul.IO;
 using Zergatul.Network.Tls.Extensions;
 using Zergatul.Network.Tls.Messages;
+using Zergatul.Security;
 using Zergatul.Security.Tls;
 
 namespace Zergatul.Network.Tls
@@ -67,14 +68,12 @@ namespace Zergatul.Network.Tls
     // * client certificates
     public partial class TlsStream : Security.Tls.TlsStream
     {
-        public TlsStreamSettings Settings { get; set; }
         public ConnectionInfo ConnectionInfo { get; private set; }
         public bool KeepOpen { get; set; }
 
         private Stream _innerStream;
         private RecordMessageStream _messageStream;
-        private TlsUtils _utils;
-        private ISecureRandom _random;
+        private SecureRandom _random;
 
         private CipherSuiteBuilder SelectedCipher;
         private Role Role;
@@ -97,7 +96,7 @@ namespace Zergatul.Network.Tls
 
         private Flows _flows;
 
-        public TlsStream(Stream innerStream, ProtocolVersion version = ProtocolVersion.Tls12, ISecureRandom random = null)
+        public TlsStream(Stream innerStream, ProtocolVersion version = ProtocolVersion.Tls12)
         {
             switch (version)
             {
@@ -110,9 +109,12 @@ namespace Zergatul.Network.Tls
 
             this._innerStream = innerStream;
 
-            this._random = random ?? new DefaultSecureRandom();
-
-            this._utils = new TlsUtils(this._random);
+            this._random =
+                Parameters.SecureRandom ??
+                Parameters.Provider.GetSecureRandom(SecureRandoms.Default) ??
+                SecurityProvider.GetSecureRandomInstance(SecureRandoms.Default);
+            if (_random == null)
+                throw new InvalidOperationException("Cannot instantiate SecureRandom");
 
             this.SecurityParameters = new SecurityParameters();
             this.SecurityParameters.Version = version;
@@ -121,7 +123,6 @@ namespace Zergatul.Network.Tls
             this._messageStream = new RecordMessageStream(innerStream, SecurityParameters.HandshakeBuffer);
             this._messageStream.Version = version;
 
-            this.Settings = TlsStreamSettings.Default;
             this.ConnectionInfo = new ConnectionInfo();
 
             this._flows = new Flows(this);
@@ -197,7 +198,7 @@ namespace Zergatul.Network.Tls
 
             _messageStream.ReleaseHandshakeBuffer();
 
-            if (Settings.ReuseSessions && !_reuseSession)
+            if (Parameters.ReuseSessions && !_reuseSession)
             {
                 TlsStreamSessions.Instance.Add(_serverHost, new TlsStreamSession(_sessionId, SecurityParameters.MasterSecret));
             }
@@ -369,21 +370,8 @@ namespace Zergatul.Network.Tls
 
         private void GenerateRandom()
         {
-            byte[] random;
-            if (Settings.GetRandom != null)
-            {
-                random = Settings.GetRandom();
-                if (random.Length != 32)
-                    throw new InvalidOperationException("Random should have 32 bytes length");
-            }
-            else
-            {
-                random = new Random
-                {
-                    GMTUnixTime = _utils.GetGMTUnixTime(),
-                    RandomBytes = _utils.GetRandomBytes(28)
-                }.ToArray();
-            }
+            byte[] random = new byte[32];
+            _random.GetNextBytes(random);
 
             if (Role == Role.Client)
                 SecurityParameters.ClientRandom = random;
@@ -492,15 +480,15 @@ namespace Zergatul.Network.Tls
                     Data = new byte[] { 0 }
                 }
             };
-            if (Settings.SupportExtendedMasterSecret)
+            if (Parameters.ExtendedMasterSecret ?? true)
                 extensions.Add(new ExtendedMasterSecret());
-            if (Settings.SupportedCurves?.Length > 0)
-                extensions.Add(new SupportedGroups(Settings.SupportedCurves));
+            //if (Settings.SupportedCurves?.Length > 0)
+            //    extensions.Add(new SupportedGroups(Settings.SupportedCurves));
             extensions.Add(new SupportedPointFormats(ECPointFormat.Uncompressed));
-            if (Settings.Extensions != null)
-                extensions.AddRange(Settings.Extensions);
+            //if (Settings.Extensions != null)
+            //    extensions.AddRange(Settings.Extensions);
 
-            if (Settings.ReuseSessions)
+            if (Parameters.ReuseSessions)
                 _clientSession = TlsStreamSessions.Instance.Get(_serverHost);
 
             return new HandshakeMessage(SelectedCipher)
@@ -510,7 +498,7 @@ namespace Zergatul.Network.Tls
                     ClientVersion = ProtocolVersion.Tls12,
                     Random = SecurityParameters.ClientRandom,
                     SessionID = _clientSession?.ID ?? new byte[0],
-                    CipherSuites = Settings.CipherSuites,
+                    CipherSuites = Parameters.CipherSuites ?? TlsStreamSettings.Default.CipherSuites,
                     Extensions = extensions.ToArray()
                 }
             };
@@ -518,7 +506,7 @@ namespace Zergatul.Network.Tls
 
         private HandshakeMessage GenerateServerHello()
         {
-            var commonCiphers = Settings.CipherSuites
+            var commonCiphers = (Parameters.CipherSuites ?? TlsStreamSettings.Default.CipherSuites)
                 .Where(cs => IsCompatible(cs, _serverCertificate))
                 .Where(cs => _clientCipherSuites.Contains(cs));
             if (!commonCiphers.Any())
@@ -535,7 +523,7 @@ namespace Zergatul.Network.Tls
                     Data = new byte[] { 0 }
                 }
             };
-            if (_clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0 && Settings.SupportExtendedMasterSecret)
+            if (_clientExtensions.OfType<ExtendedMasterSecret>().Count() > 0 && (Parameters.ExtendedMasterSecret ?? true))
                 extensions.Add(new ExtendedMasterSecret());
 
             return new HandshakeMessage(SelectedCipher)
@@ -735,14 +723,14 @@ namespace Zergatul.Network.Tls
             /* ConnectionInfo */
 
             SelectedCipher = CipherSuiteBuilder.Resolve(message.CipherSuite);
-            SelectedCipher.Init(SecurityParameters, Settings, Role, _random);
+            SelectedCipher.Init(SecurityParameters, Parameters, Role, _random);
             _messageStream.SelectedCipher = SelectedCipher;
             SecurityParameters.ServerRandom = message.Random.ToArray();
             _sessionId = message.SessionID;
 
             if (Role == Role.Client)
             {
-                if (Settings.ReuseSessions && _clientSession != null)
+                if (Parameters.ReuseSessions && _clientSession != null)
                 {
                     if (ByteArray.Equals(_clientSession.ID, message.SessionID))
                     {
@@ -781,8 +769,8 @@ namespace Zergatul.Network.Tls
 
             if (Role == Role.Client)
             {
-                if (Settings.ServerCertificateValidationOverride != null)
-                    trusted = Settings.ServerCertificateValidationOverride(tree.Root.Certificate);
+                if (Parameters.ServerCertificateValidateCallback != null)
+                    trusted = Parameters.ServerCertificateValidateCallback(tree.Root.Certificate);
                 else
                 {
                     trusted =

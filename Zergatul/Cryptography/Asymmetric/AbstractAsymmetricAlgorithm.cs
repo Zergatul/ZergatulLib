@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Zergatul.Security;
 
 namespace Zergatul.Cryptography.Asymmetric
 {
     public abstract class AbstractAsymmetricAlgorithm
     {
         public abstract void SetParameters(AbstractParameters parameters);
-        public ISecureRandom Random { get; set; }
+        public SecureRandom Random { get; set; }
         public abstract void GenerateKeyPair(int keySize);
         public abstract AbstractPrivateKey GetPrivateKey();
         public abstract AbstractPublicKey GetPublicKey();

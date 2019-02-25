@@ -22,13 +22,13 @@ namespace Zergatul.Network.Tls
 
         public override bool ShouldSendServerKeyExchange()
         {
-            return Settings.PSKIdentityHint != null;
+            return Parameters.PSKIdentityHint != null;
         }
 
         public override ServerKeyExchange GenerateServerKeyExchange()
         {
             var message = new ServerKeyExchange();
-            message.PSKIdentityHint = Settings.PSKIdentityHint ?? new byte[0];
+            message.PSKIdentityHint = Parameters.PSKIdentityHint ?? new byte[0];
 
             return message;
         }
@@ -55,17 +55,17 @@ namespace Zergatul.Network.Tls
 
         public override ClientKeyExchange GenerateClientKeyExchange()
         {
-            if (Settings.GetPSKByHint == null)
+            if (Parameters.GetPSKByHint == null)
                 throw new TlsStreamException("TlsStream.Settings.GetPSKByHint is null");
 
-            var psk = Settings.GetPSKByHint(_identityHint);
+            var psk = Parameters.GetPSKByHint(_identityHint);
 
             var message = new ClientKeyExchange();
             message.PSKIdentity = psk.Identity;
 
             byte[] otherSecret = new byte[48];
             BitHelper.GetBytes((ushort)ProtocolVersion.Tls12, ByteOrder.BigEndian, otherSecret, 0);
-            Random.GetBytes(otherSecret, 2, 46);
+            Random.GetNextBytes(otherSecret, 2, 46);
 
             PreMasterSecret = PSKKeyExchange.CreateSharedSecret(otherSecret, psk.Secret);
 
@@ -83,7 +83,7 @@ namespace Zergatul.Network.Tls
 
         public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
         {
-            if (Settings.GetPSKByIdentity == null)
+            if (Parameters.GetPSKByIdentity == null)
                 throw new TlsStreamException("TlsStream.Settings.GetPSKByIdentity is null");
 
             var message = new ClientKeyExchange();
@@ -102,7 +102,7 @@ namespace Zergatul.Network.Tls
             if (version != ProtocolVersion.Tls12)
                 throw new TlsStreamException("Invalid PreMasterSecret");
 
-            var psk = Settings.GetPSKByIdentity(message.PSKIdentity);
+            var psk = Parameters.GetPSKByIdentity(message.PSKIdentity);
             PreMasterSecret = PSKKeyExchange.CreateSharedSecret(otherSecret, psk.Secret);
 
             return message;

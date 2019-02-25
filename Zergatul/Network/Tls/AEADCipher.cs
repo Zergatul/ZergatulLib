@@ -52,7 +52,9 @@ namespace Zergatul.Network.Tls
             _encImplicitNonce = role == Role.Client ? keys.ClientIV : keys.ServerIV;
             _decImplicitNonce = role == Role.Server ? keys.ClientIV : keys.ServerIV;
 
-            _explicitNonce = Random.GetUInt64();
+            byte[] nonce = new byte[8];
+            Random.GetNextBytes(nonce);
+            _explicitNonce = BitHelper.ToUInt64(nonce, 0, ByteOrder.BigEndian);
         }
 
         protected override byte[] Encrypt(TLSCompressed compressed, ulong seqnum)

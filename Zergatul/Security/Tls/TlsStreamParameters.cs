@@ -25,5 +25,9 @@ namespace Zergatul.Security.Tls
         public bool ReuseSessions { get; set; }
         public bool BidirectionalShutdown { get; set; } = true;
         public bool KeepOpen { get; set; }
+
+        public byte[] PSKIdentityHint { get; set; }
+        public Func<byte[], PreSharedKey> GetPSKByHint;
+        public Func<byte[], PreSharedKey> GetPSKByIdentity;
     }
 }

@@ -8,6 +8,7 @@ using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math.EllipticCurves;
 using Zergatul.Network.Tls.Extensions;
 using Zergatul.Network.Tls.Messages;
+using Zergatul.Security;
 
 namespace Zergatul.Network.Tls
 {
@@ -46,7 +47,7 @@ namespace Zergatul.Network.Tls
             this._signature = signature;
         }
 
-        public override void SetRandom(ISecureRandom random)
+        public override void SetRandom(SecureRandom random)
         {
             base.SetRandom(random);
             _signature.Random = random;
@@ -58,7 +59,7 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            _ecdh = ECDHERoutine.GenerateServerKeyExchange(message, Random, Settings);
+            _ecdh = ECDHERoutine.GenerateServerKeyExchange(message, Random);
 
             // TODO, get sign and hash from clienthello
             message.SignAndHashAlgo = new SignatureAndHashAlgorithm

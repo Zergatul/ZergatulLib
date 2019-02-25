@@ -24,6 +24,17 @@ namespace Zergatul.Security.Tests
                 throw new InvalidOperationException();
         }
 
+        public override void GetNextBytes(byte[] bytes, int offset, int count)
+        {
+            if (_data.Length - _index >= count)
+            {
+                Array.Copy(_data, _index, bytes, offset, count);
+                _index += count;
+            }
+            else
+                throw new InvalidOperationException();
+        }
+
         public override void SetSeed(byte[] seed)
         {
             throw new NotImplementedException();

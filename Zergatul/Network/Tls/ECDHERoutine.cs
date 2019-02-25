@@ -7,17 +7,19 @@ using Zergatul.Cryptography;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math.EllipticCurves;
 using Zergatul.Network.Tls.Messages;
+using Zergatul.Security;
 
 namespace Zergatul.Network.Tls
 {
     internal static class ECDHERoutine
     {
-        public static ECPDiffieHellman GenerateServerKeyExchange(ServerKeyExchange message, ISecureRandom random, TlsStreamSettings settings)
+        public static ECPDiffieHellman GenerateServerKeyExchange(ServerKeyExchange message, SecureRandom random)
         {
             var namedCurve = NamedGroup.secp256r1;
 
             var ecdh = new ECPDiffieHellman();
-            ecdh.Random = random;
+            throw new NotImplementedException();
+            //ecdh.Random = random;
             ecdh.Parameters = new ECPParameters((Math.EllipticCurves.PrimeField.EllipticCurve)ResolveCurve(namedCurve));
             ecdh.GenerateKeyPair(0);
 
@@ -40,10 +42,11 @@ namespace Zergatul.Network.Tls
             message.ECParams.Read(reader);
         }
 
-        public static byte[] GetSharedSecretAsClient(ServerKeyExchange message, ISecureRandom random, out ECPDiffieHellman ecdh)
+        public static byte[] GetSharedSecretAsClient(ServerKeyExchange message, SecureRandom random, out ECPDiffieHellman ecdh)
         {
             ecdh = new ECPDiffieHellman();
-            ecdh.Random = random;
+            throw new NotImplementedException();
+            //ecdh.Random = random;
             ecdh.Parameters = new ECPParameters((Math.EllipticCurves.PrimeField.EllipticCurve)ResolveCurve(message.ECParams.CurveParams.NamedCurve));
             ecdh.GenerateKeyPair(0);
             var secret = ecdh.CalculateSharedSecret(new ECPPublicKey(ECPointGeneric.Parse(message.ECParams.Point, ecdh.Parameters.Curve).PFECPoint));

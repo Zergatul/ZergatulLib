@@ -5,6 +5,7 @@ using Zergatul.Security.Tls;
 
 namespace Zergatul.Network.Tls
 {
+    [Obsolete]
     public class TlsStreamSettings
     {
         public CipherSuite[] CipherSuites;

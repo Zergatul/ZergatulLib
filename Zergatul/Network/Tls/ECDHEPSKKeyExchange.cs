@@ -26,9 +26,9 @@ namespace Zergatul.Network.Tls
         public override ServerKeyExchange GenerateServerKeyExchange()
         {
             var message = new ServerKeyExchange();
-            message.PSKIdentityHint = Settings.PSKIdentityHint ?? new byte[0];
+            message.PSKIdentityHint = Parameters.PSKIdentityHint ?? new byte[0];
 
-            _ecdh = ECDHERoutine.GenerateServerKeyExchange(message, Random, Settings);
+            _ecdh = ECDHERoutine.GenerateServerKeyExchange(message, Random);
 
             return message;
         }
@@ -60,10 +60,10 @@ namespace Zergatul.Network.Tls
 
         public override ClientKeyExchange GenerateClientKeyExchange()
         {
-            if (Settings.GetPSKByHint == null)
+            if (Parameters.GetPSKByHint == null)
                 throw new TlsStreamException("TlsStream.Settings.GetPSKByHint is null");
 
-            var psk = Settings.GetPSKByHint(_identityHint);
+            var psk = Parameters.GetPSKByHint(_identityHint);
 
             var message = new ClientKeyExchange();
             message.PSKIdentity = psk.Identity;
@@ -76,13 +76,13 @@ namespace Zergatul.Network.Tls
 
         public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
         {
-            if (Settings.GetPSKByIdentity == null)
+            if (Parameters.GetPSKByIdentity == null)
                 throw new TlsStreamException("TlsStream.Settings.GetPSKByIdentity is null");
 
             var message = new ClientKeyExchange();
             message.PSKIdentity = reader.ReadBytes(reader.ReadShort());
 
-            var psk = Settings.GetPSKByIdentity(message.PSKIdentity);
+            var psk = Parameters.GetPSKByIdentity(message.PSKIdentity);
             byte[] otherSecret = ECDHERoutine.ReadClientKeyExchange(message, reader, _ecdh);
             PreMasterSecret = PSKKeyExchange.CreateSharedSecret(otherSecret, psk.Secret);
 

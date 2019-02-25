@@ -16,7 +16,7 @@ namespace Zergatul.Tls.Tests
         static SecurityProvider _default = new DefaultSecurityProvider();
 
         [TestMethod]
-        public void TLS_RSA_WITH_NULL_MD5() => Test(CipherSuite.TLS_RSA_WITH_NULL_MD5);
+        public void TLS_RSA_WITH_AES_128_CBC_SHA() => Test(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA);
 
         private static void Test(CipherSuite cs)
         {
@@ -46,6 +46,7 @@ namespace Zergatul.Tls.Tests
                         tls.Parameters.MaxVersion = TlsVersion.Tls12;
                         tls.AuthenticateAsServer();
                         tls.Write(serverData, 0, serverData.Length);
+                        tls.Flush();
                         byte[] buff = new byte[clientData.Length];
                         StreamHelper.ReadArray(tls, buff);
                         Assert.IsTrue(ByteArray.Equals(buff, clientData));
@@ -73,6 +74,7 @@ namespace Zergatul.Tls.Tests
                         tls.Parameters.Host = "localhost";
                         tls.AuthenticateAsClient();
                         tls.Write(clientData, 0, clientData.Length);
+                        tls.Flush();
                     }
                 }
                 catch (Exception ex)
@@ -88,7 +90,7 @@ namespace Zergatul.Tls.Tests
             serverThread.Start();
             clientThread.Start();
 
-            WaitHandle.WaitAll(new[] { serverEvent, clientEvent });
+            TestHelper.WaitAll(serverEvent, clientEvent);
 
             if (serverException != null)
                 throw new Exception("Server exception", serverException);

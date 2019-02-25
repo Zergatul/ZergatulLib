@@ -25,7 +25,8 @@ namespace Zergatul.Network.Tls
         {
             var message = new ServerKeyExchange();
 
-            _dh = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
+            throw new NotImplementedException();
+            //_dh = DHERoutine.GenerateServerKeyExchange(message, Random, Settings);
 
             return message;
         }
@@ -35,7 +36,8 @@ namespace Zergatul.Network.Tls
             var message = new ServerKeyExchange();
 
             DHERoutine.ReadServerKeyExchange(message, reader);
-            PreMasterSecret = DHERoutine.GetSharedSecretAsClient(message, Random, out _dh);
+            throw new NotImplementedException();
+            //PreMasterSecret = DHERoutine.GetSharedSecretAsClient(message, Random, out _dh);
 
             return message;
         }

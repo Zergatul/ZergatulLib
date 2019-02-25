@@ -610,6 +610,7 @@
     <Compile Include="Security\SymmetricCipher.cs" />
     <Compile Include="Security\SymmetricCipherParameters.cs" />
     <Compile Include="Security\SymmetricCiphers.cs" />
+    <Compile Include="Security\Tls\PreSharedKey.cs" />
     <Compile Include="Security\Tls\TlsHelper.cs" />
     <Compile Include="Security\Tls\TlsStream.cs" />
     <Compile Include="Security\Tls\TlsStreamParameters.cs" />

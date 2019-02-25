@@ -7,12 +7,13 @@ using Zergatul.Cryptography;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Network.Tls.Extensions;
+using Zergatul.Security;
 
 namespace Zergatul.Network.Tls
 {
     internal abstract class AbstractTlsSignature
     {
-        public ISecureRandom Random;
+        public SecureRandom Random;
         public abstract SignatureAlgorithm Algorithm { get; }
 
         public abstract byte[] CreateSignature(AbstractSignature algo, AbstractHash hash, byte[] data);

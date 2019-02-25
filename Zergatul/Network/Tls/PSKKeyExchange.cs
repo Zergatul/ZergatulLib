@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Zergatul.Network.Tls.Messages;
 
 namespace Zergatul.Network.Tls
@@ -21,13 +17,13 @@ namespace Zergatul.Network.Tls
 
         public override bool ShouldSendServerKeyExchange()
         {
-            return Settings.PSKIdentityHint != null;
+            return Parameters.PSKIdentityHint != null;
         }
 
         public override ServerKeyExchange GenerateServerKeyExchange()
         {
             var message = new ServerKeyExchange();
-            message.PSKIdentityHint = Settings.PSKIdentityHint;
+            message.PSKIdentityHint = Parameters.PSKIdentityHint;
             return message;
         }
 
@@ -51,10 +47,10 @@ namespace Zergatul.Network.Tls
 
         public override ClientKeyExchange GenerateClientKeyExchange()
         {
-            if (Settings.GetPSKByHint == null)
+            if (Parameters.GetPSKByHint == null)
                 throw new TlsStreamException("TlsStream.Settings.GetPSKByHint is null");
 
-            var psk = Settings.GetPSKByHint(_identityHint);
+            var psk = Parameters.GetPSKByHint(_identityHint);
 
             var message = new ClientKeyExchange();
             message.PSKIdentity = psk.Identity;
@@ -66,13 +62,13 @@ namespace Zergatul.Network.Tls
 
         public override ClientKeyExchange ReadClientKeyExchange(BinaryReader reader)
         {
-            if (Settings.GetPSKByIdentity == null)
+            if (Parameters.GetPSKByIdentity == null)
                 throw new TlsStreamException("TlsStream.Settings.GetPSKByIdentity is null");
 
             var message = new ClientKeyExchange();
             message.PSKIdentity = reader.ReadBytes(reader.ReadShort());
 
-            var psk = Settings.GetPSKByIdentity(message.PSKIdentity);
+            var psk = Parameters.GetPSKByIdentity(message.PSKIdentity);
             PreMasterSecret = CreateSharedSecret(null, psk.Secret);
 
             return message;

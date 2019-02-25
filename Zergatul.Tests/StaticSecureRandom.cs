@@ -31,6 +31,16 @@ namespace Zergatul.Tests
             _index += bytes.Length;
         }
 
+        public override void GetNextBytes(byte[] bytes, int offset, int count)
+        {
+            if (_data.Length - _index < count)
+                throw new InvalidOperationException();
+
+            Array.Copy(_data, _index, bytes, offset, count);
+            _index += count;
+        }
+
+
         public override void SetSeed(byte[] seed)
         {
             throw new NotImplementedException();

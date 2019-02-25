@@ -17,6 +17,11 @@ namespace Zergatul.Security.DotNet
             _rng.GetBytes(bytes);
         }
 
+        public override void GetNextBytes(byte[] bytes, int offset, int count)
+        {
+            _rng.GetBytes(bytes, offset, count);
+        }
+
         public override void SetSeed(byte[] seed)
         {
             throw new NotSupportedException();

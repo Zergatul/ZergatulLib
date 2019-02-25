@@ -6,7 +6,8 @@ namespace Zergatul.Security
     {
         protected bool _disposed;
 
-        public abstract void GetNextBytes(byte[] bytes);
+        public virtual void GetNextBytes(byte[] bytes) => GetNextBytes(bytes, 0, bytes.Length);
+        public abstract void GetNextBytes(byte[] bytes, int offset, int count);
         public abstract void SetSeed(byte[] seed);
 
         public void Dispose()

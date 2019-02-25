@@ -1242,11 +1242,9 @@ namespace Zergatul.Security.OpenSsl
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr SSL_new(IntPtr ctx);
 
-        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SSL_set_min_proto_version(IntPtr ssl, int version);
+        public static long SSL_set_min_proto_version(IntPtr ssl, int version) => SSL_ctrl(ssl, SSL_CTRL_SET_MIN_PROTO_VERSION, version, IntPtr.Zero);
 
-        [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int SSL_set_max_proto_version(IntPtr ssl, int version);
+        public static long SSL_set_max_proto_version(IntPtr ssl, int version) => SSL_ctrl(ssl, SSL_CTRL_SET_MAX_PROTO_VERSION, version, IntPtr.Zero);
 
         [DllImport(libssl, CallingConvention = CallingConvention.Cdecl)]
         public static extern int SSL_set_cipher_list(IntPtr ssl, [MarshalAs(UnmanagedType.LPStr)] string str);
@@ -1322,14 +1320,14 @@ namespace Zergatul.Security.OpenSsl
     public class OpenSslException : Exception
     {
         public ulong Code { get; private set; }
-        public string ErrorMessage { get; private set; }
+        public override string Message { get; }
 
         public OpenSslException()
         {
             this.Code = OpenSsl.ERR_get_error();
             if (this.Code != 0)
             {
-                this.ErrorMessage = OpenSsl.ERR_error_string(this.Code);
+                this.Message = OpenSsl.ERR_error_string(this.Code);
             }
         }
 

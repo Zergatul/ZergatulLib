@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Zergatul.Cryptography;
 using Zergatul.Network.Tls.Messages;
+using Zergatul.Security;
 
 namespace Zergatul.Network.Tls
 {
     internal abstract class AbstractTlsSymmetricCipher
     {
         public SecurityParameters SecurityParameters;
-        public ISecureRandom Random;
+        public SecureRandom Random;
 
         public abstract void ApplySecurityParameters();
         public abstract void Init(TlsConnectionKeys keys, Role role);

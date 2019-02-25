@@ -7,6 +7,8 @@ using Zergatul.Cryptography;
 using Zergatul.Cryptography.Hash;
 using Zergatul.Network.Tls.Extensions;
 using Zergatul.Network.Tls.Messages;
+using Zergatul.Security;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Network.Tls
 {
@@ -21,7 +23,7 @@ namespace Zergatul.Network.Tls
         public AbstractHash PRFHash { get; private set; }
         public TlsConnectionKeys Keys { get; private set; }
 
-        private ISecureRandom _random;
+        private SecureRandom _random;
 
         #region Contructors
 
@@ -49,14 +51,14 @@ namespace Zergatul.Network.Tls
 
         #endregion
 
-        public void Init(SecurityParameters securityParameters, TlsStreamSettings settings, Role role, ISecureRandom random)
+        public void Init(SecurityParameters securityParameters, TlsStreamParameters parameters, Role role, SecureRandom random)
         {
             this.SecurityParameters = securityParameters;
             this.Role = role;
             this._random = random;
 
             this.KeyExchange.SecurityParameters = securityParameters;
-            this.KeyExchange.Settings = settings;
+            this.KeyExchange.Parameters = parameters;
             this.KeyExchange.SetRandom(random);
 
             this.SymmetricCipher.SecurityParameters = securityParameters;

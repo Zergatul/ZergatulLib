@@ -7,20 +7,23 @@ using Zergatul.Cryptography;
 using Zergatul.Cryptography.Asymmetric;
 using Zergatul.Math;
 using Zergatul.Network.Tls.Messages;
+using Zergatul.Security;
+using Zergatul.Security.Tls;
 
 namespace Zergatul.Network.Tls
 {
     internal static class DHERoutine
     {
-        public static DiffieHellman GenerateServerKeyExchange(ServerKeyExchange message, ISecureRandom random, TlsStreamSettings settings)
+        public static DiffieHellman GenerateServerKeyExchange(ServerKeyExchange message, SecureRandom random, TlsStreamParameters parameters)
         {
             var dh = new DiffieHellman();
-            dh.Random = random;
+            throw new NotImplementedException();
+            //dh.Random = random;
 
-            if (settings.DHParameters != null)
-                dh.Parameters = settings.DHParameters;
-            else
-                dh.Parameters = TlsStreamSettings.Default.DHParameters;
+            //if (settings.DHParameters != null)
+            //    dh.Parameters = settings.DHParameters;
+            //else
+            //    dh.Parameters = TlsStreamSettings.Default.DHParameters;
 
             dh.GenerateKeyPair(0);
 
@@ -40,10 +43,11 @@ namespace Zergatul.Network.Tls
             message.Params.Read(reader);
         }
 
-        public static byte[] GetSharedSecretAsClient(ServerKeyExchange message, ISecureRandom random, out DiffieHellman dh)
+        public static byte[] GetSharedSecretAsClient(ServerKeyExchange message, SecureRandom random, out DiffieHellman dh)
         {
             dh = new DiffieHellman();
-            dh.Random = random;
+            throw new NotImplementedException();
+            //dh.Random = random;
             dh.Parameters = new DiffieHellmanParameters(message.Params.DH_g, message.Params.DH_p);
             dh.GenerateKeyPair(0);
             return dh.CalculateSharedSecret(new DiffieHellmanPublicKey(message.Params.DH_Ys));

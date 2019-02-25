@@ -79,6 +79,7 @@
     <Compile Include="DeflateStreamTests.cs" />
     <Compile Include="GzipStreamTests.cs" />
     <Compile Include="StaticSecureRandom.cs" />
+    <Compile Include="TestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">
