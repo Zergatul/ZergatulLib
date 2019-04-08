@@ -3,6 +3,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.OpenSsl;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.MessageDigest
 {
@@ -11,13 +13,13 @@ namespace Zergatul.Security.Tests.MessageDigest
     {
         private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultSecurityProvider(),
+            new ZergatulProvider(),
             new OpenSslProvider()
         };
 
         private static SecurityProvider[] _providersWithParamSupport = new SecurityProvider[]
         {
-            new DefaultSecurityProvider()
+            new ZergatulProvider()
         };
 
         [TestMethod]
@@ -48,7 +50,7 @@ namespace Zergatul.Security.Tests.MessageDigest
                 {
                     md.Init(new BLAKE2Parameters
                     {
-                        HashSizeBytes = 16
+                        DigestLength = 16
                     });
 
                     var digest = md.Digest();

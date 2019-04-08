@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.MessageDigest
 {
@@ -10,7 +11,7 @@ namespace Zergatul.Security.Tests.MessageDigest
     {
         private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultSecurityProvider()
+            new ZergatulProvider()
         };
 
         [TestMethod]
@@ -18,7 +19,7 @@ namespace Zergatul.Security.Tests.MessageDigest
         {
             foreach (var provider in _providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Skein512_224);
+                var md = provider.GetMessageDigest(MessageDigests.Skein512x224);
 
                 var digest = md.Digest();
                 Assert.IsTrue(BitHelper.BytesToHex(digest) == "1541ae9fc3ebe24eb758ccb1fd60c2c31a9ebfe65b220086e7819e25");
@@ -50,7 +51,7 @@ namespace Zergatul.Security.Tests.MessageDigest
 
             foreach (var provider in _providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Skein512_224);
+                var md = provider.GetMessageDigest(MessageDigests.Skein512x224);
 
                 int index = 0;
                 for (int i = 0; i < 2048; i++)
@@ -71,7 +72,7 @@ namespace Zergatul.Security.Tests.MessageDigest
         {
             foreach (var provider in _providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Skein512_224);
+                var md = provider.GetMessageDigest(MessageDigests.Skein512x224);
 
                 byte[] data = Encoding.ASCII.GetBytes("abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno");
 

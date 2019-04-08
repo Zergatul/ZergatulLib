@@ -55,7 +55,7 @@ namespace Zergatul.Network.Tls
         protected override byte[] Encrypt(TLSCompressed compressed, ulong seqnum)
         {
             byte[] IV = new byte[SecurityParameters.RecordIVLength];
-            Random.GetBytes(IV);
+            Random.GetNextBytes(IV);
 
             // compute padding
             int modulo = (compressed.Fragment.Length + SecurityParameters.MACLength + 1) % SecurityParameters.BlockLength;

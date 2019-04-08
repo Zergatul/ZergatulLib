@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Cryptography.Certificate;
 using Zergatul.IO;
 using Zergatul.Security;
+using Zergatul.Security.OpenSsl;
 using Zergatul.Security.Tls;
 using Zergatul.Tests;
 

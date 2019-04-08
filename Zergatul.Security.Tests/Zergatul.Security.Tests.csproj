@@ -52,13 +52,33 @@
     <Compile Include="Helper.cs" />
     <Compile Include="KeyDerivationFunction\ScryptTests.cs" />
     <Compile Include="KeyDerivationFunction\PBKDF2Tests.cs" />
+    <Compile Include="MessageDigest\BLAKE224Tests.cs" />
+    <Compile Include="MessageDigest\BLAKE384Tests.cs" />
+    <Compile Include="MessageDigest\BLAKE256Tests.cs" />
     <Compile Include="MessageDigest\BMW224Tests.cs" />
     <Compile Include="MessageDigest\BMW384Tests.cs" />
+    <Compile Include="MessageDigest\BLAKE512Tests.cs" />
     <Compile Include="MessageDigest\CubeHash224Tests.cs" />
     <Compile Include="MessageDigest\CubeHash256Tests.cs" />
     <Compile Include="MessageDigest\CubeHash384Tests.cs" />
     <Compile Include="MessageDigest\CubeHash512Tests.cs" />
     <Compile Include="MessageDigest\CubeHashTests.cs" />
+    <Compile Include="MessageDigest\Groestl224Tests.cs" />
+    <Compile Include="MessageDigest\Groestl256Tests.cs" />
+    <Compile Include="MessageDigest\JH224Tests.cs" />
+    <Compile Include="MessageDigest\JH256Tests.cs" />
+    <Compile Include="MessageDigest\JH384Tests.cs" />
+    <Compile Include="MessageDigest\Keccak256ests.cs" />
+    <Compile Include="MessageDigest\Keccak384Tests.cs" />
+    <Compile Include="MessageDigest\Keccak224Tests.cs" />
+    <Compile Include="MessageDigest\SHA3x256Tests.cs" />
+    <Compile Include="MessageDigest\SHA3x224Tests.cs" />
+    <Compile Include="MessageDigest\SHA3x384Tests.cs" />
+    <Compile Include="MessageDigest\SHA3x512Tests.cs" />
+    <Compile Include="MessageDigest\Keccak512Tests.cs" />
+    <Compile Include="MessageDigest\MD2Tests.cs" />
+    <Compile Include="MessageDigest\NISTMDTest.cs" />
+    <Compile Include="MessageDigest\NISTMDTestWithData.cs" />
     <Compile Include="MessageDigest\Skein224Tests.cs" />
     <Compile Include="MessageDigest\Skein256Tests.cs" />
     <Compile Include="MessageDigest\Skein384Tests.cs" />
@@ -81,6 +101,7 @@
     <Compile Include="MessageDigest\BLAKE2sTests.cs" />
     <Compile Include="MessageDigest\Groestl384Tests.cs" />
     <Compile Include="MessageDigest\BMW256Tests.cs" />
+    <Compile Include="MessageDigest\JH512Tests.cs" />
     <Compile Include="MockSecureRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Signature\ECDSATests.cs" />
@@ -88,6 +109,42 @@
     <Compile Include="SymmetricCipher\AESTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="MessageDigest\TestCases\SHA3\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHA3\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="SymmetricCipher\AESTestData\CBCGFSbox128.rsp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -307,6 +364,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Zergatul.Security.OpenSsl\Zergatul.Security.OpenSsl.csproj">
+      <Project>{cd0b67e1-ddc3-4db6-950a-704a60998b63}</Project>
+      <Name>Zergatul.Security.OpenSsl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul.Security.Zergatul\Zergatul.Security.Zergatul.csproj">
+      <Project>{c8e124ce-04b1-46aa-a370-0358337b08bb}</Project>
+      <Name>Zergatul.Security.Zergatul</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">
       <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
       <Name>Zergatul</Name>
@@ -325,28 +390,124 @@
     <Content Include="MessageDigest\BLAKE2sKey.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\BMW512.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\ExtremelyLongMsgKAT_224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\BMW384.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\ExtremelyLongMsgKAT_256.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\BMW224.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\ExtremelyLongMsgKAT_384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\BMW256.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\ExtremelyLongMsgKAT_512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\CubeHash512.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\LongMsgKAT_224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\CubeHash384.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\LongMsgKAT_256.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\CubeHash256.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\LongMsgKAT_384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\CubeHash224.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BLAKE\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\NISTData512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\NISTData384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\NISTData224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\NISTData256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\BMW\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\NISTData512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\NISTData384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\NISTData256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\NISTData224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\Luffa224.txt">
@@ -358,7 +519,103 @@
     <Content Include="MessageDigest\Luffa384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\NISTData.txt">
+    <Content Include="MessageDigest\TestCases\JH\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\JH\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Keccak\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\NISTData.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\Skein224.txt">
@@ -374,6 +631,102 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\Skein512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\CubeHash\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Groestl\ShortMsgKAT_512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

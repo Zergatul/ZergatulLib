@@ -2,7 +2,7 @@
 
 namespace Zergatul.Security
 {
-    internal abstract class ScryptBase : KeyDerivationFunction
+    public abstract class ScryptBase : KeyDerivationFunction
     {
         protected ScryptParameters _parameters;
 

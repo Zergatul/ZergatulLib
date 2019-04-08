@@ -1,7 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.OpenSsl;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.KeyDerivationFunction
 {
@@ -10,7 +11,7 @@ namespace Zergatul.Security.Tests.KeyDerivationFunction
     {
         private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultSecurityProvider(),
+            new ZergatulProvider(),
             new OpenSslProvider()
         };
 

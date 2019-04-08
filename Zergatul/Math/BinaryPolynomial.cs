@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Security;
 
 namespace Zergatul.Math
 {
@@ -96,11 +97,16 @@ namespace Zergatul.Math
         {
         }
 
-        public static BinaryPolynomial Random(int degree, IRandom random)
+        public static BinaryPolynomial Random(int degree, SecureRandom random)
         {
+            byte[] buffer = new byte[8];
+
             ulong[] words = new ulong[degree / 64 + 1];
             for (int i = words.Length - 1; i >= 0; i--)
-                words[i] = random.GetUInt64();
+            {
+                random.GetNextBytes(buffer);
+                words[i] = BitHelper.ToUInt64(buffer, 0, ByteOrder.BigEndian);
+            }
 
             if (degree % 64 != 63)
                 words[words.Length - 1] &= (1UL << (degree % 64)) - 1;

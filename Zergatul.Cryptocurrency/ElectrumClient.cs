@@ -27,26 +27,26 @@ namespace Zergatul.Cryptocurrency
 
         public void Connect()
         {
-            Console.Write("Connecting... ");
-            var client = new TcpClient(_host, _port);
-            Console.WriteLine("OK");
+            //Console.Write("Connecting... ");
+            //var client = new TcpClient(_host, _port);
+            //Console.WriteLine("OK");
 
-            if (_tls)
-            {
-                Console.Write("Begin TLS handshake... ");
-                var tlsStream = new TlsStream(client.GetStream());
-                tlsStream.Settings.ServerCertificateValidationOverride = cert => true;
-                tlsStream.AuthenticateAsClient(_host);
-                Console.WriteLine("OK");
+            //if (_tls)
+            //{
+            //    Console.Write("Begin TLS handshake... ");
+            //    var tlsStream = new TlsStream(client.GetStream());
+            //    tlsStream.Settings.ServerCertificateValidationOverride = cert => true;
+            //    tlsStream.AuthenticateAsClient(_host);
+            //    Console.WriteLine("OK");
 
-                _stream = tlsStream;
-            }
-            else
-            {
-                _stream = client.GetStream();
-            }
+            //    _stream = tlsStream;
+            //}
+            //else
+            //{
+            //    _stream = client.GetStream();
+            //}
 
-            _id = 1;
+            //_id = 1;
         }
 
         public void Close()

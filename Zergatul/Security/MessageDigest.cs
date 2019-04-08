@@ -5,6 +5,7 @@ namespace Zergatul.Security
     public abstract class MessageDigest : IDisposable
     {
         public abstract int DigestLength { get; }
+        public abstract int BlockLength { get; }
 
         protected bool _disposed;
 

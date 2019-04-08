@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Zergatul.Security;
 
 namespace Zergatul.Math
 {
@@ -10,7 +11,7 @@ namespace Zergatul.Math
 
     public class BigInteger : IComparable<BigInteger>, IComparable<long>, IComparable<int>, IEquatable<BigInteger>, IEquatable<int>
     {
-        private static IRandom _random = new DefaultRandom();
+        private static SecureRandom _random = SecurityProvider.GetSecureRandomInstance();
 
         /// <summary>
         /// Little-endian order.
@@ -249,7 +250,7 @@ namespace Zergatul.Math
         /// <summary>
         /// Generates random number in range [0..value-1]
         /// </summary>
-        public static BigInteger Random(BigInteger value, IRandom random)
+        public static BigInteger Random(BigInteger value, SecureRandom random)
         {
             if (value.IsZero)
                 throw new InvalidOperationException();
@@ -262,7 +263,7 @@ namespace Zergatul.Math
                 bool highBytesEqual = true;
                 for (int i = 0; i < result.Length; i++)
                 {
-                    random.GetBytes(result, i, 1);
+                    random.GetNextBytes(result, i, 1);
                     if (highBytesEqual && result[i] > bytes[i])
                         break;
                     if (highBytesEqual && result[i] < bytes[i])
@@ -278,7 +279,7 @@ namespace Zergatul.Math
         /// <summary>
         /// Generates random number in range [from..to-1]
         /// </summary>
-        public static BigInteger Random(BigInteger from, BigInteger to, IRandom random)
+        public static BigInteger Random(BigInteger from, BigInteger to, SecureRandom random)
         {
             if (from >= to)
                 throw new InvalidOperationException();

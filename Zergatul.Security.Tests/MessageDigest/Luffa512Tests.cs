@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.MessageDigest
 {
@@ -12,7 +13,7 @@ namespace Zergatul.Security.Tests.MessageDigest
     {
         private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultSecurityProvider()
+            new ZergatulProvider()
         };
 
         [TestMethod]

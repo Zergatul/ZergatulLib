@@ -17,8 +17,8 @@ namespace Zergatul.Security.Default
 
             var random = ((ECDSASignatureParameters)parameters).Random;
             if (random == null)
-                random = SecureRandom.GetInstance(SecureRandoms.Default);
-            _ecdsa.Random = new SecureRandomAdapter(random);
+                random = SecureRandom.GetInstance();
+            _ecdsa.Random = random;
 
             switch (key)
             {

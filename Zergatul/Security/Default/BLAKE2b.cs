@@ -4,6 +4,7 @@ namespace Zergatul.Security.Default
 {
     class BLAKE2b : MessageDigest
     {
+        public override int BlockLength => _blake.BlockSize;
         public override int DigestLength => _blake.HashSize;
 
         Cryptography.Hash.BLAKE2b _blake;
@@ -19,7 +20,7 @@ namespace Zergatul.Security.Default
             if (p == null)
                 throw new ArgumentException(nameof(parameters));
 
-            _blake = new Cryptography.Hash.BLAKE2b(p.HashSizeBytes ?? 64, p.Key);
+            _blake = new Cryptography.Hash.BLAKE2b(p.DigestLength ?? 64, p.Key);
         }
 
         public override void Update(byte[] data, int offset, int length) => _blake.Update(data, offset, length);

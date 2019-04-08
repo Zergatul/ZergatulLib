@@ -2,6 +2,8 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.OpenSsl;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.MessageDigest
 {
@@ -10,13 +12,13 @@ namespace Zergatul.Security.Tests.MessageDigest
     {
         private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultSecurityProvider(),
-            new OpenSslProvider(),
+            new ZergatulProvider(),
+            new OpenSslProvider()
         };
 
         private static SecurityProvider[] _providersWithParamSupport = new SecurityProvider[]
         {
-            new DefaultSecurityProvider()
+            new ZergatulProvider()
         };
 
         [TestMethod]
@@ -25,12 +27,12 @@ namespace Zergatul.Security.Tests.MessageDigest
             foreach (var provider in _providers)
                 using (var md = provider.GetMessageDigest(MessageDigests.BLAKE2b))
                 {
-                    var digest = md.Digest(Encoding.ASCII.GetBytes("abc"));
-                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923");
+                    var digest = md.Digest();
+                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce");
                     md.Reset();
 
-                    digest = md.Digest();
-                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce");
+                    digest = md.Digest(Encoding.ASCII.GetBytes("abc"));
+                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923");
                     md.Reset();
 
                     digest = md.Digest(Encoding.ASCII.GetBytes("The quick brown fox jumps over the lazy dog"));

@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Network.Asn1;
 using Zergatul.Network.Asn1.Structures;
+using Zergatul.Security.OpenSsl;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.Signature
 {
@@ -11,7 +13,7 @@ namespace Zergatul.Security.Tests.Signature
     {
         private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultSecurityProvider(),
+            new ZergatulProvider(),
             new OpenSslProvider()
         };
 

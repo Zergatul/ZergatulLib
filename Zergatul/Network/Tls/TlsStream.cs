@@ -58,15 +58,7 @@ namespace Zergatul.Network.Tls
     // IANA Registry TLS Parameters
     // https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml
 
-    // https://tools.ietf.org/search/rfc4492#section-5.1
-    // http://blog.fourthbit.com/2014/12/23/traffic-analysis-of-an-ssl-slash-tls-session
-
-    // TODO
-    // * work as proxy stream for another tls stream implementation, for debugging purposes
-    // * refactor dhe_psk, and ecdhe_psk to use single code
-    // * tls sessions for server
-    // * client certificates
-    public partial class TlsStream : Security.Tls.TlsStream
+    public partial class TlsStream : Security.TlsStream
     {
         public ConnectionInfo ConnectionInfo { get; private set; }
         public bool KeepOpen { get; set; }
@@ -111,8 +103,8 @@ namespace Zergatul.Network.Tls
 
             this._random =
                 Parameters.SecureRandom ??
-                Parameters.Provider.GetSecureRandom(SecureRandoms.Default) ??
-                SecurityProvider.GetSecureRandomInstance(SecureRandoms.Default);
+                Parameters.Provider.GetSecureRandom() ??
+                SecurityProvider.GetSecureRandomInstance();
             if (_random == null)
                 throw new InvalidOperationException("Cannot instantiate SecureRandom");
 

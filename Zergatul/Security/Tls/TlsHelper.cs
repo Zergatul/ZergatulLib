@@ -2,8 +2,10 @@
 
 namespace Zergatul.Security.Tls
 {
-    internal static class TlsHelper
+    public static class TlsHelper
     {
+        public const int PlaintextLimit = 0x4000;
+
         public static int ToProtocolVersion(TlsVersion version)
         {
             switch (version)

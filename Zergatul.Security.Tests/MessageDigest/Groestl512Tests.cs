@@ -1,24 +1,28 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.MessageDigest
 {
     [TestClass]
-    public class Groestl512Tests
+    public class Groestl512Tests : NISTMDTest
     {
-        private static SecurityProvider[] _providers = new SecurityProvider[]
+        protected override SecurityProvider[] Providers => new SecurityProvider[]
         {
-            new DefaultSecurityProvider()
+            new ZergatulProvider()
         };
+
+        protected override string Name => MessageDigests.Groestl512;
+        protected override string Algorithm => "Groestl";
+        protected override int Size => 512;
 
         [TestMethod]
         public void BasicTest()
         {
-            foreach (var provider in _providers)
+            foreach (var provider in Providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Groestl512);
+                var md = provider.GetMessageDigest(Name);
 
                 var digest = md.Digest();
                 Assert.IsTrue(BitHelper.BytesToHex(digest) == "6d3ad29d279110eef3adbd66de2a0345a77baede1557f5d099fce0c03d6dc2ba8e6d4a6633dfbd66053c20faa87d1a11f39a7fbe4a6c2f009801370308fc4ad8");
@@ -60,9 +64,9 @@ namespace Zergatul.Security.Tests.MessageDigest
                 .Concat(BitHelper.GetBytes(428628904, ByteOrder.LittleEndian))
                 .ToArray();
 
-            foreach (var provider in _providers)
+            foreach (var provider in Providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Groestl512);
+                var md = provider.GetMessageDigest(Name);
                 var digest = md.Digest(header);
                 md = provider.GetMessageDigest(MessageDigests.SHA256);
                 digest = md.Digest(digest);
@@ -89,9 +93,9 @@ namespace Zergatul.Security.Tests.MessageDigest
                 .Concat(BitHelper.GetBytes(793270297, ByteOrder.LittleEndian))
                 .ToArray();
 
-            foreach (var provider in _providers)
+            foreach (var provider in Providers)
             {
-                var md = provider.GetMessageDigest(MessageDigests.Groestl512);
+                var md = provider.GetMessageDigest(Name);
                 var digest = md.Digest(header);
                 md = provider.GetMessageDigest(MessageDigests.SHA256);
                 digest = md.Digest(digest);

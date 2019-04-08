@@ -4,6 +4,7 @@ namespace Zergatul.Security.Default
 {
     abstract class AbstractMessageDigest : MessageDigest
     {
+        public override int BlockLength => _hash.BlockSize;
         public override int DigestLength => _hash.HashSize;
 
         private AbstractHash _hash;

@@ -68,7 +68,7 @@ namespace Zergatul.Network.Tls
             */
             PreMasterSecret = new byte[48];
             BitHelper.GetBytes((ushort)ProtocolVersion.Tls12, ByteOrder.BigEndian, PreMasterSecret, 0);
-            Random.GetBytes(PreMasterSecret, 2, 46);
+            Random.GetNextBytes(PreMasterSecret, 2, 46);
 
             var algo = SecurityParameters.ServerCertificate.PublicKey.ResolveAlgorithm();
             var rsa = algo as RSAEncryption;

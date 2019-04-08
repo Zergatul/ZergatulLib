@@ -65,11 +65,14 @@ namespace Zergatul.Security.Tests
         {
             public override string Name => nameof(MockSecureRandomProvider);
 
+            private SecureRandom _random;
+
             public MockSecureRandomProvider(byte[] data)
             {
-                var random = new SecureRandomMock(data);
-                RegisterSecureRandom(SecureRandoms.Default, () => random);
+                _random = new SecureRandomMock(data);
             }
+
+            public override SecureRandom GetSecureRandom() => _random;
         }
     }
 }

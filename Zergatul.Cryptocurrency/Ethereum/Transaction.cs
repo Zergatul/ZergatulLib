@@ -203,7 +203,7 @@ namespace Zergatul.Cryptocurrency.Ethereum
             ECPDSA ecdsa = new ECPDSA();
             ecdsa.Parameters = new ECPDSAParameters(EllipticCurve.secp256k1);
             ecdsa.Parameters.LowS = true;
-            ecdsa.Random = new SecureRandomWrapper();
+            throw new NotImplementedException(); //ecdsa.Random = new SecureRandomWrapper();
             ecdsa.PrivateKey = new ECPPrivateKey(key);
             ecdsa.SignHashWithRecovery(GetSignHash(), out byte v, out BigInteger r, out BigInteger s);
 

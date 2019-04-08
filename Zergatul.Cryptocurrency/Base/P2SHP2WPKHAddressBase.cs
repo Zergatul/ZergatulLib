@@ -131,7 +131,7 @@ namespace Zergatul.Cryptocurrency.Base
                 ecdsa.InitForSign(new RawPrivateKey(_privateKey), new ECDSASignatureParameters
                 {
                     Curve = Curves.secp256k1,
-                    Random = SecureRandom.GetInstance(SecureRandoms.Default),
+                    Random = SecureRandom.GetInstance(),
                     LowS = true
                 });
                 ecdsa.Update(sigHash, 0, sigHash.Length);

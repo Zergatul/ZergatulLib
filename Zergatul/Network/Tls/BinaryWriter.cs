@@ -29,11 +29,6 @@ namespace Zergatul.Network.Tls
             ListAddRange(value);
         }
 
-        public void WriteBytes(ByteArray value)
-        {
-            ListAddRange(value.Array);
-        }
-
         public void WriteShort(ushort value)
         {
             ListAdd((byte)((value >> 8) & 0xFF));

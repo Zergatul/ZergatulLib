@@ -107,7 +107,7 @@ namespace Zergatul.Cryptography.Asymmetric
             {
                 do
                 {
-                    Random.GetBytes(buffer, 0, 1);
+                    Random.GetNextBytes(buffer, 0, 1);
                 }
                 while (buffer[0] == 0);
                 EB[i] = buffer[0];

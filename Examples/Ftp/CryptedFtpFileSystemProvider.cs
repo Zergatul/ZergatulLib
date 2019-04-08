@@ -24,7 +24,7 @@ namespace Zergatul.Examples.Ftp
             {
                 Mode = BlockCipherMode.CBC,
                 Padding = Padding.PKCS7,
-                Random = SecureRandom.GetInstance(SecureRandoms.Default)
+                Random = SecureRandom.GetInstance()
             };
             aes.InitForEncryption(key, parameters);
 

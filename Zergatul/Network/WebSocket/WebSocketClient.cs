@@ -71,7 +71,7 @@ namespace Zergatul.Network.WebSocket
             }
 
             byte[] nonce = new byte[16];
-            using (var random = SecureRandom.GetInstance(SecureRandoms.Default))
+            using (var random = SecureRandom.GetInstance())
                 random.GetNextBytes(nonce);
 
             string key = Convert.ToBase64String(nonce);

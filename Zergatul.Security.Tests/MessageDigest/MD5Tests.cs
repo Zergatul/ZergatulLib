@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.OpenSsl;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.MessageDigest
 {
@@ -8,7 +10,7 @@ namespace Zergatul.Security.Tests.MessageDigest
     {
         private static SecurityProvider[] _providers = new SecurityProvider[]
         {
-            new DefaultSecurityProvider(),
+            new ZergatulProvider(),
             new OpenSslProvider()
         };
 

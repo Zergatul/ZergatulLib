@@ -32,10 +32,10 @@ namespace Zergatul.Security
             RegisterMessageDigest(MessageDigests.BMW256, () => new BMW256());
             RegisterMessageDigest(MessageDigests.BMW384, () => new BMW384());
             RegisterMessageDigest(MessageDigests.BMW512, () => new BMW512());
-            RegisterMessageDigest(MessageDigests.Skein512_224, () => new Skein512_224());
-            RegisterMessageDigest(MessageDigests.Skein512_256, () => new Skein512_256());
-            RegisterMessageDigest(MessageDigests.Skein512_384, () => new Skein512_384());
-            RegisterMessageDigest(MessageDigests.Skein512_512, () => new Skein512_512());
+            RegisterMessageDigest(MessageDigests.Skein512x224, () => new Skein512_224());
+            RegisterMessageDigest(MessageDigests.Skein512x256, () => new Skein512_256());
+            RegisterMessageDigest(MessageDigests.Skein512x384, () => new Skein512_384());
+            RegisterMessageDigest(MessageDigests.Skein512x512, () => new Skein512_512());
             RegisterMessageDigest(MessageDigests.Luffa512, () => new Luffa512());
             RegisterMessageDigest(MessageDigests.CubeHash, () => new CubeHash());
             RegisterMessageDigest(MessageDigests.CubeHash224, () => new CubeHash224());
@@ -46,6 +46,6 @@ namespace Zergatul.Security
             RegisterSignature(Signatures.ECDSA, () => new ECDSASignature());
         }
 
-        public override Tls.TlsStream GetTlsStream(Stream innerStream) => new Network.Tls.TlsStream(innerStream);
+        public override TlsStream GetTlsStream(Stream innerStream) => new Network.Tls.TlsStream(innerStream);
     }
 }

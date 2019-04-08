@@ -8,7 +8,9 @@ namespace Zergatul.Security
 
         public DotNetProvider()
         {
-            RegisterSecureRandom(SecureRandoms.Default, () => new DefaultSecureRandom());
+            
         }
+
+        public override SecureRandom GetSecureRandom() => new DefaultSecureRandom();
     }
 }

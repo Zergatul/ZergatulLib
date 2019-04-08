@@ -35,9 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BouncyCastle">
-      <HintPath>..\..\bccrypto-csharp-1.8.1\crypto\bin\Debug\lib\net20\BouncyCastle.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <Choose>
@@ -68,6 +65,10 @@
     <Compile Include="OpenSslTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Zergatul.Security.OpenSsl\Zergatul.Security.OpenSsl.csproj">
+      <Project>{cd0b67e1-ddc3-4db6-950a-704a60998b63}</Project>
+      <Name>Zergatul.Security.OpenSsl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Zergatul.Tests\Zergatul.Tests.csproj">
       <Project>{74762e1c-9c03-4eab-bd9e-2785a6974fa1}</Project>
       <Name>Zergatul.Tests</Name>

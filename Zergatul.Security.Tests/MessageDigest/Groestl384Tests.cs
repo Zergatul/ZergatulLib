@@ -1,21 +1,25 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.Zergatul;
 
 namespace Zergatul.Security.Tests.MessageDigest
 {
     [TestClass]
-    public class Groestl384Tests
+    public class Groestl384Tests : NISTMDTest
     {
-        private static SecurityProvider[] _providers = new SecurityProvider[]
+        protected override SecurityProvider[] Providers => new SecurityProvider[]
         {
-            new DefaultSecurityProvider()
+            new ZergatulProvider()
         };
+
+        protected override string Name => MessageDigests.Groestl384;
+        protected override string Algorithm => "Groestl";
+        protected override int Size => 384;
 
         [TestMethod]
         public void BasicTest()
         {
-            foreach (var provider in _providers)
+            foreach (var provider in Providers)
             {
                 var md = provider.GetMessageDigest(MessageDigests.Groestl384);
 

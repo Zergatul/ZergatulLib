@@ -2,7 +2,7 @@
 
 namespace Zergatul.Security
 {
-    abstract class PBKDF2Base : KeyDerivationFunction
+    public abstract class PBKDF2Base : KeyDerivationFunction
     {
         protected PBKDF2Parameters _parameters;
 

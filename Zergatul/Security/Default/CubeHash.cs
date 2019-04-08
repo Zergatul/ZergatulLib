@@ -4,6 +4,7 @@ namespace Zergatul.Security.Default
 {
     class CubeHash : MessageDigest
     {
+        public override int BlockLength => _cubeHash?.BlockSize ?? 0;
         public override int DigestLength => _cubeHash?.HashSize ?? 0;
 
         Cryptography.Hash.Base.CubeHash _cubeHash;

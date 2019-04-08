@@ -2,7 +2,7 @@
 
 namespace Zergatul.Security.Paddings
 {
-    class PKCS7Padding : SymmetricPadding
+    public class PKCS7Padding : SymmetricPadding
     {
         public override byte[] GetPadding(int position, int blockSize)
         {
