@@ -1,0 +1,3 @@
+﻿Repeat = 16777216
+Text = abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno
+MD = c0361fab3208c380a137ca500c66a4debacba104bbe80cd6841db0cf12c64fd3d980ddb61e20a11b3f5119477959b05ddcb81130269791f87ce7b8556603d28e

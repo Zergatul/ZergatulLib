@@ -50,5 +50,9 @@
         public const string SHA3x256 = "SHA3-256";
         public const string SHA3x384 = "SHA3-384";
         public const string SHA3x512 = "SHA3-512";
+        public const string SHAvite3x224 = "SHAvite3-224";
+        public const string SHAvite3x256 = "SHAvite3-256";
+        public const string SHAvite3x384 = "SHAvite3-384";
+        public const string SHAvite3x512 = "SHAvite3-512";
     }
 }
