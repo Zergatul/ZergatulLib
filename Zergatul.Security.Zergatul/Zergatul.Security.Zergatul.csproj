@@ -85,7 +85,10 @@
     <Compile Include="MessageDigest\SHA3x512.cs" />
     <Compile Include="MessageDigest\SHA512.cs" />
     <Compile Include="MessageDigest\SHA256.cs" />
+    <Compile Include="MessageDigest\SHAvite3Constants.cs" />
+    <Compile Include="MessageDigest\SHAvite3x224.cs" />
     <Compile Include="MessageDigest\SHAvite3x384.cs" />
+    <Compile Include="MessageDigest\SHAvite3x256.cs" />
     <Compile Include="MessageDigest\SHAvite3x512.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tls\HandshakeState.cs" />

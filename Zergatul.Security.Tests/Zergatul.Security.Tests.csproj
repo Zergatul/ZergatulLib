@@ -74,7 +74,9 @@
     <Compile Include="MessageDigest\SHA3x256Tests.cs" />
     <Compile Include="MessageDigest\SHA3x224Tests.cs" />
     <Compile Include="MessageDigest\SHA3x384Tests.cs" />
+    <Compile Include="MessageDigest\SHAvite3x224Tests.cs" />
     <Compile Include="MessageDigest\SHAvite3x384Tests.cs" />
+    <Compile Include="MessageDigest\SHAvite3x256Tests.cs" />
     <Compile Include="MessageDigest\SHAvite3x512Tests.cs" />
     <Compile Include="MessageDigest\SHA3x512Tests.cs" />
     <Compile Include="MessageDigest\Keccak512Tests.cs" />
@@ -147,10 +149,22 @@
     <Content Include="MessageDigest\TestCases\SHA3\ShortMsgKAT_512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="MessageDigest\TestCases\SHAvite3\ExtremelyLongMsgKAT_384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\SHAvite3\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\LongMsgKAT_256.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\SHAvite3\LongMsgKAT_384.txt">
@@ -159,10 +173,22 @@
     <Content Include="MessageDigest\TestCases\SHAvite3\LongMsgKAT_512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="MessageDigest\TestCases\SHAvite3\MonteCarlo_384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\SHAvite3\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\SHAvite3\ShortMsgKAT_256.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\SHAvite3\ShortMsgKAT_384.txt">

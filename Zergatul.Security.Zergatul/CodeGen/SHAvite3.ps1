@@ -98,7 +98,7 @@ function KEY_EXPAND_ELT($params)
     Write-Output "$k3 = t0;"
 }
 
-function Gen
+function Gen512
 {
     Write-Output "#region Round 0"
     Write-Output ""
@@ -681,6 +681,533 @@ function Gen
     Write-Output "#endregion"
 }
 
+function Gen256
+{
+    Write-Output "uint p0 = h0;"
+    Write-Output "uint p1 = h1;"
+    Write-Output "uint p2 = h2;"
+    Write-Output "uint p3 = h3;"
+    Write-Output "uint p4 = h4;"
+    Write-Output "uint p5 = h5;"
+    Write-Output "uint p6 = h6;"
+    Write-Output "uint p7 = h7;"
+
+    Write-Output ""
+
+    Write-Output "uint rk0 = ToUInt32(buffer, 0x00, ByteOrder.LittleEndian);"
+    Write-Output "uint rk1 = ToUInt32(buffer, 0x04, ByteOrder.LittleEndian);"
+    Write-Output "uint rk2 = ToUInt32(buffer, 0x08, ByteOrder.LittleEndian);"
+    Write-Output "uint rk3 = ToUInt32(buffer, 0x0C, ByteOrder.LittleEndian);"
+    Write-Output "uint rk4 = ToUInt32(buffer, 0x10, ByteOrder.LittleEndian);"
+    Write-Output "uint rk5 = ToUInt32(buffer, 0x14, ByteOrder.LittleEndian);"
+    Write-Output "uint rk6 = ToUInt32(buffer, 0x18, ByteOrder.LittleEndian);"
+    Write-Output "uint rk7 = ToUInt32(buffer, 0x1C, ByteOrder.LittleEndian);"
+    Write-Output "uint rk8 = ToUInt32(buffer, 0x20, ByteOrder.LittleEndian);"
+    Write-Output "uint rk9 = ToUInt32(buffer, 0x24, ByteOrder.LittleEndian);"
+    Write-Output "uint rka = ToUInt32(buffer, 0x28, ByteOrder.LittleEndian);"
+    Write-Output "uint rkb = ToUInt32(buffer, 0x2C, ByteOrder.LittleEndian);"
+    Write-Output "uint rkc = ToUInt32(buffer, 0x30, ByteOrder.LittleEndian);"
+    Write-Output "uint rkd = ToUInt32(buffer, 0x34, ByteOrder.LittleEndian);"
+    Write-Output "uint rke = ToUInt32(buffer, 0x38, ByteOrder.LittleEndian);"
+    Write-Output "uint rkf = ToUInt32(buffer, 0x3C, ByteOrder.LittleEndian);"
+
+    Write-Output ""
+
+    Write-Output "uint x0, x1, x2, x3;"
+    Write-Output "uint t0, t1, t2, t3;"
+
+    Write-Output ""
+
+    Write-Output "#region Round 0"
+    Write-Output ""
+
+	Write-Output "x0 = p4 ^ rk0;"
+	Write-Output "x1 = p5 ^ rk1;"
+	Write-Output "x2 = p6 ^ rk2;"
+	Write-Output "x3 = p7 ^ rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "x0 ^= rk4;"
+	Write-Output "x1 ^= rk5;"
+	Write-Output "x2 ^= rk6;"
+	Write-Output "x3 ^= rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "x0 ^= rk8;"
+	Write-Output "x1 ^= rk9;"
+	Write-Output "x2 ^= rka;"
+	Write-Output "x3 ^= rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p0 ^= x0;"
+	Write-Output "p1 ^= x1;"
+	Write-Output "p2 ^= x2;"
+	Write-Output "p3 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 1"
+    Write-Output ""
+
+	Write-Output "x0 = p0 ^ rkc;"
+	Write-Output "x1 = p1 ^ rkd;"
+	Write-Output "x2 = p2 ^ rke;"
+	Write-Output "x3 = p3 ^ rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk0', 'rk1', 'rk2', 'rk3');
+	Write-Output "rk0 ^= rkc ^ c0;"
+	Write-Output "rk1 ^= rkd ^ ~c1;"
+	Write-Output "rk2 ^= rke;"
+	Write-Output "rk3 ^= rkf;"
+	Write-Output "x0 ^= rk0;"
+	Write-Output "x1 ^= rk1;"
+	Write-Output "x2 ^= rk2;"
+	Write-Output "x3 ^= rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk4', 'rk5', 'rk6', 'rk7');
+	Write-Output "rk4 ^= rk0;"
+	Write-Output "rk5 ^= rk1;"
+	Write-Output "rk6 ^= rk2;"
+	Write-Output "rk7 ^= rk3;"
+	Write-Output "x0 ^= rk4;"
+	Write-Output "x1 ^= rk5;"
+	Write-Output "x2 ^= rk6;"
+	Write-Output "x3 ^= rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p4 ^= x0;"
+	Write-Output "p5 ^= x1;"
+	Write-Output "p6 ^= x2;"
+	Write-Output "p7 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 2"
+    Write-Output ""
+
+    KEY_EXPAND_ELT('rk8', 'rk9', 'rka', 'rkb');
+	Write-Output "rk8 ^= rk4;"
+	Write-Output "rk9 ^= rk5;"
+	Write-Output "rka ^= rk6;"
+	Write-Output "rkb ^= rk7;"
+	Write-Output "x0 = p4 ^ rk8;"
+	Write-Output "x1 = p5 ^ rk9;"
+	Write-Output "x2 = p6 ^ rka;"
+	Write-Output "x3 = p7 ^ rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rkc', 'rkd', 'rke', 'rkf');
+	Write-Output "rkc ^= rk8;"
+	Write-Output "rkd ^= rk9;"
+	Write-Output "rke ^= rka;"
+	Write-Output "rkf ^= rkb;"
+	Write-Output "x0 ^= rkc;"
+	Write-Output "x1 ^= rkd;"
+	Write-Output "x2 ^= rke;"
+	Write-Output "x3 ^= rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk0 ^= rkd;"
+	Write-Output "x0 ^= rk0;"
+	Write-Output "rk1 ^= rke;"
+	Write-Output "x1 ^= rk1;"
+	Write-Output "rk2 ^= rkf;"
+	Write-Output "x2 ^= rk2;"
+	Write-Output "rk3 ^= rk0;"
+	Write-Output "x3 ^= rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p0 ^= x0;"
+	Write-Output "p1 ^= x1;"
+	Write-Output "p2 ^= x2;"
+	Write-Output "p3 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 3"
+    Write-Output ""
+
+    Write-Output "rk4 ^= rk1;"
+	Write-Output "x0 = p0 ^ rk4;"
+	Write-Output "rk5 ^= rk2;"
+	Write-Output "x1 = p1 ^ rk5;"
+	Write-Output "rk6 ^= rk3;"
+	Write-Output "x2 = p2 ^ rk6;"
+	Write-Output "rk7 ^= rk4;"
+	Write-Output "x3 = p3 ^ rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk8 ^= rk5;"
+	Write-Output "x0 ^= rk8;"
+	Write-Output "rk9 ^= rk6;"
+	Write-Output "x1 ^= rk9;"
+	Write-Output "rka ^= rk7;"
+	Write-Output "x2 ^= rka;"
+	Write-Output "rkb ^= rk8;"
+	Write-Output "x3 ^= rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rkc ^= rk9;"
+	Write-Output "x0 ^= rkc;"
+	Write-Output "rkd ^= rka;"
+	Write-Output "x1 ^= rkd;"
+	Write-Output "rke ^= rkb;"
+	Write-Output "x2 ^= rke;"
+	Write-Output "rkf ^= rkc;"
+	Write-Output "x3 ^= rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p4 ^= x0;"
+	Write-Output "p5 ^= x1;"
+	Write-Output "p6 ^= x2;"
+	Write-Output "p7 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 4"
+    Write-Output ""
+
+    KEY_EXPAND_ELT('rk0', 'rk1', 'rk2', 'rk3');
+	Write-Output "rk0 ^= rkc;"
+	Write-Output "rk1 ^= rkd;"
+	Write-Output "rk2 ^= rke;"
+	Write-Output "rk3 ^= rkf;"
+	Write-Output "x0 = p4 ^ rk0;"
+	Write-Output "x1 = p5 ^ rk1;"
+	Write-Output "x2 = p6 ^ rk2;"
+	Write-Output "x3 = p7 ^ rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk4', 'rk5', 'rk6', 'rk7');
+	Write-Output "rk4 ^= rk0;"
+	Write-Output "rk5 ^= rk1;"
+	Write-Output "rk6 ^= rk2;"
+	Write-Output "rk7 ^= rk3;"
+	Write-Output "x0 ^= rk4;"
+	Write-Output "x1 ^= rk5;"
+	Write-Output "x2 ^= rk6;"
+	Write-Output "x3 ^= rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk8', 'rk9', 'rka', 'rkb');
+	Write-Output "rk8 ^= rk4;"
+	Write-Output "rk9 ^= rk5 ^ c1;"
+	Write-Output "rka ^= rk6 ^ ~c0;"
+	Write-Output "rkb ^= rk7;"
+	Write-Output "x0 ^= rk8;"
+	Write-Output "x1 ^= rk9;"
+	Write-Output "x2 ^= rka;"
+	Write-Output "x3 ^= rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p0 ^= x0;"
+	Write-Output "p1 ^= x1;"
+	Write-Output "p2 ^= x2;"
+	Write-Output "p3 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 5"
+    Write-Output ""
+
+    KEY_EXPAND_ELT('rkc', 'rkd', 'rke', 'rkf');
+	Write-Output "rkc ^= rk8;"
+	Write-Output "rkd ^= rk9;"
+	Write-Output "rke ^= rka;"
+	Write-Output "rkf ^= rkb;"
+	Write-Output "x0 = p0 ^ rkc;"
+	Write-Output "x1 = p1 ^ rkd;"
+	Write-Output "x2 = p2 ^ rke;"
+	Write-Output "x3 = p3 ^ rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk0 ^= rkd;"
+	Write-Output "x0 ^= rk0;"
+	Write-Output "rk1 ^= rke;"
+	Write-Output "x1 ^= rk1;"
+	Write-Output "rk2 ^= rkf;"
+	Write-Output "x2 ^= rk2;"
+	Write-Output "rk3 ^= rk0;"
+	Write-Output "x3 ^= rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk4 ^= rk1;"
+	Write-Output "x0 ^= rk4;"
+	Write-Output "rk5 ^= rk2;"
+	Write-Output "x1 ^= rk5;"
+	Write-Output "rk6 ^= rk3;"
+	Write-Output "x2 ^= rk6;"
+	Write-Output "rk7 ^= rk4;"
+	Write-Output "x3 ^= rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p4 ^= x0;"
+	Write-Output "p5 ^= x1;"
+	Write-Output "p6 ^= x2;"
+	Write-Output "p7 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 6"
+    Write-Output ""
+
+    Write-Output "rk8 ^= rk5;"
+	Write-Output "x0 = p4 ^ rk8;"
+	Write-Output "rk9 ^= rk6;"
+	Write-Output "x1 = p5 ^ rk9;"
+	Write-Output "rka ^= rk7;"
+	Write-Output "x2 = p6 ^ rka;"
+	Write-Output "rkb ^= rk8;"
+	Write-Output "x3 = p7 ^ rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rkc ^= rk9;"
+	Write-Output "x0 ^= rkc;"
+	Write-Output "rkd ^= rka;"
+	Write-Output "x1 ^= rkd;"
+	Write-Output "rke ^= rkb;"
+	Write-Output "x2 ^= rke;"
+	Write-Output "rkf ^= rkc;"
+	Write-Output "x3 ^= rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk0', 'rk1', 'rk2', 'rk3');
+	Write-Output "rk0 ^= rkc;"
+	Write-Output "rk1 ^= rkd;"
+	Write-Output "rk2 ^= rke;"
+	Write-Output "rk3 ^= rkf;"
+	Write-Output "x0 ^= rk0;"
+	Write-Output "x1 ^= rk1;"
+	Write-Output "x2 ^= rk2;"
+	Write-Output "x3 ^= rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p0 ^= x0;"
+	Write-Output "p1 ^= x1;"
+	Write-Output "p2 ^= x2;"
+	Write-Output "p3 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 7"
+    Write-Output ""
+
+    KEY_EXPAND_ELT('rk4', 'rk5', 'rk6', 'rk7');
+	Write-Output "rk4 ^= rk0;"
+	Write-Output "rk5 ^= rk1;"
+	Write-Output "rk6 ^= rk2 ^ c1;"
+	Write-Output "rk7 ^= rk3 ^ ~c0;"
+	Write-Output "x0 = p0 ^ rk4;"
+	Write-Output "x1 = p1 ^ rk5;"
+	Write-Output "x2 = p2 ^ rk6;"
+	Write-Output "x3 = p3 ^ rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk8', 'rk9', 'rka', 'rkb');
+	Write-Output "rk8 ^= rk4;"
+	Write-Output "rk9 ^= rk5;"
+	Write-Output "rka ^= rk6;"
+	Write-Output "rkb ^= rk7;"
+	Write-Output "x0 ^= rk8;"
+	Write-Output "x1 ^= rk9;"
+	Write-Output "x2 ^= rka;"
+	Write-Output "x3 ^= rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rkc', 'rkd', 'rke', 'rkf');
+	Write-Output "rkc ^= rk8;"
+	Write-Output "rkd ^= rk9;"
+	Write-Output "rke ^= rka;"
+	Write-Output "rkf ^= rkb;"
+	Write-Output "x0 ^= rkc;"
+	Write-Output "x1 ^= rkd;"
+	Write-Output "x2 ^= rke;"
+	Write-Output "x3 ^= rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p4 ^= x0;"
+	Write-Output "p5 ^= x1;"
+	Write-Output "p6 ^= x2;"
+	Write-Output "p7 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 8"
+    Write-Output ""
+
+    Write-Output "rk0 ^= rkd;"
+	Write-Output "x0 = p4 ^ rk0;"
+	Write-Output "rk1 ^= rke;"
+	Write-Output "x1 = p5 ^ rk1;"
+	Write-Output "rk2 ^= rkf;"
+	Write-Output "x2 = p6 ^ rk2;"
+	Write-Output "rk3 ^= rk0;"
+	Write-Output "x3 = p7 ^ rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk4 ^= rk1;"
+	Write-Output "x0 ^= rk4;"
+	Write-Output "rk5 ^= rk2;"
+	Write-Output "x1 ^= rk5;"
+	Write-Output "rk6 ^= rk3;"
+	Write-Output "x2 ^= rk6;"
+	Write-Output "rk7 ^= rk4;"
+	Write-Output "x3 ^= rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk8 ^= rk5;"
+	Write-Output "x0 ^= rk8;"
+	Write-Output "rk9 ^= rk6;"
+	Write-Output "x1 ^= rk9;"
+	Write-Output "rka ^= rk7;"
+	Write-Output "x2 ^= rka;"
+	Write-Output "rkb ^= rk8;"
+	Write-Output "x3 ^= rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p0 ^= x0;"
+	Write-Output "p1 ^= x1;"
+	Write-Output "p2 ^= x2;"
+	Write-Output "p3 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 9"
+    Write-Output ""
+
+    Write-Output "rkc ^= rk9;"
+	Write-Output "x0 = p0 ^ rkc;"
+	Write-Output "rkd ^= rka;"
+	Write-Output "x1 = p1 ^ rkd;"
+	Write-Output "rke ^= rkb;"
+	Write-Output "x2 = p2 ^ rke;"
+	Write-Output "rkf ^= rkc;"
+	Write-Output "x3 = p3 ^ rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk0', 'rk1', 'rk2', 'rk3');
+	Write-Output "rk0 ^= rkc;"
+	Write-Output "rk1 ^= rkd;"
+	Write-Output "rk2 ^= rke;"
+	Write-Output "rk3 ^= rkf;"
+	Write-Output "x0 ^= rk0;"
+	Write-Output "x1 ^= rk1;"
+	Write-Output "x2 ^= rk2;"
+	Write-Output "x3 ^= rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rk4', 'rk5', 'rk6', 'rk7');
+	Write-Output "rk4 ^= rk0;"
+	Write-Output "rk5 ^= rk1;"
+	Write-Output "rk6 ^= rk2;"
+	Write-Output "rk7 ^= rk3;"
+	Write-Output "x0 ^= rk4;"
+	Write-Output "x1 ^= rk5;"
+	Write-Output "x2 ^= rk6;"
+	Write-Output "x3 ^= rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p4 ^= x0;"
+	Write-Output "p5 ^= x1;"
+	Write-Output "p6 ^= x2;"
+	Write-Output "p7 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 10"
+    Write-Output ""
+
+    KEY_EXPAND_ELT('rk8', 'rk9', 'rka', 'rkb');
+	Write-Output "rk8 ^= rk4;"
+	Write-Output "rk9 ^= rk5;"
+	Write-Output "rka ^= rk6;"
+	Write-Output "rkb ^= rk7;"
+	Write-Output "x0 = p4 ^ rk8;"
+	Write-Output "x1 = p5 ^ rk9;"
+	Write-Output "x2 = p6 ^ rka;"
+	Write-Output "x3 = p7 ^ rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	KEY_EXPAND_ELT('rkc', 'rkd', 'rke', 'rkf');
+	Write-Output "rkc ^= rk8 ^ c0;"
+	Write-Output "rkd ^= rk9;"
+	Write-Output "rke ^= rka;"
+	Write-Output "rkf ^= rkb ^ ~c1;"
+	Write-Output "x0 ^= rkc;"
+	Write-Output "x1 ^= rkd;"
+	Write-Output "x2 ^= rke;"
+	Write-Output "x3 ^= rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk0 ^= rkd;"
+	Write-Output "x0 ^= rk0;"
+	Write-Output "rk1 ^= rke;"
+	Write-Output "x1 ^= rk1;"
+	Write-Output "rk2 ^= rkf;"
+	Write-Output "x2 ^= rk2;"
+	Write-Output "rk3 ^= rk0;"
+	Write-Output "x3 ^= rk3;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p0 ^= x0;"
+	Write-Output "p1 ^= x1;"
+	Write-Output "p2 ^= x2;"
+	Write-Output "p3 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "#region Round 11"
+    Write-Output ""
+
+    Write-Output "rk4 ^= rk1;"
+	Write-Output "x0 = p0 ^ rk4;"
+	Write-Output "rk5 ^= rk2;"
+	Write-Output "x1 = p1 ^ rk5;"
+	Write-Output "rk6 ^= rk3;"
+	Write-Output "x2 = p2 ^ rk6;"
+	Write-Output "rk7 ^= rk4;"
+	Write-Output "x3 = p3 ^ rk7;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rk8 ^= rk5;"
+	Write-Output "x0 ^= rk8;"
+	Write-Output "rk9 ^= rk6;"
+	Write-Output "x1 ^= rk9;"
+	Write-Output "rka ^= rk7;"
+	Write-Output "x2 ^= rka;"
+	Write-Output "rkb ^= rk8;"
+	Write-Output "x3 ^= rkb;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "rkc ^= rk9;"
+	Write-Output "x0 ^= rkc;"
+	Write-Output "rkd ^= rka;"
+	Write-Output "x1 ^= rkd;"
+	Write-Output "rke ^= rkb;"
+	Write-Output "x2 ^= rke;"
+	Write-Output "rkf ^= rkc;"
+	Write-Output "x3 ^= rkf;"
+	AES_ROUND_NOKEY('x0', 'x1', 'x2', 'x3');
+	Write-Output "p4 ^= x0;"
+	Write-Output "p5 ^= x1;"
+	Write-Output "p6 ^= x2;"
+	Write-Output "p7 ^= x3;"
+
+    Write-Output ""
+    Write-Output "#endregion"
+
+    Write-Output ""
+
+    Write-Output "h0 ^= p0;"
+    Write-Output "h1 ^= p1;"
+    Write-Output "h2 ^= p2;"
+    Write-Output "h3 ^= p3;"
+    Write-Output "h4 ^= p4;"
+    Write-Output "h5 ^= p5;"
+    Write-Output "h6 ^= p6;"
+    Write-Output "h7 ^= p7;"
+}
+
 clear
 
-Gen
+Gen256

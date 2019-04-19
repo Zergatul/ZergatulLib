@@ -51,6 +51,8 @@ namespace Zergatul.Security.Zergatul
             RegisterMessageDigest(MessageDigests.SHA3x256, () => new SHA3x256());
             RegisterMessageDigest(MessageDigests.SHA3x384, () => new SHA3x384());
             RegisterMessageDigest(MessageDigests.SHA3x512, () => new SHA3x512());
+            RegisterMessageDigest(MessageDigests.SHAvite3x224, () => new SHAvite3x224());
+            RegisterMessageDigest(MessageDigests.SHAvite3x256, () => new SHAvite3x256());
             RegisterMessageDigest(MessageDigests.SHAvite3x384, () => new SHAvite3x384());
             RegisterMessageDigest(MessageDigests.SHAvite3x512, () => new SHAvite3x512());
         }
