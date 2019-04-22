@@ -54,5 +54,9 @@
         public const string SHAvite3x256 = "SHAvite3-256";
         public const string SHAvite3x384 = "SHAvite3-384";
         public const string SHAvite3x512 = "SHAvite3-512";
+        public const string ECHO224 = nameof(ECHO224);
+        public const string ECHO256 = nameof(ECHO256);
+        public const string ECHO384 = nameof(ECHO384);
+        public const string ECHO512 = nameof(ECHO512);
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace Zergatul.Security.Zergatul.MessageDigest
+﻿namespace Zergatul.Security.Zergatul.Common
 {
-    static class SHAvite3Constants
+    static class AESHelper
     {
         public static readonly uint[] AES0 = new uint[]
         {

@@ -37,6 +37,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\AESHelper.cs" />
     <Compile Include="MessageDigest\AbstractMessageDigest.cs" />
     <Compile Include="MessageDigest\AbstractMessageDigestWithLength.cs" />
     <Compile Include="MessageDigest\BLAKE224.cs" />
@@ -54,6 +55,10 @@
     <Compile Include="MessageDigest\CubeHash256.cs" />
     <Compile Include="MessageDigest\CubeHash384.cs" />
     <Compile Include="MessageDigest\CubeHash512.cs" />
+    <Compile Include="MessageDigest\ECHO224.cs" />
+    <Compile Include="MessageDigest\ECHO384.cs" />
+    <Compile Include="MessageDigest\ECHO256.cs" />
+    <Compile Include="MessageDigest\ECHO512.cs" />
     <Compile Include="MessageDigest\Groestl224.cs" />
     <Compile Include="MessageDigest\Groestl384.cs" />
     <Compile Include="MessageDigest\Groestl256.cs" />
@@ -85,7 +90,6 @@
     <Compile Include="MessageDigest\SHA3x512.cs" />
     <Compile Include="MessageDigest\SHA512.cs" />
     <Compile Include="MessageDigest\SHA256.cs" />
-    <Compile Include="MessageDigest\SHAvite3Constants.cs" />
     <Compile Include="MessageDigest\SHAvite3x224.cs" />
     <Compile Include="MessageDigest\SHAvite3x384.cs" />
     <Compile Include="MessageDigest\SHAvite3x256.cs" />
@@ -106,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CodeGen\Keccak.ps1" />
+    <None Include="CodeGen\ECHO.ps1" />
     <None Include="CodeGen\SHAvite3.ps1" />
   </ItemGroup>
   <ItemGroup>

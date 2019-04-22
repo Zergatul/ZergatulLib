@@ -1,6 +1,6 @@
 ﻿using System;
 using static Zergatul.BitHelper;
-using static Zergatul.Security.Zergatul.MessageDigest.SHAvite3Constants;
+using static Zergatul.Security.Zergatul.Common.AESHelper;
 
 namespace Zergatul.Security.Zergatul.MessageDigest
 {
@@ -11,7 +11,6 @@ namespace Zergatul.Security.Zergatul.MessageDigest
 
         protected byte[] buffer;
         protected int bufOffset;
-        protected int outsize;
         protected uint h0, h1, h2, h3, h4, h5, h6, h7;
         protected uint c0, c1;
 

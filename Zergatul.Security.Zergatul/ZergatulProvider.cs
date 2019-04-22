@@ -55,6 +55,10 @@ namespace Zergatul.Security.Zergatul
             RegisterMessageDigest(MessageDigests.SHAvite3x256, () => new SHAvite3x256());
             RegisterMessageDigest(MessageDigests.SHAvite3x384, () => new SHAvite3x384());
             RegisterMessageDigest(MessageDigests.SHAvite3x512, () => new SHAvite3x512());
+            RegisterMessageDigest(MessageDigests.ECHO224, () => new ECHO224());
+            RegisterMessageDigest(MessageDigests.ECHO256, () => new ECHO256());
+            RegisterMessageDigest(MessageDigests.ECHO384, () => new ECHO384());
+            RegisterMessageDigest(MessageDigests.ECHO512, () => new ECHO512());
         }
 
         public override TlsStream GetTlsStream(Stream innerStream) => new Tls.TlsStream(innerStream);
