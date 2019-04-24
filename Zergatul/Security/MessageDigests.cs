@@ -28,6 +28,9 @@
         public const string Skein512x256 = "Skein512-256";
         public const string Skein512x384 = "Skein512-384";
         public const string Skein512x512 = "Skein512-512";
+        public const string Luffa224 = nameof(Luffa224);
+        public const string Luffa256 = nameof(Luffa256);
+        public const string Luffa384 = nameof(Luffa384);
         public const string Luffa512 = nameof(Luffa512);
         public const string CubeHash = nameof(CubeHash);
         public const string CubeHash224 = nameof(CubeHash224);

@@ -5,16 +5,16 @@ using Zergatul.Security.Zergatul;
 namespace Zergatul.Security.Tests.MessageDigest
 {
     [TestClass]
-    public class Luffa512Tests : NISTMDTestWithData
+    public class Luffa384Tests : NISTMDTestWithData
     {
         protected override SecurityProvider[] Providers => new SecurityProvider[]
         {
             new ZergatulProvider()
         };
 
-        protected override string Name => MessageDigests.Luffa512;
+        protected override string Name => MessageDigests.Luffa384;
         protected override string Algorithm => "Luffa";
-        protected override int Size => 512;
+        protected override int Size => 384;
 
         [TestMethod]
         public void BasicTest()
@@ -23,19 +23,19 @@ namespace Zergatul.Security.Tests.MessageDigest
                 using (var md = provider.GetMessageDigest(Name))
                 {
                     var digest = md.Digest();
-                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "6e7de4501189b3ca58f3ac114916654bbcd4922024b4cc1cd764acfe8ab4b7805df133eab345ffdb1c414564c924f48e0a301824e2ac4c34bd4efde2e43da90e");
+                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "117d3ad49024dfe2994f4e335c9b330b48c537a13a9b7fa465938e1a02ff862bcdf33838bc0f371b045d26952d3ea0c5");
                     md.Reset();
 
                     digest = md.Digest(Encoding.ASCII.GetBytes("abc"));
-                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "f40245973e80d79d0f4b9b202ddd4505b81b8830501bea31612b5817aae387921dcefd808ca2c78020aff59345d6f91f0ee6b2eee113f0cbcf22b64381387e8a");
+                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "9a7abb797a840e2d423c34c91f559f6809bdb2916fb2e9effec2fa0a7a69881be9872480c635d20d2fd6e95d046601a7");
                     md.Reset();
 
                     digest = md.Digest(Encoding.ASCII.GetBytes("The quick brown fox jumps over the lazy dog"));
-                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "459e2280a7cdb0c721d8d9dbeb9ed339659dc9e7b158e9dd2d328d946cb21474dc9177edfc93602f1aadb31944c795c9b5df859a3dc6132d4f0a4c476aaf797f");
+                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "e67f459e496dfe04a0091a2e2c253e5f48883472dc21dce1d6a0bb0359867fc11815d8e0f868bbfb102f412e24075107");
                     md.Reset();
 
                     digest = md.Digest(Encoding.ASCII.GetBytes("The quick brown fox jumps over the lazy dog."));
-                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "8d023cb777de2059af5007032c253fe0148a35c0a98def536cf22d5af064d8279fc2c80f52fe2d08462beaa8011e30350618a01f4763dcd53d8a09afcac75c65");
+                    Assert.IsTrue(BitHelper.BytesToHex(digest) == "0562884aee1ac17ff4e5a14827e5748be18f2adfc929adc22758a1ebac25633342c370ebd01739add49abf81fafd73af");
                     md.Reset();
                 }
         }

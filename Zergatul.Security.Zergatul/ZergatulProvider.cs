@@ -59,6 +59,9 @@ namespace Zergatul.Security.Zergatul
             RegisterMessageDigest(MessageDigests.ECHO256, () => new ECHO256());
             RegisterMessageDigest(MessageDigests.ECHO384, () => new ECHO384());
             RegisterMessageDigest(MessageDigests.ECHO512, () => new ECHO512());
+            RegisterMessageDigest(MessageDigests.Luffa224, () => new Luffa224());
+            RegisterMessageDigest(MessageDigests.Luffa256, () => new Luffa256());
+            RegisterMessageDigest(MessageDigests.Luffa384, () => new Luffa384());
             RegisterMessageDigest(MessageDigests.Luffa512, () => new Luffa512());
         }
 

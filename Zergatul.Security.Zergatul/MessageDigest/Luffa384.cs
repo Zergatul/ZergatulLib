@@ -3,18 +3,17 @@ using static Zergatul.Security.Zergatul.MessageDigest.LuffaConstants;
 
 namespace Zergatul.Security.Zergatul.MessageDigest
 {
-    class Luffa512 : AbstractMessageDigest
+    class Luffa384 : AbstractMessageDigest
     {
         public override int BlockLength => 32;
-        public override int DigestLength => 64;
+        public override int DigestLength => 48;
 
         uint h00, h01, h02, h03, h04, h05, h06, h07;
         uint h10, h11, h12, h13, h14, h15, h16, h17;
         uint h20, h21, h22, h23, h24, h25, h26, h27;
         uint h30, h31, h32, h33, h34, h35, h36, h37;
-        uint h40, h41, h42, h43, h44, h45, h46, h47;
 
-        public Luffa512()
+        public Luffa384()
         {
             buffer = new byte[32];
             Reset();
@@ -54,14 +53,6 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             h35 = 0x57E9E923;
             h36 = 0x14BCB808;
             h37 = 0x7CDE72CE;
-            h40 = 0x6C68E9BE;
-            h41 = 0x5EC41E22;
-            h42 = 0xC825B7C7;
-            h43 = 0xAFFB4363;
-            h44 = 0xF5DF3999;
-            h45 = 0x0FC688F1;
-            h46 = 0xB07224CC;
-            h47 = 0x03E86CEA;
 
             bufOffset = 0;
         }
@@ -80,26 +71,22 @@ namespace Zergatul.Security.Zergatul.MessageDigest
 
             ProcessBlock();
 
-            byte[] digest = new byte[64];
-            GetBytes(h00 ^ h10 ^ h20 ^ h30 ^ h40, ByteOrder.BigEndian, digest, 0x00);
-            GetBytes(h01 ^ h11 ^ h21 ^ h31 ^ h41, ByteOrder.BigEndian, digest, 0x04);
-            GetBytes(h02 ^ h12 ^ h22 ^ h32 ^ h42, ByteOrder.BigEndian, digest, 0x08);
-            GetBytes(h03 ^ h13 ^ h23 ^ h33 ^ h43, ByteOrder.BigEndian, digest, 0x0C);
-            GetBytes(h04 ^ h14 ^ h24 ^ h34 ^ h44, ByteOrder.BigEndian, digest, 0x10);
-            GetBytes(h05 ^ h15 ^ h25 ^ h35 ^ h45, ByteOrder.BigEndian, digest, 0x14);
-            GetBytes(h06 ^ h16 ^ h26 ^ h36 ^ h46, ByteOrder.BigEndian, digest, 0x18);
-            GetBytes(h07 ^ h17 ^ h27 ^ h37 ^ h47, ByteOrder.BigEndian, digest, 0x1C);
+            byte[] digest = new byte[48];
+            GetBytes(h00 ^ h10 ^ h20 ^ h30, ByteOrder.BigEndian, digest, 0x00);
+            GetBytes(h01 ^ h11 ^ h21 ^ h31, ByteOrder.BigEndian, digest, 0x04);
+            GetBytes(h02 ^ h12 ^ h22 ^ h32, ByteOrder.BigEndian, digest, 0x08);
+            GetBytes(h03 ^ h13 ^ h23 ^ h33, ByteOrder.BigEndian, digest, 0x0C);
+            GetBytes(h04 ^ h14 ^ h24 ^ h34, ByteOrder.BigEndian, digest, 0x10);
+            GetBytes(h05 ^ h15 ^ h25 ^ h35, ByteOrder.BigEndian, digest, 0x14);
+            GetBytes(h06 ^ h16 ^ h26 ^ h36, ByteOrder.BigEndian, digest, 0x18);
+            GetBytes(h07 ^ h17 ^ h27 ^ h37, ByteOrder.BigEndian, digest, 0x1C);
 
             ProcessBlock();
 
-            GetBytes(h00 ^ h10 ^ h20 ^ h30 ^ h40, ByteOrder.BigEndian, digest, 0x20);
-            GetBytes(h01 ^ h11 ^ h21 ^ h31 ^ h41, ByteOrder.BigEndian, digest, 0x24);
-            GetBytes(h02 ^ h12 ^ h22 ^ h32 ^ h42, ByteOrder.BigEndian, digest, 0x28);
-            GetBytes(h03 ^ h13 ^ h23 ^ h33 ^ h43, ByteOrder.BigEndian, digest, 0x2C);
-            GetBytes(h04 ^ h14 ^ h24 ^ h34 ^ h44, ByteOrder.BigEndian, digest, 0x30);
-            GetBytes(h05 ^ h15 ^ h25 ^ h35 ^ h45, ByteOrder.BigEndian, digest, 0x34);
-            GetBytes(h06 ^ h16 ^ h26 ^ h36 ^ h46, ByteOrder.BigEndian, digest, 0x38);
-            GetBytes(h07 ^ h17 ^ h27 ^ h37 ^ h47, ByteOrder.BigEndian, digest, 0x3C);
+            GetBytes(h00 ^ h10 ^ h20 ^ h30, ByteOrder.BigEndian, digest, 0x20);
+            GetBytes(h01 ^ h11 ^ h21 ^ h31, ByteOrder.BigEndian, digest, 0x24);
+            GetBytes(h02 ^ h12 ^ h22 ^ h32, ByteOrder.BigEndian, digest, 0x28);
+            GetBytes(h03 ^ h13 ^ h23 ^ h33, ByteOrder.BigEndian, digest, 0x2C);
 
             return digest;
         }
@@ -138,16 +125,8 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             uint v35 = h35;
             uint v36 = h36;
             uint v37 = h37;
-            uint v40 = h40;
-            uint v41 = h41;
-            uint v42 = h42;
-            uint v43 = h43;
-            uint v44 = h44;
-            uint v45 = h45;
-            uint v46 = h46;
-            uint v47 = h47;
 
-            #region MI5
+            #region MI4
 
             uint m0 = ToUInt32(buffer, 0x00, ByteOrder.BigEndian);
             uint m1 = ToUInt32(buffer, 0x04, ByteOrder.BigEndian);
@@ -186,14 +165,6 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             a5 = a5 ^ b5;
             a6 = a6 ^ b6;
             a7 = a7 ^ b7;
-            a0 = a0 ^ v40;
-            a1 = a1 ^ v41;
-            a2 = a2 ^ v42;
-            a3 = a3 ^ v43;
-            a4 = a4 ^ v44;
-            a5 = a5 ^ v45;
-            a6 = a6 ^ v46;
-            a7 = a7 ^ v47;
             tmp = a7;
             a7 = a6;
             a6 = a5;
@@ -235,14 +206,6 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             v35 = a5 ^ v35;
             v36 = a6 ^ v36;
             v37 = a7 ^ v37;
-            v40 = a0 ^ v40;
-            v41 = a1 ^ v41;
-            v42 = a2 ^ v42;
-            v43 = a3 ^ v43;
-            v44 = a4 ^ v44;
-            v45 = a5 ^ v45;
-            v46 = a6 ^ v46;
-            v47 = a7 ^ v47;
             tmp = v07;
             b7 = v06;
             b6 = v05;
@@ -252,116 +215,14 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             b2 = v01;
             b1 = v00 ^ tmp;
             b0 = tmp;
-            b0 = b0 ^ v10;
-            b1 = b1 ^ v11;
-            b2 = b2 ^ v12;
-            b3 = b3 ^ v13;
-            b4 = b4 ^ v14;
-            b5 = b5 ^ v15;
-            b6 = b6 ^ v16;
-            b7 = b7 ^ v17;
-            tmp = v17;
-            v17 = v16;
-            v16 = v15;
-            v15 = v14;
-            v14 = v13 ^ tmp;
-            v13 = v12 ^ tmp;
-            v12 = v11;
-            v11 = v10 ^ tmp;
-            v10 = tmp;
-            v10 = v10 ^ v20;
-            v11 = v11 ^ v21;
-            v12 = v12 ^ v22;
-            v13 = v13 ^ v23;
-            v14 = v14 ^ v24;
-            v15 = v15 ^ v25;
-            v16 = v16 ^ v26;
-            v17 = v17 ^ v27;
-            tmp = v27;
-            v27 = v26;
-            v26 = v25;
-            v25 = v24;
-            v24 = v23 ^ tmp;
-            v23 = v22 ^ tmp;
-            v22 = v21;
-            v21 = v20 ^ tmp;
-            v20 = tmp;
-            v20 = v20 ^ v30;
-            v21 = v21 ^ v31;
-            v22 = v22 ^ v32;
-            v23 = v23 ^ v33;
-            v24 = v24 ^ v34;
-            v25 = v25 ^ v35;
-            v26 = v26 ^ v36;
-            v27 = v27 ^ v37;
-            tmp = v37;
-            v37 = v36;
-            v36 = v35;
-            v35 = v34;
-            v34 = v33 ^ tmp;
-            v33 = v32 ^ tmp;
-            v32 = v31;
-            v31 = v30 ^ tmp;
-            v30 = tmp;
-            v30 = v30 ^ v40;
-            v31 = v31 ^ v41;
-            v32 = v32 ^ v42;
-            v33 = v33 ^ v43;
-            v34 = v34 ^ v44;
-            v35 = v35 ^ v45;
-            v36 = v36 ^ v46;
-            v37 = v37 ^ v47;
-            tmp = v47;
-            v47 = v46;
-            v46 = v45;
-            v45 = v44;
-            v44 = v43 ^ tmp;
-            v43 = v42 ^ tmp;
-            v42 = v41;
-            v41 = v40 ^ tmp;
-            v40 = tmp;
-            v40 = v40 ^ v00;
-            v41 = v41 ^ v01;
-            v42 = v42 ^ v02;
-            v43 = v43 ^ v03;
-            v44 = v44 ^ v04;
-            v45 = v45 ^ v05;
-            v46 = v46 ^ v06;
-            v47 = v47 ^ v07;
-            tmp = b7;
-            v07 = b6;
-            v06 = b5;
-            v05 = b4;
-            v04 = b3 ^ tmp;
-            v03 = b2 ^ tmp;
-            v02 = b1;
-            v01 = b0 ^ tmp;
-            v00 = tmp;
-            v00 = v00 ^ v40;
-            v01 = v01 ^ v41;
-            v02 = v02 ^ v42;
-            v03 = v03 ^ v43;
-            v04 = v04 ^ v44;
-            v05 = v05 ^ v45;
-            v06 = v06 ^ v46;
-            v07 = v07 ^ v47;
-            tmp = v47;
-            v47 = v46;
-            v46 = v45;
-            v45 = v44;
-            v44 = v43 ^ tmp;
-            v43 = v42 ^ tmp;
-            v42 = v41;
-            v41 = v40 ^ tmp;
-            v40 = tmp;
-            v40 = v40 ^ v30;
-            v41 = v41 ^ v31;
-            v42 = v42 ^ v32;
-            v43 = v43 ^ v33;
-            v44 = v44 ^ v34;
-            v45 = v45 ^ v35;
-            v46 = v46 ^ v36;
-            v47 = v47 ^ v37;
+            b0 = b0 ^ v30;
+            b1 = b1 ^ v31;
+            b2 = b2 ^ v32;
+            b3 = b3 ^ v33;
+            b4 = b4 ^ v34;
+            b5 = b5 ^ v35;
+            b6 = b6 ^ v36;
+            b7 = b7 ^ v37;
             tmp = v37;
             v37 = v36;
             v36 = v35;
@@ -405,22 +266,22 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             v12 = v11;
             v11 = v10 ^ tmp;
             v10 = tmp;
-            v10 = v10 ^ b0;
-            v11 = v11 ^ b1;
-            v12 = v12 ^ b2;
-            v13 = v13 ^ b3;
-            v14 = v14 ^ b4;
-            v15 = v15 ^ b5;
-            v16 = v16 ^ b6;
-            v17 = v17 ^ b7;
-            v00 = v00 ^ m0;
-            v01 = v01 ^ m1;
-            v02 = v02 ^ m2;
-            v03 = v03 ^ m3;
-            v04 = v04 ^ m4;
-            v05 = v05 ^ m5;
-            v06 = v06 ^ m6;
-            v07 = v07 ^ m7;
+            v10 = v10 ^ v00;
+            v11 = v11 ^ v01;
+            v12 = v12 ^ v02;
+            v13 = v13 ^ v03;
+            v14 = v14 ^ v04;
+            v15 = v15 ^ v05;
+            v16 = v16 ^ v06;
+            v17 = v17 ^ v07;
+            v00 = b0 ^ m0;
+            v01 = b1 ^ m1;
+            v02 = b2 ^ m2;
+            v03 = b3 ^ m3;
+            v04 = b4 ^ m4;
+            v05 = b5 ^ m5;
+            v06 = b6 ^ m6;
+            v07 = b7 ^ m7;
             tmp = m7;
             m7 = m6;
             m6 = m5;
@@ -472,27 +333,10 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             v35 = v35 ^ m5;
             v36 = v36 ^ m6;
             v37 = v37 ^ m7;
-            tmp = m7;
-            m7 = m6;
-            m6 = m5;
-            m5 = m4;
-            m4 = m3 ^ tmp;
-            m3 = m2 ^ tmp;
-            m2 = m1;
-            m1 = m0 ^ tmp;
-            m0 = tmp;
-            v40 = v40 ^ m0;
-            v41 = v41 ^ m1;
-            v42 = v42 ^ m2;
-            v43 = v43 ^ m3;
-            v44 = v44 ^ m4;
-            v45 = v45 ^ m5;
-            v46 = v46 ^ m6;
-            v47 = v47 ^ m7;
 
             #endregion
 
-            #region P5
+            #region P4
 
             ulong w0, w1, w2, w3, w4, w5, w6, w7;
 
@@ -508,10 +352,6 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             v35 = RotateLeft(v35, 3);
             v36 = RotateLeft(v36, 3);
             v37 = RotateLeft(v37, 3);
-            v44 = RotateLeft(v44, 4);
-            v45 = RotateLeft(v45, 4);
-            v46 = RotateLeft(v46, 4);
-            v47 = RotateLeft(v47, 4);
 
             w0 = v00 | ((ulong)v10 << 32);
             w1 = v01 | ((ulong)v11 << 32);
@@ -769,66 +609,6 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             v27 = (uint)w7;
             v37 = (uint)(w7 >> 32);
 
-            for (int r = 0; r < 8; r++)
-            {
-                tmp = v40;
-                v40 |= v41;
-                v42 ^= v43;
-                v41 = ~v41;
-                v40 ^= v43;
-                v43 &= tmp;
-                v41 ^= v43;
-                v43 ^= v42;
-                v42 &= v40;
-                v40 = ~v40;
-                v42 ^= v41;
-                v41 |= v43;
-                tmp ^= v41;
-                v43 ^= v42;
-                v42 &= v41;
-                v41 ^= v40;
-                v40 = tmp;
-                tmp = v45;
-                v45 |= v46;
-                v47 ^= v44;
-                v46 = ~v46;
-                v45 ^= v44;
-                v44 &= tmp;
-                v46 ^= v44;
-                v44 ^= v47;
-                v47 &= v45;
-                v45 = ~v45;
-                v47 ^= v46;
-                v46 |= v44;
-                tmp ^= v46;
-                v44 ^= v47;
-                v47 &= v46;
-                v46 ^= v45;
-                v45 = tmp;
-                v44 ^= v40;
-                v40 = RotateLeft(v40, 2) ^ v44;
-                v44 = RotateLeft(v44, 14) ^ v40;
-                v40 = RotateLeft(v40, 10) ^ v44;
-                v44 = RotateLeft(v44, 1);
-                v45 ^= v41;
-                v41 = RotateLeft(v41, 2) ^ v45;
-                v45 = RotateLeft(v45, 14) ^ v41;
-                v41 = RotateLeft(v41, 10) ^ v45;
-                v45 = RotateLeft(v45, 1);
-                v46 ^= v42;
-                v42 = RotateLeft(v42, 2) ^ v46;
-                v46 = RotateLeft(v46, 14) ^ v42;
-                v42 = RotateLeft(v42, 10) ^ v46;
-                v46 = RotateLeft(v46, 1);
-                v47 ^= v43;
-                v43 = RotateLeft(v43, 2) ^ v47;
-                v47 = RotateLeft(v47, 14) ^ v43;
-                v43 = RotateLeft(v43, 10) ^ v47;
-                v47 = RotateLeft(v47, 1);
-                v40 ^= RC40[r];
-                v44 ^= RC44[r];
-            }
-
             #endregion
 
             h00 = v00;
@@ -863,14 +643,6 @@ namespace Zergatul.Security.Zergatul.MessageDigest
             h35 = v35;
             h36 = v36;
             h37 = v37;
-            h40 = v40;
-            h41 = v41;
-            h42 = v42;
-            h43 = v43;
-            h44 = v44;
-            h45 = v45;
-            h46 = v46;
-            h47 = v47;
         }
     }
 }

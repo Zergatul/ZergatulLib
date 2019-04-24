@@ -75,6 +75,9 @@
     <Compile Include="MessageDigest\Keccak256ests.cs" />
     <Compile Include="MessageDigest\Keccak384Tests.cs" />
     <Compile Include="MessageDigest\Keccak224Tests.cs" />
+    <Compile Include="MessageDigest\Luffa224Tests.cs" />
+    <Compile Include="MessageDigest\Luffa256Tests.cs" />
+    <Compile Include="MessageDigest\Luffa384Tests.cs" />
     <Compile Include="MessageDigest\SHA3x256Tests.cs" />
     <Compile Include="MessageDigest\SHA3x224Tests.cs" />
     <Compile Include="MessageDigest\SHA3x384Tests.cs" />

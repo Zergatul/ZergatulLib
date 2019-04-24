@@ -74,7 +74,11 @@
     <Compile Include="MessageDigest\Keccak256.cs" />
     <Compile Include="MessageDigest\Keccak384.cs" />
     <Compile Include="MessageDigest\Keccak512.cs" />
+    <Compile Include="MessageDigest\Luffa224.cs" />
+    <Compile Include="MessageDigest\Luffa256.cs" />
+    <Compile Include="MessageDigest\Luffa384.cs" />
     <Compile Include="MessageDigest\Luffa512.cs" />
+    <Compile Include="MessageDigest\LuffaConstants.cs" />
     <Compile Include="MessageDigest\MD2.cs" />
     <Compile Include="MessageDigest\MD4.cs" />
     <Compile Include="MessageDigest\MD5.cs" />
