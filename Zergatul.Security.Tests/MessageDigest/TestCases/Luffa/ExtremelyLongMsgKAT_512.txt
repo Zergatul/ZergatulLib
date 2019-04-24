@@ -1,0 +1,7 @@
+# ExtremelyLongMsgKAT_512.txt
+# Algorithm Name: Luffa
+# Principal Submitter: Dai Watanabe
+
+Repeat = 16777216
+Text = abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno
+MD = 29B6D811AE33B03B419DE935B7C52C92EE77B2A54D433BD4882054946D1701196559AFA6C8BA827676C8755987612D36F1424AE565671F1EEC74F94DD7964CC4

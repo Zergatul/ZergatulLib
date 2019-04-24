@@ -165,6 +165,54 @@
     <Content Include="MessageDigest\TestCases\ECHO\ShortMsgKAT_512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Luffa\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="MessageDigest\TestCases\SHA3\LongMsgKAT_224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -614,13 +662,13 @@
     <Content Include="MessageDigest\TestCases\CubeHash\NISTData224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Luffa224.txt">
+    <Content Include="MessageDigest\TestCases\Luffa\NISTData224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Luffa256.txt">
+    <Content Include="MessageDigest\TestCases\Luffa\NISTData256.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Luffa384.txt">
+    <Content Include="MessageDigest\TestCases\Luffa\NISTData384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\JH\ExtremelyLongMsgKAT_224.txt">
@@ -731,7 +779,7 @@
     <Content Include="MessageDigest\Skein384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Luffa512.txt">
+    <Content Include="MessageDigest\TestCases\Luffa\NISTData512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\Skein512.txt">

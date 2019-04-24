@@ -74,6 +74,7 @@
     <Compile Include="MessageDigest\Keccak256.cs" />
     <Compile Include="MessageDigest\Keccak384.cs" />
     <Compile Include="MessageDigest\Keccak512.cs" />
+    <Compile Include="MessageDigest\Luffa512.cs" />
     <Compile Include="MessageDigest\MD2.cs" />
     <Compile Include="MessageDigest\MD4.cs" />
     <Compile Include="MessageDigest\MD5.cs" />
@@ -111,6 +112,7 @@
   <ItemGroup>
     <None Include="CodeGen\Keccak.ps1" />
     <None Include="CodeGen\ECHO.ps1" />
+    <None Include="CodeGen\Luffa.ps1" />
     <None Include="CodeGen\SHAvite3.ps1" />
   </ItemGroup>
   <ItemGroup>
