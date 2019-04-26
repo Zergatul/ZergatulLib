@@ -99,6 +99,7 @@
     <Compile Include="MessageDigest\SHAvite3x384.cs" />
     <Compile Include="MessageDigest\SHAvite3x256.cs" />
     <Compile Include="MessageDigest\SHAvite3x512.cs" />
+    <Compile Include="MessageDigest\SIMD512.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tls\HandshakeState.cs" />
     <Compile Include="Tls\StateMachine.cs" />
@@ -118,6 +119,7 @@
     <None Include="CodeGen\ECHO.ps1" />
     <None Include="CodeGen\Luffa.ps1" />
     <None Include="CodeGen\SHAvite3.ps1" />
+    <None Include="CodeGen\SIMD.ps1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CodeGen\BLAKE256.ps1" />
