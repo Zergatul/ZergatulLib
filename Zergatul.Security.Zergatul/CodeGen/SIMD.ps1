@@ -47,10 +47,10 @@ function FFT8($params)
     $d = $params[2]
 
     Write-Output "do {"
-    Write-Output "uint x0 = x[$xb];"
-    Write-Output "uint x1 = x[$xb + $xs];"
-    Write-Output "uint x2 = x[$xb + 2 * $xs];"
-    Write-Output "uint x3 = x[$xb + 3 * $xs];"
+    Write-Output "uint x0 = x[from + $xb];"
+    Write-Output "uint x1 = x[from + $xb + $xs];"
+    Write-Output "uint x2 = x[from + $xb + 2 * $xs];"
+    Write-Output "uint x3 = x[from + $xb + 3 * $xs];"
     Write-Output "uint a0 = x0 + x2;"
     Write-Output "uint a1 = x0 + (x2 << 4);"
     Write-Output "uint a2 = x0 - x2;"
@@ -127,9 +127,11 @@ function FFT256($params)
 
 function fft64
 {
-    Write-Output "private static void fft64(object x, ulong xs, uint q)"
+    Write-Output "private static void fft64(uint[] x, int from, ulong xs, uint q)"
     Write-Output "{"
     Write-Output "ulong xd = xs << 1;"
+    FFT32('0', 'xd', '0', 'label_a')
+    FFT32('xs', 'xd', '0', 'label_a')
     Write-Output "}"
 }
 
