@@ -61,5 +61,9 @@
         public const string ECHO256 = nameof(ECHO256);
         public const string ECHO384 = nameof(ECHO384);
         public const string ECHO512 = nameof(ECHO512);
+        public const string SIMD224 = nameof(SIMD224);
+        public const string SIMD256 = nameof(SIMD256);
+        public const string SIMD384 = nameof(SIMD384);
+        public const string SIMD512 = nameof(SIMD512);
     }
 }

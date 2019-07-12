@@ -1,0 +1,7 @@
+# ExtremelyLongMsgKAT_384.txt
+# Algorithm Name: SIMD
+# Principal Submitter: Gaetan Leurent
+
+Repeat = 16777216
+Text = abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmno
+MD = 5D2D3EDA642482A24ACB239DC9FF97B6CE91E9B946B53D34DC20DEB9C1207FE9E0DED128A31D30441E366C8BDBA27544
