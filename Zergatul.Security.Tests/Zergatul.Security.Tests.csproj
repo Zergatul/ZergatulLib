@@ -117,6 +117,11 @@
     <Compile Include="MessageDigest\Groestl384Tests.cs" />
     <Compile Include="MessageDigest\BMW256Tests.cs" />
     <Compile Include="MessageDigest\JH512Tests.cs" />
+    <Compile Include="MessageDigest\Skein512x224Tests.cs" />
+    <Compile Include="MessageDigest\Skein512x256Tests.cs" />
+    <Compile Include="MessageDigest\Skein512x384Tests.cs" />
+    <Compile Include="MessageDigest\Skein512x512Tests.cs" />
+    <Compile Include="MessageDigest\X11Tests.cs" />
     <Compile Include="MockSecureRandom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Signature\ECDSATests.cs" />
@@ -350,6 +355,54 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\SIMD\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Skein512\ShortMsgKAT_512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />

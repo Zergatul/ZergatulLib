@@ -65,5 +65,7 @@
         public const string SIMD256 = nameof(SIMD256);
         public const string SIMD384 = nameof(SIMD384);
         public const string SIMD512 = nameof(SIMD512);
+
+        public const string X11 = nameof(X11);
     }
 }
