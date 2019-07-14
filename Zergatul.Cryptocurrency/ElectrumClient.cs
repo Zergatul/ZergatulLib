@@ -16,7 +16,7 @@ namespace Zergatul.Cryptocurrency
         private Stream _stream;
         private int _id;
 
-        public Version Version { get; set; }
+        public Version Version { get; set; } = new Version(1, 0);
 
         public ElectrumClient(string host, int port, bool tls = true)
         {
@@ -27,26 +27,28 @@ namespace Zergatul.Cryptocurrency
 
         public void Connect()
         {
-            //Console.Write("Connecting... ");
-            //var client = new TcpClient(_host, _port);
-            //Console.WriteLine("OK");
+            Console.Write("Connecting... ");
+            var client = new TcpClient(_host, _port);
+            Console.WriteLine("OK");
 
-            //if (_tls)
-            //{
-            //    Console.Write("Begin TLS handshake... ");
-            //    var tlsStream = new TlsStream(client.GetStream());
-            //    tlsStream.Settings.ServerCertificateValidationOverride = cert => true;
-            //    tlsStream.AuthenticateAsClient(_host);
-            //    Console.WriteLine("OK");
+            if (_tls)
+            {
+                Console.Write("Begin TLS handshake... ");
+                //var tlsStream = new TlsStream(client.GetStream());
+                //tlsStream.Settings.ServerCertificateValidationOverride = cert => true;
+                //tlsStream.AuthenticateAsClient(_host);
+                var tlsStream = new System.Net.Security.SslStream(client.GetStream(), false, (a, b, c, d) => true);
+                tlsStream.AuthenticateAsClient(_host);
+                Console.WriteLine("OK");
 
-            //    _stream = tlsStream;
-            //}
-            //else
-            //{
-            //    _stream = client.GetStream();
-            //}
+                _stream = tlsStream;
+            }
+            else
+            {
+                _stream = client.GetStream();
+            }
 
-            //_id = 1;
+            _id = 1;
         }
 
         public void Close()
@@ -56,8 +58,10 @@ namespace Zergatul.Cryptocurrency
 
         public string GetBlockHeader(int height)
         {
-            string method = Version >= new Version(1, 3) ? "blockchain.block.header" : "blockchain.block.get_header";
-            return ExecuteMethod(method, height, 1, 0);
+            if (Version < new Version(1, 3))
+                return ExecuteMethod("blockchain.block.get_header", height);
+            else
+                return ExecuteMethod("blockchain.block.header", height, 1, 0);
         }
 
         public string GetBlockChunk(string hash)

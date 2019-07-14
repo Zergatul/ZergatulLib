@@ -69,7 +69,12 @@
         public const string Hamsi256 = nameof(Hamsi256);
         public const string Hamsi384 = nameof(Hamsi384);
         public const string Hamsi512 = nameof(Hamsi512);
+        public const string Fugue224 = nameof(Fugue224);
+        public const string Fugue256 = nameof(Fugue256);
+        public const string Fugue384 = nameof(Fugue384);
+        public const string Fugue512 = nameof(Fugue512);
 
         public const string X11 = nameof(X11);
+        public const string X13 = nameof(X13);
     }
 }

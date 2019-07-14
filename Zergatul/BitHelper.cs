@@ -513,5 +513,63 @@ namespace Zergatul
             }
             return result;
         }
+
+        public static void ArrayRotateLeft<T>(T[] array, int elements)
+        {
+            // array rotate without memory allocation
+
+            int length = array.Length;
+            elements = elements % length;
+
+            for (int i = 0, j = elements - 1; i < j; i++, j--)
+            {
+                T buf = array[i];
+                array[i] = array[j];
+                array[j] = buf;
+            }
+
+            for (int i = elements, j = length - 1; i < j; i++, j--)
+            {
+                T buf = array[i];
+                array[i] = array[j];
+                array[j] = buf;
+            }
+
+            for (int i = 0, j = length - 1; i < j; i++, j--)
+            {
+                T buf = array[i];
+                array[i] = array[j];
+                array[j] = buf;
+            }
+        }
+
+        public static void ArrayRotateRight<T>(T[] array, int elements)
+        {
+            // array rotate without memory allocation
+
+            int length = array.Length;
+            elements = elements % length;
+
+            for (int i = 0, j = length - elements - 1; i < j; i++, j--)
+            {
+                T buf = array[i];
+                array[i] = array[j];
+                array[j] = buf;
+            }
+
+            for (int i = length - elements, j = length - 1; i < j; i++, j--)
+            {
+                T buf = array[i];
+                array[i] = array[j];
+                array[j] = buf;
+            }
+
+            for (int i = 0, j = length - 1; i < j; i++, j--)
+            {
+                T buf = array[i];
+                array[i] = array[j];
+                array[j] = buf;
+            }
+        }
     }
 }

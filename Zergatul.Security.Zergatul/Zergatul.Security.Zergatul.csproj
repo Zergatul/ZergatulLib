@@ -60,6 +60,8 @@
     <Compile Include="MessageDigest\ECHO384.cs" />
     <Compile Include="MessageDigest\ECHO256.cs" />
     <Compile Include="MessageDigest\ECHO512.cs" />
+    <Compile Include="MessageDigest\Fugue512.cs" />
+    <Compile Include="MessageDigest\FugueConstants.cs" />
     <Compile Include="MessageDigest\Groestl224.cs" />
     <Compile Include="MessageDigest\Groestl384.cs" />
     <Compile Include="MessageDigest\Groestl256.cs" />
@@ -114,6 +116,7 @@
     <Compile Include="MessageDigest\Skein512x256.cs" />
     <Compile Include="MessageDigest\Skein512x384.cs" />
     <Compile Include="MessageDigest\Skein512x512.cs" />
+    <Compile Include="MessageDigest\X13.cs" />
     <Compile Include="MessageDigest\X11.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tls\HandshakeState.cs" />
