@@ -71,6 +71,10 @@ namespace Zergatul.Security.Zergatul
             RegisterMessageDigest(MessageDigests.Skein512x256, () => new Skein512x256());
             RegisterMessageDigest(MessageDigests.Skein512x384, () => new Skein512x384());
             RegisterMessageDigest(MessageDigests.Skein512x512, () => new Skein512x512());
+            RegisterMessageDigest(MessageDigests.Hamsi224, () => new Hamsi224());
+            RegisterMessageDigest(MessageDigests.Hamsi256, () => new Hamsi256());
+            RegisterMessageDigest(MessageDigests.Hamsi384, () => new Hamsi384());
+            RegisterMessageDigest(MessageDigests.Hamsi512, () => new Hamsi512());
 
             RegisterMessageDigest(MessageDigests.X11, () => new X11());
         }

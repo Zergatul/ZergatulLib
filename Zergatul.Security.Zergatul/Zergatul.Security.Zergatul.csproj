@@ -65,6 +65,11 @@
     <Compile Include="MessageDigest\Groestl256.cs" />
     <Compile Include="MessageDigest\Groestl512.cs" />
     <Compile Include="MessageDigest\GroestlConstants.cs" />
+    <Compile Include="MessageDigest\Hamsi224.cs" />
+    <Compile Include="MessageDigest\Hamsi256.cs" />
+    <Compile Include="MessageDigest\Hamsi384.cs" />
+    <Compile Include="MessageDigest\Hamsi512.cs" />
+    <Compile Include="MessageDigest\HamsiConstants.cs" />
     <Compile Include="MessageDigest\JH.cs" />
     <Compile Include="MessageDigest\JH224.cs" />
     <Compile Include="MessageDigest\JH256.cs" />
@@ -125,6 +130,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="CodeGen\Hamsi.ps1" />
     <None Include="CodeGen\Keccak.ps1" />
     <None Include="CodeGen\ECHO.ps1" />
     <None Include="CodeGen\Luffa.ps1" />

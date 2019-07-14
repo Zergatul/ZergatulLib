@@ -68,6 +68,10 @@
     <Compile Include="MessageDigest\ECHO384Tests.cs" />
     <Compile Include="MessageDigest\Groestl224Tests.cs" />
     <Compile Include="MessageDigest\Groestl256Tests.cs" />
+    <Compile Include="MessageDigest\Hamsi224Tests.cs" />
+    <Compile Include="MessageDigest\Hamsi384Tests.cs" />
+    <Compile Include="MessageDigest\Hamsi256Tests.cs" />
+    <Compile Include="MessageDigest\Hamsi512Tests.cs" />
     <Compile Include="MessageDigest\JH224Tests.cs" />
     <Compile Include="MessageDigest\JH256Tests.cs" />
     <Compile Include="MessageDigest\JH384Tests.cs" />
@@ -175,6 +179,54 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\ECHO\ShortMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ExtremelyLongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ExtremelyLongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ExtremelyLongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ExtremelyLongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\LongMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\LongMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\LongMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\LongMsgKAT_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\MonteCarlo_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\MonteCarlo_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\MonteCarlo_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\MonteCarlo_512.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ShortMsgKAT_224.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ShortMsgKAT_256.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ShortMsgKAT_384.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MessageDigest\TestCases\Hamsi\ShortMsgKAT_512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\Luffa\ExtremelyLongMsgKAT_224.txt">
