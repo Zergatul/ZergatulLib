@@ -116,6 +116,8 @@
     <Compile Include="MessageDigest\Skein512x256.cs" />
     <Compile Include="MessageDigest\Skein512x384.cs" />
     <Compile Include="MessageDigest\Skein512x512.cs" />
+    <Compile Include="MessageDigest\Whirlpool.cs" />
+    <Compile Include="MessageDigest\WhirlpoolConstants.cs" />
     <Compile Include="MessageDigest\X13.cs" />
     <Compile Include="MessageDigest\X11.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -139,6 +141,7 @@
     <None Include="CodeGen\Luffa.ps1" />
     <None Include="CodeGen\SHAvite3.ps1" />
     <None Include="CodeGen\SIMD.ps1" />
+    <None Include="CodeGen\Whirlpool.ps1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CodeGen\BLAKE256.ps1" />

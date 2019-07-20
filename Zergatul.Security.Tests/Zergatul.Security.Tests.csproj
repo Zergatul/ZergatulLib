@@ -126,6 +126,7 @@
     <Compile Include="MessageDigest\Skein512x256Tests.cs" />
     <Compile Include="MessageDigest\Skein512x384Tests.cs" />
     <Compile Include="MessageDigest\Skein512x512Tests.cs" />
+    <Compile Include="MessageDigest\WhirlpoolTests.cs" />
     <Compile Include="MessageDigest\X13Tests.cs" />
     <Compile Include="MessageDigest\X11Tests.cs" />
     <Compile Include="MockSecureRandom.cs" />

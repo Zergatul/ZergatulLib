@@ -76,6 +76,7 @@ namespace Zergatul.Security.Zergatul
             RegisterMessageDigest(MessageDigests.Hamsi384, () => new Hamsi384());
             RegisterMessageDigest(MessageDigests.Hamsi512, () => new Hamsi512());
             RegisterMessageDigest(MessageDigests.Fugue512, () => new Fugue512());
+            RegisterMessageDigest(MessageDigests.Whirlpool, () => new Whirlpool());
 
             RegisterMessageDigest(MessageDigests.X11, () => new X11());
             RegisterMessageDigest(MessageDigests.X13, () => new X13());

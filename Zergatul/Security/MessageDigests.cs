@@ -73,6 +73,7 @@
         public const string Fugue256 = nameof(Fugue256);
         public const string Fugue384 = nameof(Fugue384);
         public const string Fugue512 = nameof(Fugue512);
+        public const string Whirlpool = nameof(Whirlpool);
 
         public const string X11 = nameof(X11);
         public const string X13 = nameof(X13);
