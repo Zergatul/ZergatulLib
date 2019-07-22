@@ -19,7 +19,7 @@ function F1($params)
     $x1 = $params[5]
     $x0 = $params[6]
 
-    "(($x1 & ($x0 ^ $x4)) ^ ($x2 & $x5) ^ ($x3 & $x6) ^ $x0)"
+    "($x1 & ($x0 ^ $x4)) ^ ($x2 & $x5) ^ ($x3 & $x6) ^ $x0"
 }
 
 function F2($params)
@@ -32,7 +32,7 @@ function F2($params)
     $x1 = $params[5]
     $x0 = $params[6]
 
-    "(($x2 & (($x1 & ~$x3) ^ ($x4 & $x5) ^ $x6 ^ $x0)) ^ ($x4 & ($x1 ^ $x5)) ^ ((x3 & $x5) ^ $x0))"
+    "($x2 & (($x1 & ~$x3) ^ ($x4 & $x5) ^ $x6 ^ $x0)) ^ ($x4 & ($x1 ^ $x5)) ^ ($x3 & $x5) ^ $x0"
 }
 
 function F3($params)
@@ -45,7 +45,7 @@ function F3($params)
     $x1 = $params[5]
     $x0 = $params[6]
 
-    "(($x3 & (($x1 & $x2) ^ $x6 ^ $x0)) ^ ($x1 & $x4) ^ ($x2 & $x5) ^ $x0)"
+    "($x3 & (($x1 & $x2) ^ $x6 ^ $x0)) ^ ($x1 & $x4) ^ ($x2 & $x5) ^ $x0"
 }
 
 function F4($params)
@@ -58,7 +58,7 @@ function F4($params)
     $x1 = $params[5]
     $x0 = $params[6]
 
-    "(($x3 & (($x1 & $x2) ^ ($x4 | $x6) ^ $x5)) ^ ($x4 & ((~$x2 & $x5) ^ $x1 ^ $x6 ^ $x0)) ^ ($x2 & $x6) ^ $x0)"
+    "($x3 & (($x1 & $x2) ^ ($x4 | $x6) ^ $x5)) ^ ($x4 & ((~$x2 & $x5) ^ $x1 ^ $x6 ^ $x0)) ^ ($x2 & $x6) ^ $x0"
 }
 
 function F5($params)
@@ -71,81 +71,81 @@ function F5($params)
     $x1 = $params[5]
     $x0 = $params[6]
 
-    "(($x3 & (($x1 & $x2) ^ ($x4 | $x6) ^ $x5)) ^ ($x4 & ((~$x2 & $x5) ^ $x1 ^ $x6 ^ $x0)) ^ ($x2 & $x6) ^ $x0)"
+    "($x0 & ~(($x1 & $x2 & $x3) ^ $x5)) ^ ($x1 & $x4) ^ ($x2 & $x5) ^ ($x3 & $x6)"
 }
 
 
 function FP5_1
 {
-    param($Input)
+    param([Parameter(Position=0)]$p)
     
-    $x6 = $input[0]
-    $x5 = $input[1]
-    $x4 = $input[2]
-    $x3 = $input[3]
-    $x2 = $input[4]
-    $x1 = $input[5]
-    $x0 = $input[6]
+    $x6 = $p[0]
+    $x5 = $p[1]
+    $x4 = $p[2]
+    $x3 = $p[3]
+    $x2 = $p[4]
+    $x1 = $p[5]
+    $x0 = $p[6]
 
     F1($x3, $x4, $x1, $x0, $x5, $x2, $x6)
 }
 
 function FP5_2
 {
-    param($Input)
+    param([Parameter(Position=0)]$p)
     
-    $x6 = $input[0]
-    $x5 = $input[1]
-    $x4 = $input[2]
-    $x3 = $input[3]
-    $x2 = $input[4]
-    $x1 = $input[5]
-    $x0 = $input[6]
+    $x6 = $p[0]
+    $x5 = $p[1]
+    $x4 = $p[2]
+    $x3 = $p[3]
+    $x2 = $p[4]
+    $x1 = $p[5]
+    $x0 = $p[6]
 
     F2($x6, $x2, $x1, $x0, $x3, $x4, $x5)
 }
 
 function FP5_3
 {
-    param($Input)
+    param([Parameter(Position=0)]$p)
     
-    $x6 = $input[0]
-    $x5 = $input[1]
-    $x4 = $input[2]
-    $x3 = $input[3]
-    $x2 = $input[4]
-    $x1 = $input[5]
-    $x0 = $input[6]
+    $x6 = $p[0]
+    $x5 = $p[1]
+    $x4 = $p[2]
+    $x3 = $p[3]
+    $x2 = $p[4]
+    $x1 = $p[5]
+    $x0 = $p[6]
 
     F3($x2, $x6, $x0, $x4, $x3, $x1, $x5)
 }
 
 function FP5_4
 {
-    param($Input)
+    param([Parameter(Position=0)]$p)
     
-    $x6 = $input[0]
-    $x5 = $input[1]
-    $x4 = $input[2]
-    $x3 = $input[3]
-    $x2 = $input[4]
-    $x1 = $input[5]
-    $x0 = $input[6]
+    $x6 = $p[0]
+    $x5 = $p[1]
+    $x4 = $p[2]
+    $x3 = $p[3]
+    $x2 = $p[4]
+    $x1 = $p[5]
+    $x0 = $p[6]
 
     F4($x1, $x5, $x3, $x2, $x0, $x4, $x6)
 }
 
 function FP5_5
 {
-    param($Input)
+    param([Parameter(Position=0)]$p)
     
-    $x6 = $input[0]
-    $x5 = $input[1]
-    $x4 = $input[2]
-    $x3 = $input[3]
-    $x2 = $input[4]
-    $x1 = $input[5]
-    $x0 = $input[6]
+    $x6 = $p[0]
+    $x5 = $p[1]
+    $x4 = $p[2]
+    $x3 = $p[3]
+    $x2 = $p[4]
+    $x1 = $p[5]
+    $x0 = $p[6]
 
     F5($x2, $x5, $x0, $x6, $x4, $x3, $x1)
 }
@@ -166,9 +166,8 @@ function STEP($params)
     $w  = $params[$i++]
     $c  = $params[$i++]
 
-    $t = & "FP$($n)_$($p)" -Input @($x6, $x5, $x4, $x3, $x2, $x1, $x0)
-    "t = $t;"
-    "$x7 = RotateRight(t, 7) + RotateRight($x7, 11) + $w + $c;"
+    $t = & "FP$($n)_$($p)" @($x6, $x5, $x4, $x3, $x2, $x1, $x0)
+    "$x7 = RotateRight($t, 7) + RotateRight($x7, 11) + $w + $c;"
 }
 
 function PASS1($params)
@@ -375,6 +374,8 @@ function PASS5($params)
     STEP($n, 5, 's1', 's0', 's7', 's6', 's5', 's4', 's3', 's2', "m$(hex(25, 2))", '0xC1A94FB6')
     STEP($n, 5, 's0', 's7', 's6', 's5', 's4', 's3', 's2', 's1', "m$(hex(15, 2))", '0x409F60C4')
 }
+
+Clear-Host
 
 "#region Pass 1"
 PASS1(5)

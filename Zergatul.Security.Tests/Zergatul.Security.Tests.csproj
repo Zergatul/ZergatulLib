@@ -73,6 +73,7 @@
     <Compile Include="MessageDigest\Hamsi384Tests.cs" />
     <Compile Include="MessageDigest\Hamsi256Tests.cs" />
     <Compile Include="MessageDigest\Hamsi512Tests.cs" />
+    <Compile Include="MessageDigest\Haval256Tests.cs" />
     <Compile Include="MessageDigest\JH224Tests.cs" />
     <Compile Include="MessageDigest\JH256Tests.cs" />
     <Compile Include="MessageDigest\JH384Tests.cs" />
@@ -131,6 +132,7 @@
     <Compile Include="MessageDigest\Skein512x384Tests.cs" />
     <Compile Include="MessageDigest\Skein512x512Tests.cs" />
     <Compile Include="MessageDigest\WhirlpoolTests.cs" />
+    <Compile Include="MessageDigest\X17Tests.cs" />
     <Compile Include="MessageDigest\X15Tests.cs" />
     <Compile Include="MessageDigest\X13Tests.cs" />
     <Compile Include="MessageDigest\X11Tests.cs" />

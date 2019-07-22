@@ -78,6 +78,7 @@
         public const string Shabal256 = nameof(Shabal256);
         public const string Shabal384 = nameof(Shabal384);
         public const string Shabal512 = nameof(Shabal512);
+        public const string Haval256 = nameof(Haval256);
         public const string Whirlpool = nameof(Whirlpool);
 
         public const string X11 = nameof(X11);

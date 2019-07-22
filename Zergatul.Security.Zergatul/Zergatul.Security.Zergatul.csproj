@@ -123,6 +123,7 @@
     <Compile Include="MessageDigest\Skein512x512.cs" />
     <Compile Include="MessageDigest\Whirlpool.cs" />
     <Compile Include="MessageDigest\WhirlpoolConstants.cs" />
+    <Compile Include="MessageDigest\X17.cs" />
     <Compile Include="MessageDigest\X15.cs" />
     <Compile Include="MessageDigest\X13.cs" />
     <Compile Include="MessageDigest\X11.cs" />
