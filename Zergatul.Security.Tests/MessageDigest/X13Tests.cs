@@ -15,6 +15,60 @@ namespace Zergatul.Security.Tests.MessageDigest
         private string Name => MessageDigests.X13;
 
         [TestMethod]
+        public void StratisBlock11511Test()
+        {
+            byte[] header =
+                // version
+                BitHelper.GetBytes(7, ByteOrder.LittleEndian)
+                // prev block
+                .Concat(BitHelper.HexToBytes("fe3828bcf77619a5e7c72a3525b61f0e000b4ab59e7c8ec18f004c5faa154403").Reverse())
+                // merkle
+                .Concat(BitHelper.HexToBytes("93be66a6e3c112eb5ad7545661a690e84fa8a7ba2ac64ab279039b5225cd8bab").Reverse())
+                // time
+                .Concat(BitHelper.GetBytes(1471160068, ByteOrder.LittleEndian))
+                // bits
+                .Concat(BitHelper.HexToBytes("1c08ef1b").Reverse())
+                // nonce
+                .Concat(BitHelper.GetBytes(3059428248, ByteOrder.LittleEndian))
+                .ToArray();
+
+            foreach (var provider in Providers)
+                using (var md = provider.GetMessageDigest(Name))
+                {
+                    var digest = md.Digest(header);
+                    var hash = BitHelper.BytesToHex(digest.Reverse().ToArray());
+                    Assert.IsTrue(hash == "0000000000e4f0d88a2cfdd5d3ffc7e00babeb27ae5941a16b3e2bc4a9afa7b4");
+                }
+        }
+
+        [TestMethod]
+        public void StratisBlock12035Test()
+        {
+            byte[] header =
+                // version
+                BitHelper.GetBytes(7, ByteOrder.LittleEndian)
+                // prev block
+                .Concat(BitHelper.HexToBytes("d0b3bd233c793afee73af6f9848fb4067e946fc08341524174b3573660d3632b").Reverse())
+                // merkle
+                .Concat(BitHelper.HexToBytes("688fd669dec1538f21427cc0c9bbafb50b50f79f7673bf5b9b12ddda23f972c8").Reverse())
+                // time
+                .Concat(BitHelper.GetBytes(1471177889, ByteOrder.LittleEndian))
+                // bits
+                .Concat(BitHelper.HexToBytes("1c066ebb").Reverse())
+                // nonce
+                .Concat(BitHelper.GetBytes(2915989926, ByteOrder.LittleEndian))
+                .ToArray();
+
+            foreach (var provider in Providers)
+                using (var md = provider.GetMessageDigest(Name))
+                {
+                    var digest = md.Digest(header);
+                    var hash = BitHelper.BytesToHex(digest.Reverse().ToArray());
+                    Assert.IsTrue(hash == "00000000004901d92abcd2e8a507f7d82f32c085b9137213161413d684343577");
+                }
+        }
+
+        [TestMethod]
         public void DeepOnionBlock1346541Test()
         {
             byte[] header =

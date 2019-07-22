@@ -72,6 +72,7 @@
     <Compile Include="MessageDigest\Hamsi384.cs" />
     <Compile Include="MessageDigest\Hamsi512.cs" />
     <Compile Include="MessageDigest\HamsiConstants.cs" />
+    <Compile Include="MessageDigest\Haval256.cs" />
     <Compile Include="MessageDigest\JH.cs" />
     <Compile Include="MessageDigest\JH224.cs" />
     <Compile Include="MessageDigest\JH256.cs" />
@@ -103,6 +104,10 @@
     <Compile Include="MessageDigest\SHA3x512.cs" />
     <Compile Include="MessageDigest\SHA512.cs" />
     <Compile Include="MessageDigest\SHA256.cs" />
+    <Compile Include="MessageDigest\Shabal224.cs" />
+    <Compile Include="MessageDigest\Shabal256.cs" />
+    <Compile Include="MessageDigest\Shabal384.cs" />
+    <Compile Include="MessageDigest\Shabal512.cs" />
     <Compile Include="MessageDigest\SHAvite3x224.cs" />
     <Compile Include="MessageDigest\SHAvite3x384.cs" />
     <Compile Include="MessageDigest\SHAvite3x256.cs" />
@@ -118,6 +123,7 @@
     <Compile Include="MessageDigest\Skein512x512.cs" />
     <Compile Include="MessageDigest\Whirlpool.cs" />
     <Compile Include="MessageDigest\WhirlpoolConstants.cs" />
+    <Compile Include="MessageDigest\X15.cs" />
     <Compile Include="MessageDigest\X13.cs" />
     <Compile Include="MessageDigest\X11.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -136,9 +142,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CodeGen\Hamsi.ps1" />
+    <None Include="CodeGen\Haval.ps1" />
     <None Include="CodeGen\Keccak.ps1" />
     <None Include="CodeGen\ECHO.ps1" />
     <None Include="CodeGen\Luffa.ps1" />
+    <None Include="CodeGen\Shabal.ps1" />
     <None Include="CodeGen\SHAvite3.ps1" />
     <None Include="CodeGen\SIMD.ps1" />
     <None Include="CodeGen\Whirlpool.ps1" />

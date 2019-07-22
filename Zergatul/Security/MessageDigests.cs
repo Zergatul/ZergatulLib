@@ -73,9 +73,16 @@
         public const string Fugue256 = nameof(Fugue256);
         public const string Fugue384 = nameof(Fugue384);
         public const string Fugue512 = nameof(Fugue512);
+        public const string Shabal192 = nameof(Shabal192);
+        public const string Shabal224 = nameof(Shabal224);
+        public const string Shabal256 = nameof(Shabal256);
+        public const string Shabal384 = nameof(Shabal384);
+        public const string Shabal512 = nameof(Shabal512);
         public const string Whirlpool = nameof(Whirlpool);
 
         public const string X11 = nameof(X11);
         public const string X13 = nameof(X13);
+        public const string X15 = nameof(X15);
+        public const string X17 = nameof(X17);
     }
 }

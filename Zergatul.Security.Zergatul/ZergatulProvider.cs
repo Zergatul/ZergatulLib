@@ -76,10 +76,15 @@ namespace Zergatul.Security.Zergatul
             RegisterMessageDigest(MessageDigests.Hamsi384, () => new Hamsi384());
             RegisterMessageDigest(MessageDigests.Hamsi512, () => new Hamsi512());
             RegisterMessageDigest(MessageDigests.Fugue512, () => new Fugue512());
+            RegisterMessageDigest(MessageDigests.Shabal224, () => new Shabal224());
+            RegisterMessageDigest(MessageDigests.Shabal256, () => new Shabal256());
+            RegisterMessageDigest(MessageDigests.Shabal384, () => new Shabal384());
+            RegisterMessageDigest(MessageDigests.Shabal512, () => new Shabal512());
             RegisterMessageDigest(MessageDigests.Whirlpool, () => new Whirlpool());
 
             RegisterMessageDigest(MessageDigests.X11, () => new X11());
             RegisterMessageDigest(MessageDigests.X13, () => new X13());
+            RegisterMessageDigest(MessageDigests.X15, () => new X15());
         }
 
         public override TlsStream GetTlsStream(Stream innerStream) => new Tls.TlsStream(innerStream);
