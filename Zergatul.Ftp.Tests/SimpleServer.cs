@@ -76,7 +76,7 @@ namespace Zergatul.Ftp.Tests
             }
         }
 
-        private void WriteToStream(NetworkStream stream, string data)
+        private void WriteToStream(System.Net.Sockets.NetworkStream stream, string data)
         {
             byte[] bytes = Encoding.ASCII.GetBytes(data);
             stream.Write(bytes, 0, bytes.Length);

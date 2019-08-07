@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Zergatul.Cryptography.Tests</RootNamespace>
     <AssemblyName>Zergatul.Cryptography.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -101,12 +101,6 @@
     <Compile Include="Symmetric\KuznyechikTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Zergatul\Zergatul.csproj">
-      <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
-      <Name>Zergatul</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Asymmetric\ed25519.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -124,6 +118,12 @@
     <None Include="Certificate\tools.ietf.org.crt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Zergatul\Zergatul.csproj">
+      <Project>{bd067870-0336-4f17-a5e1-b13ce4725e5f}</Project>
+      <Name>Zergatul</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

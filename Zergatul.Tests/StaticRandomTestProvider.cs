@@ -7,10 +7,14 @@ namespace Zergatul.Tests
     {
         public override string Name => "StaticRandomTest";
 
+        private byte[] _data;
+
         public StaticRandomTestProvider(byte[] data)
         {
-            RegisterSecureRandom(SecureRandoms.Default, () => new StaticSecureRandom(data));
+            _data = data;
         }
+
+        public override SecureRandom GetSecureRandom() => new StaticSecureRandom(_data);
 
         public static IDisposable Use(string hex) => Use(BitHelper.HexToBytes(hex));
 

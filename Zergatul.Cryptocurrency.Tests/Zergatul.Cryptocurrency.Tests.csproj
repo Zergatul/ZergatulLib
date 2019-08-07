@@ -92,7 +92,7 @@
       <Name>Zergatul.Tests</Name>
     </ProjectReference>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj">
-      <Project>{70DCFA02-0D6B-4220-8E1C-F1B8BA158FAC}</Project>
+      <Project>{bd067870-0336-4f17-a5e1-b13ce4725e5f}</Project>
       <Name>Zergatul</Name>
     </ProjectReference>
   </ItemGroup>

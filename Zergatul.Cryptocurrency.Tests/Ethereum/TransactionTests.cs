@@ -101,7 +101,7 @@ namespace Zergatul.Cryptocurrency.Tests.Ethereum
             Assert.IsTrue(tx.VerifySignature());
 
             // test high S
-            var s = new BigInteger(tx.s, ByteOrder.BigEndian);
+            var s = new Math.BigInteger(tx.s, ByteOrder.BigEndian);
             tx.s = (EllipticCurve.secp256k1.n - s).ToBytes(ByteOrder.BigEndian);
 
             Assert.IsFalse(tx.VerifySignature());
