@@ -104,11 +104,7 @@
     <Compile Include="MessageDigest\SIMD384Tests.cs" />
     <Compile Include="MessageDigest\SIMD256Tests.cs" />
     <Compile Include="MessageDigest\SIMD512Tests.cs" />
-    <Compile Include="MessageDigest\Skein224Tests.cs" />
-    <Compile Include="MessageDigest\Skein256Tests.cs" />
-    <Compile Include="MessageDigest\Skein384Tests.cs" />
     <Compile Include="MessageDigest\Luffa512Tests.cs" />
-    <Compile Include="MessageDigest\Skein512Tests.cs" />
     <Compile Include="MessageDigest\BMW512Tests.cs" />
     <Compile Include="MessageDigest\Groestl512Tests.cs" />
     <Compile Include="MessageDigest\MD4Tests.cs" />
@@ -141,6 +137,7 @@
     <Compile Include="Signature\ECDSATests.cs" />
     <Compile Include="StaticSecureRandom.cs" />
     <Compile Include="SymmetricCipher\AESTests.cs" />
+    <Compile Include="Tls\Zergatul\RecordLayerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="MessageDigest\TestCases\ECHO\ExtremelyLongMsgKAT_224.txt">
@@ -782,16 +779,30 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MessageDigest\BLAKE2b.txt">
+    <ProjectReference Include="..\Zergatul.Security.OpenSsl\Zergatul.Security.OpenSsl.csproj">
+      <Project>{cd0b67e1-ddc3-4db6-950a-704a60998b63}</Project>
+      <Name>Zergatul.Security.OpenSsl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul.Security.Zergatul\Zergatul.Security.Zergatul.csproj">
+      <Project>{c8e124ce-04b1-46aa-a370-0358337b08bb}</Project>
+      <Name>Zergatul.Security.Zergatul</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Zergatul\Zergatul.csproj">
+      <Project>{70dcfa02-0d6b-4220-8e1c-f1b8ba158fac}</Project>
+      <Name>Zergatul</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="MessageDigest\TestCases\BLAKE2\BLAKE2b.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\BLAKE2s.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE2\BLAKE2s.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\BLAKE2bKey.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE2\BLAKE2bKey.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\BLAKE2sKey.txt">
+    <Content Include="MessageDigest\TestCases\BLAKE2\BLAKE2sKey.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\BLAKE\ExtremelyLongMsgKAT_224.txt">
@@ -1022,19 +1033,19 @@
     <Content Include="MessageDigest\TestCases\NISTData.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Skein224.txt">
+    <Content Include="MessageDigest\TestCases\Skein512\NISTData224.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Skein256.txt">
+    <Content Include="MessageDigest\TestCases\Skein512\NISTData256.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Skein384.txt">
+    <Content Include="MessageDigest\TestCases\Skein512\NISTData384.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\Luffa\NISTData512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="MessageDigest\Skein512.txt">
+    <Content Include="MessageDigest\TestCases\Skein512\NISTData512.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MessageDigest\TestCases\CubeHash\ExtremelyLongMsgKAT_224.txt">

@@ -6,7 +6,7 @@ using Zergatul.Security.Zergatul;
 namespace Zergatul.Security.Tests.MessageDigest
 {
     [TestClass]
-    public class Skein512x512Tests : NISTMDTest
+    public class Skein512x512Tests : NISTMDTestWithData
     {
         protected override SecurityProvider[] Providers => new SecurityProvider[]
         {

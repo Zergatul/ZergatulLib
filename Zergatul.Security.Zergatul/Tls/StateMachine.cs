@@ -10,12 +10,19 @@ namespace Zergatul.Security.Zergatul.Tls
     {
         public MessageFlowState State;
         public ReadState RState;
+        public WriteState WState;
         public HandshakeState HState;
 
-        public void Reset()
+        public void ResetServer()
         {
-            State = MessageFlowState.Init;
-            HState = HandshakeState.Init;
+            HState = HandshakeState.ServerReadClientHello;
+            State = MessageFlowState.Reading;
+            RState = ReadState.ReadHeader;
+        }
+
+        public void ProcessRead()
+        {
+
         }
     }
 }

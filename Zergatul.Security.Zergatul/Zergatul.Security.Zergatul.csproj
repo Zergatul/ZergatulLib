@@ -5,7 +5,6 @@
     <Authors>Zergatul</Authors>
     <Company>Zergatul</Company>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Zergatul\Zergatul.csproj" />
   </ItemGroup>

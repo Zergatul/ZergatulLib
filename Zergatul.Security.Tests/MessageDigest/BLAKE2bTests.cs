@@ -44,7 +44,7 @@ namespace Zergatul.Security.Tests.MessageDigest
         [TestMethod]
         public void VectorsTest()
         {
-            var text = File.ReadAllText("MessageDigest/BLAKE2b.txt");
+            var text = File.ReadAllText("MessageDigest/TestCases/BLAKE2/BLAKE2b.txt");
             var r = new Regex("in:\\s+(?<data>[0-9a-f]*)\\s+hash:\\s+(?<hash>[0-9a-f]+)", RegexOptions.Multiline);
 
             foreach (var provider in _providers)
@@ -64,7 +64,7 @@ namespace Zergatul.Security.Tests.MessageDigest
         [TestMethod]
         public void KeyVectorsTest()
         {
-            var text = File.ReadAllText("MessageDigest/BLAKE2bKey.txt");
+            var text = File.ReadAllText("MessageDigest/TestCases/BLAKE2/BLAKE2bKey.txt");
             var r = new Regex("in:\\s+(?<data>[0-9a-f]*)\\s+key:\\s+(?<key>[0-9a-f]+)\\s+hash:\\s+(?<hash>[0-9a-f]+)", RegexOptions.Multiline);
 
             foreach (var provider in _providersWithParamSupport)

@@ -3,12 +3,20 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Zergatul.IO;
+using static Zergatul.Security.Zergatul.Tls.TlsConstants;
 
 namespace Zergatul.Security.Zergatul.Tls
 {
     class TlsStream : Security.TlsStream
     {
+        #region Constants
+        #endregion
+
         private Stream _innerStream;
+        private StateMachine _stateMachine;
+        private RecordLayer _recordLayer;
+        private bool _isServer;
+        private byte[] _readBuffer;
 
         public TlsStream(Stream innerStream)
         {
@@ -18,6 +26,9 @@ namespace Zergatul.Security.Zergatul.Tls
                 throw new ArgumentException("innerStream.CanRead should be true", nameof(innerStream));
             if (!innerStream.CanWrite)
                 throw new ArgumentException("innerStream.CanWrite should be true", nameof(innerStream));
+
+            _recordLayer.Init();
+            _readBuffer = new byte[TlsCiphertextMaxLength];
         }
 
         #region TlsStream overrides
@@ -34,12 +45,39 @@ namespace Zergatul.Security.Zergatul.Tls
 
         public override void AuthenticateAsServer()
         {
+            _isServer = true;
+            _stateMachine.ResetServer();
+            ProcessHandshake();
             throw new NotImplementedException();
         }
 
         public override Task AuthenticateAsServerAsync()
         {
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private void ProcessHandshake()
+        {
+            while (_stateMachine.State != MessageFlowState.Finished)
+            {
+                if (_stateMachine.State == MessageFlowState.Reading)
+                {
+                    switch (_stateMachine.RState)
+                    {
+                        case ReadState.ReadHeader:
+                            
+                            break;
+                        case ReadState.ReadBody:
+                            break;
+                        case ReadState.PostProcess:
+                            break;
+                    }
+                }
+            }
         }
 
         #endregion
