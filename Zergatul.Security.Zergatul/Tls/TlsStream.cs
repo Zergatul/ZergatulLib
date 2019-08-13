@@ -9,11 +9,9 @@ namespace Zergatul.Security.Zergatul.Tls
 {
     class TlsStream : Security.TlsStream
     {
-        #region Constants
-        #endregion
+        internal Stream InnerStream;
+        internal StateMachine StateMachine;
 
-        private Stream _innerStream;
-        private StateMachine _stateMachine;
         private RecordLayer _recordLayer;
         private bool _isServer;
         private byte[] _readBuffer;
@@ -27,7 +25,7 @@ namespace Zergatul.Security.Zergatul.Tls
             if (!innerStream.CanWrite)
                 throw new ArgumentException("innerStream.CanWrite should be true", nameof(innerStream));
 
-            _recordLayer.Init();
+            _recordLayer.Init(this);
             _readBuffer = new byte[TlsCiphertextMaxLength];
         }
 
@@ -46,7 +44,7 @@ namespace Zergatul.Security.Zergatul.Tls
         public override void AuthenticateAsServer()
         {
             _isServer = true;
-            _stateMachine.ResetServer();
+            StateMachine.ResetServer();
             ProcessHandshake();
             throw new NotImplementedException();
         }
@@ -62,14 +60,14 @@ namespace Zergatul.Security.Zergatul.Tls
 
         private void ProcessHandshake()
         {
-            while (_stateMachine.State != MessageFlowState.Finished)
+            while (StateMachine.State != MessageFlowState.Finished)
             {
-                if (_stateMachine.State == MessageFlowState.Reading)
+                if (StateMachine.State == MessageFlowState.Reading)
                 {
-                    switch (_stateMachine.RState)
+                    switch (StateMachine.RState)
                     {
                         case ReadState.ReadHeader:
-                            
+                            _recordLayer.ReadNext(_readBuffer, 4);
                             break;
                         case ReadState.ReadBody:
                             break;

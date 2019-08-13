@@ -6,93 +6,70 @@ namespace Zergatul.Security.Zergatul.Tls
 {
     struct RecordLayer
     {
-        public ContentType Type;
-        public ProtocolVersion Version;
-        public int Length;
-        public ReadState RState;
-        public byte[] ReadBuffer;
-        public int BufferOffset;
-        public int BufferLength;
+        private TlsStream _tlsStream;
+        private ReadState _readState;
+        private ContentType _contentType;
+        private ProtocolVersion _protocolVersion;
+        private int _recordLength;
+        private byte[] _readBuffer;
+        private int _readOffset;
 
-        public bool EndOfRecordMessage => BufferLength != 0 && BufferOffset == BufferLength;
-        public bool HasFullHigherProtocolMessage
+        public void Init(TlsStream tlsStream)
         {
-            get
+            _tlsStream = tlsStream;
+            _readState = ReadState.ReadHeader;
+            _readBuffer = new byte[RecordLayerHeaderLength];
+        }
+
+        public void ReadNext(byte[] buffer, int count)
+        {
+            int offset = 0;
+            while (offset < count)
             {
-                switch (Type)
+                if (_readState == ReadState.ReadHeader)
                 {
-                    case ContentType.Handshake:
-                        bool hasHeader = BufferLength >= BufferOffset + 4;
-                        if (!hasHeader)
-                            return false;
-                        int messageLength =
-                            ReadBuffer[BufferOffset] |
-                            (ReadBuffer[BufferOffset + 1] << 8) |
-                            (ReadBuffer[BufferOffset + 2] << 16);
-                        return BufferLength >= BufferOffset + 4 + messageLength;
+                    int index = 0;
+                    while (index < RecordLayerHeaderLength)
+                    {
+                        int read = _tlsStream.InnerStream.Read(_readBuffer, index, RecordLayerHeaderLength - index);
+                        if (read == 0)
+                            throw new TlsStreamRecordLayerException("Unexpected end of stream");
+                        index += read;
+                    }
 
-                    case ContentType.ChangeCipherSpec:
-                        throw new NotImplementedException();
+                    _contentType = (ContentType)_readBuffer[0];
+                    _protocolVersion = (ProtocolVersion)(_readBuffer[1] | (_readBuffer[2] << 8));
+                    _recordLength = _readBuffer[3] | (_readBuffer[4] << 8);
 
-                    case ContentType.ApplicationData:
-                        throw new NotImplementedException();
+                    ValidateContentType();
+                    ValidateLength();
 
-                    case ContentType.Alert:
-                        throw new NotImplementedException();
-
-                    default:
-                        throw new TlsStreamInternalErrorException("Invalid content type");
+                    _readState = ReadState.ReadBody;
+                    _readOffset = 0;
                 }
-            }
-        }
 
-        public void Init()
-        {
-            ReadBuffer = new byte[RecordLayerLimit];
-        }
-
-        public void ReadNext(Stream stream)
-        {
-            if (RState == ReadState.ReadHeader)
-            {
-                int index = 0;
-                while (index < RecordLayerHeaderLength)
+                if (_readState == ReadState.ReadBody)
                 {
-                    int read = stream.Read(ReadBuffer, index, RecordLayerHeaderLength - index);
+                    int read = _tlsStream.InnerStream.Read(buffer, offset, System.Math.Min(count - offset, _recordLength - _readOffset));
                     if (read == 0)
                         throw new TlsStreamRecordLayerException("Unexpected end of stream");
-                    index += read;
+
+                    offset += read;
+                    _readOffset += read;
+                    if (_readOffset == _recordLength)
+                        _readState = ReadState.ReadHeader;
                 }
-
-                Type = (ContentType)ReadBuffer[0];
-                Version = (ProtocolVersion)(ReadBuffer[1] | (ReadBuffer[2] << 8));
-                Length = ReadBuffer[3] | (ReadBuffer[4] << 8);
-
-                ValidateContentType();
-                ValidateLength();
-
-                RState = ReadState.ReadBody;
-                BufferOffset = 0;
-                BufferLength = 0;
-            }
-
-            if (RState == ReadState.ReadBody)
-            {
-                int read = stream.Read(ReadBuffer, BufferLength, Length - BufferLength);
-                if (read == 0)
-                    throw new TlsStreamRecordLayerException("Unexpected end of stream");
-
-                BufferLength += read;
-                if (BufferLength == Length)
-                    RState = ReadState.ReadHeader;
             }
         }
 
         private void ValidateContentType()
         {
-            switch (Type)
+            switch (_contentType)
             {
                 case ContentType.Handshake:
+                    if (_tlsStream.StateMachine.State == MessageFlowState.Reading)
+                        return;
+                    break;
                 case ContentType.ChangeCipherSpec:
                 case ContentType.ApplicationData:
                 case ContentType.Alert:
@@ -100,16 +77,16 @@ namespace Zergatul.Security.Zergatul.Tls
             }
 
             var exception = new TlsStreamRecordLayerException("Invalid content type");
-            exception.Data.Add("ContentType", (int)Type);
+            exception.Data.Add("ContentType", (int)_contentType);
             throw exception;
         }
 
         private void ValidateLength()
         {
-            if (Length > RecordLayerLimit)
+            if (_recordLength > RecordLayerLimit)
             {
                 var exception = new TlsStreamRecordLayerException("Record layer overflow");
-                exception.Data.Add("Length", Length);
+                exception.Data.Add("Length", _recordLength);
                 throw exception;
             }
         }
