@@ -33,7 +33,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Security.OpenSsl",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul", "Zergatul\Zergatul.csproj", "{BD067870-0336-4F17-A5E1-B13CE4725E5F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Security.Zergatul", "Zergatul.Security.Zergatul\Zergatul.Security.Zergatul.csproj", "{68FBAC9E-891F-4994-A2AF-6E3CEAB17F49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.Security.Zergatul", "Zergatul.Security.Zergatul\Zergatul.Security.Zergatul.csproj", "{68FBAC9E-891F-4994-A2AF-6E3CEAB17F49}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Test.Common", "Tests\Zergatul.Test.Common\Zergatul.Test.Common.csproj", "{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -225,6 +227,18 @@ Global
 		{68FBAC9E-891F-4994-A2AF-6E3CEAB17F49}.Release|x64.Build.0 = Release|Any CPU
 		{68FBAC9E-891F-4994-A2AF-6E3CEAB17F49}.Release|x86.ActiveCfg = Release|Any CPU
 		{68FBAC9E-891F-4994-A2AF-6E3CEAB17F49}.Release|x86.Build.0 = Release|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Debug|x64.Build.0 = Debug|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Debug|x86.Build.0 = Debug|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|x64.ActiveCfg = Release|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|x64.Build.0 = Release|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|x86.ActiveCfg = Release|Any CPU
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -239,6 +253,7 @@ Global
 		{710FB74D-151A-4576-B358-E1AB7C2C669D} = {FAFE9EE8-02C4-4DAD-B638-7B5235B015EB}
 		{A6A93DED-7BB6-4D84-84C9-1EEEB7CA8F33} = {FAFE9EE8-02C4-4DAD-B638-7B5235B015EB}
 		{7CB1A7F5-FE03-4FBC-A5FB-B0CD0055AA75} = {FAFE9EE8-02C4-4DAD-B638-7B5235B015EB}
+		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256} = {FAFE9EE8-02C4-4DAD-B638-7B5235B015EB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D529C049-9F55-421C-90B5-BC689D80BA9B}

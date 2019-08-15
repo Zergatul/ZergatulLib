@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Zergatul.Security.Zergatul.Tls
 {
-    struct StateMachine
+    class StateMachine
     {
         public MessageFlowState State;
         public ReadState RState;

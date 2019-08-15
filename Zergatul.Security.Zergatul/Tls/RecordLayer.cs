@@ -67,9 +67,10 @@ namespace Zergatul.Security.Zergatul.Tls
             switch (_contentType)
             {
                 case ContentType.Handshake:
-                    if (_tlsStream.StateMachine.State == MessageFlowState.Reading)
-                        return;
+                    if (_tlsStream.StateMachine.HState == HandshakeState.Finished)
+                        throw new TlsStreamRecordLayerException("Received handshake type record, but handshake is finished");
                     break;
+
                 case ContentType.ChangeCipherSpec:
                 case ContentType.ApplicationData:
                 case ContentType.Alert:

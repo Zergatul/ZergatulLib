@@ -2,6 +2,7 @@
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Security.Zergatul.Tls;
+using Zergatul.Test.Common;
 
 namespace Zergatul.Security.Tests.Tls.Zergatul
 {
@@ -11,12 +12,13 @@ namespace Zergatul.Security.Tests.Tls.Zergatul
         [TestMethod]
         public void EndOfStreamHeaderTest()
         {
-            Assert.ThrowsException<TlsStreamRecordLayerException>(() =>
+            Assert2.ThrowsException<TlsStreamRecordLayerException>(() =>
             {
+                var stream = new Security.Zergatul.Tls.TlsStream(new MemoryStream(new byte[] { 0x16, 0x01 }));
                 var rl = new RecordLayer();
-                rl.Init();
-                rl.ReadNext(new MemoryStream(new byte[] { 0x16, 0x01 }));
-            });
+                rl.Init(stream);
+                rl.ReadNext();
+            }, e => true);
         }
 
         [TestMethod]

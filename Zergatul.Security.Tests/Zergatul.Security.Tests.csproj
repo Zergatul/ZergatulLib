@@ -779,6 +779,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tests\Zergatul.Test.Common\Zergatul.Test.Common.csproj">
+      <Project>{63cd5923-7f2c-43aa-809b-5efc2ae3d256}</Project>
+      <Name>Zergatul.Test.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Zergatul.Security.OpenSsl\Zergatul.Security.OpenSsl.csproj">
       <Project>{cd0b67e1-ddc3-4db6-950a-704a60998b63}</Project>
       <Name>Zergatul.Security.OpenSsl</Name>
