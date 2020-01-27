@@ -22,14 +22,14 @@ namespace Zergatul.Security.OpenSsl.SymmetricCipher
 
         public override int BlockSize => 16;
 
-        public override void InitForDecryption(byte[] key, SymmetricCipherParameters parameters)
-        {
-            Init(key, false, parameters);
-        }
-
         public override void InitForEncryption(byte[] key, SymmetricCipherParameters parameters)
         {
             Init(key, true, parameters);
+        }
+
+        public override void InitForDecryption(byte[] key, SymmetricCipherParameters parameters)
+        {
+            Init(key, false, parameters);
         }
 
         public override int Update(byte[] input, int inputLength, byte[] output)

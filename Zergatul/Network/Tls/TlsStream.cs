@@ -103,7 +103,7 @@ namespace Zergatul.Network.Tls
 
             this._random =
                 Parameters.SecureRandom ??
-                Parameters.Provider.GetSecureRandom() ??
+                Parameters.Provider?.GetSecureRandom() ??
                 SecurityProvider.GetSecureRandomInstance();
             if (_random == null)
                 throw new InvalidOperationException("Cannot instantiate SecureRandom");
