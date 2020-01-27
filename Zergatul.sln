@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.Security.Zergatul"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Test.Common", "Tests\Zergatul.Test.Common\Zergatul.Test.Common.csproj", "{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.FileFormat.Pdf", "Zergatul.FileFormat.Pdf\Zergatul.FileFormat.Pdf.csproj", "{9687230E-3CCE-4701-B929-3DB2E18A5A3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -239,6 +241,18 @@ Global
 		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|x64.Build.0 = Release|Any CPU
 		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|x86.ActiveCfg = Release|Any CPU
 		{63CD5923-7F2C-43AA-809B-5EFC2AE3D256}.Release|x86.Build.0 = Release|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Debug|x64.Build.0 = Debug|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Debug|x86.Build.0 = Debug|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Release|x64.ActiveCfg = Release|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Release|x64.Build.0 = Release|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Release|x86.ActiveCfg = Release|Any CPU
+		{9687230E-3CCE-4701-B929-3DB2E18A5A3A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

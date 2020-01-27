@@ -2,8 +2,8 @@
 {
     public class TlsStreamRecordLayerException : TlsStreamException
     {
-        public TlsStreamRecordLayerException(string message)
-            : base(message)
+        internal TlsStreamRecordLayerException(ErrorCode error)
+            : base(error)
         {
 
         }

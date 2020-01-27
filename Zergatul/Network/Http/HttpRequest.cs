@@ -163,6 +163,7 @@ namespace Zergatul.Network.Http
         {
             byte[] buffer = Encoding.ASCII.GetBytes($"{Method} {Uri.PathAndQuery} HTTP/{Version}{Constants.TelnetEndOfLine}");
             stream.Write(buffer, 0, buffer.Length);
+            _orderedHeaders.Sort();
             foreach (string header in _orderedHeaders)
             {
                 buffer = Encoding.ASCII.GetBytes($"{header}: {_headers[header.ToLower()]}{Constants.TelnetEndOfLine}");
@@ -178,6 +179,7 @@ namespace Zergatul.Network.Http
         {
             byte[] buffer = Encoding.ASCII.GetBytes($"{Method} {Uri.PathAndQuery} HTTP/{Version}{Constants.TelnetEndOfLine}");
             await stream.WriteAsync(buffer, 0, buffer.Length, cancellationToken);
+            _orderedHeaders.Sort();
             foreach (string header in _orderedHeaders)
             {
                 buffer = Encoding.ASCII.GetBytes($"{header}: {_headers[header.ToLower()]}{Constants.TelnetEndOfLine}");

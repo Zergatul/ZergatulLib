@@ -9,10 +9,10 @@ namespace Zergatul.Security.Zergatul.Tls
 {
     class TlsStream : Security.TlsStream
     {
-        internal Stream InnerStream;
-        internal StateMachine StateMachine;
+        private readonly Stream _innerStream;
+        private readonly StateMachine _stateMachine;
+        private readonly RecordLayer _recordLayer;
 
-        private RecordLayer _recordLayer;
         private bool _isServer;
         private byte[] _readBuffer;
 
@@ -25,7 +25,9 @@ namespace Zergatul.Security.Zergatul.Tls
             if (!innerStream.CanWrite)
                 throw new ArgumentException("innerStream.CanWrite should be true", nameof(innerStream));
 
-            _recordLayer.Init(this);
+            _innerStream = innerStream;
+            _stateMachine = new StateMachine();
+            _recordLayer = new RecordLayer(_innerStream, _stateMachine);
             _readBuffer = new byte[TlsCiphertextMaxLength];
         }
 
@@ -44,7 +46,7 @@ namespace Zergatul.Security.Zergatul.Tls
         public override void AuthenticateAsServer()
         {
             _isServer = true;
-            StateMachine.ResetServer();
+            _stateMachine.ResetServer();
             ProcessHandshake();
             throw new NotImplementedException();
         }
@@ -60,11 +62,16 @@ namespace Zergatul.Security.Zergatul.Tls
 
         private void ProcessHandshake()
         {
-            while (StateMachine.State != MessageFlowState.Finished)
+            while (true)
             {
-                if (StateMachine.State == MessageFlowState.Reading)
+                if (_stateMachine.HState == HandshakeState.Finished)
+                    break;
+
+                if (_stateMachine.State == MessageFlowState.Reading)
                 {
-                    switch (StateMachine.RState)
+                    _recordLayer.FillContentType();
+
+                    switch (_stateMachine.RState)
                     {
                         case ReadState.ReadHeader:
                             _recordLayer.ReadNext(_readBuffer, 4);

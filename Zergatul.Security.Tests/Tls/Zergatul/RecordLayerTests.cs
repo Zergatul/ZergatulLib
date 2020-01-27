@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zergatul.Security.Zergatul;
 using Zergatul.Security.Zergatul.Tls;
 using Zergatul.Test.Common;
 
@@ -14,52 +15,61 @@ namespace Zergatul.Security.Tests.Tls.Zergatul
         {
             Assert2.ThrowsException<TlsStreamRecordLayerException>(() =>
             {
-                var stream = new Security.Zergatul.Tls.TlsStream(new MemoryStream(new byte[] { 0x16, 0x01 }));
-                var rl = new RecordLayer();
-                rl.Init(stream);
-                rl.ReadNext();
-            }, e => true);
+                var stream = new MemoryStream(new byte[] { 0x16, 0x01 });
+                var rl = new RecordLayer(stream, new StateMachine());
+                byte[] buffer = new byte[1024];
+                rl.ReadNext(buffer, 1);
+            }, e => e.ErrorCode == ErrorCodes.UnexpectedEndOfStream.Code);
         }
 
         [TestMethod]
         public void EndOfStreamDataTest()
         {
-            Assert.ThrowsException<TlsStreamRecordLayerException>(() =>
+            Assert2.ThrowsException<TlsStreamRecordLayerException>(() =>
             {
-                var rl = new RecordLayer();
-                rl.Init();
-                var ms = new MemoryStream(new byte[] { 0x16, 0x03, 0x03, 0x02, 0x00, 0x00 });
-                while (true)
-                {
-                    rl.ReadNext(ms);
-                    if (rl.EndOfRecordMessage)
-                        return;
-                    if (rl.HasFullHigherProtocolMessage)
-                        return;
-                }
-            });
+                var stream = new MemoryStream(new byte[] { 0x16, 0x03, 0x03, 0x02, 0x00, 0x00 });
+                var rl = new RecordLayer(stream, new StateMachine());
+                byte[] buffer = new byte[1024];
+                rl.ReadNext(buffer, 2);
+            }, e => e.ErrorCode == ErrorCodes.UnexpectedEndOfStream.Code);
         }
 
         [TestMethod]
         public void InvalidContentTypeTest()
         {
-            Assert.ThrowsException<TlsStreamRecordLayerException>(() =>
+            Assert2.ThrowsException<TlsStreamRecordLayerException>(() =>
             {
-                var rl = new RecordLayer();
-                rl.Init();
-                rl.ReadNext(new MemoryStream(new byte[] { 0x00, 0x03, 0x03, 0x01, 0x00 }));
-            });
+                var stream = new MemoryStream(new byte[] { 0x00, 0x03, 0x03, 0x01, 0x00 });
+                var rl = new RecordLayer(stream, new StateMachine());
+                byte[] buffer = new byte[1024];
+                rl.ReadNext(buffer, 1);
+            }, e => e.ErrorCode == ErrorCodes.InvalidContentType.Code);
+        }
+
+        [TestMethod]
+        public void UnexpectedHandshakeMessageTest()
+        {
+            Assert2.ThrowsException<TlsStreamRecordLayerException>(() =>
+            {
+                var stream = new MemoryStream(new byte[] { 0x16, 0x03, 0x03, 0x02, 0x00, 0x00 });
+                var stateMachine = new StateMachine();
+                stateMachine.HState = HandshakeState.Finished;
+                var rl = new RecordLayer(stream, stateMachine);
+                byte[] buffer = new byte[1024];
+                rl.ReadNext(buffer, 2);
+            }, e => e.ErrorCode == ErrorCodes.UnexpectedHandshakeMessage.Code);
         }
 
         [TestMethod]
         public void InvalidLengthTest()
         {
-            Assert.ThrowsException<TlsStreamRecordLayerException>(() =>
+            Assert2.ThrowsException<TlsStreamRecordLayerException>(() =>
             {
-                var rl = new RecordLayer();
-                rl.Init();
-                rl.ReadNext(new MemoryStream(new byte[] { 0x16, 0x03, 0x03, 0x01, 0x40 }));
-            });
+                var stream = new MemoryStream(new byte[] { 0x16, 0x03, 0x03, 0x01, 0x40 });
+                var rl = new RecordLayer(stream, new StateMachine());
+                byte[] buffer = new byte[1024];
+                rl.ReadNext(buffer, 1);
+            }, e => e.ErrorCode == ErrorCodes.RecordLayerOverflow.Code);
         }
     }
 }
