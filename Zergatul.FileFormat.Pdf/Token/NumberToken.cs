@@ -2,5 +2,6 @@
 {
     internal class NumberToken : TokenBase
     {
+        public override bool IsBasic => true;
     }
 }

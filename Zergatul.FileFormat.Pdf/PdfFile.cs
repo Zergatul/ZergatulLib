@@ -15,7 +15,7 @@ namespace Zergatul.FileFormat.Pdf
         private static readonly byte[] StartXRefMarker = new byte[] { 0x73, 0x74, 0x61, 0x72, 0x74, 0x78, 0x72, 0x65, 0x66 };
 
         public string Version { get; private set; }
-        public XRefTable XRefTable { get; private set; }
+        public InternalStructure Structure { get; }
 
         private Stream _stream;
         private byte[] _buffer;
@@ -36,12 +36,17 @@ namespace Zergatul.FileFormat.Pdf
 
             _stream = stream;
 
+            Structure = new InternalStructure();
+
             _buffer = new byte[BufferSize];
             _parser = new Parser(NextByte);
             _sb = new StringBuilder();
 
             ParseHeader();
+            GoToStartXRef();
+            GoToMainXref();
             ParseXRefTable();
+            ParseIncrementalUpdates();
         }
 
         private void ParseHeader()
@@ -69,41 +74,35 @@ namespace Zergatul.FileFormat.Pdf
 
         private void ParseXRefTable()
         {
-            GoToStartXRef();
-
             ResetBuffer();
             _parser.Reset();
 
-            EnsureStaticToken("startxref", "startxref expected.");
             var token = _parser.NextToken();
-            var integer = token as IntegerToken;
-            if (integer == null)
-                throw new InvalidDataException("Invalid startxref value.");
-
-            _stream.Position = integer.Value;
-            ResetBuffer();
-            _parser.Reset();
-
-            token = _parser.NextToken();
             var @static = token as StaticToken;
             if (@static == null)
                 throw new InvalidDataException("Invalid xref data.");
 
             if (@static.Value == "xref")
             {
-                XRefTable = new XRefTable();
+                var xref = new XRefTable();
+                Structure.ListXRefs.Add(xref);
 
                 while (true)
                 {
                     token = _parser.NextToken();
-                    integer = token as IntegerToken;
+                    var integer = token as IntegerToken;
                     if (integer == null)
                     {
-                        if (XRefTable.Count == 0)
+                        if (xref.Count == 0)
+                        {
                             // table should have at least one record
                             throw new InvalidDataException("Invalid xref object number.");
+                        }
                         else
+                        {
                             ParseTrailer(token);
+                            return;
+                        }
                     }
                     long objectNumber = integer.Value;
 
@@ -133,7 +132,7 @@ namespace Zergatul.FileFormat.Pdf
                             throw new InvalidDataException("Invalid xref entry in-use marker.");
                         bool free = @static.Value == "f";
 
-                        XRefTable.Add(objectNumber + i, offset, generation, free);
+                        xref.Add(objectNumber + i, offset, generation, free);
                     }
                 }
             }
@@ -153,6 +152,23 @@ namespace Zergatul.FileFormat.Pdf
             var dictionary = token as DictionaryToken;
             if (dictionary == null)
                 throw new InvalidDataException("trailer should have dictionary token.");
+
+            Structure.ListTrailers.Add(new TrailerDictionary(dictionary));
+        }
+
+        private void ParseIncrementalUpdates()
+        {
+            while (true)
+            {
+                var lastTrailer = Structure.ListTrailers[Structure.ListTrailers.Count - 1];
+                if (lastTrailer.Prev == null)
+                    break;
+
+                throw new NotImplementedException();
+
+                _stream.Position = lastTrailer.Prev.Value;
+                ParseXRefTable();
+            }
         }
 
         private void GoToStartXRef()
@@ -192,6 +208,20 @@ namespace Zergatul.FileFormat.Pdf
                 throw new InvalidDataException("Cannot locate startxref section.");
         }
 
+        private void GoToMainXref()
+        {
+            ResetBuffer();
+            _parser.Reset();
+
+            EnsureStaticToken("startxref", "startxref expected.");
+            var token = _parser.NextToken();
+            var integer = token as IntegerToken;
+            if (integer == null)
+                throw new InvalidDataException("Invalid startxref value.");
+
+            _stream.Position = integer.Value;
+        }
+
         private void EnsureStaticToken(string value, string message)
         {
             var token = _parser.NextToken();
@@ -201,22 +231,12 @@ namespace Zergatul.FileFormat.Pdf
             }
         }
 
-        private void SkipWhiteSpace()
-        {
-            while (true)
-            {
-                if (!IsWhiteSpace(NextByte()))
-                    break;
-            }
-            _bufOffset--;
-        }
-
         private void ResetBuffer()
         {
             _bufOffset = _bufLength = 0;
         }
 
-        private byte NextByte()
+        private int NextByte()
         {
             if (_bufOffset >= _bufLength)
             {

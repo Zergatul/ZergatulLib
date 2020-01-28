@@ -2,6 +2,8 @@
 
 namespace Zergatul.FileFormat.Pdf
 {
+    using static Common;
+
     public class XRefEntry
     {
         public long Offset { get; }
@@ -16,7 +18,7 @@ namespace Zergatul.FileFormat.Pdf
                 throw new ArgumentOutOfRangeException(nameof(offset), "offset too big");
             if (generation < 0)
                 throw new ArgumentOutOfRangeException(nameof(generation), "generation cannot be negative.");
-            if (generation > 65535)
+            if (generation > MaxGeneration)
                 throw new ArgumentOutOfRangeException(nameof(generation), "generation too big.");
 
             Offset = offset;

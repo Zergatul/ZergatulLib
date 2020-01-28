@@ -5,6 +5,7 @@
         public static BooleanToken False { get; } = new BooleanToken(false);
         public static BooleanToken True { get; } = new BooleanToken(true);
 
+        public override bool IsBasic => true;
         public bool Value { get; }
 
         private BooleanToken(bool value)

@@ -10,12 +10,13 @@ namespace Zergatul.FileFormat.Pdf
 
     internal class Parser
     {
-        private Func<byte> _nextByte;
-        private byte _byte;
+        private Func<int> _nextByte;
+        private int _byte;
         private StringBuilder _sb;
         private List<byte> _list;
+        private TokenBase _token1, _token2;
 
-        public Parser(Func<byte> nextByte)
+        public Parser(Func<int> nextByte)
         {
             if (nextByte == null)
                 throw new ArgumentNullException(nameof(nextByte));
@@ -28,63 +29,152 @@ namespace Zergatul.FileFormat.Pdf
 
         public void Reset()
         {
-            _byte = _nextByte();
+            MoveNext();
+            _token1 = null;
+            _token2 = null;
         }
 
         public TokenBase NextToken()
         {
+            TokenBase token;
+            if (_token1 != null)
+            {
+                token = _token1;
+                _token1 = _token2;
+                _token2 = null;
+            }
+            else
+            {
+                token = ReadSimpleToken();
+            }
+
+            // check for indirect object
+            var integer1 = token as IntegerToken;
+            if (integer1?.Value >= 0)
+            {
+                if (_token1 == null)
+                    _token1 = ReadSimpleToken();
+
+                var integer2 = _token1 as IntegerToken;
+                if (0 <= integer2?.Value && integer2?.Value <= MaxGeneration)
+                {
+                    if (_token2 == null)
+                        _token2 = ReadSimpleToken();
+
+                    var @static = _token2 as StaticToken;
+                    if (@static?.Value == "R")
+                    {
+                        _token1 = null;
+                        _token2 = null;
+                        return new IndirectReferenceToken(integer1.Value, (int)integer2.Value);
+                    }
+                }
+            }
+
+            return token;
+        }
+
+        private TokenBase ReadSimpleToken()
+        {
             bool comment = false;
+            bool readingComment = false;
 
             while (true)
             {
                 if (comment)
                 {
-                    if (IsEndOfLine(_byte))
+                    if (IsEndOfLine(_byte) || _byte == -1)
+                    {
                         comment = false;
+                        if (readingComment && _sb.ToString() == "%%EOF")
+                            return EndOfFileToken.Marker;
+                        if (_byte == -1)
+                            return EndOfFileToken.Unexpected;
+                    }
+                    else if (_byte < 0x80 && _sb.Length < 5)
+                    {
+                        _sb.Append((char)_byte);
+                    }
+                    else
+                    {
+                        readingComment = false;
+                    }
                 }
                 else
                 {
                     if (_byte == '%')
+                    {
                         comment = true;
-                    if (!IsWhiteSpace(_byte))
-                        break;
+                        readingComment = true;
+                        _sb.Clear();
+                        _sb.Append((char)_byte);
+                    }
+                    else
+                    {
+                        if (!IsWhiteSpace(_byte))
+                            break;
+                    }
                 }
 
-                _byte = _nextByte();
+                MoveNext();
             }
 
             switch (_byte)
             {
-                case (byte)'0':
-                case (byte)'1':
-                case (byte)'2':
-                case (byte)'3':
-                case (byte)'4':
-                case (byte)'5':
-                case (byte)'6':
-                case (byte)'7':
-                case (byte)'8':
-                case (byte)'9':
-                case (byte)'.':
-                case (byte)'+':
-                case (byte)'-':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                case '.':
+                case '+':
+                case '-':
                     return ReadNumber();
 
-                case (byte)'(':
+                case '(':
+                    MoveNext();
                     return ReadString();
 
-                case (byte)'/':
+                case '/':
+                    MoveNext();
                     return ReadName();
 
-                case (byte)'[':
+                case '[':
+                    MoveNext();
                     return ReadArray();
 
-                case (byte)'<':
-                    _byte = _nextByte();
+                case ']':
+                    MoveNext();
+                    return EndOfArrayToken.Instance;
+
+                case '<':
+                    MoveNext();
                     if (_byte == '<')
+                    {
+                        MoveNext();
                         return ReadDictionary();
+                    }
                     else
+                    {
                         return ReadHexString();
+                    }
+
+                case '>':
+                    MoveNext();
+                    if (_byte == '>')
+                    {
+                        MoveNext();
+                        return EndOfDictionaryToken.Instance;
+                    }
+                    else
+                    {
+                        return EndOfHexStringToken.Instance;
+                    }
 
                 default:
                     return ReadStaticToken();
@@ -93,36 +183,52 @@ namespace Zergatul.FileFormat.Pdf
 
         private TokenBase ReadArray()
         {
-            throw new NotImplementedException();
+            var list = new List<TokenBase>();
+            while (true)
+            {
+                var token = NextToken();
+                if (token == EndOfArrayToken.Instance)
+                    break;
+
+                if (!token.IsBasic)
+                    throw new InvalidDataException("Unexpected special token in array.");
+
+                list.Add(token);
+            }
+            return new ArrayToken(list);
         }
 
         private TokenBase ReadDictionary()
         {
-            _byte = _nextByte();
-
             var dictionary = new Dictionary<string, TokenBase>();
-            TokenBase token, nextToken = null, nextNextToken = null;
+            TokenBase token;
             while (true)
             {
                 token = NextToken();
+
                 var name = token as NameToken;
                 if (name == null)
+                {
+                    if (token == EndOfDictionaryToken.Instance)
+                        return new DictionaryToken(dictionary);
+
                     throw new InvalidDataException("Dictionary parsing error. Name token expected.");
+                }
 
                 token = NextToken();
-                var 
-                bool isNull = token == NullToken.Instance;
+                if (!token.IsBasic)
+                    throw new InvalidDataException("Dictionary parsing error. Unexpected special token.");
 
                 if (dictionary.ContainsKey(name.Value))
                 {
-                    if (isNull)
+                    if (token == NullToken.Instance)
                         dictionary.Remove(name.Value);
                     else
                         dictionary[name.Value] = token;
                 }
                 else
                 {
-                    if (!isNull)
+                    if (token != NullToken.Instance)
                         dictionary.Add(name.Value, token);
                 }
             }
@@ -130,7 +236,40 @@ namespace Zergatul.FileFormat.Pdf
 
         private TokenBase ReadHexString()
         {
-            throw new NotImplementedException();
+            var list = new List<byte>();
+            int index = 0;
+            int value = 0;
+            while (true)
+            {
+                if (IsHexDigit(_byte))
+                {
+                    if ((index & 0x01) == 0)
+                    {
+                        value = ParseHex(_byte) << 4;
+                    }
+                    else
+                    {
+                        value |= ParseHex(_byte);
+                        list.Add((byte)value);
+                    }
+                    index++;
+                    MoveNext();
+                    continue;
+                }
+
+                if (_byte == '>')
+                {
+                    MoveNext();
+                    break;
+                }
+
+                throw new InvalidDataException("Unexpected symbol in hex string.");
+            }
+
+            if ((index & 0x01) == 1)
+                list.Add((byte)value);
+
+            return new HexStringToken(list);
         }
 
         private TokenBase ReadName()
@@ -138,18 +277,17 @@ namespace Zergatul.FileFormat.Pdf
             _list.Clear();
             while (true)
             {
-                _byte = _nextByte();
-                if (IsWhiteSpace(_byte))
+                if (IsWhiteSpace(_byte) || IsSpecial(_byte))
                     break;
 
                 if (_byte == '#')
                 {
-                    _byte = _nextByte();
+                    MoveNext();
                     if (!IsHexDigit(_byte))
                         throw new InvalidDataException("Hex symbol expected in name token");
                     int value = ParseHex(_byte) << 4;
 
-                    _byte = _nextByte();
+                    MoveNext();
                     if (!IsHexDigit(_byte))
                         throw new InvalidDataException("Hex symbol expected in name token");
                     value |= ParseHex(_byte);
@@ -158,11 +296,13 @@ namespace Zergatul.FileFormat.Pdf
                 }
                 else
                 {
-                    _list.Add(_byte);
+                    _list.Add((byte)_byte);
                 }
 
                 if (_list.Count >= 128)
                     throw new ImplementationLimitException("Name token too long");
+
+                MoveNext();
             }
 
             return new NameToken(Encoding.UTF8.GetString(_list.ToArray()));
@@ -173,12 +313,12 @@ namespace Zergatul.FileFormat.Pdf
             int sign = 1;
 
             if (_byte == '+')
-                _byte = _nextByte();
+                MoveNext();
 
             if (_byte == '-')
             {
                 sign = -1;
-                _byte = _nextByte();
+                MoveNext();
             }
 
             bool point = false;
@@ -188,23 +328,26 @@ namespace Zergatul.FileFormat.Pdf
             {
                 if (IsWhiteSpace(_byte))
                 {
-                    _byte = _nextByte();
+                    MoveNext();
                     break;
                 }
 
                 if (_byte == '.')
                 {
                     point = true;
-                    _byte = _nextByte();
+                    MoveNext();
                     break;
                 }
+
+                if (IsSpecial(_byte))
+                    break;
 
                 if (!IsDigit(_byte))
                     throw new InvalidDataException("Invalid symbol in number token.");
 
                 _sb.Append((char)_byte);
 
-                _byte = _nextByte();
+                MoveNext();
 
                 if (_sb.Length > 16)
                     throw new InvalidDataException("Integer part of number token too long.");
@@ -219,16 +362,19 @@ namespace Zergatul.FileFormat.Pdf
                 {
                     if (IsWhiteSpace(_byte))
                     {
-                        _byte = _nextByte();
+                        MoveNext();
                         break;
                     }
+
+                    if (IsSpecial(_byte))
+                        break;
 
                     if (!IsDigit(_byte))
                         throw new InvalidDataException("Invalid symbol in number token.");
 
                     _sb.Append((char)_byte);
 
-                    _byte = _nextByte();
+                    MoveNext();
 
                     if (_sb.Length > 16)
                         throw new InvalidDataException("Decimals part of number token too long.");
@@ -254,9 +400,9 @@ namespace Zergatul.FileFormat.Pdf
 
                 _sb.Append((char)_byte);
 
-                _byte = _nextByte();
+                MoveNext();
 
-                if (IsWhiteSpace(_byte))
+                if (IsWhiteSpace(_byte) || IsSpecial(_byte))
                     break;
 
                 if (_sb.Length > 128)
@@ -283,6 +429,11 @@ namespace Zergatul.FileFormat.Pdf
         private TokenBase ReadString()
         {
             throw new NotImplementedException();
+        }
+
+        private void MoveNext()
+        {
+            _byte = _nextByte();
         }
     }
 }
