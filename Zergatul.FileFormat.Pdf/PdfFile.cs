@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Zergatul.FileFormat.Pdf.Token;
@@ -15,6 +16,8 @@ namespace Zergatul.FileFormat.Pdf
         private static readonly byte[] StartXRefMarker = new byte[] { 0x73, 0x74, 0x61, 0x72, 0x74, 0x78, 0x72, 0x65, 0x66 };
 
         public string Version { get; private set; }
+        public byte[] OriginalDocumentId { get; private set; }
+        public byte[] DocumentId { get; private set; }
         public InternalStructure Structure { get; }
 
         private Stream _stream;
@@ -47,6 +50,8 @@ namespace Zergatul.FileFormat.Pdf
             GoToMainXref();
             ParseXRefTable();
             ParseIncrementalUpdates();
+
+            ProcessTrailers();
         }
 
         private void ParseHeader()
@@ -164,8 +169,6 @@ namespace Zergatul.FileFormat.Pdf
                 if (lastTrailer.Prev == null)
                     break;
 
-                throw new NotImplementedException();
-
                 _stream.Position = lastTrailer.Prev.Value;
                 ParseXRefTable();
             }
@@ -220,6 +223,28 @@ namespace Zergatul.FileFormat.Pdf
                 throw new InvalidDataException("Invalid startxref value.");
 
             _stream.Position = integer.Value;
+        }
+
+        private void ProcessTrailers()
+        {
+            var trailer = Structure.ListTrailers[0];
+            if (trailer.OriginalId != null)
+                OriginalDocumentId = trailer.OriginalId;
+            if (trailer.Id != null)
+                DocumentId = trailer.Id;
+
+            Structure.XRef = Structure.ListXRefs[Structure.ListXRefs.Count - 1].Clone();
+            for (int i = Structure.ListXRefs.Count - 2; i >= 0; i--)
+                Structure.XRef.MergeWith(Structure.ListXRefs[i]);
+
+            // Any object in a cross-reference section whose number is greater than Trailer.Size is ignored and considered missing
+            var remove = new List<long>();
+            foreach (long id in Structure.XRef.Keys)
+                if (id > trailer.Size)
+                    remove.Add(id);
+
+            foreach (long id in remove)
+                Structure.XRef.Remove(id);
         }
 
         private void EnsureStaticToken(string value, string message)

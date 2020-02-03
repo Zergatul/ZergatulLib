@@ -22,6 +22,18 @@ namespace Zergatul.FileFormat.Pdf.Token
             return _dictionary[key] is T;
         }
 
+        public ArrayToken GetArrayNullable(string key)
+        {
+            if (_dictionary.TryGetValue(key, out TokenBase token))
+            {
+                return (ArrayToken)_dictionary[key];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public IndirectObject GetIndirectObject(string key)
         {
             return new IndirectObject((IndirectReferenceToken)_dictionary[key]);
