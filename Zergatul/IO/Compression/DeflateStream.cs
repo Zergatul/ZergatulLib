@@ -64,9 +64,10 @@ namespace Zergatul.IO.Compression
             if (disposing)
             {
                 if (!_leaveOpen)
-                    BaseStream.Dispose();
-
-                BaseStream = null;
+                {
+                    BaseStream?.Dispose();
+                    BaseStream = null;
+                }
             }
         }
 

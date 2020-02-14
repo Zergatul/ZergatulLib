@@ -106,6 +106,17 @@ namespace Zergatul.IO
             return result;
         }
 
+        public int ReadRawInt32BE()
+        {
+            int result =
+                (_readBuffer[_readBufferStart++] << 24) |
+                (_readBuffer[_readBufferStart++] << 16) |
+                (_readBuffer[_readBufferStart++] << 8) |
+                _readBuffer[_readBufferStart++];
+            TotalBits -= 32;
+            return result;
+        }
+
         public void SkipTillByteBoundary()
         {
             TotalBits -= _bitLength;

@@ -21,7 +21,10 @@ namespace Zergatul.IO.Compression
             if (mode == CompressionMode.Compress)
                 throw new NotImplementedException();
 
-            BaseStream = stream ?? throw new ArgumentNullException(nameof(stream));
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
+            BaseStream = stream;
 
             _mode = mode;
             _leaveOpen = leaveOpen;

@@ -8,7 +8,6 @@ namespace Zergatul.IO.Compression
         public int Available { get; private set; }
         public bool IsFinished { get; private set; }
         public bool CanFinishNow => _state == State.ReadBlockHeader && _input.TotalBits == 0;
-        public int ReadBufferSize { get; }
 
         private State _state;
         private InputBuffer _input;
@@ -18,37 +17,12 @@ namespace Zergatul.IO.Compression
 
         public GzipDecompressor(int readBufferSize)
         {
-            ReadBufferSize = readBufferSize;
             _state = State.ReadBlockHeader;
             _input = new InputBuffer(readBufferSize);
             _crc32 = new CRC32(CRC32Parameters.IEEE8023);
         }
 
         public void Decode()
-        {
-            DecodeInternal();
-        }
-
-        public void Get(byte[] buffer, int offset, int count)
-        {
-            if (count > Available)
-                throw new InvalidOperationException();
-
-            _deflate.Get(buffer, offset, count);
-            _crc32.Update(buffer, offset, count);
-            _memberLength += (uint)count;
-            Available = _deflate.Available;
-        }
-
-        public void Add(byte[] buffer, int offset, int count)
-        {
-            if (Available != 0)
-                throw new InvalidOperationException();
-
-            _input.Add(buffer, offset, count);
-        }
-
-        private void DecodeInternal()
         {
             while (true)
             {
@@ -101,6 +75,25 @@ namespace Zergatul.IO.Compression
                         return;
                 }
             }
+        }
+
+        public void Get(byte[] buffer, int offset, int count)
+        {
+            if (count > Available)
+                throw new InvalidOperationException();
+
+            _deflate.Get(buffer, offset, count);
+            _crc32.Update(buffer, offset, count);
+            _memberLength += (uint)count;
+            Available = _deflate.Available;
+        }
+
+        public void Add(byte[] buffer, int offset, int count)
+        {
+            if (Available != 0)
+                throw new InvalidOperationException();
+
+            _input.Add(buffer, offset, count);
         }
 
         #region Nested classes

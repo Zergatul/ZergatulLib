@@ -7,7 +7,6 @@ namespace Zergatul.IO.Compression
     {
         public int Available { get; private set; }
         public bool IsFinished { get; private set; }
-        public int ReadBufferSize { get; }
 
         private State _state;
         private bool _isFinalBlock;
@@ -16,7 +15,6 @@ namespace Zergatul.IO.Compression
         private int _blockLength;
         private byte[] _ringBuffer;
         private int _ringBufferPos;
-        private int _position;
         private int[] _codeLen;
 
         private InputBuffer _input;
@@ -42,7 +40,6 @@ namespace Zergatul.IO.Compression
 
         public DeflateDecompressor(InputBuffer input)
         {
-            ReadBufferSize = input.BufferSize;
             _state = State.ReadBlockHeader;
             _ringBuffer = new byte[0x8000];
             _codeLen = new int[19];
@@ -97,25 +94,27 @@ namespace Zergatul.IO.Compression
                             return;
                         _isFinalBlock = _input.ReadBits(1) == 1;
                         _blockType = (BlockType)_input.ReadBits(2);
-                        switch (_blockType)
+                        if (_blockType == BlockType.Dynamic)
                         {
-                            case BlockType.Uncompressed:
-                                _input.SkipTillByteBoundary();
-                                _state = State.ReadUncompressedBlockHeader;
-                                break;
-                            case BlockType.Fixed:
-                                _literalAlphabet = FixedAlphabetTree;
-                                _isFixedBlock = true;
-                                _state = State.ReadBlock;
-                                break;
-                            case BlockType.Dynamic:
-                                _isFixedBlock = false;
-                                _state = State.ReadDynamicBlockHeader;
-                                break;
-                            case BlockType.Reserved:
-                                throw new DeflateDataFormatException();
+                            _isFixedBlock = false;
+                            _state = State.ReadDynamicBlockHeader;
+                            goto case State.ReadDynamicBlockHeader;
                         }
-                        break;
+                        if (_blockType == BlockType.Fixed)
+                        {
+                            _literalAlphabet = FixedAlphabetTree;
+                            _isFixedBlock = true;
+                            _state = State.ReadBlock;
+                            goto case State.ReadBlock;
+                        }
+                        if (_blockType == BlockType.Uncompressed)
+                        {
+                            _input.SkipTillByteBoundary();
+                            _state = State.ReadUncompressedBlockHeader;
+                            goto case State.ReadUncompressedBlockHeader;
+                        }
+                        // BlockType.Reserved
+                        throw new DeflateDataFormatException();
 
                     case State.ReadUncompressedBlockHeader:
                         if (_input.TotalBits < 32)
@@ -142,6 +141,9 @@ namespace Zergatul.IO.Compression
                             _codeLen[CodeLenIndex[_arrayIndex++]] = _input.ReadBits(3);
                         if (_arrayIndex == hCLen)
                         {
+                            while (_arrayIndex < _codeLen.Length)
+                                _codeLen[CodeLenIndex[_arrayIndex++]] = 0;
+
                             _codeLenTree = new HuffmanTree(_codeLen);
                             _arrayIndex = 0;
                             _treeBits = new int[hLit];
@@ -351,7 +353,6 @@ namespace Zergatul.IO.Compression
         private bool AddLiteral(byte value)
         {
             _ringBuffer[_ringBufferPos++] = value;
-            _position++;
             Available++;
             if (_ringBufferPos == _ringBuffer.Length)
                 _ringBufferPos = 0;

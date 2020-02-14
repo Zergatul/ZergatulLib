@@ -546,7 +546,22 @@ namespace Zergatul.Tests
                 "8744 6961 60b3 8661 0730 1263 818c 8120" +
                 "9b45 3ee4 6380 d989 8d1d 7bed dd7f 41fd" +
                 "1fe5 1529 a95b 9a9e 6949 33d2 c29b 86ad" +
-                "e916 bb58 f51e abea 57af 5e3d be5f fd1f", "7b");
+                "e916 bb58 f51e abea 57af 5e3d be5f fd1f", "7b",
+                1, 2, 5, 10, 20);
+        }
+
+        [TestMethod]
+        public void TwoBlocksTest()
+        {
+            HexTest(
+                "04e0ffffffffe7bffecfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7" +
+                "f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e" +
+                "9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3" +
+                "f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcfe7f3f97c3e9fcf07010a400090" +
+                "000000000000000000000000000000000000000000000000505555555555550000000000000000000000000000000000000000000000000000000000" +
+                "0000000004010d041119030b",
+                BitHelper.BytesToHex(System.Text.Encoding.ASCII.GetBytes("qwerty")),
+                1, 2, 5, 10, 20);
         }
 
         private static void BinTest(string binInput, string hexOutput)
@@ -611,24 +626,27 @@ namespace Zergatul.Tests
             Assert.IsTrue(ds.Position == output.Count);
         }
 
-        private static void HexTest(string hexInput, string hexOutput)
+        private static void HexTest(string hexInput, string hexOutput, params int[] bufferSizes)
         {
-            var ms = new MemoryStream(BitHelper.HexToBytes(hexInput.Replace(" ", "")));
-
-            var output = new List<byte>();
-            var buffer = new byte[20];
-
-            var ds = new DeflateStream(ms, CompressionMode.Decompress);
-            while (true)
+            foreach (int bufferSize in bufferSizes)
             {
-                int read = ds.Read(buffer, 0, buffer.Length);
-                output.AddRange(buffer.Take(read));
-                if (read == 0)
-                    break;
-            }
+                var ms = new MemoryStream(BitHelper.HexToBytes(hexInput.Replace(" ", "")));
 
-            Assert.IsTrue(BitHelper.BytesToHex(output.ToArray()) == hexOutput.Replace(" ", "").ToLower());
-            Assert.IsTrue(ds.Position == output.Count);
+                var output = new List<byte>();
+                var buffer = new byte[bufferSize];
+
+                var ds = new DeflateStream(ms, CompressionMode.Decompress);
+                while (true)
+                {
+                    int read = ds.Read(buffer, 0, buffer.Length);
+                    output.AddRange(buffer.Take(read));
+                    if (read == 0)
+                        break;
+                }
+
+                Assert.IsTrue(BitHelper.BytesToHex(output.ToArray()) == hexOutput.Replace(" ", "").ToLower());
+                Assert.IsTrue(ds.Position == output.Count);
+            }
         }
     }
 }
