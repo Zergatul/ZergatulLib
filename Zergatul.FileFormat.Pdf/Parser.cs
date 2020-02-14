@@ -10,6 +10,8 @@ namespace Zergatul.FileFormat.Pdf
 
     internal class Parser
     {
+        public long Position { get; private set; }
+
         private Func<int> _nextByte;
         private int _byte;
         private StringBuilder _sb;
@@ -21,20 +23,23 @@ namespace Zergatul.FileFormat.Pdf
             if (nextByte == null)
                 throw new ArgumentNullException(nameof(nextByte));
 
+            Position = 0;
+
             _sb = new StringBuilder();
             _list = new List<byte>();
 
             _nextByte = nextByte;
         }
 
-        public void Reset()
+        public void Reset(long position)
         {
+            Position = position - 1;
             MoveNext();
             _token1 = null;
             _token2 = null;
         }
 
-        public TokenBase NextToken()
+        public TokenBase NextToken(bool allowObj = false)
         {
             TokenBase token;
             if (_token1 != null)
@@ -49,6 +54,7 @@ namespace Zergatul.FileFormat.Pdf
             }
 
             // check for indirect object
+            // or begin object
             var integer1 = token as IntegerToken;
             if (integer1?.Value >= 0)
             {
@@ -68,10 +74,37 @@ namespace Zergatul.FileFormat.Pdf
                         _token2 = null;
                         return new IndirectReferenceToken(integer1.Value, (int)integer2.Value);
                     }
+                    if (allowObj && @static?.Value == "obj")
+                    {
+                        _token1 = null;
+                        _token2 = null;
+                        return new BeginObjectToken(integer1.Value, (int)integer2.Value);
+                    }
                 }
             }
 
             return token;
+        }
+
+        public void SkipStrongRuleEndOfLine()
+        {
+            if (_byte == 0x0A)
+            {
+                MoveNext();
+                return;
+            }
+
+            if (_byte == 0x0D)
+            {
+                MoveNext();
+                if (_byte == 0x0A)
+                {
+                    MoveNext();
+                    return;
+                }
+            }
+
+            throw new InvalidDataException();
         }
 
         private TokenBase ReadSimpleToken()
@@ -434,6 +467,7 @@ namespace Zergatul.FileFormat.Pdf
         private void MoveNext()
         {
             _byte = _nextByte();
+            Position++;
         }
     }
 }

@@ -67,5 +67,9 @@ namespace Zergatul.FileFormat.Pdf.Token
                 return null;
             }
         }
+
+        public TokenBase GetToken(string key) => _dictionary[key];
+
+        public TokenBase GetTokenNullable(string key) => _dictionary.ContainsKey(key) ? _dictionary[key] : null;
     }
 }

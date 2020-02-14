@@ -80,9 +80,17 @@ namespace Zergatul.FileFormat.Pdf
         private void ParseXRefTable()
         {
             ResetBuffer();
-            _parser.Reset();
+            _parser.Reset(_stream.Position);
 
-            var token = _parser.NextToken();
+            var token = _parser.NextToken(allowObj: true);
+
+            var beginObj = token as BeginObjectToken;
+            if (beginObj != null)
+            {
+                var stream = ReadStream();
+                return;
+            }
+
             var @static = token as StaticToken;
             if (@static == null)
                 throw new InvalidDataException("Invalid xref data.");
@@ -214,7 +222,7 @@ namespace Zergatul.FileFormat.Pdf
         private void GoToMainXref()
         {
             ResetBuffer();
-            _parser.Reset();
+            _parser.Reset(_stream.Position);
 
             EnsureStaticToken("startxref", "startxref expected.");
             var token = _parser.NextToken();
@@ -283,6 +291,27 @@ namespace Zergatul.FileFormat.Pdf
             int read = (int)System.Math.Min(BufferSize, _stream.Length - _stream.Position);
             StreamHelper.ReadArray(_stream, _buffer, read);
             return read;
+        }
+
+        private StreamObject ReadStream()
+        {
+            var obj = new StreamObject(_stream, _parser);
+            return obj;
+
+            //if (!dictionary.ContainsKey("Type"))
+            //    throw new InvalidDataException();
+            //if (!dictionary.Is<NameToken>("Type"))
+            //    throw new InvalidDataException();
+
+            //if (!dictionary.ContainsKey("Size"))
+            //    throw new InvalidDataException();
+            //if (!dictionary.Is<IntegerToken>("Size"))
+            //    throw new InvalidDataException();
+
+            //if (!dictionary.ContainsKey("Root"))
+            //    throw new InvalidDataException();
+            //if (!dictionary.Is<IndirectReferenceToken>("Root"))
+            //    throw new InvalidDataException();
         }
     }
 }
