@@ -9,6 +9,8 @@ namespace Zergatul.FileFormat.Pdf
 
         private Dictionary<long, XRefEntry> _data = new Dictionary<long, XRefEntry>();
 
+        public XRefEntry this[long id] => _data[id];
+
         public void Add(long id, XRefEntry entry)
         {
             if (_data.ContainsKey(id))
@@ -19,7 +21,7 @@ namespace Zergatul.FileFormat.Pdf
 
         public void Add(long id, long offset, int generation, bool free)
         {
-            Add(id, new XRefEntry(offset, generation, free));
+            Add(id, new XRefEntry(id, offset, generation, free));
         }
 
         public XRefTable Clone()

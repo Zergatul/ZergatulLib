@@ -10,12 +10,12 @@ namespace Zergatul.FileFormat.Pdf
 
     internal class Parser
     {
-        public long Position { get; private set; }
+        public long Position { get; private set; } = 0;
 
         private Func<int> _nextByte;
         private int _byte;
-        private StringBuilder _sb;
-        private List<byte> _list;
+        private StringBuilder _sb = new StringBuilder();
+        private List<byte> _list = new List<byte>();
         private TokenBase _token1, _token2;
 
         public Parser(Func<int> nextByte)
@@ -23,12 +23,21 @@ namespace Zergatul.FileFormat.Pdf
             if (nextByte == null)
                 throw new ArgumentNullException(nameof(nextByte));
 
-            Position = 0;
-
-            _sb = new StringBuilder();
-            _list = new List<byte>();
-
             _nextByte = nextByte;
+        }
+
+        public Parser(byte[] data, long offset, long endOffset)
+        {
+            if (data == null)
+                throw new ArgumentNullException(nameof(data));
+
+            _nextByte = () =>
+            {
+                if (offset >= endOffset)
+                    throw new InvalidDataException("End of parser data.");
+
+                return data[offset++];
+            };
         }
 
         public void Reset(long position)

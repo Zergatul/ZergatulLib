@@ -22,6 +22,11 @@ namespace Zergatul.FileFormat.Pdf.Token
             return _dictionary[key] is T;
         }
 
+        public ArrayToken GetArray(string key)
+        {
+            return (ArrayToken)_dictionary[key];
+        }
+
         public ArrayToken GetArrayNullable(string key)
         {
             if (_dictionary.TryGetValue(key, out TokenBase token))
@@ -68,8 +73,37 @@ namespace Zergatul.FileFormat.Pdf.Token
             }
         }
 
+        public string GetName(string key)
+        {
+            return ((NameToken)_dictionary[key]).Value;
+        }
+
         public TokenBase GetToken(string key) => _dictionary[key];
 
         public TokenBase GetTokenNullable(string key) => _dictionary.ContainsKey(key) ? _dictionary[key] : null;
+
+        public bool TryGet<T>(string key, out T result)
+            where T : TokenBase
+        {
+            if (_dictionary.TryGetValue(key, out TokenBase token))
+                result = token as T;
+            else
+                result = null;
+
+            return result != null;
+        }
+
+        public bool ValidateName(string key, string value)
+        {
+            if (_dictionary.TryGetValue(key, out TokenBase token))
+            {
+                var name = token as NameToken;
+                return name?.Value == value;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }
