@@ -11,5 +11,15 @@ namespace Zergatul.Security.Zergatul.SymmetricCipher
         {
             Code = code;
         }
+
+        internal BlockCipherException(ErrorCode error)
+        {
+            if (error == null)
+                throw new ArgumentNullException(nameof(error));
+
+            throw new NotImplementedException();
+            //ErrorCode = error.Code;
+            //Message = error.Message;
+        }
     }
 }

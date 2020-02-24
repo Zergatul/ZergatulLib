@@ -12,11 +12,11 @@ namespace Zergatul.Security.Zergatul.SymmetricCipher
         public override void ProcessKey(int blockSize, byte[] key)
         {
             if (blockSize != 16)
-                throw new BlockCipherException("Invalid block size", ErrorCodes.BlockCipherInvalidBlockSize);
+                throw new BlockCipherException(ErrorCodes.BlockCipherInvalidBlockSize);
 
             int keySize = key.Length;
             if (keySize != 16 && keySize != 24 && keySize != 32)
-                throw new BlockCipherException("Invalid key size", ErrorCodes.BlockCipherInvalidKeySize);
+                throw new BlockCipherException(ErrorCodes.BlockCipherInvalidKeySize);
 
             _roundKey = new uint[16];
             _roundKey[0] = ToUInt32(key, 0x00, ByteOrder.LittleEndian);

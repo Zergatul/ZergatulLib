@@ -8,5 +8,8 @@
         public static readonly ErrorCode InvalidContentType = new ErrorCode(_index++, "Invalid content type.");
         public static readonly ErrorCode RecordLayerOverflow = new ErrorCode(_index++, "Record layer overflow.");
         public static readonly ErrorCode UnexpectedHandshakeMessage = new ErrorCode(_index++, "Received handshake type record, but handshake is finished.");
+
+        public static readonly ErrorCode BlockCipherInvalidBlockSize = new ErrorCode(_index++, "Invalid block size.");
+        public static readonly ErrorCode BlockCipherInvalidKeySize = new ErrorCode(_index++, "Invalid key size.");
     }
 }
