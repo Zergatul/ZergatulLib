@@ -12,7 +12,10 @@ namespace Zergatul.Network
         public override Stream GetTcpStream(string host, int port, ProxyBase proxy)
         {
             if (proxy != null)
-                throw new NotImplementedException();
+            {
+                var client = proxy.CreateConnection(host, port, null);
+                return client.GetStream();
+            }
 
             var addresses = DnsResolve(host);
             if (addresses.Length == 0)

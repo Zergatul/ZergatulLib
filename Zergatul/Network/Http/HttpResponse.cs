@@ -72,15 +72,18 @@ namespace Zergatul.Network.Http
             _headers = new List<Header>();
         }
 
-        public void ReadFrom(Stream stream)
+        public bool ReadFrom(Stream stream)
         {
             _stream = stream;
             _sb = new StringBuilder();
 
-            ParseStatusLine();
+            if (!ParseStatusLine())
+                return false;
             ParseHeaders();
 
             ProcessHeaders();
+
+            return true;
         }
 
         public async Task ReadFromAsync(Stream stream, CancellationToken cancellationToken)
@@ -136,7 +139,7 @@ namespace Zergatul.Network.Http
 
         #region Private methods
 
-        private void ParseStatusLine()
+        private bool ParseStatusLine()
         {
             // status-line = HTTP-version SP status-code SP reason-phrase CRLF
             // https://tools.ietf.org/html/rfc7230#section-3.1.2
@@ -145,8 +148,15 @@ namespace Zergatul.Network.Http
             // HTTP-version  = HTTP-name "/" DIGIT "." DIGIT
             // HTTP-name     = %x48.54.54.50 ; "HTTP", case-sensitive
             // https://tools.ietf.org/html/rfc7230#section-2.6
-            if (ReadNextByte() != 'H')
-                throw new HttpParseException(InvalidHttpVersion);
+            try
+            {
+                if (ReadNextByte() != 'H')
+                    throw new HttpParseException(InvalidHttpVersion);
+            }
+            catch (IOException) // TODO: improve
+            {
+                return false; // keep-alive connection may be dropped
+            }
             if (ReadNextByte() != 'T')
                 throw new HttpParseException(InvalidHttpVersion);
             if (ReadNextByte() != 'T')
@@ -217,6 +227,8 @@ namespace Zergatul.Network.Http
             {
                 throw new HttpParseException(SpaceOrCRLFExpected);
             }
+
+            return true;
         }
 
         // copy of ParseStatusLine method

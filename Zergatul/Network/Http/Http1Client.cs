@@ -47,14 +47,29 @@ namespace Zergatul.Network.Http
 
             ThrowIfDisposed();
 
-            var connection = GetConnection(request.Uri);
-            request.WriteTo(connection.Stream);
-            connection.Stream.Flush();
+            while (true)
+            {
 
-            var response = new HttpResponse(this);
-            response.ReadFrom(connection.Stream);
-            connection.LastResponse = response;
-            return response;
+                var connection = GetConnection(request.Uri);
+                request.WriteTo(connection.Stream);
+                connection.Stream.Flush();
+
+                var response = new HttpResponse(this);
+                if (!response.ReadFrom(connection.Stream))
+                {
+                    if (connection.IsFirstUse)
+                    {
+                        throw new Exception("Invalid response???"); // TODO
+                    }
+                    else
+                    {
+                        RemoveConnection(request.Uri, connection);
+                        continue;
+                    }
+                }
+                connection.LastResponse = response;
+                return response;
+            }
         }
 
         public Task<HttpResponse> GetResponseAsync(HttpRequest request) => GetResponseAsync(request, CancellationToken.None);
@@ -118,6 +133,28 @@ namespace Zergatul.Network.Http
 
         #region Private methods
 
+        private List<ConnectionInfo> GetConnectionGroup(Uri uri)
+        {
+            List<ConnectionInfo> list;
+            lock (_connections)
+            {
+                var @group = new ConnectionGroup
+                {
+                    Host = uri.Host,
+                    Port = uri.Port,
+                    IsSecure = uri.Scheme == "https"
+                };
+                _connections.TryGetValue(@group, out list);
+
+                if (list == null)
+                {
+                    list = new List<ConnectionInfo>();
+                    _connections.Add(group, list);
+                }
+            }
+            return list;
+        }
+
         private ConnectionInfo GetConnection(Uri uri)
         {
             if (uri.Scheme != "http" && uri.Scheme != "https")
@@ -154,22 +191,7 @@ namespace Zergatul.Network.Http
 
         private void GetFreeConnection(Uri uri, out List<ConnectionInfo> list, out ConnectionInfo connection)
         {
-            lock (_connections)
-            {
-                var @group = new ConnectionGroup
-                {
-                    Host = uri.Host,
-                    Port = uri.Port,
-                    IsSecure = uri.Scheme == "https"
-                };
-                _connections.TryGetValue(@group, out list);
-
-                if (list == null)
-                {
-                    list = new List<ConnectionInfo>();
-                    _connections.Add(group, list);
-                }
-            }
+            list = GetConnectionGroup(uri);
 
             lock (list)
             {
@@ -186,11 +208,13 @@ namespace Zergatul.Network.Http
                         {
                             list.RemoveAt(i);
                             i--;
+                            connection.Dispose();
                             continue;
                         }
                     }
                     connection.LastUse = now;
                     connection.InUse = true;
+                    connection.IsFirstUse = false;
                     return;
                 }
             }
@@ -209,7 +233,8 @@ namespace Zergatul.Network.Http
                     {
                         Stream = stream,
                         LastUse = DateTime.Now,
-                        InUse = true
+                        InUse = true,
+                        IsFirstUse = true
                     };
 
                 case "https":
@@ -222,7 +247,8 @@ namespace Zergatul.Network.Http
                     {
                         Stream = tls,
                         LastUse = DateTime.Now,
-                        InUse = true
+                        InUse = true,
+                        IsFirstUse = true
                     };
 
                 default:
@@ -258,6 +284,14 @@ namespace Zergatul.Network.Http
                 default:
                     throw new InvalidOperationException();
             }
+        }
+
+        private void RemoveConnection(Uri uri, ConnectionInfo connection)
+        {
+            var list = GetConnectionGroup(uri);
+            lock (list)
+                list.Remove(connection);
+            connection.Dispose();
         }
 
         private void ThrowIfDisposed()
@@ -327,6 +361,23 @@ namespace Zergatul.Network.Http
             public DateTime LastUse;
             public Stream Stream;
             public HttpResponse LastResponse;
+            public bool IsFirstUse;
+
+            public void Dispose()
+            {
+                try
+                {
+                    Stream?.Dispose();
+                }
+                catch (IOException)
+                {
+
+                }
+                finally
+                {
+                    Stream = null;
+                }
+            }
         }
 
         #endregion
