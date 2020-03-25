@@ -9,13 +9,13 @@ namespace Zergatul.Network.Http.Frames
         public override FrameType Type => FrameType.GOAWAY;
 
         public uint LastStreamId;
-        public ErrorCode ErrorCode;
+        public FrameErrorCode ErrorCode;
 
         public override void ReadPayload(Stream stream, int length)
         {
             if (Id != 0)
             {
-                GoAwayWith(ErrorCode.PROTOCOL_ERROR);
+                GoAwayWith(FrameErrorCode.PROTOCOL_ERROR);
                 return;
             }
 
@@ -23,7 +23,7 @@ namespace Zergatul.Network.Http.Frames
             StreamHelper.ReadArray(stream, buffer);
 
             LastStreamId = BitHelper.ToUInt32(buffer, 0, ByteOrder.BigEndian) & 0x7FFFFFFF;
-            ErrorCode = (ErrorCode)BitHelper.ToUInt32(buffer, 4, ByteOrder.BigEndian);
+            ErrorCode = (FrameErrorCode)BitHelper.ToUInt32(buffer, 4, ByteOrder.BigEndian);
         }
 
         public override byte[] GetPayload()

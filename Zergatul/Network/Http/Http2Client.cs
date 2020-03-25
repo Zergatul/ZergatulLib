@@ -218,7 +218,7 @@ namespace Zergatul.Network.Http
             if (disposing)
             {
                 if (_isOpened)
-                    SendGoAway(ErrorCode.NO_ERROR);
+                    SendGoAway(FrameErrorCode.NO_ERROR);
             }
 
             _disposed = true;
@@ -321,7 +321,7 @@ namespace Zergatul.Network.Http
                 case WindowUpdateFrame wndUpdFrame:
                     if (_state == State.Init)
                     {
-                        SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                        SendGoAway(FrameErrorCode.PROTOCOL_ERROR);
                         throw new InvalidOperationException();
                     }
 
@@ -345,7 +345,7 @@ namespace Zergatul.Network.Http
                 }
                 else
                 {
-                    SendGoAway(ErrorCode.PROTOCOL_ERROR);
+                    SendGoAway(FrameErrorCode.PROTOCOL_ERROR);
                     throw new InvalidOperationException();
                 }
             }
@@ -377,7 +377,7 @@ namespace Zergatul.Network.Http
             }
         }
 
-        private void SendGoAway(ErrorCode errorCode)
+        private void SendGoAway(FrameErrorCode errorCode)
         {
             _connection.SendFrame(new GoAwayFrame
             {

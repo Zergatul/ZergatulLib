@@ -79,7 +79,7 @@ namespace Zergatul.Network.Http.Frames
         {
             if (Id == 0)
             {
-                GoAwayWith(ErrorCode.PROTOCOL_ERROR);
+                GoAwayWith(FrameErrorCode.PROTOCOL_ERROR);
                 return;
             }
 

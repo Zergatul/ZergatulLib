@@ -16,7 +16,7 @@ namespace Zergatul.Network.Http.Frames
         public uint Id;
 
         public bool ShouldSendGoAway;
-        public ErrorCode GoAwayErrorCode;
+        public FrameErrorCode GoAwayErrorCode;
 
         public abstract void ReadPayload(Stream stream, int length);
         public abstract byte[] GetPayload();
@@ -42,7 +42,7 @@ namespace Zergatul.Network.Http.Frames
                 stream.Write(payload, 0, length);
         }
 
-        protected void GoAwayWith(ErrorCode errorCode)
+        protected void GoAwayWith(FrameErrorCode errorCode)
         {
             ShouldSendGoAway = true;
             GoAwayErrorCode = errorCode;

@@ -1,6 +1,6 @@
 ﻿namespace Zergatul.Network.Http.Frames
 {
-    public enum ErrorCode : uint
+    public enum FrameErrorCode : uint
     {
         NO_ERROR = 0x00,
         PROTOCOL_ERROR = 0x01,

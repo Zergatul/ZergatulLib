@@ -1,6 +1,6 @@
-﻿namespace Zergatul.Security.Zergatul
+﻿namespace Zergatul
 {
-    internal class ErrorCode
+    public class ErrorCode
     {
         public int Code { get; }
         public string Message { get; }

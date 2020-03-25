@@ -18,7 +18,7 @@ namespace Zergatul.Network.Http.Frames
         {
             if (length != 4)
             {
-                GoAwayWith(ErrorCode.FRAME_SIZE_ERROR);
+                GoAwayWith(FrameErrorCode.FRAME_SIZE_ERROR);
                 return;
             }
 
@@ -27,7 +27,7 @@ namespace Zergatul.Network.Http.Frames
             Increment = BitHelper.ToUInt32(buffer, ByteOrder.BigEndian) & 0x7FFFFFFFU;
             if (Increment == 0)
             {
-                GoAwayWith(ErrorCode.PROTOCOL_ERROR);
+                GoAwayWith(FrameErrorCode.PROTOCOL_ERROR);
                 return;
             }
         }

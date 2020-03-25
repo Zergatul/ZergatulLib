@@ -27,19 +27,19 @@ namespace Zergatul.Network.Http.Frames
         {
             if (ACK && length != 0)
             {
-                GoAwayWith(ErrorCode.FRAME_SIZE_ERROR);
+                GoAwayWith(FrameErrorCode.FRAME_SIZE_ERROR);
                 return;
             }
 
             if (Id != 0)
             {
-                GoAwayWith(ErrorCode.PROTOCOL_ERROR);
+                GoAwayWith(FrameErrorCode.PROTOCOL_ERROR);
                 return;
             }
 
             if (length % 6 != 0)
             {
-                GoAwayWith(ErrorCode.FRAME_SIZE_ERROR);
+                GoAwayWith(FrameErrorCode.FRAME_SIZE_ERROR);
                 return;
             }
 
@@ -58,7 +58,7 @@ namespace Zergatul.Network.Http.Frames
                         case SettingParameter.SETTINGS_ENABLE_PUSH:
                             if (value != 0 && value != 1)
                             {
-                                GoAwayWith(ErrorCode.PROTOCOL_ERROR);
+                                GoAwayWith(FrameErrorCode.PROTOCOL_ERROR);
                                 return;
                             }
                             break;
@@ -66,7 +66,7 @@ namespace Zergatul.Network.Http.Frames
                         case SettingParameter.SETTINGS_INITIAL_WINDOW_SIZE:
                             if (value >= 0x80000000)
                             {
-                                GoAwayWith(ErrorCode.FLOW_CONTROL_ERROR);
+                                GoAwayWith(FrameErrorCode.FLOW_CONTROL_ERROR);
                                 return;
                             }
                             break;
@@ -74,7 +74,7 @@ namespace Zergatul.Network.Http.Frames
                         case SettingParameter.SETTINGS_MAX_FRAME_SIZE:
                             if (value < 16384 || value >= 16777216)
                             {
-                                GoAwayWith(ErrorCode.PROTOCOL_ERROR);
+                                GoAwayWith(FrameErrorCode.PROTOCOL_ERROR);
                                 return;
                             }
                             break;
