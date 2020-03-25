@@ -1,8 +1,7 @@
-﻿using System;
-
-namespace Zergatul.FileFormat.Pdf
+﻿namespace Zergatul.FileFormat.Pdf
 {
     using static Common;
+    using static ExceptionHelper;
 
     public class XRefEntry
     {
@@ -17,15 +16,15 @@ namespace Zergatul.FileFormat.Pdf
         public XRefEntry(long id, long offset, int generation, bool free)
         {
             if (id < 0)
-                throw new ArgumentOutOfRangeException(nameof(id), "id cannot be negative.");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(id), ErrorCodes.XRefEntryNegativeId);
             if (offset < 0)
-                throw new ArgumentOutOfRangeException(nameof(offset), "offset cannot be negative.");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(offset), ErrorCodes.XRefEntryNegativeOffset);
             if (offset > 9999999999)
-                throw new ArgumentOutOfRangeException(nameof(offset), "offset too big");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(offset), ErrorCodes.XRefEntryOffsetOverflow);
             if (generation < 0)
-                throw new ArgumentOutOfRangeException(nameof(generation), "generation cannot be negative.");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(generation), ErrorCodes.XRefEntryNegativeGeneration);
             if (generation > MaxGeneration)
-                throw new ArgumentOutOfRangeException(nameof(generation), "generation too big.");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(generation), ErrorCodes.XRefEntryGenerationOverflow);
 
             Id = id;
             Offset = offset;
@@ -36,11 +35,11 @@ namespace Zergatul.FileFormat.Pdf
         public XRefEntry(long id, long streamObjectId, long objectIndex)
         {
             if (id < 0)
-                throw new ArgumentOutOfRangeException(nameof(id), "id cannot be negative.");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(id), ErrorCodes.XRefEntryNegativeId);
             if (streamObjectId < 0)
-                throw new ArgumentOutOfRangeException(nameof(streamObjectId), "streamObjectId cannot be negative.");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(streamObjectId), ErrorCodes.XRefEntryNegativeStreamObjectId);
             if (objectIndex < 0)
-                throw new ArgumentOutOfRangeException(nameof(objectIndex), "objectIndex cannot be negative.");
+                throw ArgumentOutOfRangeExceptionByCode(nameof(objectIndex), ErrorCodes.XRefEntryNegativeObjectIndex);
 
             Id = id;
             StreamObjectId = streamObjectId;

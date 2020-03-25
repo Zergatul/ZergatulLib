@@ -21,5 +21,12 @@ namespace Zergatul.FileFormat.Pdf.Token
             Id = id;
             Generation = generation;
         }
+
+#if DEBUG
+        public override string ToString()
+        {
+            return $"{Id} {Generation} R";
+        }
+#endif
     }
 }

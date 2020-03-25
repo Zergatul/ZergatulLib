@@ -24,13 +24,6 @@ namespace Zergatul.FileFormat.Pdf
             Add(id, new XRefEntry(id, offset, generation, free));
         }
 
-        public XRefTable Clone()
-        {
-            var copy = new XRefTable();
-            copy._data = new Dictionary<long, XRefEntry>(_data);
-            return copy;
-        }
-
         public void MergeWith(XRefTable other)
         {
             foreach (var kv in other._data)

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Zergatul.FileFormat.Pdf.Token
 {
@@ -11,5 +12,12 @@ namespace Zergatul.FileFormat.Pdf.Token
         {
             Value = value;
         }
+
+#if DEBUG
+        public override string ToString()
+        {
+            return "<" + BitHelper.BytesToHex(Value.ToArray()) + ">";
+        }
+#endif
     }
 }

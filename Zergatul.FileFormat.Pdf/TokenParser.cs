@@ -8,8 +8,9 @@ namespace Zergatul.FileFormat.Pdf
 {
     using static Common;
 
-    internal class Parser
+    internal class TokenParser
     {
+        public TokenBase LastToken { get; private set; }
         public long Position { get; private set; } = 0;
 
         private Func<int> _nextByte;
@@ -18,7 +19,7 @@ namespace Zergatul.FileFormat.Pdf
         private List<byte> _list = new List<byte>();
         private TokenBase _token1, _token2;
 
-        public Parser(Func<int> nextByte)
+        public TokenParser(Func<int> nextByte)
         {
             if (nextByte == null)
                 throw new ArgumentNullException(nameof(nextByte));
@@ -26,7 +27,7 @@ namespace Zergatul.FileFormat.Pdf
             _nextByte = nextByte;
         }
 
-        public Parser(byte[] data, long offset, long endOffset)
+        public TokenParser(byte[] data, long offset, long endOffset)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
@@ -44,6 +45,7 @@ namespace Zergatul.FileFormat.Pdf
         {
             Position = position - 1;
             MoveNext();
+            LastToken = null;
             _token1 = null;
             _token2 = null;
         }
@@ -81,18 +83,21 @@ namespace Zergatul.FileFormat.Pdf
                     {
                         _token1 = null;
                         _token2 = null;
-                        return new IndirectReferenceToken(integer1.Value, (int)integer2.Value);
+                        LastToken = new IndirectReferenceToken(integer1.Value, (int)integer2.Value);
+                        return LastToken;
                     }
                     if (allowObj && @static?.Value == "obj")
                     {
                         _token1 = null;
                         _token2 = null;
-                        return new BeginObjectToken(integer1.Value, (int)integer2.Value);
+                        LastToken = new BeginObjectToken(integer1.Value, (int)integer2.Value);
+                        return LastToken;
                     }
                 }
             }
 
-            return token;
+            LastToken = token;
+            return LastToken;
         }
 
         public void SkipStrongRuleEndOfLine()
@@ -242,8 +247,9 @@ namespace Zergatul.FileFormat.Pdf
 
         private TokenBase ReadDictionary()
         {
-            var dictionary = new Dictionary<string, TokenBase>();
+            var dictionary = new Dictionary<string, DictionaryEntry>();
             TokenBase token;
+            int @order = 0;
             while (true)
             {
                 token = NextToken();
@@ -264,14 +270,26 @@ namespace Zergatul.FileFormat.Pdf
                 if (dictionary.ContainsKey(name.Value))
                 {
                     if (token == NullToken.Instance)
+                    {
                         dictionary.Remove(name.Value);
+                    }
                     else
-                        dictionary[name.Value] = token;
+                    {
+                        dictionary[name.Value] = new DictionaryEntry
+                        {
+                            Order = order++,
+                            Token = token
+                        };
+                    }
                 }
                 else
                 {
                     if (token != NullToken.Instance)
-                        dictionary.Add(name.Value, token);
+                        dictionary.Add(name.Value, new DictionaryEntry
+                        {
+                            Order = order++,
+                            Token = token
+                        });
                 }
             }
         }

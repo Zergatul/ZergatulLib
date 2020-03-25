@@ -9,5 +9,12 @@
         {
             Value = value;
         }
+
+#if DEBUG
+        public override string ToString()
+        {
+            return "/" + Value;
+        }
+#endif
     }
 }
