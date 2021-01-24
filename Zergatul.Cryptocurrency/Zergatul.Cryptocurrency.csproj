@@ -152,18 +152,6 @@
     <Compile Include="Zcash\ZcashFactory.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="BerkeleyDB\libdb_dotnet62.dll" />
-    <Content Include="BerkeleyDB\libdb_dotnet62.XML">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="BerkeleyDB\libdb62d.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="BerkeleyDB\libdb_csharp62d.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

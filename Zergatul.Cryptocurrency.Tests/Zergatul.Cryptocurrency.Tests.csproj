@@ -83,6 +83,10 @@
       <Project>{6cb93460-a3cd-4985-8cdd-7ff4ca26b7dd}</Project>
       <Name>Zergatul.Cryptocurrency</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Zergatul.Security.OpenSsl\Zergatul.Security.OpenSsl.csproj">
+      <Project>{CD0B67E1-DDC3-4DB6-950A-704A60998B63}</Project>
+      <Name>Zergatul.Security.OpenSsl</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Zergatul.Security.Tests\Zergatul.Security.Tests.csproj">
       <Project>{a6a93ded-7bb6-4d84-84c9-1eeeb7ca8f33}</Project>
       <Name>Zergatul.Security.Tests</Name>

@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Zergatul.Cryptocurrency.Bitcoin;
 using Zergatul.Security;
+using Zergatul.Security.OpenSsl;
 using Zergatul.Security.Tests;
 
 namespace Zergatul.Cryptocurrency.Tests.Bitcoin
@@ -252,6 +253,25 @@ namespace Zergatul.Cryptocurrency.Tests.Bitcoin
         }
 
         [TestMethod]
+        public void VerifyP2SHP2WPKH2()
+        {
+            var tx = _repository.GetTransaction("31e89ec088dfbfc778afa66b954d04f36e07687656978a3c15e499dc81e18960");
+
+            Assert.IsTrue(tx.IDString == "31e89ec088dfbfc778afa66b954d04f36e07687656978a3c15e499dc81e18960");
+
+            Assert.IsTrue(tx.Inputs.Count == 1);
+            Assert.IsTrue(tx.Inputs[0].Address.Value == "37mZZjrA1zihRVNDTjuWQivm4aaND1zxZ8");
+
+            Assert.IsTrue(tx.Outputs.Count == 2);
+            Assert.IsTrue(tx.Outputs[0].Address.Value == "3BbJEWWsCPbZEqCfEs98sXtwfY7wpw3Y39");
+            Assert.IsTrue(tx.Outputs[0].AmountBTC == 0.01700000m);
+            Assert.IsTrue(tx.Outputs[1].Address.Value == "3Hp1NG7qVCwiyjBXCo7b2QwGaFhcP45xJj");
+            Assert.IsTrue(tx.Outputs[1].AmountBTC == 5.61213956m);
+
+            Assert.IsTrue(tx.Verify(_repository));
+        }
+
+        [TestMethod]
         public void Sign1Test()
         {
             // SHA256(my-testnet-bitcoins)
@@ -469,8 +489,8 @@ namespace Zergatul.Cryptocurrency.Tests.Bitcoin
         [ClassInitialize]
         public static void Init(TestContext context)
         {
-            //Provider.UnregisterAll();
-            //Provider.Register(new OpenSslProvider());
+            SecurityProvider.UnregisterAll();
+            SecurityProvider.Register(new OpenSslProvider());
 
             _repository = new SimpleTransactionRepository<Transaction>("Bitcoin/Transactions.txt");
         }
