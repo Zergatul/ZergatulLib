@@ -139,7 +139,7 @@ namespace Zergatul.Security.OpenSsl.Signature
                 IntPtr r = Native.BN_new();
                 if (r == IntPtr.Zero)
                     throw new OpenSslException();
-                if (Native.BN_div(IntPtr.Zero, r, x, q, IntPtr.Zero) != 1)
+                if (Native.BN_div(IntPtr.Zero, r, x, q, ctx) != 1)
                     throw new OpenSslException();
                 if (Native.BN_is_zero(r) == 1)
                     goto CalculateK;
