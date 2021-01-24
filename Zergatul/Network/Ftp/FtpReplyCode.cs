@@ -209,7 +209,7 @@ namespace Zergatul.Network.Ftp
         /// Requested action not taken.
         ///     File unavailable (e.g., file not found, no access).
         /// </summary>
-        RequestedActionNotTakenFileUnavailable2 = 550,
+        RequestedActionNotTakenFileUnavailable = 550,
 
         /// <summary>
         /// Requested action aborted. Page type unknown.

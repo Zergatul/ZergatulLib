@@ -94,10 +94,14 @@ namespace Zergatul.Examples.Ftp
         private readonly string _directory;
         private readonly byte[] _key;
 
+        private string _currentDirectory;
+
         public CryptedFtpFileSystemProvider(string directory, byte[] key)
         {
             _directory = directory;
             _key = key;
+
+            _currentDirectory = _directory;
         }
 
         public string GetCurrentDirectory()
@@ -107,7 +111,19 @@ namespace Zergatul.Examples.Ftp
 
         public bool SetWorkingDirectory(string path)
         {
-            return true;
+            if (path.Contains(".."))
+                return false;
+
+            path = Path.Combine(_directory, path);
+            if (Directory.Exists(path))
+            {
+                _currentDirectory = path;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public IFtpFile GetFile(string filename)

@@ -205,7 +205,7 @@ namespace Zergatul.Network.Ftp
                 if (_fileSystemProvider.SetWorkingDirectory(param))
                     client.Connection.WriteReply(FtpReplyCode.RequestedFileActionOkay);
                 else
-                    client.Connection.WriteReply(FtpReplyCode.RequestedActionNotTakenFileUnavailable2);
+                    client.Connection.WriteReply(FtpReplyCode.RequestedActionNotTakenFileUnavailable);
             }
             else
                 WriteBadSequence(client);
@@ -412,10 +412,14 @@ namespace Zergatul.Network.Ftp
             if (client.State == ClientState.LoggedIn)
             {
                 var file = _fileSystemProvider.GetFile(filename);
-                if (file == null)
-                    throw new NotImplementedException();
-
-                client.Connection.WriteReply(FtpReplyCode.FileStatus, file.GetSize().ToString());
+                if (file != null)
+                {
+                    client.Connection.WriteReply(FtpReplyCode.FileStatus, file.GetSize().ToString());
+                }
+                else
+                {
+                    client.Connection.WriteReply(FtpReplyCode.RequestedActionNotTakenFileUnavailable);
+                }
             }
             else
                 WriteBadSequence(client);
