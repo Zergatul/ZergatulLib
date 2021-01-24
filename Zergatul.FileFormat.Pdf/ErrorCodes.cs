@@ -54,12 +54,38 @@
         public static readonly ErrorCode StreamDictionaryDecodeParamsInvalidToken = new ErrorCode(_index++, "Stream dictionary /DecodeParms key should be dictionary or array.");
 
         public static readonly ErrorCode GenerationNumberMismatch = new ErrorCode(_index++, "Generation numbers don't match between reference and xref table.");
+        public static readonly ErrorCode BeginObjectTokenExpected = new ErrorCode(_index++, "Begin object token expected.");
 
         public static readonly ErrorCode ObjectStreamCompressedEntry = new ErrorCode(_index++, "Compressed object cannot be inside another compressed object.");
         public static readonly ErrorCode ObjectStreamCompressedFree = new ErrorCode(_index++, "Compressed object references to free object.");
         public static readonly ErrorCode ObjectStreamBeginObjectTokenExpected = new ErrorCode(_index++, "BeginObjectToken expected.");
         public static readonly ErrorCode ObjectStreamObjectNumberMismatch = new ErrorCode(_index++, "Object numbers mismatch.");
         public static readonly ErrorCode ObjectStreamObjectGenerationMismatch = new ErrorCode(_index++, "Object generations mismatch.");
+        public static readonly ErrorCode ObjectStreamTypeExpected = new ErrorCode(_index++, "Object stream dictionary must contain /Type key.");
+        public static readonly ErrorCode ObjectStreamTypeInvalidToken = new ErrorCode(_index++, "Object stream dictionary /Type key should be name.");
+        public static readonly ErrorCode ObjectStreamTypeInvalidValue = new ErrorCode(_index++, "Object stream dictionary /Type key should have value ObjStm.");
+        public static readonly ErrorCode ObjectStreamNExpected = new ErrorCode(_index++, "Object stream dictionary must contain /N key.");
+        public static readonly ErrorCode ObjectStreamNInvalidToken = new ErrorCode(_index++, "Object stream dictionary /N key should be integer.");
+        public static readonly ErrorCode ObjectStreamFirstExpected = new ErrorCode(_index++, "Object stream dictionary must contain /First key.");
+        public static readonly ErrorCode ObjectStreamFirstInvalidToken = new ErrorCode(_index++, "Object stream dictionary /First key should be integer.");
+
+
+        public static readonly ErrorCode DocumentCatalogInvalidToken = new ErrorCode(_index++, "Document root should be dictionary.");
+        public static readonly ErrorCode DocumentCatalogTypeInvalid = new ErrorCode(_index++, "Catalog dictionary should have /Type key with /Catalog value.");
+        public static readonly ErrorCode DocumentCatalogPagesInvalid = new ErrorCode(_index++, "Catalog dictionary should have /Pages key with indirect reference.");
+
+        public static readonly ErrorCode PagesInvalidToken = new ErrorCode(_index++, "Pages indirect reference should refer to dictionary.");
+        public static readonly ErrorCode PagesTypeInvalid = new ErrorCode(_index++, "Pages dictionary should have /Type key with /Pages value.");
+        public static readonly ErrorCode PagesKidsInvalid = new ErrorCode(_index++, "Pages dictionary should have /Kids key with array value.");
+        public static readonly ErrorCode PagesKidsInvalidItems = new ErrorCode(_index++, "/Kids array should contain indirect references.");
+        public static readonly ErrorCode PagesCountInvalid = new ErrorCode(_index++, "Pages dictionary should have /Count key with integer value.");
+        public static readonly ErrorCode PagesCountMismatch = new ErrorCode(_index++, "Pages dictionary count does not match the actual pages count.");
+
+        public static readonly ErrorCode PageInvalidToken = new ErrorCode(_index++, "Page indirect reference should refer to dictionary.");
+        public static readonly ErrorCode PageTypeInvalidToken = new ErrorCode(_index++, "Page dictionary should have /Type key with name.");
+        public static readonly ErrorCode PageTypeInvalidValue = new ErrorCode(_index++, "Page dictionary should have /Type key /Page or /Pages value.");
+        public static readonly ErrorCode PageParentExpected = new ErrorCode(_index++, "Page dictionary should have /Parent key with indirect reference.");
+        //
 
         //"Invalid xref entry offset."
     }

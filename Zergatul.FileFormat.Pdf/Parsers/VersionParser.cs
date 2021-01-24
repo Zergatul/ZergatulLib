@@ -31,7 +31,10 @@ namespace Zergatul.FileFormat.Pdf.Parsers
                     throw InvalidDataExceptionByCode(ErrorCodes.InvalidVersionCharacter);
 
                 if (IsEndOfLine(buffer[i]))
-                    return Encoding.ASCII.GetString(buffer, HeaderMarker.Length, i - HeaderMarker.Length);
+                {
+                    _reader.Version = Encoding.ASCII.GetString(buffer, HeaderMarker.Length, i - HeaderMarker.Length);
+                    return _reader.Version;
+                }
             }
 
             throw InvalidDataExceptionByCode(ErrorCodes.InvalidVersion);

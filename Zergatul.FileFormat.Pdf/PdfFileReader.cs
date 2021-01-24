@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Zergatul.FileFormat.Pdf.Parsers;
 using Zergatul.FileFormat.Pdf.Token;
 using Zergatul.IO;
@@ -18,20 +16,28 @@ namespace Zergatul.FileFormat.Pdf
         public byte[] Buffer { get; }
         public TokenParser Parser { get; }
 
+        public string Version { get; set; }
+        public byte[] OriginalDocumentId { get; set; }
+        public byte[] DocumentId { get; set; }
+        public XRefTable XRef { get; set; }
+        public List<Footer> Footers { get; set; }
+        public DocumentCatalog Catalog { get; set; }
+        public Dictionary<long, ObjectStream> ObjectStreamCache { get; set; }
+
         private int _bufOffset, _bufLength;
         private ParserFactory _factory;
-        private XRefTable _xref;
-        private Dictionary<long, ObjectStream> _objectStreamCache;
 
-        public PdfFileReader(Stream stream, ParserFactory factory, XRefTable xref)
+        public PdfFileReader(Stream stream, ParserFactory factory)
         {
+            _factory = factory;
+
             Stream = stream;
             Buffer = new byte[BufferSize];
             Parser = new TokenParser(NextByte);
-
-            _factory = factory;
-            _xref = xref;
-            _objectStreamCache = new Dictionary<long, ObjectStream>();
+            Footers = new List<Footer>();
+            XRef = new XRefTable();
+            Catalog = new DocumentCatalog();
+            ObjectStreamCache = new Dictionary<long, ObjectStream>();
         }
 
         #region Public methods

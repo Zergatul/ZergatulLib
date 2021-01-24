@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Zergatul.FileFormat.Pdf.Token;
 
 namespace Zergatul.FileFormat.Pdf.Parsers
@@ -10,33 +9,31 @@ namespace Zergatul.FileFormat.Pdf.Parsers
     {
         private readonly long _id;
         private readonly int _generation;
-        private readonly XRefTable _xref;
-        private readonly Dictionary<long, ObjectStream> _cache;
 
-        public ObjectParser(PdfFileReader reader, ParserFactory factory, XRefTable xref, Dictionary<long, ObjectStream> cache, long id, int generation)
+        public ObjectParser(PdfFileReader reader, ParserFactory factory, long id, int generation)
             : base(reader, factory)
         {
-            _xref = xref;
-            _cache = cache;
             _id = id;
             _generation = generation;
         }
 
         public override TokenBase Parse()
         {
-            var entry = _xref[_id];
+            var entry = _reader.XRef[_id];
             if (entry.Generation != _generation)
                 throw InvalidDataExceptionByCode(ErrorCodes.GenerationNumberMismatch);
 
             if (entry.Free)
                 return NullToken.Instance;
 
+            ObjectStream objStream;
+
             if (entry.Compressed)
             {
-                if (!_cache.TryGetValue(entry.StreamObjectId, out ObjectStream objStream))
+                if (!_reader.ObjectStreamCache.TryGetValue(entry.StreamObjectId, out objStream))
                 {
-                    objStream = _factory.GetObjectStreamParser(_reader, _xref[entry.StreamObjectId]).Parse();
-                    _cache.Add(entry.StreamObjectId, objStream);
+                    objStream = _factory.GetObjectStreamParser(_reader, _reader.XRef[entry.StreamObjectId]).Parse();
+                    _reader.ObjectStreamCache.Add(entry.StreamObjectId, objStream);
                 }
 
                 long offset = objStream.Objects[(int)entry.ObjectIndex].Offset;
@@ -46,8 +43,7 @@ namespace Zergatul.FileFormat.Pdf.Parsers
             }
 
             _reader.ResetBuffer(entry.Offset);
-
-            throw new NotImplementedException();
+            return _factory.GetObjectStreamParser(_reader, entry).Parse();
         }
     }
 }

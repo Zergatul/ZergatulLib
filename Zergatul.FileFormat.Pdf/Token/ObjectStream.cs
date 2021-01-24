@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Zergatul.FileFormat.Pdf
+namespace Zergatul.FileFormat.Pdf.Token
 {
-    internal class ObjectStream
+    internal class ObjectStream : TokenBase
     {
+        public override bool IsBasic => false;
         public byte[] Data { get; }
         public IReadOnlyList<ObjectStreamEntry> Objects { get; }
 

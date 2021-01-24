@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Zergatul.FileFormat.Pdf.Token;
+﻿using Zergatul.FileFormat.Pdf.Token;
 
 namespace Zergatul.FileFormat.Pdf.Parsers
 {
@@ -37,7 +34,7 @@ namespace Zergatul.FileFormat.Pdf.Parsers
             if (beginObj.Generation != _entry.Generation)
                 throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamObjectGenerationMismatch);
 
-            var streamObj = new StreamObject(Stream, Parser);
+            var streamObj = new StreamObject(_reader.Stream, _reader.Parser);
             var dictionary = streamObj.Dictionary;
 
             const string Type = nameof(Type);
@@ -45,21 +42,21 @@ namespace Zergatul.FileFormat.Pdf.Parsers
             const string First = nameof(First);
 
             if (!dictionary.ContainsKey(Type))
-                throw new InvalidDataException("Object stream dictionary must contain [Type] key.");
+                throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamTypeExpected);
             if (!dictionary.Is<NameToken>(Type))
-                throw new InvalidDataException("Object stream dictionary [Type] key should be name.");
+                throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamTypeInvalidToken);
             if (dictionary.GetName(Type) != "ObjStm")
-                throw new InvalidDataException("Object stream dictionary [Type] key should have value ObjStm.");
+                throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamTypeInvalidValue);
 
             if (!dictionary.ContainsKey(N))
-                throw new InvalidDataException("Object stream dictionary must contain [N] key.");
+                throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamNExpected);
             if (!dictionary.Is<IntegerToken>(N))
-                throw new InvalidDataException("Object stream dictionary [N] key should be integer.");
+                throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamNInvalidToken);
 
             if (!dictionary.ContainsKey(First))
-                throw new InvalidDataException("Object stream dictionary must contain [First] key.");
+                throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamFirstExpected);
             if (!dictionary.Is<IntegerToken>(First))
-                throw new InvalidDataException("Object stream dictionary [First] key should be integer.");
+                throw InvalidDataExceptionByCode(ErrorCodes.ObjectStreamFirstInvalidToken);
 
             return new ObjectStream(streamObj.Data, dictionary.GetInteger(N), dictionary.GetInteger(First));
         }

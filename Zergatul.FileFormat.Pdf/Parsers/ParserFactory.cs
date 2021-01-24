@@ -13,13 +13,11 @@ namespace Zergatul.FileFormat.Pdf.Parsers
         public virtual ParserBase<Footer> GetMainFooterParser(PdfFileReader reader) =>
             new MainFooterParser(reader, this);
 
-        public virtual ParserBase<TokenBase> GetObjectParser(
-            PdfFileReader reader,
-            XRefTable xref,
-            Dictionary<long, ObjectStream> cache,
-            long id,
-            int generation) =>
-            new ObjectParser(reader, this, xref, cache, id, generation);
+        public virtual ParserBase<List<Footer>> GetFootersParser(PdfFileReader reader) =>
+            new FootersParser(reader, this);
+
+        public virtual ParserBase<TokenBase> GetObjectParser(PdfFileReader reader, long id, int generation) =>
+            new ObjectParser(reader, this, id, generation);
 
         public virtual ParserBase<ObjectStream> GetObjectStreamParser(PdfFileReader reader, XRefEntry entry) =>
             new ObjectStreamParser(reader, this, entry);
@@ -35,5 +33,8 @@ namespace Zergatul.FileFormat.Pdf.Parsers
 
         public virtual ParserBase<XRefTable> GetXRefTableParser(PdfFileReader reader) =>
             new XRefTableParser(reader, this);
+
+        public virtual ParserBase<DocumentCatalog> GetDocumentCatalogParser(PdfFileReader reader) =>
+            new DocumentCatalogParser(reader, this);
     }
 }
