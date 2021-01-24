@@ -2,7 +2,7 @@
 
 namespace Zergatul.Math
 {
-    public class BigFloat
+    public struct BigFloat
     {
         // representation:
         // 0.[mantissa] * 2 ^ [exponent]
@@ -32,7 +32,7 @@ namespace Zergatul.Math
             if (mantissaBits <= 0)
                 throw new ArgumentOutOfRangeException("mantissaBits should be >= 1");
 
-            this._mantissaBits = mantissaBits;
+            _mantissaBits = mantissaBits;
 
             long bits = BitConverter.DoubleToInt64Bits(value);
             bool negative = bits < 0;
@@ -48,9 +48,12 @@ namespace Zergatul.Math
 
             if (mantissa == 0)
             {
-                this._mantissaSign = 0;
-                this._mantissaLength = 0;
-                this._exponentLength = 0;
+                _mantissaSign = 0;
+                _mantissaLength = 0;
+                _mantissa = null;
+                _exponentSign = 0;
+                _exponentLength = 0;
+                _exponent = null;
             }
             else
             {
@@ -60,7 +63,7 @@ namespace Zergatul.Math
                     exponent++;
                 }
 
-                this._mantissaSign = negative ? -1 : 1;
+                _mantissaSign = negative ? -1 : 1;
                 if (mantissa > uint.MaxValue)
                 {
                     throw new NotImplementedException();
@@ -69,34 +72,58 @@ namespace Zergatul.Math
                 }
                 else
                 {
-                    this._mantissa = new uint[] { (uint)mantissa };
-                    this._mantissaLength = 1;
-
-                    exponent += 32;
+                    _mantissa = new uint[] { (uint)mantissa };
+                    _mantissaLength = 1;
+                    _mantissaSign = 1;
 
                     if (exponent == 0)
                     {
-                        this._exponentLength = 0;
-                        this._exponentSign = 0;
+                        _exponentLength = 0;
+                        _exponentSign = 0;
+                        _exponent = null;
                     }
                     else
                     {
-                        this._exponentLength = 1;
+                        _exponentLength = 1;
                         if (exponent > 0)
                         {
-                            this._exponent = new uint[] { (uint)exponent };
-                            this._exponentSign = 1;
+                            _exponent = new uint[] { (uint)exponent };
+                            _exponentSign = 1;
                         }
                         else
                         {
-                            this._exponent = new uint[] { (uint)(-exponent) };
-                            this._exponentSign = -1;
+                            _exponent = new uint[] { (uint)(-exponent) };
+                            _exponentSign = -1;
                         }
                     }
                 }
-
-                Normalize();
             }
+        }
+
+        #endregion
+
+        #region Converters
+
+        public static explicit operator double(BigFloat value)
+        {
+            if (value.IsZero)
+                return 0;
+
+            if (value._exponentLength > 1)
+                throw new OverflowException();
+
+            long exponent = 0;
+            if (value._exponentLength == 1)
+            {
+                exponent = value._exponent[0];
+            }
+
+            long mantissa = (long)value._mantissa[0] << 20;
+            //if (value._mantissaLength > 1)
+            //    mantissa
+
+
+            return 0;
         }
 
         #endregion
