@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Numerics;
 using System.Text;
 
 namespace Zergatul.Math
 {
-    public struct UInt128
+    public struct UInt128 : IEquatable<UInt128>
     {
         internal uint _w1;
         internal uint _w2;
@@ -246,6 +245,13 @@ namespace Zergatul.Math
             return ((ulong)value._w3 << 32) | value._w4;
         }
 
+        public static explicit operator long(UInt128 value)
+        {
+            if (value._w1 != 0 || value._w2 != 0 || value._w3 >= 0x80000000)
+                throw new OverflowException();
+            return ((long)value._w3 << 32) | value._w4;
+        }
+
         #endregion
 
         #region Compare operators
@@ -272,6 +278,40 @@ namespace Zergatul.Math
             {
                 return true;
             }
+        }
+
+        public static bool operator ==(UInt128 left, UInt128 right) => left.Equals(right);
+        public static bool operator !=(UInt128 left, UInt128 right) => !left.Equals(right);
+
+        #endregion
+
+        #region IEquatable<UInt128>
+
+        public bool Equals(UInt128 other)
+        {
+            return
+                _w1 == other._w1 &&
+                _w2 == other._w2 &&
+                _w3 == other._w3 &&
+                _w4 == other._w4;
+        }
+
+        #endregion
+
+        #region Object overrides
+
+        public override bool Equals(object obj)
+        {
+            switch (obj)
+            {
+                case UInt128 value: return Equals(value);
+                default: return false;
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(_w1, _w2, _w3, _w4);
         }
 
         #endregion

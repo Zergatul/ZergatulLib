@@ -1,14 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Zergatul.Math.Tests
 {
     [TestClass]
-    public class Int128Tests
+    public class UInt128Tests
     {
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]

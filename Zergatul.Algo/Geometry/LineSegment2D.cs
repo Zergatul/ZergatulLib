@@ -20,7 +20,7 @@ namespace Zergatul.Algo.Geometry
             if (new Rectangle2D(P1, P2).IsInside(proj))
                 return point.GetDistanceSquaredTo(proj);
             else
-                return Math.Min(P1.GetDistanceSquaredTo(point), P2.GetDistanceSquaredTo(point));
+                return System.Math.Min(P1.GetDistanceSquaredTo(point), P2.GetDistanceSquaredTo(point));
         }
 
         public Line2D ToLine()

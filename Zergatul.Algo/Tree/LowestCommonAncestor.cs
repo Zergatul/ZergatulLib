@@ -35,7 +35,7 @@ namespace Zergatul.Algo.Tree
             for (int i = 1; i < log2.Length; i++)
                 log2[i] = log2[i >> 1] + 1;
 
-            int blockSize = Math.Max(1, log2[orderSize] >> 1);
+            int blockSize = System.Math.Max(1, log2[orderSize] >> 1);
             int blockCount = (orderSize + blockSize - 1) / blockSize;
 
             int[][] sparseTable = new int[blockCount][];

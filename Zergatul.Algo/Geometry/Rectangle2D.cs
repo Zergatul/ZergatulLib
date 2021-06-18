@@ -9,8 +9,8 @@ namespace Zergatul.Algo.Geometry
 
         public Rectangle2D(Point2D p1, Point2D p2)
         {
-            P1 = new Point2D(Math.Min(p1.X, p2.X), Math.Min(p1.Y, p2.Y));
-            P2 = new Point2D(Math.Max(p1.X, p2.X), Math.Max(p1.Y, p2.Y));
+            P1 = new Point2D(System.Math.Min(p1.X, p2.X), System.Math.Min(p1.Y, p2.Y));
+            P2 = new Point2D(System.Math.Max(p1.X, p2.X), System.Math.Max(p1.Y, p2.Y));
         }
 
         public bool IsInside(Point2D point)
