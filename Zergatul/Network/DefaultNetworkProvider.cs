@@ -31,7 +31,10 @@ namespace Zergatul.Network
         public override async Task<Stream> GetTcpStreamAsync(string host, int port, ProxyBase proxy)
         {
             if (proxy != null)
-                throw new NotImplementedException();
+            {
+                var client = await proxy.CreateConnectionAsync(host, port);
+                return client.GetStream();
+            }
 
             var addresses = await DnsResolveAsync(host);
             if (addresses.Length == 0)

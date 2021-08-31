@@ -51,7 +51,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.FileFormat.Qip", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.WinApi", "Zergatul.WinApi\Zergatul.WinApi.csproj", "{304BD87D-DC9C-4811-A53D-FBA98C994282}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Math.Tests", "Tests\Zergatul.Math.Tests\Zergatul.Math.Tests.csproj", "{D04F7FAA-A28F-4949-B7B3-94C15126FD63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.Math.Tests", "Tests\Zergatul.Math.Tests\Zergatul.Math.Tests.csproj", "{D04F7FAA-A28F-4949-B7B3-94C15126FD63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.FileFormat.Zip", "Zergatul.FileFormat.Zip\Zergatul.FileFormat.Zip.csproj", "{2908BBFC-B1B3-4098-9005-17C9A085CA66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -351,6 +353,18 @@ Global
 		{D04F7FAA-A28F-4949-B7B3-94C15126FD63}.Release|x64.Build.0 = Release|Any CPU
 		{D04F7FAA-A28F-4949-B7B3-94C15126FD63}.Release|x86.ActiveCfg = Release|Any CPU
 		{D04F7FAA-A28F-4949-B7B3-94C15126FD63}.Release|x86.Build.0 = Release|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Debug|x64.Build.0 = Debug|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Debug|x86.Build.0 = Debug|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|x64.ActiveCfg = Release|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|x64.Build.0 = Release|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|x86.ActiveCfg = Release|Any CPU
+		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

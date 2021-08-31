@@ -62,9 +62,28 @@ namespace Zergatul.Network.Proxy
             return tcp;
         }
 
+        protected async Task<TcpClient> ConnectToServerAsync(TcpClient tcp)
+        {
+            if (tcp == null)
+            {
+                tcp = new TcpClient();
+                if (ReadTimeout > 0)
+                    tcp.ReceiveTimeout = ReadTimeout;
+                if (WriteTimeout > 0)
+                    tcp.SendTimeout = WriteTimeout;
+                if (_serverAddress != null)
+                    await tcp.ConnectAsync(_serverAddress, _serverPort);
+                else
+                    await tcp.ConnectAsync(_serverHostname, _serverPort);
+            }
+            return tcp;
+        }
+
         public abstract TcpClient CreateConnection(IPAddress address, int port, TcpClient tcp);
 
         public abstract TcpClient CreateConnection(string hostname, int port, TcpClient tcp);
+
+        public abstract Task<TcpClient> CreateConnectionAsync(string hostname, int port, TcpClient tcp);
 
         public virtual TcpClient CreateConnection(IPAddress address, int port)
         {
@@ -74,6 +93,11 @@ namespace Zergatul.Network.Proxy
         public virtual TcpClient CreateConnection(string hostname, int port)
         {
             return CreateConnection(hostname, port, null);
+        }
+
+        public virtual Task<TcpClient> CreateConnectionAsync(string hostname, int port)
+        {
+            return CreateConnectionAsync(hostname, port, null);
         }
 
         public abstract TcpListener CreateListener(int port);

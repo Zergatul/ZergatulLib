@@ -23,6 +23,22 @@ namespace Zergatul.Algo.Geometry
                 return System.Math.Min(P1.GetDistanceSquaredTo(point), P2.GetDistanceSquaredTo(point));
         }
 
+        public Point2D? Intersect(LineSegment2D segment)
+        {
+            var result = ToLine().Intersect(segment.ToLine());
+            switch (result)
+            {
+                case Point2D point:
+                    if (new Rectangle2D(P1, P2).IsInside(point) && new Rectangle2D(segment.P1, segment.P2).IsInside(point))
+                        return point;
+                    else
+                        return null;
+
+                default:
+                    return null;
+            }
+        }
+
         public Line2D ToLine()
         {
             return new Line2D(P1, P2);

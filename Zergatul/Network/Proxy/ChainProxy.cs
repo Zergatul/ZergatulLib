@@ -54,6 +54,11 @@ namespace Zergatul.Network.Proxy
             throw new NotImplementedException();
         }
 
+        public override Task<TcpClient> CreateConnectionAsync(string hostname, int port, TcpClient tcp)
+        {
+            throw new NotImplementedException();
+        }
+
         public override TcpListener CreateListener(int port)
         {
             throw new NotImplementedException();

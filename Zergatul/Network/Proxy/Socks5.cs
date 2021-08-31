@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Zergatul.Network.Proxy
 {
@@ -78,6 +79,11 @@ namespace Zergatul.Network.Proxy
             Greeting(tcp.GetStream());
             Connect(tcp.GetStream(), hostname, port);
             return tcp;
+        }
+
+        public override Task<TcpClient> CreateConnectionAsync(string hostname, int port, TcpClient tcp)
+        {
+            throw new NotImplementedException();
         }
 
         private void Greeting(Stream stream)
