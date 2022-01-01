@@ -15,7 +15,7 @@ namespace Zergatul.Algo.Geometry
 
         public static Point2D Center(Point2D p1, Point2D p2)
         {
-            return new Point2D((p1.X + p2.X) / 2, (p1.Y + p2.Y) / 2);
+            return new Point2D(0.5 * (p1.X + p2.X), 0.5 * (p1.Y + p2.Y));
         }
 
         public double GetDistanceSquaredTo(Point2D point)
@@ -40,6 +40,11 @@ namespace Zergatul.Algo.Geometry
             if (point == null)
                 throw new InvalidOperationException();
             return Mirror(point.Value);
+        }
+
+        public bool Equals(Point2D other, double epsilon)
+        {
+            return Math.Abs(X - other.X) < epsilon && Math.Abs(Y - other.Y) < epsilon;
         }
 
         #region Object overrides
@@ -87,6 +92,11 @@ namespace Zergatul.Algo.Geometry
         public static bool operator !=(Point2D p1, Point2D p2)
         {
             return !p1.Equals(p2);
+        }
+
+        public static Vector2D operator -(Point2D p1, Point2D p2)
+        {
+            return new Vector2D(p1.X - p2.X, p1.Y - p2.Y);
         }
 
         #endregion

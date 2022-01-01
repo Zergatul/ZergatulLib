@@ -9,8 +9,4 @@
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Zergatul\Zergatul.csproj" />
-  </ItemGroup>
-
 </Project>
