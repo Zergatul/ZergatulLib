@@ -41,7 +41,7 @@ namespace Zergatul.Network.Proxy
             tcp = ConnectToServer(tcp);
 
             var stream = GetStream(tcp);
-            byte[] data = Encoding.ASCII.GetBytes(string.Format("CONNECT {0}:{1} HTTP/1.0{2}Host: {0}{2}{2}", hostname, port, Constants.TelnetEndOfLine));
+            byte[] data = Encoding.ASCII.GetBytes(string.Format("CONNECT {0}:{1} HTTP/1.1{2}Host: {0}{2}{2}", hostname, port, Constants.TelnetEndOfLine));
             stream.Write(data, 0, data.Length);
 
             byte[] buffer = new byte[1024];
@@ -80,7 +80,7 @@ namespace Zergatul.Network.Proxy
             tcp = await ConnectToServerAsync(tcp);
 
             var stream = GetStream(tcp);
-            byte[] data = Encoding.ASCII.GetBytes(string.Format("CONNECT {0}:{1} HTTP/1.0{2}Host: {0}{2}{2}", hostname, port, Constants.TelnetEndOfLine));
+            byte[] data = Encoding.ASCII.GetBytes(string.Format("CONNECT {0}:{1} HTTP/1.1{2}Host: {0}{2}{2}", hostname, port, Constants.TelnetEndOfLine));
             await stream.WriteAsync(data, 0, data.Length);
 
             byte[] buffer = new byte[1024];

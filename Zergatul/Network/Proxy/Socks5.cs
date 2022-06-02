@@ -81,9 +81,13 @@ namespace Zergatul.Network.Proxy
             return tcp;
         }
 
-        public override Task<TcpClient> CreateConnectionAsync(string hostname, int port, TcpClient tcp)
+        public override async Task<TcpClient> CreateConnectionAsync(string hostname, int port, TcpClient tcp)
         {
-            throw new NotImplementedException();
+            tcp = await ConnectToServerAsync(tcp);
+
+            await GreetingAsync(tcp.GetStream());
+            await ConnectAsync(tcp.GetStream(), hostname, port);
+            return tcp;
         }
 
         private void Greeting(Stream stream)
@@ -96,6 +100,22 @@ namespace Zergatul.Network.Proxy
 
             byte[] response = new byte[2];
             stream.Read(response, 0, response.Length);
+            if (response[0] != Version)
+                throw new Socks5Exception("Server response: invalid socks version");
+            if (response[1] == AuthenticationMethod.NoAcceptableMethods)
+                throw new Socks5Exception("Server response: client didn't offer acceptable authentication methods");
+        }
+
+        private async Task GreetingAsync(Stream stream)
+        {
+            byte[] packet = new byte[3];
+            packet[0] = Version;
+            packet[1] = 1;
+            packet[2] = AuthenticationMethod.NoAuthentication;
+            await stream.WriteAsync(packet, 0, packet.Length);
+
+            byte[] response = new byte[2];
+            await stream.ReadAsync(response, 0, response.Length);
             if (response[0] != Version)
                 throw new Socks5Exception("Server response: invalid socks version");
             if (response[1] == AuthenticationMethod.NoAcceptableMethods)
@@ -132,6 +152,23 @@ namespace Zergatul.Network.Proxy
             stream.Write(packet, 0, packet.Length);
 
             ReadConnectResponse(stream);
+        }
+
+        private async Task ConnectAsync(Stream stream, string domainName, int port)
+        {
+            byte[] packet = new byte[5 + domainName.Length + 2];
+            packet[0] = Version;
+            packet[1] = Command.Connect;
+            packet[2] = 0;
+            packet[3] = AddressType.DomainName;
+            packet[4] = (byte)domainName.Length;
+            var domainNameBytes = Encoding.ASCII.GetBytes(domainName);
+            Array.Copy(domainNameBytes, 0, packet, 5, domainName.Length);
+            packet[packet.Length - 2] = (byte)(port / 256);
+            packet[packet.Length - 1] = (byte)(port % 256);
+            await stream.WriteAsync(packet, 0, packet.Length);
+
+            await ReadConnectResponseAsync(stream);
         }
 
         private void ReadConnectResponse(Stream stream)
@@ -179,6 +216,55 @@ namespace Zergatul.Network.Proxy
             while (totalRead < responseLength)
             {
                 int bytesRead = stream.Read(response, totalRead, responseLength - totalRead);
+                totalRead += bytesRead;
+            }
+        }
+
+        private async Task ReadConnectResponseAsync(Stream stream)
+        {
+            byte[] response = new byte[256];
+            int totalRead = 0;
+            while (totalRead < 4)
+            {
+                int bytesRead = await stream.ReadAsync(response, totalRead, 4 - totalRead);
+                totalRead += bytesRead;
+            }
+            if (response[0] != Version)
+                throw new Socks5Exception("Server response: invalid socks version");
+            if (response[1] != Reply.Succeeded)
+                throw new Socks5Exception("Server response: reply failed");
+            if (response[2] != 0)
+                throw new Socks5Exception("Server response: invalid reserved field");
+            switch (response[3])
+            {
+                case AddressType.IPv4:
+                    while (totalRead < 8)
+                    {
+                        int bytesRead = await stream.ReadAsync(response, totalRead, 8 - totalRead);
+                        totalRead += bytesRead;
+                    }
+                    break;
+                case AddressType.DomainName:
+                    while (totalRead < 5)
+                    {
+                        int bytesRead = await stream.ReadAsync(response, totalRead, 5 - totalRead);
+                        totalRead += bytesRead;
+                    }
+                    while (totalRead < 5 + response[4])
+                    {
+                        int bytesRead = await stream.ReadAsync(response, totalRead, 5 + response[4] - totalRead);
+                        totalRead += bytesRead;
+                    }
+                    break;
+                case AddressType.IPv6:
+                    throw new NotImplementedException();
+                default:
+                    throw new Socks5Exception("Server response: invalid address type");
+            }
+            int responseLength = totalRead + 2;
+            while (totalRead < responseLength)
+            {
+                int bytesRead = await stream.ReadAsync(response, totalRead, responseLength - totalRead);
                 totalRead += bytesRead;
             }
         }

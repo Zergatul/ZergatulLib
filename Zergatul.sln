@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29201.188
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Ftp.Tests", "Zergatul.Ftp.Tests\Zergatul.Ftp.Tests.csproj", "{1E50A861-5981-491B-A619-34CCED82C3D5}"
 EndProject
@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Security.Tests", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Network.Tests", "Zergatul.Network.Tests\Zergatul.Network.Tests.csproj", "{7CB1A7F5-FE03-4FBC-A5FB-B0CD0055AA75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.Security.OpenSsl", "Zergatul.Security.OpenSsl\Zergatul.Security.OpenSsl.csproj", "{CD0B67E1-DDC3-4DB6-950A-704A60998B63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.Security.OpenSsl", "Zergatul.Security.OpenSsl\Zergatul.Security.OpenSsl.csproj", "{CD0B67E1-DDC3-4DB6-950A-704A60998B63}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul", "Zergatul\Zergatul.csproj", "{BD067870-0336-4F17-A5E1-B13CE4725E5F}"
 EndProject
@@ -53,7 +53,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.WinApi", "Zergatul
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.Math.Tests", "Tests\Zergatul.Math.Tests\Zergatul.Math.Tests.csproj", "{D04F7FAA-A28F-4949-B7B3-94C15126FD63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.FileFormat.Zip", "Zergatul.FileFormat.Zip\Zergatul.FileFormat.Zip.csproj", "{2908BBFC-B1B3-4098-9005-17C9A085CA66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zergatul.FileFormat.Zip", "Zergatul.FileFormat.Zip\Zergatul.FileFormat.Zip.csproj", "{2908BBFC-B1B3-4098-9005-17C9A085CA66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zergatul.FileFormat.M3U8", "Zergatul.FileFormat.M3U8\Zergatul.FileFormat.M3U8.csproj", "{2A40CE47-3221-4A17-B584-28E774B398F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -365,6 +367,18 @@ Global
 		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|x64.Build.0 = Release|Any CPU
 		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|x86.ActiveCfg = Release|Any CPU
 		{2908BBFC-B1B3-4098-9005-17C9A085CA66}.Release|x86.Build.0 = Release|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Debug|x64.Build.0 = Debug|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Debug|x86.Build.0 = Debug|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Release|x64.ActiveCfg = Release|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Release|x64.Build.0 = Release|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Release|x86.ActiveCfg = Release|Any CPU
+		{2A40CE47-3221-4A17-B584-28E774B398F5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

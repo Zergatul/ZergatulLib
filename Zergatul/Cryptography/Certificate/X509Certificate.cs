@@ -10,6 +10,7 @@ using Zergatul.IO;
 using Zergatul.Network;
 using Zergatul.Network.Asn1;
 using Zergatul.Network.Asn1.Structures;
+using Zergatul.Security;
 
 namespace Zergatul.Cryptography.Certificate
 {
@@ -153,6 +154,14 @@ namespace Zergatul.Cryptography.Certificate
             ParseX509(asn1);
 
             this.RawData = asn1.Raw;
+            using (var md = SecurityProvider.GetMessageDigestInstance(MessageDigests.SHA1))
+            {
+                if (md != null)
+                {
+                    byte[] hash = md.Digest(asn1.Raw);
+                    this.Thumbprint = BitHelper.BytesToHex(hash);
+                }
+            }
         }
 
         private void ReadFromStreamPKCS12(Stream stream, string password)
